@@ -2,7 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FiPower, FiTrash2 } from 'react-icons/fi';
 
-//import api from '../../services/api';
+import logoImg from '../../assets/logo.svg';
+
+import api from '../../services/api';
 
 import './styles.css';
 
@@ -11,51 +13,56 @@ export default function MaltList() {
     const [loading, setLoading] = useState(true); // Estado para indicar carregamento
     const [error, setError] = useState(null); // Estado para erros
   
-    // Função para buscar os maltes
+    const brewerId = localStorage.getItem('brewerId');
+
     useEffect(() => {
-      const fetchMalts = async () => {
-        try {
-          const response = await fetch('http://localhost:5000/api/malts'); // Substitua pela URL da sua API
-          if (!response.ok) {
-            throw new Error('Erro ao buscar os maltes.');
+      api.get('MaltList', {
+          headers: {
+              Authorization: brewerId,
           }
-          const data = await response.json();
-          setMalts(data); // Atualiza o estado com os maltes retornados
-        } catch (err) {
-          setError(err.message); // Define a mensagem de erro
-        } finally {
-          setLoading(false); // Finaliza o carregamento
-        }
-      };
-  
-      fetchMalts();
-    }, []); // Executa o efeito apenas uma vez ao montar o componente
-  
-    // Renderização condicional com base no estado
-    if (loading) {
-      return <p>Carregando maltes...</p>;
-    }
-  
-    if (error) {
-      return <p>Erro: {error}</p>;
-    }
+      }).then(response => {
+          setIncidents(response.data);
+      })
+  }, [brewerId]);
+
+    async function handleDeleteMalt(brewerId) {
+      try {
+          await api.delete(`malts/${brewerId}`, {
+              headers: {
+                  Authorization: brewerId,
+              }
+          });
+
+          setMalts(malts.filter(malt => malt.id !== id));
+      } catch (err) {
+          alert('Erro ao deletar malte, tente novamente.');
+      }
+  }
   
     return (
-      <div>
-        <h1>Lista de Maltes</h1>
-        {malts.length > 0 ? (
-          <ul>
-            {malts.map((malt) => (
-              <li key={malt.id}>
-                <h2>{malt.name}</h2>
-                <p>Descrição: {malt.description}</p>
-                <p>Tipo: {malt.type}</p>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p>Nenhum malte cadastrado.</p>
-        )}
+      <div className='malt-container'>
+          <header>
+              <img src={logoImg} alt="Brewchemy" />
+
+              <Link className="button" to="/malts/new">Cadastrar novo malte</Link>
+
+          </header>
+          <h1>Maltes</h1>
+          {malts.length > 0 ? (
+            <ul>
+              {malts.map((malt) => (
+                <li key={malt.id}>
+                  <h2>{malt.name}</h2>
+                  <p>Descrição: {malt.description}</p>
+                  <button onClick={() => handleDeleteMalt(malt.id)} type="button">
+                            <FiTrash2 size={20} color="#a8a8b3"/>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p>Nenhum malte cadastrado.</p>
+          )}
       </div>
     );
   }

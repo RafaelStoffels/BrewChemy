@@ -1,17 +1,14 @@
 from flask import Flask, jsonify
 from flask_cors import CORS
-from db import db
+from db import db, configure_db
 from malts_bp import create_malts_bp
+from users_bp import create_users_bp
 
 # Inicializando Flask
 app = Flask(__name__)
 
-# Configuração do banco de dados
-app.config["SQLALCHEMY_DATABASE_URI"] = "postgresql://postgres:P4p3P2p1%2A@localhost:5432/brewchemy"
-app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-
-# Inicializando o db
-db.init_app(app)
+# Configura o banco de dados
+configure_db(app)
 
 # Inicializando CORS
 CORS(app)
@@ -20,6 +17,9 @@ CORS(app)
 def create_app():
     # Registra o blueprint com as rotas
     app.register_blueprint(create_malts_bp(), url_prefix="/api")
+    app.register_blueprint(create_users_bp(), url_prefix="/api/")
+    
+    # Retorna a instância do app
     return app
 
 # Rota principal
@@ -29,6 +29,7 @@ def get_data():
 
 # Roda o servidor Flask
 if __name__ == "__main__":
+    # Garantir que o db seja inicializado antes de rodar o app
     with app.app_context():
         db.create_all()  # Cria as tabelas no banco de dados
     create_app().run(debug=True)

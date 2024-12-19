@@ -7,7 +7,6 @@ import api from '../../services/api';
 import './styles.css';
 
 import logoImg from '../../assets/logo.svg'
-import engenhariaSolidariaImg from '../../assets/engenhariaSolidariaLogo.png'
 
 export default function Logon() {
     const [id, setId] = useState('');
@@ -19,10 +18,10 @@ export default function Logon() {
         try {
             const response = await api.post('sessions', { id });
 
-            localStorage.setItem('ongId', id);
-            localStorage.setItem('ongName', response.data.name);
+            localStorage.setItem('brewerId', id);
+            localStorage.setItem('brewerName', response.data.name);
 
-            navigate('/profile');
+            navigate('/Main');
         } catch {
             alert('Falha no login. Tente novamente.');
         }
@@ -31,7 +30,7 @@ export default function Logon() {
     return (
         <div className="logon-container">
             <section className="form">
-                <img className="logo-img" src={logoImg} alt="Engenharia Solidaria" />
+                <img className="logo-img" src={logoImg} alt="BrewChemy" />
 
                 <form onSubmit={handleLogin}>
                     <h1>Faça seu logon</h1>
@@ -50,7 +49,6 @@ export default function Logon() {
 
             </section>
 
-            <img src={engenhariaSolidariaImg} alt="Engenharia Solidaria" />
         </div>
     );
 }
