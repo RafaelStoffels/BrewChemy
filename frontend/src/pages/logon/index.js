@@ -9,16 +9,17 @@ import './styles.css';
 import logoImg from '../../assets/logo.svg'
 
 export default function Logon() {
-    const [id, setId] = useState('');
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
     const navigate = useNavigate();
 
     async function handleLogin(e) {
         e.preventDefault();
 
         try {
-            const response = await api.post('sessions', { id });
+            const response = await api.post('login', { email, password });
 
-            localStorage.setItem('brewerId', id);
+            localStorage.setItem('brewerId', response.data.id);
             localStorage.setItem('brewerName', response.data.name);
 
             navigate('/Main');
@@ -36,9 +37,16 @@ export default function Logon() {
                     <h1>Faça seu logon</h1>
 
                     <input 
-                        placeholder='Sua ID'
-                        value={id}
-                        onChange={e => setId(e.target.value)}
+                        type="email"
+                        placeholder='Seu e-mail'
+                        value={email}
+                        onChange={e => setEmail(e.target.value)}
+                    />
+                    <input 
+                        type="password"
+                        placeholder='Sua senha'
+                        value={password}
+                        onChange={e => setPassword(e.target.value)}
                     />
                     <button className="button" type='submit'>Entrar</button>
 

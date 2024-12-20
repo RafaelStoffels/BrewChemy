@@ -108,7 +108,7 @@ def create_users_bp():
     def login():
         data = request.json
         email = data.get('email')
-        password_hash = data.get('password_hash')
+        password_hash = data.get('password')
 
         user = User.query.filter_by(email=email).first()
 

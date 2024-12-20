@@ -21,7 +21,7 @@ export default function MaltList() {
               Authorization: brewerId,
           }
       }).then(response => {
-          setIncidents(response.data);
+          setMalts(response.data);
       })
   }, [brewerId]);
 
@@ -33,7 +33,7 @@ export default function MaltList() {
               }
           });
 
-          setMalts(malts.filter(malt => malt.id !== id));
+          setMalts(malts.filter(malt => malt.id !== brewerId));
       } catch (err) {
           alert('Erro ao deletar malte, tente novamente.');
       }
