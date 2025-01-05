@@ -1,62 +1,61 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useState, useContext } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { FiLogIn } from 'react-icons/fi';
 
-import api from '../../services/api';
-
 import './styles.css';
-
-import logoImg from '../../assets/logo.svg'
+import logoImg from '../../assets/logo.svg';
+import api from '../../services/api';
+import AuthContext from '../../context/AuthContext';
 
 export default function Logon() {
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const navigate = useNavigate();
+  const { login } = useContext(AuthContext);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
 
-    async function handleLogin(e) {
-        e.preventDefault();
+  const navigate = useNavigate();
 
-        try {
-            const response = await api.post('login', { email, password });
+  const handleSubmit = (e) => {
+    e.preventDefault();
+  
+    api.post('api/login', { email, password })
+      .then((response) => {
 
-            localStorage.setItem('brewerId', response.data.id);
-            localStorage.setItem('brewerName', response.data.name);
+        const { token } = response.data;
+  
+        const userData = {token};
+  
+        login(userData);
+  
+        navigate('/Main');
+      })
+      .catch((error) => {
+        console.error('Erro ao fazer login:', error);
+      });
+  };
 
-            navigate('/Main');
-        } catch {
-            alert('Falha no login. Tente novamente.');
-        }
-    }
-
-    return (
-        <div className="logon-container">
-            <section className="form">
-                <img className="logo-img" src={logoImg} alt="BrewChemy" />
-
-                <form onSubmit={handleLogin}>
-                    <h1>Faça seu logon</h1>
-
-                    <input 
-                        type="email"
-                        placeholder='Seu e-mail'
-                        value={email}
-                        onChange={e => setEmail(e.target.value)}
-                    />
-                    <input 
-                        type="password"
-                        placeholder='Sua senha'
-                        value={password}
-                        onChange={e => setPassword(e.target.value)}
-                    />
-                    <button className="button" type='submit'>Entrar</button>
-
-                    <Link className=".back-link" to="/register">
-                    <FiLogIn size={16} color="#E02041"/>
-                    Não tenho cadastro</Link>
-                </form>
-
-            </section>
-
-        </div>
-    );
+  return (
+    <div className="logon-container">
+      <section className="form">
+        <img src={logoImg} alt="Brewchemy" />
+        <form onSubmit={handleSubmit}>
+          <h1>Faça seu logon</h1>
+          <input
+            placeholder="E-mail"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+          <input
+            placeholder="Senha"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+          <button className="button" type="submit">
+            Entrar
+            <FiLogIn size={16} color="#fff" />
+          </button>
+        </form>
+      </section>
+    </div>
+  );
 }
