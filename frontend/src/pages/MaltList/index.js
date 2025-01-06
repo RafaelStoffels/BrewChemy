@@ -5,12 +5,12 @@ import { FiPower, FiTrash2 } from 'react-icons/fi';
 import logoImg from '../../assets/logo.svg';
 
 import api from '../../services/api';
-import AuthContext from '../../context/AuthContext';  // Importa o contexto de autenticação
+import AuthContext from '../../context/AuthContext';
 
 import './styles.css';
 
 export default function MaltList() {
-  const { user, logout } = useContext(AuthContext);  // Acessa o contexto de autenticação
+  const { user, logout } = useContext(AuthContext);
   const [malts, setMalts] = useState([]); 
   const [loading, setLoading] = useState(true); 
   const [error, setError] = useState(null);
@@ -35,8 +35,8 @@ export default function MaltList() {
 
   async function handleDeleteMalt(maltId) {
     try {
-      await api.delete(`malts/${maltId}`, {
-        headers: { Authorization: user.token }
+      await api.delete(`api/malts/${maltId}`, {
+        headers: { Authorization: `Bearer ${user.token}` }
       });
       setMalts(malts.filter(malt => malt.id !== maltId));
     } catch (err) {
@@ -48,7 +48,7 @@ export default function MaltList() {
     <div className='malt-container'>
       <header>
         <img src={logoImg} alt="Brewchemy" />
-        <Link className="button" to="/malts/new">Cadastrar novo malte</Link>
+        <Link className="button" to="/Malts/new">Cadastrar novo malte</Link>
         <button onClick={logout}>Sair <FiPower size={20} color="#E02041" /></button>
       </header>
 

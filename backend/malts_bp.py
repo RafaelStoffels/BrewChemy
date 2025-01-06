@@ -9,7 +9,6 @@ class Malt(db.Model):
     # Definição das colunas da tabela
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'), nullable=False)
-    supply_code = db.Column(db.String(50), unique=True, nullable=False)
     name = db.Column(db.String(100), nullable=False)
     description = db.Column(db.Text)
     color_degrees_lovibond = db.Column(db.Numeric(5, 2), nullable=False)
@@ -24,7 +23,6 @@ class Malt(db.Model):
         return {
             "id": self.id,
             "user_id": self.user_id,
-            "supply_code": self.supply_code,
             "name": self.name,
             "description": self.description,
             "color_degrees_lovibond": float(self.color_degrees_lovibond),
@@ -66,15 +64,19 @@ def create_malts_bp():
     def add_malt(current_user_id):
         data = request.json
 
+        # Conversão de valores vazios para None
+        def sanitize(value):
+            return value if value != "" else None
+
         new_malt = Malt(
-            supply_code=data.get("supply_code"),
             name=data.get("name"),
             description=data.get("description"),
-            color_degrees_lovibond=data.get("color_degrees_lovibond"),
-            potential_extract=data.get("potential_extract"),
+            color_degrees_lovibond=sanitize(data.get("color_degrees_lovibond")),
+            potential_extract=sanitize(data.get("potential_extract")),
             malt_type=data.get("malt_type"),
-            stock_quantity=data.get("stock_quantity"),
+            stock_quantity=sanitize(data.get("stock_quantity")),
             supplier=data.get("supplier"),
+            unit_price=sanitize(data.get("unit_price")),
             user_id=current_user_id  # Inclui o user_id ao criar o novo malte
         )
         db.session.add(new_malt)  # Adiciona o novo malte ao banco
@@ -95,7 +97,6 @@ def create_malts_bp():
         data = request.json
 
         # Atualiza os campos do malte com os novos valores, se fornecidos
-        malt.supply_code = data.get("supply_code", malt.supply_code)
         malt.name = data.get("name", malt.name)
         malt.description = data.get("description", malt.description)
         malt.color_degrees_lovibond = data.get("color_degrees_lovibond", malt.color_degrees_lovibond)

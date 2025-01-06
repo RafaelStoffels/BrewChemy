@@ -8,6 +8,7 @@ import './global.css';
 import Logon from "./pages/Logon";
 import Main from "./pages/Main";
 import MaltList from "./pages/MaltList";
+import Malt from "./pages/Malt";
 
 const App = () => {
   return (
@@ -17,6 +18,7 @@ const App = () => {
           <Route path="/" element={<Logon />} />
           <Route path="/Main" element={<Main />} />
           <Route path="/MaltList" element={<MaltList />} />
+          <Route path="/Malts/new" element={<Malt />} />
         </Routes>
       </Router>
     </AuthProvider>
