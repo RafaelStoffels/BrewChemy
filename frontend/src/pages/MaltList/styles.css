@@ -41,6 +41,12 @@
     border-color: #999;
 }
 
+.back-header {
+    position: relative;
+    top: 10px;
+    left: -860px;
+  }
+
 .malt-container h1 {
     margin-top: 30px;
     margin-bottom:15px;
@@ -51,6 +57,7 @@
     grid-template-columns: repeat(2, 1fr);
     grid-gap: 0px;
     list-style: none;
+    grid-gap: 24px;
 }
 
 .malt-container ul li {
@@ -58,17 +65,6 @@
     padding: 24px;
     border-radius: 8px;
     position: relative;
-}
-
-.malt-container ul li button {
-    position: absolute;
-    right: 24px;
-    top: 24px;
-    border: 0;
-}
-
-.malt-container ul li button:hover {
-    opacity: 0.8s;
 }
 
 .malt-container ul li strong {
@@ -86,3 +82,22 @@
     line-height: 21px;
     font-size: 16px;
 }
+
+  
+  .malt-container ul li .button-group {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    display: flex;
+    gap: 8px; /* Espaçamento entre os botões */
+  }
+  
+  .malt-container ul li .button-group button {
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+  }
+  
+  .malt-container ul li .button-group button:hover {
+    opacity: 0.8;
+  }

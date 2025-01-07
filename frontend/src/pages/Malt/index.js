@@ -70,7 +70,7 @@ export default function NewMalt() {
             <section>
                 <h1>Cadastrar novo malte</h1>
 
-                <Link className=".back-link" to="/Main">
+                <Link className=".back-link" to="/MaltList">
                     <FiArrowLeft size={16} color="#E02041"/>
                     Voltar
                 </Link>

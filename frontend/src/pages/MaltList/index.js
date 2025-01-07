@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { FiPower, FiTrash2 } from 'react-icons/fi';
+import { FiPower, FiArrowLeft, FiTrash2, FiEdit } from 'react-icons/fi';
 
 import logoImg from '../../assets/logo.svg';
 
@@ -44,13 +44,25 @@ export default function MaltList() {
     }
   }
 
+  async function handleUpdateMalt(maltId) {
+
+  }
+
   return (
     <div className='malt-container'>
-      <header>
-        <img src={logoImg} alt="Brewchemy" />
-        <Link className="button" to="/Malts/new">Cadastrar novo malte</Link>
-        <button onClick={logout}>Sair <FiPower size={20} color="#E02041" /></button>
-      </header>
+
+    <header>
+      <img src={logoImg} alt="Brewchemy" />
+      <Link className="button" to="/Malts/new">Cadastrar novo malte</Link>
+      <button onClick={logout}>Sair <FiPower size={20} color="#E02041" /></button>
+    </header>
+
+    <header className="back-header">
+    <Link className="back-link" to="/Main">
+      <FiArrowLeft size={16} color="#E02041" />
+      Voltar
+    </Link>
+    </header>
 
       <h1>Maltes</h1>
       {loading ? <p>Carregando...</p> : error ? <p>{error}</p> : (
@@ -60,9 +72,14 @@ export default function MaltList() {
               <li key={malt.id}>
                 <h2>{malt.name}</h2>
                 <p>Descrição: {malt.description}</p>
-                <button onClick={() => handleDeleteMalt(malt.id)} type="button">
-                  <FiTrash2 size={20} color="#a8a8b3" />
-                </button>
+                <div className="button-group">
+                  <button onClick={() => handleUpdateMalt(malt.id)} type="button">
+                    <FiEdit size={20} color="#a8a8b3" />
+                  </button>
+                  <button onClick={() => handleDeleteMalt(malt.id)} type="button">
+                    <FiTrash2 size={20} color="#a8a8b3" />
+                  </button>
+                </div>
               </li>
             ))}
           </ul>
