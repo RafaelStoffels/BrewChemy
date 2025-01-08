@@ -1,0 +1,65 @@
+.crud-container {
+    width: 100%;
+    max-width: 1000px;
+    height: 90vh;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.header-crud {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.div-logout-button{
+    position: relative;
+    margin-left: 670px;
+}
+
+.crud-container header span {
+    font-size: 20px;
+    margin-left: -70px;
+    margin-top: 25px;
+}
+
+.crud-container section {
+    width: 100%;
+    max-width: 380px;
+}
+
+.crud-container section h1 {
+    margin: 0 0 32px;
+    font-size: 32px;
+}
+
+.crud-container section p {
+    font-size: 18px;
+    color: #737380;
+    line-height: 32px;
+}
+
+.crud-container section form {
+    width: 100%;
+    max-width: 450px;
+}
+
+.crud-container .content form input,
+.crud-container .content form textarea {
+    margin-top: 8px;
+}
+
+/* Links específicos dentro do CRUD */
+.crud-container section a {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+}
+
+.crud-container section a svg {
+    margin-right: 8px;
+}
+

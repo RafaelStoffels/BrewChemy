@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { FiPower, FiArrowLeft, FiTrash2, FiEdit } from 'react-icons/fi';
+import { FiPower, FiArrowLeft, FiTrash2, FiEdit, FiBookOpen  } from 'react-icons/fi';
 
 import logoImg from '../../assets/logo.svg';
 
 import api from '../../services/api';
 import AuthContext from '../../context/AuthContext';
 
-import './styles.css';
+import '../../styles/list.css';
 
 export default function MaltList() {
   const { user, logout } = useContext(AuthContext);
@@ -19,7 +19,7 @@ export default function MaltList() {
 
   useEffect(() => {
     if (!user) {
-      navigate('/');  // Se não estiver logado, redireciona para a página de login
+      navigate('/');
     } else {
       api.get('api/malts', {
         headers: { Authorization: `Bearer ${user.token}` }
@@ -33,7 +33,15 @@ export default function MaltList() {
     }
   }, [user, navigate]);
 
-  async function handleDeleteMalt(maltId) {
+  async function handleDetails(maltId) {
+    navigate(`/Malts/${maltId}/details`);
+  }
+
+  async function handleUpdate(maltId) {
+    navigate(`/Malts/${maltId}/edit`);
+  }
+
+  async function handleDelete(maltId) {
     try {
       await api.delete(`api/malts/${maltId}`, {
         headers: { Authorization: `Bearer ${user.token}` }
@@ -44,39 +52,38 @@ export default function MaltList() {
     }
   }
 
-  async function handleUpdateMalt(maltId) {
-
-  }
-
   return (
-    <div className='malt-container'>
+    <div className='list-container'>
 
     <header>
-      <img src={logoImg} alt="Brewchemy" />
-      <Link className="button" to="/Malts/new">Cadastrar novo malte</Link>
-      <button onClick={logout}>Sair <FiPower size={20} color="#E02041" /></button>
+      <img src={logoImg} alt="Brewchemy" className="logoImg" />
+      <Link className="Addbutton" to="/Malts/new">Add new malt</Link>
+      <button onClick={logout}><FiPower size={20} color="#E02041" className="logoutButton"/></button>
     </header>
 
     <header className="back-header">
     <Link className="back-link" to="/Main">
       <FiArrowLeft size={16} color="#E02041" />
-      Voltar
+      Back
     </Link>
     </header>
 
-      <h1>Maltes</h1>
-      {loading ? <p>Carregando...</p> : error ? <p>{error}</p> : (
+      <h1>Malts</h1>
+      {loading ? <p>Loading...</p> : error ? <p>{error}</p> : (
         malts.length > 0 ? (
           <ul>
             {malts.map((malt) => (
               <li key={malt.id}>
                 <h2>{malt.name}</h2>
-                <p>Descrição: {malt.description}</p>
+                <p>Description: {malt.description}</p>
                 <div className="button-group">
-                  <button onClick={() => handleUpdateMalt(malt.id)} type="button">
+                  <button onClick={() => handleDetails(malt.id)} type="button">
+                  <FiBookOpen  size={20} color="#a8a8b3" />
+                  </button>
+                  <button onClick={() => handleUpdate(malt.id)} type="button">
                     <FiEdit size={20} color="#a8a8b3" />
                   </button>
-                  <button onClick={() => handleDeleteMalt(malt.id)} type="button">
+                  <button onClick={() => handleDelete(malt.id)} type="button">
                     <FiTrash2 size={20} color="#a8a8b3" />
                   </button>
                 </div>
