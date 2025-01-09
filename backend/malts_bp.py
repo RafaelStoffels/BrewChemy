@@ -1,12 +1,11 @@
 from flask import Blueprint, jsonify, request
 from db import db
-from AuthTokenVerifier import token_required  # Importe o decorador
+from AuthTokenVerifier import token_required
 
-# Classe representando os maltes
 class Malt(db.Model):
     __tablename__ = 'malts'
 
-    # Definição das colunas da tabela
+    # Table Definition
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'), nullable=False)
     name = db.Column(db.String(100), nullable=False)
@@ -34,37 +33,35 @@ class Malt(db.Model):
             "notes": self.notes,
         }
 
-# Função para criar o Blueprint
 def create_malts_bp():
     malts_bp = Blueprint("malts", __name__)
 
-    # Rota para obter todos os maltes
+    #Return all records
     @malts_bp.route("/malts", methods=["GET"])
     @token_required
     def get_malts(current_user_id):
         malts = Malt.query.filter_by(user_id=current_user_id).all()
         
-        return jsonify([malt.to_dict() for malt in malts])  # Converte para dicionário e retorna
+        return jsonify([malt.to_dict() for malt in malts])
 
-
+    #Return a specific record
     @malts_bp.route("/malts/<int:id>", methods=["GET"])
     @token_required
-    def get_malt(current_user_id, id):  # O id da URL vem primeiro e o current_user_id vem depois
-        malt = Malt.query.filter_by(id=id, user_id=current_user_id).first()  # Busca o malte pelo ID e user_id
+    def get_malt(current_user_id, id): 
+        malt = Malt.query.filter_by(id=id, user_id=current_user_id).first()
     
         if malt is None:
-            return jsonify({"message": "Malte não encontrado"}), 404  # Se não encontrar, retorna erro 404
+            return jsonify({"message": "Malt not found"}), 404
     
-        return jsonify(malt.to_dict())  # Retorna os dados do malte encontrado
+        return jsonify(malt.to_dict())
 
-
-    # Rota para adicionar um novo malte
+    # Add record
     @malts_bp.route("/malts", methods=["POST"])
     @token_required
     def add_malt(current_user_id):
         data = request.json
 
-        # Conversão de valores vazios para None
+        # Adjustment to handle OPTIONS request errors
         def sanitize(value):
             return value if value != "" else None
 
@@ -77,26 +74,24 @@ def create_malts_bp():
             stock_quantity=sanitize(data.get("stock_quantity")),
             supplier=data.get("supplier"),
             unit_price=sanitize(data.get("unit_price")),
-            user_id=current_user_id  # Inclui o user_id ao criar o novo malte
+            user_id=current_user_id
         )
-        db.session.add(new_malt)  # Adiciona o novo malte ao banco
-        db.session.commit()  # Comita as mudanças no banco
-        return jsonify(new_malt.to_dict()), 201  # Retorna o malte recém-adicionado
+        db.session.add(new_malt)
+        db.session.commit()
+        return jsonify(new_malt.to_dict()), 201
 
-    # Rota para atualizar um malte
+    # Update record
     @malts_bp.route("/malts/<int:id>", methods=["PUT"])
     @token_required
     def update_malt(current_user_id, id):
 
-        malt = Malt.query.filter_by(id=id, user_id=current_user_id).first()  # Verifica se o malte pertence ao user_id
+        malt = Malt.query.filter_by(id=id, user_id=current_user_id).first()
         
         if malt is None:
-            return jsonify({"message": "Malte não encontrado"}), 404
+            return jsonify({"message": "Malt not found"}), 404
 
-        # Obtém os dados da requisição para atualizar
         data = request.json
 
-        # Atualiza os campos do malte com os novos valores, se fornecidos
         malt.name = data.get("name", malt.name)
         malt.description = data.get("description", malt.description)
         malt.color_degrees_lovibond = data.get("color_degrees_lovibond", malt.color_degrees_lovibond)
@@ -107,27 +102,23 @@ def create_malts_bp():
         malt.unit_price = data.get("unit_price", malt.unit_price)
         malt.notes = data.get("notes", malt.notes)
 
-        # Comita as mudanças no banco de dados
         db.session.commit()
 
-        # Retorna os dados atualizados do malte
         return jsonify(malt.to_dict()), 200
 
-    # Rota para deletar um malte
+    # Delete record
     @malts_bp.route("/malts/<int:id>", methods=["DELETE"])
     @token_required
     def delete_malt(current_user_id, id):
 
-        malt = Malt.query.filter_by(id=id, user_id=current_user_id).first()  # Verifica se o malte pertence ao user_id
+        malt = Malt.query.filter_by(id=id, user_id=current_user_id).first()
         
         if malt is None:
-            return jsonify({"message": "Malte não encontrado"}), 404
+            return jsonify({"message": "Malt not found"}), 404
 
-        # Remove o malte do banco de dados
         db.session.delete(malt)
         db.session.commit()
 
-        # Retorna uma mensagem de sucesso
         return jsonify({"message": f"Malte com ID {id} foi deletado com sucesso"}), 200
 
     return malts_bp

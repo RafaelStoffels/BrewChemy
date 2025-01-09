@@ -31,7 +31,7 @@ export default function Main() {
                 <Link to="/MaltList">
                     <img src={maltImg} alt="Malts" className="maltImg" />
                 </Link>
-                <Link to="/MaltList">
+                <Link to="/RecipeList">
                     <img src={reciptImg} alt="Recipts" className="reciptImg" />
                 </Link>
             </div>

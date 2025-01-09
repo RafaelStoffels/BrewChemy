@@ -8,6 +8,8 @@ import Logon from "./pages/Logon";
 import Main from "./pages/Main";
 import MaltList from "./pages/MaltList";
 import Malt from "./pages/Malt";
+import RecipeList from "./pages/RecipeList";
+
 
 const App = () => {
   return (
@@ -20,6 +22,7 @@ const App = () => {
           <Route path="/Malts/:id/details" element={<Malt />} />
           <Route path="/Malts/:id/edit" element={<Malt />} />
           <Route path="/Malts/new" element={<Malt />} />
+          <Route path="/RecipeList" element={<RecipeList />} />
         </Routes>
       </Router>
     </AuthProvider>

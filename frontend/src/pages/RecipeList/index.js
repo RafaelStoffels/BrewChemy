@@ -34,11 +34,11 @@ export default function MaltList() {
   }, [user, navigate]);
 
   async function handleDetails(itemListId) {
-    navigate(`/Malts/${itemListId}/details`);
+    navigate(`/Recipes/${itemListId}/details`);
   }
 
   async function handleUpdate(itemListId) {
-    navigate(`/Malts/${itemListId}/edit`);
+    navigate(`/Recipes/${itemListId}/edit`);
   }
 
   async function handleDelete(itemListId) {
@@ -48,7 +48,7 @@ export default function MaltList() {
       });
       setItemList(itemList.filter(itemList => itemList.id !== itemListId));
     } catch (err) {
-      alert('Erro ao deletar malt, try again.');
+      alert('Erro ao deletar receita, try again.');
     }
   }
 
@@ -57,7 +57,7 @@ export default function MaltList() {
 
     <header>
       <img src={logoImg} alt="Brewchemy" className="logoImg" />
-      <Link className="Addbutton" to="/Malts/new">Add new malt</Link>
+      <Link className="Addbutton" to="/Recipes/new">Add new recipe</Link>
       <button onClick={logout}><FiPower size={20} color="#E02041" className="logoutButton"/></button>
     </header>
 
@@ -68,7 +68,7 @@ export default function MaltList() {
     </Link>
     </header>
 
-      <h1>Malts</h1>
+      <h1>Recipes</h1>
       {loading ? <p>Loading...</p> : error ? <p>{error}</p> : (
         itemList.length > 0 ? (
           <ul>
@@ -91,7 +91,7 @@ export default function MaltList() {
             ))}
           </ul>
         ) : (
-          <p>No malt found.</p>
+          <p>No recipes found.</p>
         )
       )}
     </div>
