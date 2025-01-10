@@ -21,7 +21,7 @@ export default function MaltList() {
     if (!user) {
       navigate('/');
     } else {
-      api.get('api/malts', {
+      api.get('api/recipes', {
         headers: { Authorization: `Bearer ${user.token}` }
       }).then(response => {
         setItemList(response.data);
@@ -43,7 +43,7 @@ export default function MaltList() {
 
   async function handleDelete(itemListId) {
     try {
-      await api.delete(`api/malts/${itemListId}`, {
+      await api.delete(`api/recipes/${itemListId}`, {
         headers: { Authorization: `Bearer ${user.token}` }
       });
       setItemList(itemList.filter(itemList => itemList.id !== itemListId));
