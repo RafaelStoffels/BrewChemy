@@ -27,7 +27,7 @@ export default function MaltList() {
         setItemList(response.data);
         setLoading(false);
       }).catch(err => {
-        setError('Erro ao carregar maltes');
+        setError('Error loading recipes');
         setLoading(false);
       });
     }
@@ -48,7 +48,7 @@ export default function MaltList() {
       });
       setItemList(itemList.filter(itemList => itemList.id !== itemListId));
     } catch (err) {
-      alert('Erro ao deletar receita, try again.');
+      alert('Error recipe cannot be deleted, try again.');
     }
   }
 

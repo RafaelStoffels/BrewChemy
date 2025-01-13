@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { Link, useNavigate, useParams  } from 'react-router-dom';
 import { FiPower, FiArrowLeft } from 'react-icons/fi';
+import Modal from 'react-modal';
 
 import api from '../../services/api';
 import AuthContext from '../../context/AuthContext';
@@ -9,92 +10,121 @@ import './styles.css';
 import '../Recipe/styles.css';
 import logoImg from '../../assets/logo.svg'
 
-export default function NewMalt() {
+Modal.setAppElement('#root');
+
+export default function NewRecipe() {
     const { user, logout } = useContext(AuthContext);
     const { id, details } = useParams();
     const navigate = useNavigate();
 
-    const [name, setName] = useState('');
-    const [description, setDescription] = useState('');
-    const [malt_type, setMaltType] = useState('');
-    const [supplier, setSupplier] = useState('');
-    const [color_degrees_lovibond, setColorDegree] = useState('');
-    const [potential_extract, setPotentialExtract] = useState('');
-    const [unit_price, setUnitPrice] = useState('');
-    const [stock_quantity, setStockQuantity] = useState('');
     const [isEditing, setIsEditing] = useState(false);
     const [isView, setIsView] = useState(false);
 
+    const [isModalOpen, setIsModalOpen] = useState(false);
+
+    const openModal = () => setIsModalOpen(true);
+    const closeModal = () => setIsModalOpen(false);
+
+    const [recipeName, setRecipeName] = useState('');
+    const [recipeStyle, setRecipeStyle] = useState('');
+    const [recipeVolumeLiters, setRecipeVolumeLiters] = useState('');
+    const [batchTime, setRecipeBatchTime] = useState('');
+    const [description, setDescription] = useState('');
+    const [creationDate, setCreationDate] = useState('');
+    const [notes, setNotes] = useState('');
+
+
+
+    const [recipeMaltName, setMaltName] = useState('');
+    const [recipeMaltsupplier, setSupplier] = useState('');
+    const [recipeMaltColor_degrees_lovibond, setColorDegree] = useState('');
+    const [recipeMaltPotential_extract, setPotentialExtract] = useState('');
+    const [recipeMaltUnit_price, setUnitPrice] = useState('');
+
+
+    const [recipeMalts, setRecipeMalts] = useState([]); // Adicionando o estado para maltsRecipe
+
+    const [malts, setMalts] = useState([]); // Adicionando o estado para malts
+
     useEffect(() => {
-        if (id) {
-            if (window.location.pathname.includes('/details')) {
-                setIsView(true); 
-                setIsEditing(false); 
-            } else {
-                setIsView(false); 
-                setIsEditing(true); 
+        if (!user) {
+            navigate('/');
+          } else {
+            if (id) {
+                if (window.location.pathname.includes('/details')) {
+                    setIsView(true); 
+                    setIsEditing(false); 
+                } else {
+                    setIsView(false); 
+                    setIsEditing(true); 
+                }
+                fetchRecipeById(id);  
             }
-            fetchMaltById(id);  
         }
     }, [id]);
 
-    // Função para buscar os dados de um malte específico
-    async function fetchMaltById(maltId) {
+    async function fetchRecipeById(recipeId) {
         try {
-            const response = await api.get(`/api/malts/${maltId}`, {
+            const response = await api.get(`/api/recipes/${recipeId}`, {
                 headers: {
                     Authorization: `Bearer ${user.token}`,
                 },
             });
-            const malt = response.data;
-            setName(malt.name);
-            setDescription(malt.description);
-            setMaltType(malt.malt_type);
-            setSupplier(malt.supplier);
-            setColorDegree(malt.color_degrees_lovibond);
-            setPotentialExtract(malt.potential_extract);
-            setUnitPrice(malt.unit_price);
-            setStockQuantity(malt.stock_quantity);
+            const recipe = response.data;
+            setRecipeName(recipe.name);
+            setRecipeStyle(recipe.style);
+            setRecipeVolumeLiters(recipe.volume_liters);
+            setRecipeMalts(recipe.recipeMalts || []); // Definindo os maltsRecipe
+
         } catch (err) {
-            alert('Erro ao carregar os dados do malte.');
+            alert('Error loading recipe record.');
             navigate('/RecipeList');
         }
     }
 
-    // Função para salvar (criar ou atualizar)
+    async function fetchMalts() {
+        try {
+            const response = await api.get(`/api/malts/`, {
+                headers: {
+                    Authorization: `Bearer ${user.token}`,
+                },
+            });
+            const malts = response.data;
+            setMaltName(malts.name);
+
+        } catch (err) {
+            alert('Error loading malts records.');
+            navigate('/RecipeList');
+        }
+    }
+
     async function handleSubmit(e) {
         e.preventDefault();
 
         const data = {
-            name,
-            description,
-            malt_type,
-            supplier,
-            color_degrees_lovibond,
-            potential_extract,
-            unit_price,
-            stock_quantity,
+            recipeName,
+            recipeStyle,
         };
 
         try {
             if (isEditing) {
-                await api.put(`/api/malts/${id}`, data, {
+                await api.put(`/api/recipes/${id}`, data, {
                     headers: {
                         Authorization: `Bearer ${user.token}`,
                     },
                 });
-                alert('Malte atualizado com sucesso!');
+                alert('Recipe updated!');
             } else {
-                await api.post('/api/malts', data, {
+                await api.post('/api/recipes', data, {
                     headers: {
                         Authorization: `Bearer ${user.token}`,
                     },
                 });
-                alert('Malte cadastrado com sucesso!');
+                alert('Recipe saved!');
             }
             navigate('/RecipeList');
         } catch (err) {
-            alert('Erro ao salvar o malte. Por favor, tente novamente.');
+            alert('Error salving recipe. Please, try again.');
         }
     }
 
@@ -125,42 +155,50 @@ export default function NewMalt() {
                         <div className="form-fields">
                             <input classname="input-name"
                                 placeholder='Recipe name'
-                                value={name}
-                                onChange={e => setName(e.target.value)}
+                                value={recipeName}
+                                onChange={e => setRecipeName(e.target.value)}
                                 disabled={isView}
                             />
                             <input classname="input-style" 
                                 type='Style' 
                                 placeholder='Style'
-                                value={malt_type}
-                                onChange={e => setMaltType(e.target.value)}
+                                value={recipeStyle}
+                                onChange={e => setRecipeStyle(e.target.value)}
                                 disabled={isView}
                             />
                             <input classname="input-volume"
-                            placeholder='Volume'
+                            placeholder="Volume"
                             type="Number"
-                            value={supplier}
-                            onChange={e => setSupplier(e.target.value)}
+                            value={recipeVolumeLiters}
+                            onChange={e => setRecipeVolumeLiters(e.target.value)}
                             disabled={isView}
                             />
                             <input classname="input-batch-time"
-                            placeholder='Batch time'
+                            placeholder="Batch time"
                             type="Number"
-                            value={supplier}
-                            onChange={e => setSupplier(e.target.value)}
+                            value={batchTime}
+                            onChange={e => setRecipeBatchTime(e.target.value)}
                             disabled={isView}
                             />
                         </div>
-
                     </form>
+                </div>
+                <div classname="buttons-container">
+                    <button onClick={openModal} className="modalAddMalt">Add Malt</button>
                 </div>
                 <div class="bottom-container">
                     <div class="bottom-left">
-                        oi
+                        <ul>
+                          {recipeMalts.map(malt => (
+                            <li key={malt.id}>
+                                <strong>{malt.weight_grams}g - {malt.name}</strong>
+                            </li>
+                          ))}
+                        </ul>
                     </div>
-                        ola
+                        
                     <div class="bottom-right">
-
+                        olaaaa
                     </div>
                 </div>
                 {!isView && (
@@ -169,6 +207,34 @@ export default function NewMalt() {
                 </button>
                 )}
             </div>
+            <Modal
+                isOpen={isModalOpen}
+                onRequestClose={closeModal}
+                contentLabel="Malts Modal"
+                style={{
+                    content: {
+                        top: '50%',
+                        left: '50%',
+                        right: 'auto',
+                        bottom: 'auto',
+                        marginRight: '-50%',
+                        transform: 'translate(-50%, -50%)',
+                        width: '400px',
+                        padding: '20px',
+                    },
+                }}
+            >
+                <h2>Add Malt</h2>
+                <ul>
+                    {malts.map((malt, index) => (
+                        <li key={index}>
+                            <strong>{malt.name}</strong> - {malt.weight_grams}g
+                        </li>
+                    ))}
+                </ul>
+                <button onClick={closeModal} className="crud-save-button">Close</button>
+            </Modal>
         </div>
+        
     );
 }

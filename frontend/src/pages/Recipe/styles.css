@@ -101,3 +101,8 @@
 .bottom-right {
     background-color: #f8d7da; 
 }
+
+.buttons-container {
+    border: 1px solid red; /* Para ver se a div está sendo renderizada */
+    display: block;
+}
