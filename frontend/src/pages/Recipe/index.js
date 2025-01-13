@@ -5,6 +5,7 @@ import Modal from 'react-modal';
 
 import api from '../../services/api';
 import AuthContext from '../../context/AuthContext';
+import { MaltModal, AddMaltModal, fetchMalts, fetchMaltById } from './modals';
 
 import './styles.css';
 import '../Recipe/styles.css';
@@ -21,30 +22,27 @@ export default function NewRecipe() {
     const [isView, setIsView] = useState(false);
 
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isAddMaltModalOpen, setIsAddMaltModalOpen] = useState(false);
 
-    const openModal = () => setIsModalOpen(true);
-    const closeModal = () => setIsModalOpen(false);
-
-    const [recipeName, setRecipeName] = useState('');
-    const [recipeStyle, setRecipeStyle] = useState('');
-    const [recipeVolumeLiters, setRecipeVolumeLiters] = useState('');
-    const [batchTime, setRecipeBatchTime] = useState('');
-    const [description, setDescription] = useState('');
-    const [creationDate, setCreationDate] = useState('');
-    const [notes, setNotes] = useState('');
-
-
-
-    const [recipeMaltName, setMaltName] = useState('');
-    const [recipeMaltsupplier, setSupplier] = useState('');
-    const [recipeMaltColor_degrees_lovibond, setColorDegree] = useState('');
-    const [recipeMaltPotential_extract, setPotentialExtract] = useState('');
-    const [recipeMaltUnit_price, setUnitPrice] = useState('');
-
+    /* Recipe */
+    const [recipe, setRecipe] = useState({
+        name: '',
+        style: '',
+        volumeLiters: '',
+        batchTime: '',
+        description: '',
+        creationDate: '',
+        notes: '',
+        recipeMalts: [],
+    });
 
     const [recipeMalts, setRecipeMalts] = useState([]); // Adicionando o estado para maltsRecipe
 
-    const [malts, setMalts] = useState([]); // Adicionando o estado para malts
+    /* Malts */
+    const [maltList, setMaltList] = useState([]); // Adicionando o estado para malts
+    const [maltsLoaded, setMaltsLoaded] = useState(false);
+    const [selectedMalt, setSelectedMalt] = useState(null);
+    const [maltName, setMaltName] = useState(null);
 
     useEffect(() => {
         if (!user) {
@@ -66,44 +64,53 @@ export default function NewRecipe() {
     async function fetchRecipeById(recipeId) {
         try {
             const response = await api.get(`/api/recipes/${recipeId}`, {
-                headers: {
-                    Authorization: `Bearer ${user.token}`,
-                },
+                headers: { Authorization: `Bearer ${user.token}` },
             });
-            const recipe = response.data;
-            setRecipeName(recipe.name);
-            setRecipeStyle(recipe.style);
-            setRecipeVolumeLiters(recipe.volume_liters);
-            setRecipeMalts(recipe.recipeMalts || []); // Definindo os maltsRecipe
-
+            const recipeData = response.data;
+            setRecipe({
+                name: recipeData.name || '',
+                style: recipeData.style || '',
+                volumeLiters: recipeData.volume_liters || '',
+                batchTime: recipeData.batchTime || '',
+                description: recipeData.description || '',
+                creationDate: recipeData.creationDate || '',
+                notes: recipeData.notes || '',
+                recipeMalts: recipeData.recipeMalts || [],
+            });
         } catch (err) {
             alert('Error loading recipe record.');
-            navigate('/RecipeList');
         }
     }
 
-    async function fetchMalts() {
-        try {
-            const response = await api.get(`/api/malts/`, {
-                headers: {
-                    Authorization: `Bearer ${user.token}`,
-                },
-            });
-            const malts = response.data;
-            setMaltName(malts.name);
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setRecipe((prevState) => ({ ...prevState, [name]: value }));
+    };
 
-        } catch (err) {
-            alert('Error loading malts records.');
-            navigate('/RecipeList');
-        }
-    }
+    const openModal = async () => {
+        const malts = await fetchMalts(api, user.token);
+        setMaltList(malts);
+        setIsModalOpen(true);
+    };
+
+    const closeModal = () => setIsModalOpen(false);
+
+    const handleSelectMaltModal = async (selectedMaltId) => {
+        const malt = await fetchMaltById(api, user.token, selectedMaltId);
+        setSelectedMalt(malt);
+        setIsAddMaltModalOpen(true);
+        closeModal();
+    };
+
+    const handleSaveMaltRecipe = (maltId) => {
+        setIsAddMaltModalOpen(false);
+    };
 
     async function handleSubmit(e) {
         e.preventDefault();
 
         const data = {
-            recipeName,
-            recipeStyle,
+
         };
 
         try {
@@ -153,32 +160,35 @@ export default function NewRecipe() {
                 <div class="top">
                     <form onSubmit={handleSubmit}>
                         <div className="form-fields">
-                            <input classname="input-name"
-                                placeholder='Recipe name'
-                                value={recipeName}
-                                onChange={e => setRecipeName(e.target.value)}
+                            <input
+                                name="name"
+                                placeholder="Recipe Name"
+                                value={recipe.name}
+                                onChange={handleChange}
                                 disabled={isView}
                             />
-                            <input classname="input-style" 
-                                type='Style' 
-                                placeholder='Style'
-                                value={recipeStyle}
-                                onChange={e => setRecipeStyle(e.target.value)}
+                            <input
+                                name="style"
+                                placeholder="Style"
+                                value={recipe.style}
+                                onChange={handleChange}
                                 disabled={isView}
                             />
-                            <input classname="input-volume"
-                            placeholder="Volume"
-                            type="Number"
-                            value={recipeVolumeLiters}
-                            onChange={e => setRecipeVolumeLiters(e.target.value)}
-                            disabled={isView}
+                            <input
+                                name="volumeLiters"
+                                placeholder="Volume (Liters)"
+                                type="number"
+                                value={recipe.volumeLiters}
+                                onChange={handleChange}
+                                disabled={isView}
                             />
-                            <input classname="input-batch-time"
-                            placeholder="Batch time"
-                            type="Number"
-                            value={batchTime}
-                            onChange={e => setRecipeBatchTime(e.target.value)}
-                            disabled={isView}
+                            <input
+                                name="batchTime"
+                                placeholder="Batch Time"
+                                type="number"
+                                value={recipe.batchTime}
+                                onChange={handleChange}
+                                disabled={isView}
                             />
                         </div>
                     </form>
@@ -189,11 +199,15 @@ export default function NewRecipe() {
                 <div class="bottom-container">
                     <div class="bottom-left">
                         <ul>
-                          {recipeMalts.map(malt => (
+                        {recipe.recipeMalts.length > 0 ? (
+                          recipe.recipeMalts.map((malt) => (
                             <li key={malt.id}>
-                                <strong>{malt.weight_grams}g - {malt.name}</strong>
+                              <strong>{malt.name}</strong> - {malt.weight_grams}g
                             </li>
-                          ))}
+                          ))
+                        ) : (
+                          <li>No malts added to this recipe yet.</li>
+                        )}
                         </ul>
                     </div>
                         
@@ -207,34 +221,18 @@ export default function NewRecipe() {
                 </button>
                 )}
             </div>
-            <Modal
+            <MaltModal
                 isOpen={isModalOpen}
-                onRequestClose={closeModal}
-                contentLabel="Malts Modal"
-                style={{
-                    content: {
-                        top: '50%',
-                        left: '50%',
-                        right: 'auto',
-                        bottom: 'auto',
-                        marginRight: '-50%',
-                        transform: 'translate(-50%, -50%)',
-                        width: '400px',
-                        padding: '20px',
-                    },
-                }}
-            >
-                <h2>Add Malt</h2>
-                <ul>
-                    {malts.map((malt, index) => (
-                        <li key={index}>
-                            <strong>{malt.name}</strong> - {malt.weight_grams}g
-                        </li>
-                    ))}
-                </ul>
-                <button onClick={closeModal} className="crud-save-button">Close</button>
-            </Modal>
-        </div>
-        
+                closeModal={closeModal}
+                maltList={maltList}
+                handleSelectMalt={handleSelectMaltModal}
+            />
+
+            <AddMaltModal
+                isOpen={isAddMaltModalOpen}
+                closeModal={() => setIsAddMaltModalOpen(false)}
+                selectedMalt={selectedMalt}
+            />
+        </div>   
     );
 }
