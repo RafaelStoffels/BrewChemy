@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FiPower, FiArrowLeft, FiTrash2, FiEdit, FiBookOpen  } from 'react-icons/fi';
+import { fetchMalts } from '../../services/malts';
 
 import logoImg from '../../assets/logo.svg';
 
@@ -21,15 +22,17 @@ export default function MaltList() {
     if (!user) {
       navigate('/');
     } else {
-      api.get('api/malts', {
-        headers: { Authorization: `Bearer ${user.token}` }
-      }).then(response => {
-        setItemList(response.data);
-        setLoading(false);
-      }).catch(err => {
-        setError('Erro ao carregar maltes');
-        setLoading(false);
-      });
+      const loadMalts = async () => {
+        try {
+          const malts = await fetchMalts(api, user.token);
+          setItemList(malts);
+        } catch (err) {
+          setError('Error loading malts');
+        } finally {
+          setLoading(false);
+        }
+      };
+      loadMalts();
     }
   }, [user, navigate]);
 

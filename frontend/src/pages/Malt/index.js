@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { Link, useNavigate, useParams  } from 'react-router-dom';
 import { FiPower, FiArrowLeft } from 'react-icons/fi';
+import { fetchMaltbyId } from '../../services/malts';
 
 import api from '../../services/api';
 import AuthContext from '../../context/AuthContext';
@@ -39,12 +40,7 @@ export default function NewMalt() {
 
     async function fetchMaltById(maltId) {
         try {
-            const response = await api.get(`/api/malts/${maltId}`, {
-                headers: {
-                    Authorization: `Bearer ${user.token}`,
-                },
-            });
-            const malt = response.data;
+            const malt = await fetchMaltById(api, user.token, maltId);
             setName(malt.name);
             setDescription(malt.description);
             setMaltType(malt.malt_type);

@@ -1,6 +1,5 @@
 import React from 'react';
 import Modal from 'react-modal';
-import api from '../../services/api';
 
 export function MaltModal({ isOpen, closeModal, maltList, handleSelectMalt }) {
     return (
@@ -43,7 +42,7 @@ export function MaltModal({ isOpen, closeModal, maltList, handleSelectMalt }) {
 }
 
 export function AddMaltModal({ isOpen, closeModal, selectedMalt, handleSaveMaltRecipe }) {
-    const [maltDetails, setMaltDetails] = React.useState({
+    const [recipeMalts, setRecipeMalts] = React.useState({
         name: '',
         description: '',
         malt_type: '',
@@ -54,8 +53,8 @@ export function AddMaltModal({ isOpen, closeModal, selectedMalt, handleSaveMaltR
     });
 
     const handleChange = (e) => {
-        setMaltDetails({
-            ...maltDetails,
+        setRecipeMalts({
+            ...recipeMalts,
             [e.target.name]: e.target.value
         });
     };
@@ -81,50 +80,50 @@ export function AddMaltModal({ isOpen, closeModal, selectedMalt, handleSaveMaltR
             <h2>Adding Malt</h2>
             {selectedMalt ? (
                 <div>
-                    <form onSubmit={(e) => handleSaveMaltRecipe(e, maltDetails)}>
+                    <form onSubmit={(e) => handleSaveMaltRecipe(e, recipeMalts)}>
                         <input 
                             name="name"
                             placeholder="Malt name"
-                            value={maltDetails.name}
+                            value={recipeMalts.name}
                             onChange={handleChange}
                         />
                         <textarea 
                             name="description"
                             placeholder="Malt Description"
-                            value={maltDetails.description}
+                            value={recipeMalts.description}
                             onChange={handleChange}
                         />
                         <input 
                             name="malt_type"
                             placeholder="Malt Type"
-                            value={maltDetails.malt_type}
+                            value={recipeMalts.malt_type}
                             onChange={handleChange}
                         />
                         <input 
                             name="supplier"
                             placeholder="Supplier"
-                            value={maltDetails.supplier}
+                            value={recipeMalts.supplier}
                             onChange={handleChange}
                         />
                         <input 
                             name="color_degrees_lovibond"
                             placeholder="Color Degree"
                             type="number"
-                            value={maltDetails.color_degrees_lovibond}
+                            value={recipeMalts.color_degrees_lovibond}
                             onChange={handleChange}
                         />
                         <input 
                             name="potential_extract"
                             placeholder="Potential extract"
                             type="number"
-                            value={maltDetails.potential_extract}
+                            value={recipeMalts.potential_extract}
                             onChange={handleChange}
                         />
                         <input 
                             name="unit_price"
                             placeholder="Unit Price"
                             type="number"
-                            value={maltDetails.unit_price}
+                            value={recipeMalts.unit_price}
                             onChange={handleChange}
                         />
                         <button type="submit" className="crud-save-button">
@@ -138,27 +137,4 @@ export function AddMaltModal({ isOpen, closeModal, selectedMalt, handleSaveMaltR
             <button onClick={closeModal} className="crud-save-button">Close</button>
         </Modal>
     );
-}
-
-export async function fetchMalts(api, userToken) {
-    try {
-        const response = await api.get('api/malts', {
-            headers: { Authorization: `Bearer ${userToken}` },
-        });
-        return response.data;
-    } catch (err) {
-        alert('Error loading malts records.');
-        return [];
-    }
-}
-
-export async function fetchMaltById(api, userToken, maltId) {
-    try {
-        const response = await api.get(`/api/malts/${maltId}`, {
-            headers: { Authorization: `Bearer ${userToken}` },
-        });
-        return response.data;
-    } catch (err) {
-        alert('Error loading malt by id.');
-    }
 }

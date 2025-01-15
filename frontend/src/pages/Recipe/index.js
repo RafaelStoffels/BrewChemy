@@ -5,7 +5,8 @@ import Modal from 'react-modal';
 
 import api from '../../services/api';
 import AuthContext from '../../context/AuthContext';
-import { MaltModal, AddMaltModal, fetchMalts, fetchMaltById } from './modals';
+import { MaltModal, AddMaltModal } from './modals';
+import { fetchMalts, fetchMaltById } from '../../services/malts';
 
 import './styles.css';
 import '../Recipe/styles.css';
@@ -39,27 +40,20 @@ export default function NewRecipe() {
     const [recipeMalts, setRecipeMalts] = useState([]); // Adicionando o estado para maltsRecipe
 
     /* Malts */
-    const [maltList, setMaltList] = useState([]); // Adicionando o estado para malts
-    const [maltsLoaded, setMaltsLoaded] = useState(false);
+    const [maltList, setMaltList] = useState([]);
     const [selectedMalt, setSelectedMalt] = useState(null);
-    const [maltName, setMaltName] = useState(null);
 
     useEffect(() => {
         if (!user) {
             navigate('/');
           } else {
             if (id) {
-                if (window.location.pathname.includes('/details')) {
-                    setIsView(true); 
-                    setIsEditing(false); 
-                } else {
-                    setIsView(false); 
-                    setIsEditing(true); 
-                }
-                fetchRecipeById(id);  
+                setIsView(window.location.pathname.includes('/details'));
+                setIsEditing(!window.location.pathname.includes('/details'));
+                fetchRecipeById(id);
             }
         }
-    }, [id]);
+    }, [id, user, navigate]);
 
     async function fetchRecipeById(recipeId) {
         try {
@@ -110,7 +104,14 @@ export default function NewRecipe() {
         e.preventDefault();
 
         const data = {
-
+            name: recipe.name,
+            style: recipe.style,
+            volume_liters: recipe.volumeLiters,
+            batch_time: recipe.batchTime,
+            description: recipe.description,
+            creation_date: recipe.creationDate,
+            notes: recipe.notes,
+            recipe_malts: recipe.recipeMalts,
         };
 
         try {

@@ -4,9 +4,8 @@ import { FiPower, FiArrowLeft, FiTrash2, FiEdit, FiBookOpen  } from 'react-icons
 
 import logoImg from '../../assets/logo.svg';
 
-import api from '../../services/api';
 import AuthContext from '../../context/AuthContext';
-
+import { fetchRecipes, deleteRecipe } from '../../services/recipes';
 import '../../styles/list.css';
 
 export default function MaltList() {
@@ -21,15 +20,15 @@ export default function MaltList() {
     if (!user) {
       navigate('/');
     } else {
-      api.get('api/recipes', {
-        headers: { Authorization: `Bearer ${user.token}` }
-      }).then(response => {
-        setItemList(response.data);
-        setLoading(false);
-      }).catch(err => {
-        setError('Error loading recipes');
-        setLoading(false);
-      });
+      fetchRecipes(user.token) // Usando o fetch da função externa
+        .then((data) => {
+          setItemList(data);
+          setLoading(false);
+        })
+        .catch((err) => {
+          setError('Error loading recipes');
+          setLoading(false);
+        });
     }
   }, [user, navigate]);
 
@@ -43,9 +42,7 @@ export default function MaltList() {
 
   async function handleDelete(itemListId) {
     try {
-      await api.delete(`api/recipes/${itemListId}`, {
-        headers: { Authorization: `Bearer ${user.token}` }
-      });
+      await deleteRecipe(itemListId, user.token);
       setItemList(itemList.filter(itemList => itemList.id !== itemListId));
     } catch (err) {
       alert('Error recipe cannot be deleted, try again.');
