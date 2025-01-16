@@ -1,16 +1,16 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { Link, useNavigate, useParams  } from 'react-router-dom';
-import { FiPower, FiArrowLeft } from 'react-icons/fi';
-import { fetchMaltbyId } from '../../services/malts';
+import { useNavigate, useParams  } from 'react-router-dom';
+import { fetchMaltById } from '../../services/malts';
 
 import api from '../../services/api';
 import AuthContext from '../../context/AuthContext';
 
 import '../../styles/crud.css';
-import logoImg from '../../assets/logo.svg'
+import Sidebar from '../../components/Sidebar';
+import Header from '../../components/Header';
 
 export default function NewMalt() {
-    const { user, logout } = useContext(AuthContext);
+    const { user } = useContext(AuthContext);
     const { id, details } = useParams();
     const navigate = useNavigate();
 
@@ -34,11 +34,11 @@ export default function NewMalt() {
                 setIsView(false); 
                 setIsEditing(true); 
             }
-            fetchMaltById(id); 
+            fetchMalt(id); 
         }
     }, [id]); 
 
-    async function fetchMaltById(maltId) {
+    async function fetchMalt(maltId) {
         try {
             const malt = await fetchMaltById(api, user.token, maltId);
             setName(malt.name);
@@ -50,7 +50,7 @@ export default function NewMalt() {
             setUnitPrice(malt.unit_price);
             setStockQuantity(malt.stock_quantity);
         } catch (err) {
-            alert('Erro ao carregar os dados do malte.');
+            alert('Error loading malt record.');
             navigate('/MaltList');
         }
     }
@@ -76,41 +76,32 @@ export default function NewMalt() {
                         Authorization: `Bearer ${user.token}`,
                     },
                 });
-                alert('Malte atualizado com sucesso!');
             } else {
                 await api.post('/api/malts', data, {
                     headers: {
                         Authorization: `Bearer ${user.token}`,
                     },
                 });
-                alert('Malte cadastrado com sucesso!');
             }
             navigate('/MaltList');
         } catch (err) {
-            alert('Erro ao salvar o malte. Por favor, tente novamente.');
+            alert('Error saving record. Please try again.');
         }
     }
 
     return (
         <div className='crud-container'>
-            <div className='content'>
-            <header className="header-crud">
-                <img src={logoImg} alt="Brewchemy" className="logoImg" />
-                <div className="div-logout-button">
-                    <button onClick={logout}><FiPower size={20} color="#E02041" className="logoutButton"/></button>
-                </div>
-            </header>
+
+            <Sidebar />
+
+            <Header />
+
             <section>
                 <h1>
                   {isEditing ? 'Update Malt' :
                    isView ? 'Malt Details' : 
                    'Add New Malt'}
                 </h1>
-
-                <Link className=".back-link" to="/MaltList">
-                    <FiArrowLeft size={16} color="#E02041"/>
-                    Back
-                </Link>
             </section>
 
             <form onSubmit={handleSubmit}>
@@ -171,7 +162,6 @@ export default function NewMalt() {
                     </button>
                 )}
             </form>
-            </div>
         </div>
     );
 }

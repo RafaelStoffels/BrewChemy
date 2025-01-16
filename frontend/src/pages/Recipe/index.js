@@ -1,31 +1,30 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { Link, useNavigate, useParams  } from 'react-router-dom';
-import { FiPower, FiArrowLeft } from 'react-icons/fi';
+import { useNavigate, useParams  } from 'react-router-dom';
 import Modal from 'react-modal';
 
 import api from '../../services/api';
 import AuthContext from '../../context/AuthContext';
-import { MaltModal, AddMaltModal } from './modals';
+import { MaltModal, UpdateMaltModal } from './modals';
 import { fetchMalts, fetchMaltById } from '../../services/malts';
 
 import './styles.css';
 import '../Recipe/styles.css';
-import logoImg from '../../assets/logo.svg'
+import Sidebar from '../../components/Sidebar';
+import Header from '../../components/Header';
 
 Modal.setAppElement('#root');
 
 export default function NewRecipe() {
-    const { user, logout } = useContext(AuthContext);
-    const { id, details } = useParams();
+    const { user } = useContext(AuthContext);
+    const { id } = useParams();
     const navigate = useNavigate();
 
     const [isEditing, setIsEditing] = useState(false);
     const [isView, setIsView] = useState(false);
 
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [isAddMaltModalOpen, setIsAddMaltModalOpen] = useState(false);
+    const [isUpdateMaltModalOpen, setIsUpdateMaltModalOpen] = useState(false);
 
-    /* Recipe */
     const [recipe, setRecipe] = useState({
         name: '',
         style: '',
@@ -37,11 +36,8 @@ export default function NewRecipe() {
         recipeMalts: [],
     });
 
-    const [recipeMalts, setRecipeMalts] = useState([]); // Adicionando o estado para maltsRecipe
-
     /* Malts */
     const [maltList, setMaltList] = useState([]);
-    const [selectedMalt, setSelectedMalt] = useState(null);
 
     useEffect(() => {
         if (!user) {
@@ -91,13 +87,17 @@ export default function NewRecipe() {
 
     const handleSelectMaltModal = async (selectedMaltId) => {
         const malt = await fetchMaltById(api, user.token, selectedMaltId);
-        setSelectedMalt(malt);
-        setIsAddMaltModalOpen(true);
+        
+        setRecipe((prevRecipe) => ({
+            ...prevRecipe,
+            recipeMalts: [...prevRecipe.recipeMalts, malt],
+        }));
+
         closeModal();
     };
 
     const handleSaveMaltRecipe = (maltId) => {
-        setIsAddMaltModalOpen(false);
+        setIsUpdateMaltModalOpen(false);
     };
 
     async function handleSubmit(e) {
@@ -137,25 +137,19 @@ export default function NewRecipe() {
     }
 
     return (
-        <div className='crud-container'>
+        <div className='recipe-container'>
             <div className='content'>
-                <header className="header-crud">
-                    <img src={logoImg} alt="Brewchemy" className="logoImg" />
-                    <div className="div-logout-button">
-                        <button onClick={logout}><FiPower size={20} color="#E02041" className="logoutButton"/></button>
-                    </div>
-                </header>
+
+                <Sidebar />
+
+                <Header />
+
                 <section>
                     <h1>
                       {isEditing ? 'Update Recipe' :
                        isView ? 'Recipe Details' : 
                        'Add New Recipe'}
                     </h1>
-
-                    <Link className=".back-link" to="/RecipeList">
-                        <FiArrowLeft size={16} color="#E02041"/>
-                        Back
-                    </Link>
                 </section>
 
                 <div class="top">
@@ -229,10 +223,9 @@ export default function NewRecipe() {
                 handleSelectMalt={handleSelectMaltModal}
             />
 
-            <AddMaltModal
-                isOpen={isAddMaltModalOpen}
-                closeModal={() => setIsAddMaltModalOpen(false)}
-                selectedMalt={selectedMalt}
+            <UpdateMaltModal
+                isOpen={isUpdateMaltModalOpen}
+                closeModal={() => setIsUpdateMaltModalOpen(false)}
             />
         </div>   
     );

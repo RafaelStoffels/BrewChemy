@@ -1,0 +1,40 @@
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100px;
+  background-color: #45361e;
+  color: #16505e;
+  overflow-x: hidden;
+  z-index: 1000;
+}
+
+.sidebar .menu ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+  padding-top: 50px;
+  display: flex;  
+  flex-direction: column; 
+  grid-gap: 10px;
+  
+}
+
+.sidebar .menu ul li {
+  padding: 1px 10px;
+  background-color: #614922; 
+  border-radius: 8px;
+}
+
+.sidebar .menu ul li a {
+  text-decoration: none;
+  color: #cb8b00;
+  font-size: 18px;
+  display: block;
+}
+
+.sidebar .menu ul li a:hover {
+  color: #ffc400;
+  border-radius: 5px;
+}

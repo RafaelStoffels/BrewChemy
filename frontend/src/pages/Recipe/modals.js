@@ -41,7 +41,7 @@ export function MaltModal({ isOpen, closeModal, maltList, handleSelectMalt }) {
     );
 }
 
-export function AddMaltModal({ isOpen, closeModal, selectedMalt, handleSaveMaltRecipe }) {
+export function UpdateMaltModal({ isOpen, closeModal, selectedMalt, handleSaveMaltRecipe }) {
     const [recipeMalts, setRecipeMalts] = React.useState({
         name: '',
         description: '',

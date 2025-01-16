@@ -38,7 +38,7 @@ export default function Logon() {
       <section className="form">
         <img src={logoImg} alt="Brewchemy" />
         <form onSubmit={handleSubmit}>
-          <h1>Faça seu logon</h1>
+          <h1>Faça seu login</h1>
           <input
             placeholder="E-mail"
             value={email}
@@ -50,8 +50,8 @@ export default function Logon() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
-          <button className="button" type="submit">
-            Entrar
+          <button className="buttonLogin" type="submit">
+            Login
             <FiLogIn size={16} color="#fff" />
           </button>
         </form>

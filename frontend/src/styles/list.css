@@ -1,26 +1,9 @@
 .list-container {
+    margin-left: 250px;
     width: 100%;
     max-width: 1180px;
     padding: 0 30px;
     margin: 30px auto;
-}
-
-.list-container header {
-    display: flex;
-    align-items: center;
-    gap: 20px;
-}
-
-.list-container header a {
-    width: 260px;
-    margin-left: auto;
-    margin-top: 0;
-}
-
-.back-header {
-    position: relative;
-    top: 10px;
-    left: -860px;
 }
 
 .list-container h1 {
@@ -74,4 +57,8 @@
 
 .list-container ul li .button-group button:hover {
     opacity: 0.8;
+}
+
+.div-addButton {
+    text-align: right;
 }

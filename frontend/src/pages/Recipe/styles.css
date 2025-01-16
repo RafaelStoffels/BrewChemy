@@ -1,7 +1,7 @@
-.crud-container {
+.recipe-container {
     width: 100%;
     max-width: 1000px;
-    height: 70vh;
+    height: 60vh;
     margin: 0 auto;
     display: flex;
     align-items: center;
@@ -20,45 +20,45 @@
     margin-left: 670px;
 }
 
-.crud-container header span {
+.recipe-container header span {
     font-size: 20px;
     margin-left: -70px;
     margin-top: 25px;
 }
 
-.crud-container section {
+.recipe-container section {
     width: 100%;
     max-width: 380px;
 }
 
-.crud-container section h1 {
+.recipe-container section h1 {
     margin: 0 0 32px;
     font-size: 32px;
 }
 
-.crud-container section p {
+.recipe-container section p {
     font-size: 18px;
     color: #737380;
     line-height: 32px;
 }
 
-.crud-container section form {
+.recipe-container section form {
     width: 100%;
     max-width: 450px;
 }
 
-.crud-container .content form input,
-.crud-container .content form textarea {
+.recipe-container .content form input,
+.recipe-container .content form textarea {
     margin-top: 8px;
 }
 
-.crud-container section a {
+.recipe-container section a {
     position: absolute;
     top: 20px;
     left: 20px;
 }
 
-.crud-container section a svg {
+.recipe-container section a svg {
     margin-right: 8px;
 }
 
