@@ -3,7 +3,7 @@
   top: 0;
   left: 0;
   height: 100%;
-  width: 100px;
+  width: 120px;
   background-color: #45361e;
   color: #16505e;
   overflow-x: hidden;
@@ -30,7 +30,7 @@
 .sidebar .menu ul li a {
   text-decoration: none;
   color: #cb8b00;
-  font-size: 18px;
+  font-size: 16px;
   display: block;
 }
 

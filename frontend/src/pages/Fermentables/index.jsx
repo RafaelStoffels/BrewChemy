@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate, useParams  } from 'react-router-dom';
-import { fetchMaltById } from '../../services/malts';
+import { fetchFermentableById } from '../../services/Fermentables';
 
 import api from '../../services/api';
 import AuthContext from '../../context/AuthContext';
@@ -9,14 +9,14 @@ import '../../styles/crud.css';
 import Sidebar from '../../components/Sidebar';
 import Header from '../../components/Header';
 
-export default function NewMalt() {
+export default function NewFermentable() {
     const { user } = useContext(AuthContext);
-    const { id, details } = useParams();
+    const { id } = useParams();
     const navigate = useNavigate();
 
     const [name, setName] = useState('');
     const [description, setDescription] = useState('');
-    const [malt_type, setMaltType] = useState('');
+    const [fermentable_type, setFermentableType] = useState('');
     const [supplier, setSupplier] = useState('');
     const [color_degrees_lovibond, setColorDegree] = useState('');
     const [potential_extract, setPotentialExtract] = useState('');
@@ -26,32 +26,36 @@ export default function NewMalt() {
     const [isView, setIsView] = useState(false);
 
     useEffect(() => {
-        if (id) {
-            if (window.location.pathname.includes('/details')) {
-                setIsView(true); 
-                setIsEditing(false); 
-            } else {
-                setIsView(false); 
-                setIsEditing(true); 
+        if (!user) {
+            navigate('/');
+        } else {
+            if (id) {
+                if (window.location.pathname.includes('/details')) {
+                    setIsView(true); 
+                    setIsEditing(false); 
+                } else {
+                    setIsView(false); 
+                    setIsEditing(true); 
+                }
+                fetchFermentable(id); 
             }
-            fetchMalt(id); 
         }
-    }, [id]); 
+    }, [id, user, navigate]); 
 
-    async function fetchMalt(maltId) {
+    async function fetchFermentable(fermentableId) {
         try {
-            const malt = await fetchMaltById(api, user.token, maltId);
-            setName(malt.name);
-            setDescription(malt.description);
-            setMaltType(malt.malt_type);
-            setSupplier(malt.supplier);
-            setColorDegree(malt.color_degrees_lovibond);
-            setPotentialExtract(malt.potential_extract);
-            setUnitPrice(malt.unit_price);
-            setStockQuantity(malt.stock_quantity);
+            const fermentable = await fetchFermentableById(api, user.token, fermentableId);
+            setName(fermentable.name);
+            setDescription(fermentable.description);
+            setFermentableType(fermentable.fermentable_type);
+            setSupplier(fermentable.supplier);
+            setColorDegree(fermentable.color_degrees_lovibond);
+            setPotentialExtract(fermentable.potential_extract);
+            setUnitPrice(fermentable.unit_price);
+            setStockQuantity(fermentable.stock_quantity);
         } catch (err) {
-            alert('Error loading malt record.');
-            navigate('/MaltList');
+            alert('Error loading fermentable record.');
+            navigate('/FermentableList');
         }
     }
 
@@ -61,7 +65,7 @@ export default function NewMalt() {
         const data = {
             name,
             description,
-            malt_type,
+            fermentable_type,
             supplier,
             color_degrees_lovibond,
             potential_extract,
@@ -71,19 +75,19 @@ export default function NewMalt() {
 
         try {
             if (isEditing) {
-                await api.put(`/api/malts/${id}`, data, {
+                await api.put(`/api/fermentables/${id}`, data, {
                     headers: {
                         Authorization: `Bearer ${user.token}`,
                     },
                 });
             } else {
-                await api.post('/api/malts', data, {
+                await api.post('/api/fermentables', data, {
                     headers: {
                         Authorization: `Bearer ${user.token}`,
                     },
                 });
             }
-            navigate('/MaltList');
+            navigate('/FermentableList');
         } catch (err) {
             alert('Error saving record. Please try again.');
         }
@@ -98,29 +102,29 @@ export default function NewMalt() {
 
             <section>
                 <h1>
-                  {isEditing ? 'Update Malt' :
-                   isView ? 'Malt Details' : 
-                   'Add New Malt'}
+                  {isEditing ? 'Update Fermentable' :
+                   isView ? 'Fermentable Details' : 
+                   'Add New Fermentable'}
                 </h1>
             </section>
 
             <form onSubmit={handleSubmit}>
                 <input 
-                    placeholder='Malt name'
+                    placeholder='Fermentable name'
                     value={name}
                     onChange={e => setName(e.target.value)}
                     disabled={isView}
                 />
                 <textarea type='Description' 
-                    placeholder='Malt Description'
+                    placeholder='Fermentable Description'
                     value={description}
                     onChange={e => setDescription(e.target.value)}
                     disabled={isView}
                 />
-                <input type='Malt type' 
-                    placeholder='Malt Type'
-                    value={malt_type}
-                    onChange={e => setMaltType(e.target.value)}
+                <input type='Fermentable type' 
+                    placeholder='Fermentable Type'
+                    value={fermentable_type}
+                    onChange={e => setFermentableType(e.target.value)}
                     disabled={isView}
                 />
                 <input 

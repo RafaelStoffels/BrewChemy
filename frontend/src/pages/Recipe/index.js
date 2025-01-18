@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { useNavigate, useParams  } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import Modal from 'react-modal';
 
 import api from '../../services/api';
 import AuthContext from '../../context/AuthContext';
-import { MaltModal, UpdateMaltModal } from './modals';
-import { fetchMalts, fetchMaltById } from '../../services/malts';
+import { FermentableModal } from './modals';
+import { fetchFermentables, fetchFermentableById } from '../../services/Fermentables';
 
 import './styles.css';
 import '../Recipe/styles.css';
@@ -21,9 +21,9 @@ export default function NewRecipe() {
 
     const [isEditing, setIsEditing] = useState(false);
     const [isView, setIsView] = useState(false);
-
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [isUpdateMaltModalOpen, setIsUpdateMaltModalOpen] = useState(false);
+
+    const [fermentableList, setFermentableList] = useState([]);
 
     const [recipe, setRecipe] = useState({
         name: '',
@@ -33,16 +33,13 @@ export default function NewRecipe() {
         description: '',
         creationDate: '',
         notes: '',
-        recipeMalts: [],
+        recipeFermentables: [],
     });
-
-    /* Malts */
-    const [maltList, setMaltList] = useState([]);
 
     useEffect(() => {
         if (!user) {
             navigate('/');
-          } else {
+        } else {
             if (id) {
                 setIsView(window.location.pathname.includes('/details'));
                 setIsEditing(!window.location.pathname.includes('/details'));
@@ -50,6 +47,39 @@ export default function NewRecipe() {
             }
         }
     }, [id, user, navigate]);
+
+    const handleAddFermentableRecipe = (selectedFermentable, quantity) => {
+        if (selectedFermentable && quantity) {
+            const selectedFermentableDetails = fermentableList.find((fermentable) => fermentable.id === selectedFermentable);
+
+            if (selectedFermentableDetails) {
+                const fermentableWithWeight = {
+                    ...selectedFermentableDetails,
+                    weightGrams: parseFloat(quantity),
+                };
+
+                console.log("Recipe Fermentables:", selectedFermentableDetails);
+
+                setRecipe((prevRecipe) => ({
+                    ...prevRecipe,
+                    recipeFermentables: [
+                        ...prevRecipe.recipeFermentables,
+                        {
+                            ...selectedFermentableDetails,
+                            id: undefined,
+                            weightGrams: parseFloat(quantity),
+                        },
+                    ],
+                }));
+
+                closeModal();
+            } else {
+                alert('Selected fermentable not found.');
+            }
+        } else {
+            alert('Please select a fermentable and enter a quantity.');
+        }
+    };
 
     async function fetchRecipeById(recipeId) {
         try {
@@ -60,12 +90,12 @@ export default function NewRecipe() {
             setRecipe({
                 name: recipeData.name || '',
                 style: recipeData.style || '',
-                volumeLiters: recipeData.volume_liters || '',
+                volumeLiters: recipeData.volumeLiters || '',
                 batchTime: recipeData.batchTime || '',
                 description: recipeData.description || '',
                 creationDate: recipeData.creationDate || '',
                 notes: recipeData.notes || '',
-                recipeMalts: recipeData.recipeMalts || [],
+                recipeFermentables: recipeData.recipeFermentables || [],
             });
         } catch (err) {
             alert('Error loading recipe record.');
@@ -78,40 +108,27 @@ export default function NewRecipe() {
     };
 
     const openModal = async () => {
-        const malts = await fetchMalts(api, user.token);
-        setMaltList(malts);
+        const fermentables = await fetchFermentables(api, user.token);
+        setFermentableList(fermentables);
         setIsModalOpen(true);
     };
 
     const closeModal = () => setIsModalOpen(false);
 
-    const handleSelectMaltModal = async (selectedMaltId) => {
-        const malt = await fetchMaltById(api, user.token, selectedMaltId);
-        
-        setRecipe((prevRecipe) => ({
-            ...prevRecipe,
-            recipeMalts: [...prevRecipe.recipeMalts, malt],
-        }));
-
-        closeModal();
-    };
-
-    const handleSaveMaltRecipe = (maltId) => {
-        setIsUpdateMaltModalOpen(false);
-    };
-
     async function handleSubmit(e) {
         e.preventDefault();
+
+        console.log("Recipe Fermentables:", recipe);
 
         const data = {
             name: recipe.name,
             style: recipe.style,
-            volume_liters: recipe.volumeLiters,
-            batch_time: recipe.batchTime,
+            volumeLiters: recipe.volumeLiters,
+            batchTime: recipe.batchTime,
             description: recipe.description,
-            creation_date: recipe.creationDate,
+            creationDate: recipe.creationDate,
             notes: recipe.notes,
-            recipe_malts: recipe.recipeMalts,
+            recipeFermentables: recipe.recipeFermentables,
         };
 
         try {
@@ -132,7 +149,7 @@ export default function NewRecipe() {
             }
             navigate('/RecipeList');
         } catch (err) {
-            alert('Error salving recipe. Please, try again.');
+            alert('Error saving recipe. Please, try again.');
         }
     }
 
@@ -146,13 +163,13 @@ export default function NewRecipe() {
 
                 <section>
                     <h1>
-                      {isEditing ? 'Update Recipe' :
-                       isView ? 'Recipe Details' : 
-                       'Add New Recipe'}
+                        {isEditing ? 'Update Recipe' :
+                            isView ? 'Recipe Details' :
+                            'Add New Recipe'}
                     </h1>
                 </section>
 
-                <div class="top">
+                <div className="top">
                     <form onSubmit={handleSubmit}>
                         <div className="form-fields">
                             <input
@@ -188,45 +205,40 @@ export default function NewRecipe() {
                         </div>
                     </form>
                 </div>
-                <div classname="buttons-container">
-                    <button onClick={openModal} className="modalAddMalt">Add Malt</button>
+                <div className="buttons-container">
+                    <button onClick={openModal} className="modalAddFermentable">Add Fermentable</button>
                 </div>
-                <div class="bottom-container">
-                    <div class="bottom-left">
+                <div className="bottom-container">
+                    <div className="bottom-left">
                         <ul>
-                        {recipe.recipeMalts.length > 0 ? (
-                          recipe.recipeMalts.map((malt) => (
-                            <li key={malt.id}>
-                              <strong>{malt.name}</strong> - {malt.weight_grams}g
-                            </li>
-                          ))
-                        ) : (
-                          <li>No malts added to this recipe yet.</li>
-                        )}
+                            {recipe.recipeFermentables.length > 0 ? (
+                                recipe.recipeFermentables.map((fermentable) => (
+                                    <li key={fermentable.id}>
+                                        <strong>{fermentable.name}</strong> - {fermentable.weightGrams}g
+                                    </li>
+                                ))
+                            ) : (
+                                <li>No fermentables added to this recipe yet.</li>
+                            )}
                         </ul>
                     </div>
-                        
-                    <div class="bottom-right">
+
+                    <div className="bottom-right">
                         olaaaa
                     </div>
                 </div>
                 {!isView && (
-                <button onClick={handleSubmit} className='crud-save-button' type="submit">
-                    Save
-                </button>
+                    <button onClick={handleSubmit} className='crud-save-button' type="submit">
+                        Save
+                    </button>
                 )}
             </div>
-            <MaltModal
+            <FermentableModal
                 isOpen={isModalOpen}
                 closeModal={closeModal}
-                maltList={maltList}
-                handleSelectMalt={handleSelectMaltModal}
+                fermentableList={fermentableList}
+                handleAddFermentableRecipe={handleAddFermentableRecipe}
             />
-
-            <UpdateMaltModal
-                isOpen={isUpdateMaltModalOpen}
-                closeModal={() => setIsUpdateMaltModalOpen(false)}
-            />
-        </div>   
+        </div>
     );
 }
