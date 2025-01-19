@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import Modal from 'react-modal';
+import { FiTrash2, FiEdit } from 'react-icons/fi';
 
 import api from '../../services/api';
 import AuthContext from '../../context/AuthContext';
@@ -107,6 +108,27 @@ export default function NewRecipe() {
         setRecipe((prevState) => ({ ...prevState, [name]: value }));
     };
 
+    const handleUpdateFermentable = (fermentableId) => {
+        const updatedFermentables = recipe.recipeFermentables.filter(
+            (fermentable) => fermentable.id !== fermentableId
+        );
+        /* abrir o novo modal */
+    };
+
+    const handleDeleteFermentable = (fermentableId) => {
+        const confirmDelete = window.confirm('Are you sure you want to delete this fermentable?');
+        if (confirmDelete) {
+            const updatedFermentables = recipe.recipeFermentables.filter(
+                (fermentable) => fermentable.id !== fermentableId
+            );
+        
+            setRecipe((prevRecipe) => ({
+                ...prevRecipe,
+                recipeFermentables: updatedFermentables,
+            }));
+        }
+    };
+
     const openModal = async () => {
         const fermentables = await fetchFermentables(api, user.token);
         setFermentableList(fermentables);
@@ -138,14 +160,12 @@ export default function NewRecipe() {
                         Authorization: `Bearer ${user.token}`,
                     },
                 });
-                alert('Recipe updated!');
             } else {
                 await api.post('/api/recipes', data, {
                     headers: {
                         Authorization: `Bearer ${user.token}`,
                     },
                 });
-                alert('Recipe saved!');
             }
             navigate('/RecipeList');
         } catch (err) {
@@ -215,6 +235,12 @@ export default function NewRecipe() {
                                 recipe.recipeFermentables.map((fermentable) => (
                                     <li key={fermentable.id}>
                                         <strong>{fermentable.name}</strong> - {fermentable.weightGrams}g
+                                        <button onClick={() => handleUpdateFermentable(fermentable.id)} type="button">
+                                          <FiEdit size={20} color="#a8a8b3" />
+                                        </button>
+                                        <button onClick={() => handleDeleteFermentable(fermentable.id)} type="button">
+                                          <FiTrash2 size={20} color="#a8a8b3" />
+                                        </button>
                                     </li>
                                 ))
                             ) : (
@@ -224,7 +250,15 @@ export default function NewRecipe() {
                     </div>
 
                     <div className="bottom-right">
-                        olaaaa
+                        OG
+                        <p></p>
+                        FG
+                        <p></p>
+                        EBC
+                        <p></p>
+                        IBU
+                        <p></p>
+                        ABV
                     </div>
                 </div>
                 {!isView && (

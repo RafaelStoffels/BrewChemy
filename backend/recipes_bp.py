@@ -38,7 +38,7 @@ class RecipeFermentable(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'), nullable=False)
     name = db.Column(db.String(100), nullable=False)
     description = db.Column(db.Text)
-    color_degrees_lovibond = db.Column(db.Numeric(5, 2), nullable=False)
+    ebc = db.Column(db.Numeric(5, 2), nullable=False)
     potential_extract = db.Column(db.Numeric(5, 3), nullable=False)
     malt_type = db.Column(db.String(50))
     supplier = db.Column(db.String(100))
@@ -52,7 +52,7 @@ class RecipeFermentable(db.Model):
             "recipeId": self.recipe_id,
             "name": self.name,
             "description": self.description,
-            "colorDegreesLovibond": float(self.color_degrees_lovibond),
+            "ebc": float(self.ebc),
             "potentialExtract": float(self.potential_extract),
             "maltType": self.malt_type,
             "supplier": self.supplier,
@@ -107,7 +107,7 @@ def create_recipes_bp():
                 user_id=current_user_id,
                 name=fermentable_data["name"],
                 description=fermentable_data.get("description"),
-                color_degrees_lovibond=fermentable_data["colorDegreesLovibond"],
+                ebc=fermentable_data["ebc"],
                 potential_extract=fermentable_data["potentialExtract"],
                 malt_type=fermentable_data.get("maltType"),
                 supplier=fermentable_data.get("supplier"),
@@ -130,6 +130,8 @@ def create_recipes_bp():
 
         data = request.json
 
+        print(data);
+
         def sanitize(value):
             return value if value != "" else None
 
@@ -148,9 +150,9 @@ def create_recipes_bp():
                 fermentable = existing_fermentables[fermentable_id]
                 fermentable.name = fermentable_data.get("name", fermentable.name)
                 fermentable.description = fermentable_data.get("description", fermentable.description)
-                fermentable.color_degrees_lovibond = fermentable_data.get("colorDegreesLovibond", fermentable.color_degrees_lovibond)
+                fermentable.ebc = fermentable_data.get("ebc", fermentable.ebc)
                 fermentable.potential_extract = fermentable_data.get("potentialExtract", fermentable.potential_extract)
-                fermentable.malt_type = fermentable_data.get("maltType", fermentable.fermentable_type)
+                fermentable.malt_type = fermentable_data.get("maltType", fermentable.malt_type)
                 fermentable.supplier = fermentable_data.get("supplier", fermentable.supplier)
                 fermentable.unit_price = fermentable_data.get("unitPrice", fermentable.unit_price)
                 fermentable.notes = fermentable_data.get("notes", fermentable.notes)
@@ -161,7 +163,7 @@ def create_recipes_bp():
                     user_id=current_user_id,
                     name=fermentable_data["name"],
                     description=fermentable_data.get("description"),
-                    color_degrees_lovibond=fermentable_data["colorDegreesLovibond"],
+                    ebc=fermentable_data["ebc"],
                     potential_extract=fermentable_data["potentialExtract"],
                     malt_type=fermentable_data.get("maltType"),
                     supplier=fermentable_data.get("supplier"),

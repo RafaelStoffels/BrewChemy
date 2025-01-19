@@ -35,7 +35,7 @@ class Fermentable(db.Model):
         }
 
 class FermentableOfficial(db.Model):
-    __tablename__ = 'fermentable_official'
+    __tablename__ = 'fermentables_official'
 
     # Table Definition
     id = db.Column(db.Integer, primary_key=True)
