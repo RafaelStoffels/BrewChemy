@@ -17,6 +17,8 @@ class Recipe(db.Model):
 
     recipe_fermentables = db.relationship('RecipeFermentable', backref='recipe', lazy=True, cascade="all, delete-orphan")
 
+    recipe_hops = db.relationship('RecipeHop', backref='recipe', lazy=True, cascade="all, delete-orphan")
+
     def to_dict(self):
         return {
             "id": self.id,
@@ -26,7 +28,8 @@ class Recipe(db.Model):
             "creationDate": self.creation_date.isoformat() if self.creation_date else None,
             "volumeLiters": float(self.volume_liters) if self.volume_liters else None,
             "notes": self.notes,
-            "recipeFermentables": [fermentable.to_dict() for fermentable in self.recipe_fermentables]
+            "recipeFermentables": [fermentable.to_dict() for fermentable in self.recipe_fermentables],
+            "recipeHops": [hop.to_dict() for hop in self.recipe_hops]
         }
 
 class RecipeFermentable(db.Model):
@@ -59,6 +62,34 @@ class RecipeFermentable(db.Model):
             "unitPrice": float(self.unit_price) if self.unit_price else None,
             "notes": self.notes,
             "weightGrams": float(self.weight_grams) if self.weight_grams else None
+        }
+    
+class RecipeHop(db.Model):
+    __tablename__ = 'recipe_hops'
+
+    # Table Definition
+    id = db.Column(db.Integer, primary_key=True)
+    recipe_id = db.Column(db.Integer, db.ForeignKey('recipes.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'), nullable=False)
+    name = db.Column(db.String(100), nullable=False)
+    alpha_acid_content = db.Column(db.Numeric(5, 2))
+    beta_acid_content = db.Column(db.Numeric(5, 2))
+    use_type = db.Column(db.String(50))
+    country_of_origin = db.Column(db.String(50))
+    description = db.Column(db.Text)
+    amount = db.Column(db.Numeric)
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "recipeId": self.recipe_id,
+            "name": self.name,
+            "alphaAcidContent": float(self.alpha_acid_content) if self.alpha_acid_content else None,
+            "betaAcidContent": float(self.beta_acid_content) if self.beta_acid_content else None,
+            "useType": self.use_type,
+            "countryOfOrigin": self.country_of_origin,
+            "description": self.description,
+            "amount": float(self.amount) if self.amount else None
         }
 
 def create_recipes_bp():
@@ -117,6 +148,21 @@ def create_recipes_bp():
             )
             db.session.add(new_fermentable)
 
+        hops_data = data.get("recipeHops", [])
+        for hop_data in hops_data:
+            new_hop = RecipeHop(
+                recipe_id=new_recipe.id,
+                user_id=current_user_id,
+                name=hop_data["name"],
+                alpha_acid_content=hop_data.get("alphaAcidContent"),
+                beta_acid_content=hop_data.get("betaAcidContent"),
+                use_type=hop_data.get("useType"),
+                country_of_origin=hop_data.get("countryOfOrigin"),
+                description=hop_data.get("description"),
+                amount=hop_data.get("amount")
+            )
+            db.session.add(new_hop)
+
         db.session.commit()
         return jsonify(new_recipe.to_dict()), 201
 
@@ -173,10 +219,46 @@ def create_recipes_bp():
                 )
                 db.session.add(new_fermentable)
 
+        # Atualização de hops
+        hops_data = data.get("recipeHops", [])
+        existing_hops = {hop.id: hop for hop in recipe.recipe_hops}
+
+        for hop_data in hops_data:
+            hop_id = hop_data.get("id")
+            if hop_id and hop_id in existing_hops:
+                hop = existing_hops[hop_id]
+                hop.name = hop_data.get("name", hop.name)
+                hop.alpha_acid_content = hop_data.get("alphaAcidContent", hop.alpha_acid_content)
+                hop.beta_acid_content = hop_data.get("betaAcidContent", hop.beta_acid_content)
+                hop.use_type = hop_data.get("useType", hop.use_type)
+                hop.country_of_origin = hop_data.get("countryOfOrigin", hop.country_of_origin)
+                hop.description = hop_data.get("description", hop.description)
+                hop.amount = hop_data.get("amount", hop.amount)
+            else:
+                new_hop = RecipeHop(
+                    recipe_id=recipe.id,
+                    user_id=current_user_id,
+                    name=hop_data["name"],
+                    alpha_acid_content=hop_data.get("alphaAcidContent"),
+                    beta_acid_content=hop_data.get("betaAcidContent"),
+                    use_type=hop_data.get("useType"),
+                    country_of_origin=hop_data.get("countryOfOrigin"),
+                    description=hop_data.get("description"),
+                    amount=hop_data.get("amount")
+                )
+                db.session.add(new_hop)
+
+        # Remover fermentables deletados
         sent_fermentable_ids = {fermentable_data.get("id") for fermentable_data in fermentables_data if fermentable_data.get("id")}
         for fermentable_id, fermentable in existing_fermentables.items():
             if fermentable_id not in sent_fermentable_ids:
                 db.session.delete(fermentable)
+
+        # Remover hops deletados
+        sent_hop_ids = {hop_data.get("id") for hop_data in hops_data if hop_data.get("id")}
+        for hop_id, hop in existing_hops.items():
+            if hop_id not in sent_hop_ids:
+                db.session.delete(hop)
 
         db.session.commit()
         return jsonify(recipe.to_dict()), 200
