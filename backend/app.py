@@ -3,8 +3,10 @@ from flask_cors import CORS
 from db import db, configure_db
 from fermentables_bp import create_fermentables_bp
 from hops_bp import create_hops_bp
-from users_bp import create_users_bp
 from recipes_bp import create_recipes_bp
+from users_bp import create_users_bp
+from yeasts_bp import create_yeasts_bp
+
 
 app = Flask(__name__)
 
@@ -16,9 +18,10 @@ def create_app():
     # Registra o blueprint com as rotas
     app.register_blueprint(create_fermentables_bp(), url_prefix="/api")
     app.register_blueprint(create_hops_bp(), url_prefix="/api")
-    app.register_blueprint(create_users_bp(), url_prefix="/api/")
     app.register_blueprint(create_recipes_bp(), url_prefix="/api/")
-    
+    app.register_blueprint(create_users_bp(), url_prefix="/api/")
+    app.register_blueprint(create_yeasts_bp(), url_prefix="/api")
+
     return app
 
 # Rota principal

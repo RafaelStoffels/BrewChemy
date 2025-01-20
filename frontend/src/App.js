@@ -11,6 +11,7 @@ import Fermentable from "./pages/Fermentables";
 import HopList from "./pages/HopList";
 import RecipeList from "./pages/RecipeList";
 import Recipe from "./pages/Recipe";
+import YeastList from "./pages/YeastList";
 
 
 const App = () => {
@@ -29,6 +30,7 @@ const App = () => {
           <Route path="/Recipes/:id/details" element={<Recipe />} />
           <Route path="/Recipes/:id/edit" element={<Recipe />} />
           <Route path="/Recipes/new" element={<Recipe />} />
+          <Route path="/YeastList" element={<YeastList />} />
         </Routes>
       </Router>
     </AuthProvider>
