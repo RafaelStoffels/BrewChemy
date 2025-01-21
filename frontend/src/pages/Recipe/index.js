@@ -7,8 +7,10 @@ import api from '../../services/api';
 import AuthContext from '../../context/AuthContext';
 import { FermentableModal } from './modals';
 import { HopModal } from './modals';
+import { YeastModal } from './modals';
 import { fetchFermentables } from '../../services/Fermentables';
 import { fetchHops } from '../../services/Hops';
+import { fetchYeasts } from '../../services/Yeasts';
 import { fetchRecipeById } from '../../services/recipes';
 
 import './styles.css';
@@ -29,6 +31,7 @@ export default function NewRecipe() {
 
     const [fermentableList, setFermentableList] = useState([]);
     const [hopList, setHopList] = useState([]);
+    const [yeastList, setYeastList] = useState([]);
 
     const [recipe, setRecipe] = useState({
         name: '',
@@ -40,6 +43,7 @@ export default function NewRecipe() {
         notes: '',
         recipeFermentables: [],
         recipeHops: [],
+        recipeYeasts: [],
     });
 
     useEffect(() => {
@@ -66,6 +70,7 @@ export default function NewRecipe() {
             notes: recipeResponse.notes || '',
             recipeFermentables: recipeResponse.recipeFermentables || [],
             recipeHops: recipeResponse.recipeHops || [],
+            recipeYeasts: recipeResponse.recipeYeasts || [],
         })
     };
 
@@ -78,8 +83,6 @@ export default function NewRecipe() {
                     ...selectedFermentableDetails,
                     weightGrams: parseFloat(quantity),
                 };
-
-                console.log("Recipe Fermentables:", selectedFermentableDetails);
 
                 setRecipe((prevRecipe) => ({
                     ...prevRecipe,
@@ -112,8 +115,6 @@ export default function NewRecipe() {
                     amount: parseFloat(amount),
                 };
 
-                console.log("Recipe Fermentables:", selectedHopDetails);
-
                 setRecipe((prevRecipe) => ({
                     ...prevRecipe,
                     recipeHops: [
@@ -135,9 +136,35 @@ export default function NewRecipe() {
         }
     };
 
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        setRecipe((prevState) => ({ ...prevState, [name]: value }));
+    const handleAddYeastRecipe = (selectedYeast, amount) => {
+        if (selectedYeast && amount) {
+            const selectedYeastDetails = yeastList.find((yeast) => yeast.id === selectedYeast);
+
+            if (selectedYeastDetails) {
+                const yeastWithAmount = {
+                    ...selectedYeastDetails,
+                    amount: parseFloat(amount),
+                };
+
+                setRecipe((prevRecipe) => ({
+                    ...prevRecipe,
+                    recipeYeasts: [
+                        ...prevRecipe.recipeYeasts,
+                        {
+                            ...selectedYeastDetails,
+                            id: undefined,
+                            amount: parseFloat(amount),
+                        },
+                    ],
+                }));
+
+                closeModal();
+            } else {
+                alert('Selected yeast not found.');
+            }
+        } else {
+            alert('Please select a yeast and enter a quantity.');
+        }
     };
 
     const handleUpdateFermentable = (fermentableID) => {
@@ -150,6 +177,13 @@ export default function NewRecipe() {
     const handleUpdateHop = (hopID) => {
         const updatedHops = recipe.recipeHops.filter(
             (hop) => hop.id !== hopID
+        );
+        /* abrir o novo modal */
+    };
+
+    const handleUpdateYeast = (yeastID) => {
+        const updatedYeasts = recipe.recipeYeasts.filter(
+            (yeast) => yeast.id !== yeastID
         );
         /* abrir o novo modal */
     };
@@ -182,6 +216,25 @@ export default function NewRecipe() {
         }
     };
 
+    const handleDeleteYeast = (yeastID) => {
+        const confirmDelete = window.confirm('Are you sure you want to delete this yeast?');
+        if (confirmDelete) {
+            const updatedYeasts = recipe.recipeYeasts.filter(
+                (yeast) => yeast.id !== yeastID
+            );
+        
+            setRecipe((prevRecipe) => ({
+                ...prevRecipe,
+                recipeYeasts: updatedYeasts,
+            }));
+        }
+    };
+
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setRecipe((prevState) => ({ ...prevState, [name]: value }));
+    };
+
     const openFermentableModal = async () => {
         const fermentables = await fetchFermentables(api, user.token);
         setFermentableList(fermentables);
@@ -194,12 +247,16 @@ export default function NewRecipe() {
         setIsModalOpen(true);
     };
 
+    const openYeastModal = async () => {
+        const yeasts = await fetchYeasts(api, user.token);
+        setYeastList(yeasts);
+        setIsModalOpen(true);
+    };
+
     const closeModal = () => setIsModalOpen(false);
 
     async function handleSubmit(e) {
         e.preventDefault();
-
-        console.log("Recipe Fermentables:", recipe);
 
         const data = {
             name: recipe.name,
@@ -211,6 +268,7 @@ export default function NewRecipe() {
             notes: recipe.notes,
             recipeFermentables: recipe.recipeFermentables,
             recipeHops: recipe.recipeHops,
+            recipeYeasts: recipe.recipeYeasts,
         };
 
         try {
@@ -288,6 +346,7 @@ export default function NewRecipe() {
                 <div className="buttons-container">
                     <button onClick={openFermentableModal} className="modalAddFermentable">Add Fermentable</button>
                     <button onClick={openHopModal} className="modalAddHop">Add Hop</button>
+                    <button onClick={openYeastModal} className="modalAddYeast">Add Yeast</button>
                 </div>
                 <div className="bottom-container">
                     <div className="bottom-left">
@@ -310,6 +369,17 @@ export default function NewRecipe() {
                                       <FiEdit size={20} color="#a8a8b3" />
                                     </button>
                                     <button onClick={() => handleDeleteHop(hop.id)} type="button">
+                                      <FiTrash2 size={20} color="#a8a8b3" />
+                                    </button>
+                                </li>
+                            ))}
+                            {recipe.recipeYeasts.map((yeast) => (
+                                <li key={yeast.id}>
+                                    <strong>{yeast.name}</strong> - {yeast.amount}g
+                                    <button onClick={() => handleUpdateYeast(yeast.id)} type="button">
+                                      <FiEdit size={20} color="#a8a8b3" />
+                                    </button>
+                                    <button onClick={() => handleDeleteYeast(yeast.id)} type="button">
                                       <FiTrash2 size={20} color="#a8a8b3" />
                                     </button>
                                 </li>
@@ -346,6 +416,12 @@ export default function NewRecipe() {
                 closeModal={closeModal}
                 hopList={hopList}
                 handleAddHopRecipe={handleAddHopRecipe}
+            />
+            <YeastModal
+            isOpen={isModalOpen}
+            closeModal={closeModal}
+            yeastList={yeastList}
+            handleAddYeastRecipe={handleAddYeastRecipe}
             />
         </div>
     );

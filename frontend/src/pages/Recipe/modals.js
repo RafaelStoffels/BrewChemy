@@ -140,3 +140,73 @@ export function HopModal({ isOpen, closeModal, hopList, handleAddHopRecipe }) {
         </Modal>
     );
 }
+
+export function YeastModal({ isOpen, closeModal, yeastList, handleAddYeastRecipe }) {
+    const [selectedYeast, setSelectedYeast] = useState(null);
+    const [amount, setAmount] = useState('');
+
+    const handleChange = (yeastID) => {
+        setSelectedYeast(yeastID);
+    };
+
+    const handleAmountChange = (e) => {
+        setAmount(e.target.value);
+    };
+
+    const handleSaveButton = () => {
+        handleAddYeastRecipe(selectedYeast, amount);
+    };
+
+    return (
+        <Modal
+            isOpen={isOpen}
+            onRequestClose={closeModal}
+            contentLabel="Yeast Modal"
+            style={{
+                content: {
+                    top: '50%',
+                    left: '50%',
+                    right: 'auto',
+                    bottom: 'auto',
+                    marginRight: '-50%',
+                    transform: 'translate(-50%, -50%)',
+                    width: '400px',
+                    padding: '20px',
+                },
+            }}
+        >
+            <h2>Select a Yeast</h2>
+            <ul>
+                {yeastList.length > 0 ? (
+                    yeastList.map((yeast) => (
+                        <li key={yeast.id} style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
+                            <input
+                                type="radio"
+                                id={`yeast-${yeast.id}`}
+                                name="yeast"
+                                value={yeast.id}
+                                checked={selectedYeast === yeast.id}
+                                onChange={() => handleChange(yeast.id)}
+                                style={{ marginRight: '10px' }}
+                            />
+                            <label htmlFor={`yeast-${yeast.id}`}>
+                                <strong>{yeast.name}</strong>
+                            </label>
+                        </li>
+                    ))
+                ) : (
+                    <p>No yeasts available.</p>
+                )}
+            </ul>
+            <div>
+                <input
+                    type="number"
+                    placeholder="Amount"
+                    value={amount}
+                    onChange={handleAmountChange}
+                />
+            </div>
+            <button onClick={handleSaveButton} className="crud-save-button">Add yeast</button>
+        </Modal>
+    );
+}

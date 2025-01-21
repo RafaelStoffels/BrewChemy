@@ -16,8 +16,8 @@ class Recipe(db.Model):
     notes = db.Column(db.Text)
 
     recipe_fermentables = db.relationship('RecipeFermentable', backref='recipe', lazy=True, cascade="all, delete-orphan")
-
     recipe_hops = db.relationship('RecipeHop', backref='recipe', lazy=True, cascade="all, delete-orphan")
+    recipe_yeasts = db.relationship('RecipeYeast', backref='recipe', lazy=True, cascade="all, delete-orphan")
 
     def to_dict(self):
         return {
@@ -29,7 +29,8 @@ class Recipe(db.Model):
             "volumeLiters": float(self.volume_liters) if self.volume_liters else None,
             "notes": self.notes,
             "recipeFermentables": [fermentable.to_dict() for fermentable in self.recipe_fermentables],
-            "recipeHops": [hop.to_dict() for hop in self.recipe_hops]
+            "recipeHops": [hop.to_dict() for hop in self.recipe_hops],
+            "recipeYeasts": [yeast.to_dict() for yeast in self.recipe_yeasts]
         }
 
 class RecipeFermentable(db.Model):
@@ -88,6 +89,43 @@ class RecipeHop(db.Model):
             "betaAcidContent": float(self.beta_acid_content) if self.beta_acid_content else None,
             "useType": self.use_type,
             "countryOfOrigin": self.country_of_origin,
+            "description": self.description,
+            "amount": float(self.amount) if self.amount else None
+        }
+
+class RecipeYeast(db.Model):
+    __tablename__ = 'recipe_yeasts'
+
+    # Table Definition
+    id = db.Column(db.Integer, primary_key=True)
+    recipe_id = db.Column(db.Integer, db.ForeignKey('recipes.id'), nullable=False)
+    name = db.Column(db.String(100), nullable=False)
+    manufacturer = db.Column(db.String(100), nullable=False)
+    type = db.Column(db.String(50), nullable=False)
+    form = db.Column(db.String(50), nullable=False)
+    attenuation_range = db.Column(db.String(20), nullable=False)
+    temperature_range = db.Column(db.String(20), nullable=False)
+    alcohol_tolerance = db.Column(db.String(50), nullable=False)
+    flavor_profile = db.Column(db.Text) 
+    flocculation = db.Column(db.String(20), nullable=False)
+    notes = db.Column(db.Text) 
+    description = db.Column(db.Text)
+    amount = db.Column(db.Numeric)
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "recipeId": self.recipe_id,
+            "name": self.name,
+            "manufacturer": self.manufacturer,
+            "type": self.type,
+            "form": self.form,
+            "attenuation_range": self.attenuation_range,
+            "temperature_range": self.temperature_range,
+            "alcohol_tolerance": self.alcohol_tolerance,
+            "flavor_profile": self.flavor_profile,
+            "flocculation": self.flocculation,
+            "notes": self.notes,
             "description": self.description,
             "amount": float(self.amount) if self.amount else None
         }
@@ -152,7 +190,6 @@ def create_recipes_bp():
         for hop_data in hops_data:
             new_hop = RecipeHop(
                 recipe_id=new_recipe.id,
-                user_id=current_user_id,
                 name=hop_data["name"],
                 alpha_acid_content=hop_data.get("alphaAcidContent"),
                 beta_acid_content=hop_data.get("betaAcidContent"),
@@ -162,6 +199,26 @@ def create_recipes_bp():
                 amount=hop_data.get("amount")
             )
             db.session.add(new_hop)
+
+        yeast_data = data.get("recipeYeasts", [])
+
+        for yeast_data_item in yeast_data:
+            new_yeast = RecipeYeast(
+                recipe_id=new_recipe.id,
+                name=yeast_data_item["name"],
+                manufacturer=yeast_data_item["manufacturer"],
+                type=yeast_data_item["type"],
+                form=yeast_data_item["form"],
+                attenuation_range=yeast_data_item["attenuation_range"],
+                temperature_range=yeast_data_item["temperature_range"],
+                alcohol_tolerance=yeast_data_item["alcohol_tolerance"],
+                flavor_profile=yeast_data_item.get("flavor_profile"),
+                flocculation=yeast_data_item["flocculation"],
+                notes=yeast_data_item.get("notes"),
+                description=yeast_data_item.get("description"),
+                amount=yeast_data_item.get("amount")
+            )
+            db.session.add(new_yeast)
 
         db.session.commit()
         return jsonify(new_recipe.to_dict()), 201
@@ -248,6 +305,47 @@ def create_recipes_bp():
                 )
                 db.session.add(new_hop)
 
+        # Atualizar yeast
+        yeast_data = data.get("recipeYeasts", [])
+        existing_yeasts = {yeast.id: yeast for yeast in recipe.recipe_yeasts}
+        for yeast_data_item in yeast_data:
+            # Verifique se o yeast já existe (por exemplo, por id ou nome, conforme seu modelo)
+            existing_yeast = RecipeYeast.query.filter_by(
+                recipe_id=recipe.id, name=yeast_data_item["name"]
+            ).first()
+
+            if existing_yeast:
+                # Atualiza os campos existentes
+                existing_yeast.manufacturer = yeast_data_item["manufacturer"]
+                existing_yeast.type = yeast_data_item["type"]
+                existing_yeast.form = yeast_data_item["form"]
+                existing_yeast.attenuation_range = yeast_data_item["attenuationRange"]
+                existing_yeast.temperature_range = yeast_data_item["temperatureRange"]
+                existing_yeast.alcohol_tolerance = yeast_data_item["alcoholTolerance"]
+                existing_yeast.flavor_profile = yeast_data_item.get("flavorProfile")
+                existing_yeast.flocculation = yeast_data_item["flocculation"]
+                existing_yeast.notes = yeast_data_item.get("notes")
+                existing_yeast.description = yeast_data_item.get("description")
+                existing_yeast.amount = yeast_data_item.get("amount")
+            else:
+                # Se não encontrar, cria um novo objeto de yeast
+                new_yeast = RecipeYeast(
+                    recipe_id=recipe.id,
+                    name=yeast_data_item["name"],
+                    manufacturer=yeast_data_item["manufacturer"],
+                    type=yeast_data_item["type"],
+                    form=yeast_data_item["form"],
+                    attenuation_range=yeast_data_item["attenuationRange"],
+                    temperature_range=yeast_data_item["temperatureRange"],
+                    alcohol_tolerance=yeast_data_item["alcoholTolerance"],
+                    flavor_profile=yeast_data_item.get("flavorProfile"),
+                    flocculation=yeast_data_item["flocculation"],
+                    notes=yeast_data_item.get("notes"),
+                    description=yeast_data_item.get("description"),
+                    amount=yeast_data_item.get("amount")
+                )
+                db.session.add(new_yeast)
+
         # Remover fermentables deletados
         sent_fermentable_ids = {fermentable_data.get("id") for fermentable_data in fermentables_data if fermentable_data.get("id")}
         for fermentable_id, fermentable in existing_fermentables.items():
@@ -259,6 +357,12 @@ def create_recipes_bp():
         for hop_id, hop in existing_hops.items():
             if hop_id not in sent_hop_ids:
                 db.session.delete(hop)
+
+        # Remover hops deletados
+        sent_yeast_ids = {yeast_data.get("id") for yeast_data in yeast_data if yeast_data.get("id")}
+        for yeast_id, yeast in existing_yeasts.items():
+            if yeast_id not in sent_yeast_ids:
+                db.session.delete(yeast)
 
         db.session.commit()
         return jsonify(recipe.to_dict()), 200
