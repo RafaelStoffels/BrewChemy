@@ -27,11 +27,19 @@ export default function NewRecipe() {
 
     const [isEditing, setIsEditing] = useState(false);
     const [isView, setIsView] = useState(false);
-    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isFermentableModalOpen, setIsFermentableModalOpen] = useState(false);
+    const [isHopModalOpen, setIsHopModalOpen] = useState(false);
+    const [isYeastModalOpen, setIsYeastModalOpen] = useState(false);
 
     const [fermentableList, setFermentableList] = useState([]);
     const [hopList, setHopList] = useState([]);
     const [yeastList, setYeastList] = useState([]);
+
+    const [isLoading, setIsLoading] = useState(true);
+
+    const [OG, setOG] = useState("");
+    const [fg, setFg] = useState("");
+    const [ABV, setABV] = useState(0);
 
     const [recipe, setRecipe] = useState({
         name: '',
@@ -56,22 +64,18 @@ export default function NewRecipe() {
                 fetchRecipe(id);
             }
         }
-    }, [id, user, navigate]);
+    }, [id, user]);
+
+    useEffect(() => {
+        if (recipe) {
+            calculateOG();
+            calculateABV();
+        }
+    }, [recipe]);
 
     const fetchRecipe = async (recipeID) => {
         const recipeResponse = await fetchRecipeById(recipeID, user.token);
-        setRecipe({
-            name: recipeResponse.name || '',
-            style: recipeResponse.style || '',
-            volumeLiters: recipeResponse.volumeLiters || '',
-            batchTime: recipeResponse.batchTime || '',
-            description: recipeResponse.description || '',
-            creationDate: recipeResponse.creationDate || '',
-            notes: recipeResponse.notes || '',
-            recipeFermentables: recipeResponse.recipeFermentables || [],
-            recipeHops: recipeResponse.recipeHops || [],
-            recipeYeasts: recipeResponse.recipeYeasts || [],
-        })
+        setRecipe({...recipeResponse});
     };
 
     const handleAddFermentableRecipe = (selectedFermentable, quantity) => {
@@ -96,7 +100,7 @@ export default function NewRecipe() {
                     ],
                 }));
 
-                closeModal();
+                closeFermentableModal();
             } else {
                 alert('Selected fermentable not found.');
             }
@@ -127,7 +131,7 @@ export default function NewRecipe() {
                     ],
                 }));
 
-                closeModal();
+                closeHopModal();
             } else {
                 alert('Selected hop not found.');
             }
@@ -158,7 +162,7 @@ export default function NewRecipe() {
                     ],
                 }));
 
-                closeModal();
+                closeYeastModal();
             } else {
                 alert('Selected yeast not found.');
             }
@@ -235,26 +239,70 @@ export default function NewRecipe() {
         setRecipe((prevState) => ({ ...prevState, [name]: value }));
     };
 
+    const calculateOG = () => {
+        let totalGravityPoints = 0;
+    
+        const volumeLiters = 23;
+        const efficiency = 0.75;
+    
+        const volumeGallons = volumeLiters / 3.78541;
+    
+        if (!recipe.recipeFermentables || recipe.recipeFermentables.length === 0) {
+            console.error("recipe.recipeFermentables está vazio ou indefinido");
+            return;
+        }
+    
+        recipe.recipeFermentables.forEach((fermentable) => {
+            const weightKg = fermentable.weightGrams / 1000;
+            const weightLb = weightKg * 2.20462;
+            const potential = fermentable.potentialExtract || 1.036;
+    
+            const gravityPoints = (potential - 1) * 1000;
+    
+            totalGravityPoints += weightLb * gravityPoints * efficiency;
+        });
+    
+        const OG = (totalGravityPoints / volumeGallons) / 1000 + 1;
+    
+        setOG(OG.toFixed(3));
+    };
+    
+    const calculateABV = () => {
+
+        // Estimar o FG (gravidade final) baseado no estilo, pode ser ajustado conforme necessário
+        const FG = 1.010; // Valor padrão para FG (ajustável conforme estilo ou fermento)
+    
+        console.log(OG);
+        console.log(OG - FG);
+
+        // Calcular a ABV
+        const ABV = ((OG - FG) * 131.25).toFixed(2); // Fórmula para ABV
+    
+        setABV(ABV);
+    };
+
     const openFermentableModal = async () => {
         const fermentables = await fetchFermentables(api, user.token);
         setFermentableList(fermentables);
-        setIsModalOpen(true);
+        setIsFermentableModalOpen(true);
     };
 
     const openHopModal = async () => {
         const hops = await fetchHops(api, user.token);
         setHopList(hops);
-        setIsModalOpen(true);
+        setIsHopModalOpen(true);
     };
 
     const openYeastModal = async () => {
         const yeasts = await fetchYeasts(api, user.token);
         setYeastList(yeasts);
-        setIsModalOpen(true);
+        setIsYeastModalOpen(true);
     };
 
-    const closeModal = () => setIsModalOpen(false);
-
+    const closeFermentableModal = () => setIsFermentableModalOpen(false);
+    const closeHopModal = () => setIsHopModalOpen(false);
+    const closeYeastModal = () => setIsYeastModalOpen(false);
+    
     async function handleSubmit(e) {
         e.preventDefault();
 
@@ -388,7 +436,7 @@ export default function NewRecipe() {
                     </div>
 
                     <div className="bottom-right">
-                        OG
+                        OG: <span>{OG}</span>
                         <p></p>
                         FG
                         <p></p>
@@ -396,7 +444,7 @@ export default function NewRecipe() {
                         <p></p>
                         IBU
                         <p></p>
-                        ABV
+                        ABV: <span>{ABV}</span>
                     </div>
                 </div>
                 {!isView && (
@@ -406,22 +454,22 @@ export default function NewRecipe() {
                 )}
             </div>
             <FermentableModal
-                isOpen={isModalOpen}
-                closeModal={closeModal}
+                isOpen={isFermentableModalOpen}
+                closeModal={closeFermentableModal}
                 fermentableList={fermentableList}
                 handleAddFermentableRecipe={handleAddFermentableRecipe}
             />
             <HopModal
-                isOpen={isModalOpen}
-                closeModal={closeModal}
+                isOpen={isHopModalOpen}
+                closeModal={closeHopModal}
                 hopList={hopList}
                 handleAddHopRecipe={handleAddHopRecipe}
             />
             <YeastModal
-            isOpen={isModalOpen}
-            closeModal={closeModal}
-            yeastList={yeastList}
-            handleAddYeastRecipe={handleAddYeastRecipe}
+                isOpen={isYeastModalOpen}
+                closeModal={closeYeastModal}
+                yeastList={yeastList}
+                handleAddYeastRecipe={handleAddYeastRecipe}
             />
         </div>
     );
