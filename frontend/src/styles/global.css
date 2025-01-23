@@ -9,7 +9,7 @@
 
 body{
     font: 400 14px Roboto, sans-serif;
-    background: #f5e3b1;
+    background: #d9c07c;
     -webkit-font-smoothing: antialiased;
 }
 
@@ -74,9 +74,4 @@ form textarea{
 
 .crud-save-button:hover, .logoutButton:hover, .Addbutton:hover {
     filter: brightness(90%);
-}
-
-.logoImg {
-    height: 180px;
-    margin-top: -30px;
 }

@@ -12,7 +12,7 @@ const Header = () => {
     <header>
        <div className="logo">
        </div>
-       <div className="logout">
+       <div className="div-logout">
            <button onClick={logout}><FiPower size={20} color="#E02041" className="logoutButton"/></button>
        </div>
     </header>

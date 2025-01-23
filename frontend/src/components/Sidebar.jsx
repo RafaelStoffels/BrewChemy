@@ -2,13 +2,11 @@ import React from "react";
 import { Link} from 'react-router-dom';
 import "./Sidebar.css";
 
-import logoImg from '../assets/logo.svg';
-
 const Sidebar = () => {
 
   return (
     <div className="sidebar">
-      <img src={logoImg} alt="Brewchemy" className="logoImg" />
+      <object className="Brewchemy-object" type="image/svg+xml" data="/logo.svg"></object>
       <nav className="menu">
         <ul>
           <li><Link to="/Main">Home</Link></li>

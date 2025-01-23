@@ -8,6 +8,10 @@ header {
     text-align: right;
 }
 
+.div-logout {
+    background-color: rgb(173, 83, 83); /* nao funcionando*/
+}
+
 .logoutButton {
     width: 70px;  
     height: 50px;  

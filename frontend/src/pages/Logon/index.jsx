@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { FiLogIn } from 'react-icons/fi';
 
 import './styles.css';
-import logoImg from '../../assets/logo.svg';
 import api from '../../services/api';
 import AuthContext from '../../context/AuthContext';
 
@@ -36,7 +35,7 @@ export default function Logon() {
   return (
     <div className="logon-container">
       <section className="form">
-        <img src={logoImg} alt="Brewchemy" />
+        <object className="Brewchemy-object" type="image/svg+xml" data="/logo.svg"></object>
         <form onSubmit={handleSubmit}>
           <h1>Faça seu login</h1>
           <input
