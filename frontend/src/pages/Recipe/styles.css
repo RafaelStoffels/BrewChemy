@@ -122,3 +122,18 @@
     display: flex;
     gap: 10px;
 }
+  
+.beerImg {
+    width: 150px;
+    height: auto;
+}
+
+.beer-object {
+    fill: #ff5733;
+    width: 200px;
+    height: 200px;
+}
+
+.beer-object path {
+    fill: #ff5733;
+}

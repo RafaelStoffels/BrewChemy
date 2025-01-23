@@ -1,7 +1,8 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import Modal from 'react-modal';
 import { FiTrash2, FiEdit } from 'react-icons/fi';
+import { v4 as uuidv4 } from 'uuid';
 
 import api from '../../services/api';
 import AuthContext from '../../context/AuthContext';
@@ -24,6 +25,7 @@ export default function NewRecipe() {
     const { user } = useContext(AuthContext);
     const { id } = useParams();
     const navigate = useNavigate();
+    const generateId = () => `fermentable-${Date.now()}`;
 
     const [isEditing, setIsEditing] = useState(false);
     const [isView, setIsView] = useState(false);
@@ -35,11 +37,13 @@ export default function NewRecipe() {
     const [hopList, setHopList] = useState([]);
     const [yeastList, setYeastList] = useState([]);
 
-    const [isLoading, setIsLoading] = useState(true);
-
     const [OG, setOG] = useState("");
-    const [fg, setFg] = useState("");
+    const [FG, setFG] = useState("");
+    const [EBC, setEBC] = useState(0);
+    const [IBU, setIBU] = useState(0);
     const [ABV, setABV] = useState(0);
+
+    const [EBCColor, setEBCColor] = useState("");
 
     const [recipe, setRecipe] = useState({
         name: '',
@@ -68,10 +72,50 @@ export default function NewRecipe() {
 
     useEffect(() => {
         if (recipe) {
-            calculateOG();
-            calculateABV();
+            console.log("useEffect Recipe")
+            setFG(1.010.toFixed(3)); // Define FG
+            calculateOG(); // Calcula OG
+            calculateEBC(); // Calcula EBC
+            calculateIBU(); // Calcula IBU
         }
     }, [recipe]);
+    
+    useEffect(() => {
+        if (EBC) {
+            const color = beerColor(EBC); // Atualiza a cor com base no novo EBC
+            console.log("assign " + EBCColor);
+        }
+    }, [EBC]);
+    
+    useEffect(() => {
+        if (OG && FG) {
+            if (OG === "1.000") {
+                setABV(0);
+            } else {
+                const abvValue = ((OG - FG) * 131.25).toFixed(2);
+                setABV(abvValue > 0 ? abvValue : 0);
+            }
+        }
+    }, [OG, FG]);
+    
+    useEffect(() => {
+        console.log("aqui " + EBCColor);
+
+        const svgObject = document.querySelector('.beer-object');
+        
+        if (svgObject && svgObject.contentDocument) {
+            const svgDoc = svgObject.contentDocument;
+            const gradients = svgDoc.querySelectorAll('linearGradient, radialGradient');
+    
+            gradients.forEach(gradient => {
+                const stops = gradient.querySelectorAll('stop');
+        
+                stops.forEach(stop => {
+                    stop.setAttribute('stop-color', EBCColor); // Atualiza a cor com a variável EBCColor
+                });
+            });
+        }
+    }, [EBCColor]);
 
     const fetchRecipe = async (recipeID) => {
         const recipeResponse = await fetchRecipeById(recipeID, user.token);
@@ -94,7 +138,7 @@ export default function NewRecipe() {
                         ...prevRecipe.recipeFermentables,
                         {
                             ...selectedFermentableDetails,
-                            id: undefined,
+                            id: generateId(),
                             weightGrams: parseFloat(quantity),
                         },
                     ],
@@ -125,7 +169,7 @@ export default function NewRecipe() {
                         ...prevRecipe.recipeHops,
                         {
                             ...selectedHopDetails,
-                            id: undefined,
+                            id: generateId(),
                             amount: parseFloat(amount),
                         },
                     ],
@@ -156,7 +200,7 @@ export default function NewRecipe() {
                         ...prevRecipe.recipeYeasts,
                         {
                             ...selectedYeastDetails,
-                            id: undefined,
+                            id: generateId(),
                             amount: parseFloat(amount),
                         },
                     ],
@@ -195,14 +239,23 @@ export default function NewRecipe() {
     const handleDeleteFermentable = (fermentableId) => {
         const confirmDelete = window.confirm('Are you sure you want to delete this fermentable?');
         if (confirmDelete) {
-            const updatedFermentables = recipe.recipeFermentables.filter(
+          setRecipe((prevRecipe) => {
+
+            if (!prevRecipe || !prevRecipe.recipeFermentables) {
+              console.error("prevRecipe ou recipeFermentables estão indefinidos!");
+              return prevRecipe || {};
+            }
+      
+            // Atualiza o estado com os fermentables filtrados
+            const updatedRecipe = {
+              ...prevRecipe,
+              recipeFermentables: prevRecipe.recipeFermentables.filter(
                 (fermentable) => fermentable.id !== fermentableId
-            );
+              ),
+            };
         
-            setRecipe((prevRecipe) => ({
-                ...prevRecipe,
-                recipeFermentables: updatedFermentables,
-            }));
+            return updatedRecipe;
+          });
         }
     };
 
@@ -244,14 +297,15 @@ export default function NewRecipe() {
     
         const volumeLiters = 23;
         const efficiency = 0.75;
-    
         const volumeGallons = volumeLiters / 3.78541;
     
         if (!recipe.recipeFermentables || recipe.recipeFermentables.length === 0) {
             console.error("recipe.recipeFermentables está vazio ou indefinido");
+            setOG(1.000.toFixed(3))
+            setABV(0)
             return;
         }
-    
+
         recipe.recipeFermentables.forEach((fermentable) => {
             const weightKg = fermentable.weightGrams / 1000;
             const weightLb = weightKg * 2.20462;
@@ -266,20 +320,112 @@ export default function NewRecipe() {
     
         setOG(OG.toFixed(3));
     };
-    
-    const calculateABV = () => {
 
-        // Estimar o FG (gravidade final) baseado no estilo, pode ser ajustado conforme necessário
-        const FG = 1.010; // Valor padrão para FG (ajustável conforme estilo ou fermento)
-    
-        console.log(OG);
-        console.log(OG - FG);
+    const calculateEBC = () => {
 
-        // Calcular a ABV
-        const ABV = ((OG - FG) * 131.25).toFixed(2); // Fórmula para ABV
+        const volumeLiters = 23;
+
+        if (!volumeLiters || volumeLiters <= 0) {
+            throw new Error("Volume deve ser maior que 0.");
+        }
+
+        let totalEBC = 0;
+
+        recipe.recipeFermentables.forEach((fermentable) => {
+            const weightKg = fermentable.weightGrams / 1000;
+            const ebc = fermentable.ebc || 0;
+
+            totalEBC += weightKg * ebc;
+        });
     
-        setABV(ABV);
+        const EBCValue = (totalEBC / volumeLiters) * 4.23;
+
+        setEBC(EBCValue.toFixed(1));
     };
+
+    const beerColor = () => {
+
+        console.log("EBC beerColor: " + EBC);   
+
+        if (EBC >= 0 && EBC <= 2) {
+            setEBCColor("#FFE699"); // Muito clara, quase transparente
+        } else if (EBC <= 4) {
+            setEBCColor("#FFE37A"); // Amarelo palha claro
+        } else if (EBC <= 6) {
+            setEBCColor("#FFD878"); // Amarelo dourado
+        } else if (EBC <= 8) {
+            setEBCColor("#FFCA5A"); // Dourado claro
+        } else if (EBC <= 10) {
+            setEBCColor("#FFBF42"); // Dourado padrão
+        } else if (EBC <= 12) {
+            setEBCColor("#FFB742"); // Dourado intenso
+        } else if (EBC <= 14) {
+            setEBCColor("#FFA846"); // Laranja claro
+        } else if (EBC <= 17) {
+            setEBCColor("#F49C44"); // Laranja médio
+        } else if (EBC <= 20) {
+            setEBCColor("#E98F36"); // Âmbar claro
+        } else if (EBC <= 23) {
+            setEBCColor("#D77A32"); // Âmbar médio
+        } else if (EBC <= 26) {
+            setEBCColor("#BF5B23"); // Âmbar escuro
+        } else if (EBC <= 29) {
+            setEBCColor("#A64F1E"); // Marrom claro
+        } else if (EBC <= 32) {
+            setEBCColor("#8E3C1A"); // Marrom médio
+        } else if (EBC <= 35) {
+            setEBCColor("#6F2F1A"); // Marrom avermelhado
+        } else if (EBC <= 40) {
+            setEBCColor("#5D2614"); // Marrom escuro
+        } else if (EBC <= 45) {
+            setEBCColor("#4E1F0D"); // Marrom intenso
+        } else if (EBC <= 50) {
+            setEBCColor("#3B1E0E"); // Preto com reflexos marrons
+        } else if (EBC <= 55) {
+            setEBCColor("#2E160B"); // Preto com bordas marrons
+        } else if (EBC <= 60) {
+            setEBCColor("#26150C"); // Preto opaco com reflexos suaves
+        } else if (EBC <= 70) {
+            setEBCColor("#1C1009"); // Preto profundo com bordas marrons
+        } else if (EBC <= 80) {
+            setEBCColor("#16100C"); // Preto intenso e opaco
+        } else if (EBC <= 90) {
+            setEBCColor("#0F0D08"); // Preto muito profundo
+        } else if (EBC <= 100) {
+            setEBCColor("#080707"); // Preto absoluto
+        } else {
+            setEBCColor("#000000"); // Preto total, sem reflexos
+        }
+
+        console.log("EBCColor: " + EBCColor); 
+    };
+
+    const calculateIBU = () => {
+        const volumeLiters = 23;
+        
+        if (!recipe || !recipe.recipeHops || recipe.recipeHops.length === 0 || volumeLiters <= 0 || OG <= 0) {
+            console.error("Parâmetros inválidos para o cálculo do IBU.");
+        }
+      
+        let totalIBU = 0;
+
+        recipe.recipeHops.forEach((hop) => {
+          const { amount, alphaAcidContent, boilTime } = hop;
+      
+          if (!amount || !alphaAcidContent) {
+            console.error("Informações de lúpulo inválidas.");
+          }
+      
+          const utilization = (1.65 * Math.pow(0.000125, OG - 1)) *
+                              ((1 - Math.exp(-0.04 * boilTime)) / 4.15);
+
+          const ibu = ((utilization * (alphaAcidContent / 100) * amount * 1000) / volumeLiters);
+      
+          totalIBU += ibu;
+        });
+        
+        setIBU(totalIBU.toFixed(2));
+      };
 
     const openFermentableModal = async () => {
         const fermentables = await fetchFermentables(api, user.token);
@@ -438,13 +584,16 @@ export default function NewRecipe() {
                     <div className="bottom-right">
                         OG: <span>{OG}</span>
                         <p></p>
-                        FG
+                        FG: <span>{FG}</span>
                         <p></p>
-                        EBC
+                        EBC: <span>{EBC}</span>
                         <p></p>
-                        IBU
+                        IBU: <span>{IBU}</span>
                         <p></p>
                         ABV: <span>{ABV}</span>
+                    </div>
+                    <div className="image-container" style={{ display: 'inline-block' }}>
+                        <object className="beer-object" type="image/svg+xml" data="/beer.svg"></object>
                     </div>
                 </div>
                 {!isView && (

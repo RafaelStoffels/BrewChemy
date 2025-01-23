@@ -71,7 +71,6 @@ class RecipeHop(db.Model):
     # Table Definition
     id = db.Column(db.Integer, primary_key=True)
     recipe_id = db.Column(db.Integer, db.ForeignKey('recipes.id'), nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'), nullable=False)
     name = db.Column(db.String(100), nullable=False)
     alpha_acid_content = db.Column(db.Numeric(5, 2))
     beta_acid_content = db.Column(db.Numeric(5, 2))
@@ -79,6 +78,7 @@ class RecipeHop(db.Model):
     country_of_origin = db.Column(db.String(50))
     description = db.Column(db.Text)
     amount = db.Column(db.Numeric)
+    boil_time = db.Column(db.Integer)
 
     def to_dict(self):
         return {
@@ -90,7 +90,8 @@ class RecipeHop(db.Model):
             "useType": self.use_type,
             "countryOfOrigin": self.country_of_origin,
             "description": self.description,
-            "amount": float(self.amount) if self.amount else None
+            "amount": float(self.amount) if self.amount else None,
+            "boilTime": self.boil_time
         }
 
 class RecipeYeast(db.Model):
@@ -120,10 +121,10 @@ class RecipeYeast(db.Model):
             "manufacturer": self.manufacturer,
             "type": self.type,
             "form": self.form,
-            "attenuation_range": self.attenuation_range,
-            "temperature_range": self.temperature_range,
-            "alcohol_tolerance": self.alcohol_tolerance,
-            "flavor_profile": self.flavor_profile,
+            "attenuationRange": self.attenuation_range,
+            "temperatureRange": self.temperature_range,
+            "alcoholTolerance": self.alcohol_tolerance,
+            "flavorProfile": self.flavor_profile,
             "flocculation": self.flocculation,
             "notes": self.notes,
             "description": self.description,
@@ -196,7 +197,8 @@ def create_recipes_bp():
                 use_type=hop_data.get("useType"),
                 country_of_origin=hop_data.get("countryOfOrigin"),
                 description=hop_data.get("description"),
-                amount=hop_data.get("amount")
+                amount=hop_data.get("amount"),
+                boil_time=hop_data.get("boilTime")
             )
             db.session.add(new_hop)
 
@@ -291,17 +293,18 @@ def create_recipes_bp():
                 hop.country_of_origin = hop_data.get("countryOfOrigin", hop.country_of_origin)
                 hop.description = hop_data.get("description", hop.description)
                 hop.amount = hop_data.get("amount", hop.amount)
+                hop.boil_time = hop_data.get("boilTime", hop.boil_time)
             else:
                 new_hop = RecipeHop(
                     recipe_id=recipe.id,
-                    user_id=current_user_id,
                     name=hop_data["name"],
                     alpha_acid_content=hop_data.get("alphaAcidContent"),
                     beta_acid_content=hop_data.get("betaAcidContent"),
                     use_type=hop_data.get("useType"),
                     country_of_origin=hop_data.get("countryOfOrigin"),
                     description=hop_data.get("description"),
-                    amount=hop_data.get("amount")
+                    amount=hop_data.get("amount"),
+                    boil_time=hop_data.get("boilTime")
                 )
                 db.session.add(new_hop)
 
