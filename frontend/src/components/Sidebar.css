@@ -3,11 +3,12 @@
   top: 0;
   left: 0;
   height: 100%;
-  width: 120px;
+  width: 170px;
   background-color: #45361e;
   color: #16505e;
   overflow-x: hidden;
   z-index: 1000;
+  box-shadow: 0 0px 150px rgba(0, 0, 0, 1);
 }
 
 .sidebar .menu ul {
@@ -18,7 +19,6 @@
   display: flex;  
   flex-direction: column; 
   grid-gap: 10px;
-  
 }
 
 .sidebar .menu ul li {
@@ -32,9 +32,25 @@
   color: #cb8b00;
   font-size: 16px;
   display: block;
+  transition: color 0.3s ease, background-color 0.3s ease;
 }
 
 .sidebar .menu ul li a:hover {
   color: #ffc400;
   border-radius: 5px;
+  transform: scale(1.05); /* Efeito de leve aumento */
+}
+
+.menu hr {
+  border: none; /* Remove a borda padrão */
+  height: 2px; /* Define a espessura */
+  background: linear-gradient(to right, #69480b, #493003); /* Gradiente azul-verde */
+  margin: 10px 0; /* Espaçamento acima e abaixo */
+  border-radius: 5px; /* Arredondar as extremidades */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 1);
+}
+
+.sidebar .logoImg {
+  height: 200px;
+  width: 200px;
 }

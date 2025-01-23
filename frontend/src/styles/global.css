@@ -55,21 +55,6 @@ form textarea{
     transition: filter 0.2s;
 }
 
-.logoutButton {
-    width: 70px;  
-    height: 50px;  
-    font-size: 20px; 
-    padding: 10px 20px; 
-    border-radius: 8px; 
-    color: white; 
-    border: none; 
-    display: inline-block;
-    text-align: center; 
-    text-decoration: none; 
-    font-weight: 700; 
-    transition: filter 0.2s;
-}
-
 .Addbutton {
     width: 300px;
     height: 60px;

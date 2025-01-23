@@ -1,11 +1,9 @@
 .recipe-container {
+    margin-left: 250px;
     width: 100%;
-    max-width: 1000px;
-    height: 60vh;
-    margin: 0 auto;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    max-width: 1180px;
+    padding: 0 30px;
+    margin: 30px auto;
 }
 
 .header-crud {
@@ -65,7 +63,7 @@
 .top {
     width: 100%; 
     height: 50%; 
-    background-color: #a5a749; 
+    background-color: #d9b951; 
     padding: 20px;
     border: 1px solid #ccc;
 }
@@ -84,6 +82,7 @@
 }
 
 .bottom-container {
+    margin-top: 5px;
     display: flex;
     width: 100%;
     flex: 1; 
@@ -95,13 +94,15 @@
 }
 
 .bottom-left {
-    background-color: #eed170; 
+    background-color: #d9b951; 
+    position: relative;
 }
 
 .bottom-left li {
     display: flex;
     align-items: center;
     gap: 10px; /* Espaçamento entre os botões */
+    line-height: 1.8;
 }
 
 .bottom-left ul li button {
@@ -136,4 +137,81 @@
 
 .beer-object path {
     fill: #ff5733;
+}
+
+.malt-object, .yeast-object, .hop-object{
+    width: 20px;
+    height: 20px;
+}
+
+.modalAddButtonFermentable {
+    width: 140px;
+    height: 40px;
+    background: #903615;
+    border: 0;
+    border-radius: 8px;
+    color: #FFF;
+    font-weight: 700;
+    margin-top: 2px;
+    display: inline-block;
+    text-align: center;
+    text-decoration: none;
+    font-size: 15px;
+    transition: filter 0.2s;
+    cursor: pointer;
+}
+
+.modalAddButtonHop {
+    width: 140px;
+    height: 40px;
+    background: #903615;
+    border: 0;
+    border-radius: 8px;
+    color: #FFF;
+    font-weight: 700;
+    margin-top: 2px;
+    display: inline-block;
+    text-align: center;
+    text-decoration: none;
+    font-size: 15px;
+    transition: filter 0.2s;
+    cursor: pointer;
+}
+
+.modalAddButtonYeast {
+    width: 140px;
+    height: 40px;
+    background: #903615;
+    border: 0;
+    border-radius: 8px;
+    color: #FFF;
+    font-weight: 700;
+    margin-top: 2px;
+    display: inline-block;
+    text-align: center;
+    text-decoration: none;
+    font-size: 15px;
+    transition: filter 0.2s;
+    cursor: pointer;
+}
+
+.modalAddButtonFermentable:hover, .modalAddButtonHop:hover, .modalAddButtonYeast:hover {
+    filter: brightness(90%);
+}
+
+.bottom-left ul li .ingredients-list-button-group {
+    position: absolute;
+    left: 390px;
+    display: flex;
+    gap: 8px;
+}
+
+.bottom-left ul li ingredients-list-button-group button {
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+}
+
+.bottom-left ul li .ingredients-list-button-group button:hover {
+    opacity: 0.8;
 }

@@ -538,44 +538,53 @@ export default function NewRecipe() {
                     </form>
                 </div>
                 <div className="buttons-container">
-                    <button onClick={openFermentableModal} className="modalAddFermentable">Add Fermentable</button>
-                    <button onClick={openHopModal} className="modalAddHop">Add Hop</button>
-                    <button onClick={openYeastModal} className="modalAddYeast">Add Yeast</button>
+                    <button onClick={openFermentableModal} className="modalAddButtonFermentable">Add Fermentable</button>
+                    <button onClick={openHopModal} className="modalAddButtonHop">Add Hop</button>
+                    <button onClick={openYeastModal} className="modalAddButtonYeast">Add Yeast</button>
                 </div>
                 <div className="bottom-container">
                     <div className="bottom-left">
                         <ul>
                             {recipe.recipeFermentables.map((fermentable) => (
                                 <li key={fermentable.id}>
-                                    <strong>{fermentable.name}</strong> - {fermentable.weightGrams}g
-                                    <button onClick={() => handleUpdateFermentable(fermentable.id)} type="button">
-                                      <FiEdit size={20} color="#a8a8b3" />
-                                    </button>
-                                    <button onClick={() => handleDeleteFermentable(fermentable.id)} type="button">
-                                      <FiTrash2 size={20} color="#a8a8b3" />
-                                    </button>
+                                    <object className="malt-object" type="image/svg+xml" data="/malt.svg"></object>
+                                    {fermentable.weightGrams}g - <strong>{fermentable.name}</strong>
+                                    <div className="ingredients-list-button-group">
+                                        <button onClick={() => handleUpdateFermentable(fermentable.id)} type="button">
+                                          <FiEdit size={20} color="#a8a8b3" />
+                                        </button>
+                                        <button onClick={() => handleDeleteFermentable(fermentable.id)} type="button">
+                                          <FiTrash2 size={20} color="#a8a8b3" />
+                                        </button>
+                                    </div>
                                 </li>
                             ))}
                             {recipe.recipeHops.map((hop) => (
                                 <li key={hop.id}>
-                                    <strong>{hop.name}</strong> - {hop.amount}g
-                                    <button onClick={() => handleUpdateHop(hop.id)} type="button">
-                                      <FiEdit size={20} color="#a8a8b3" />
-                                    </button>
-                                    <button onClick={() => handleDeleteHop(hop.id)} type="button">
-                                      <FiTrash2 size={20} color="#a8a8b3" />
-                                    </button>
+                                    <object className="hop-object" type="image/svg+xml" data="/hop.svg"></object>
+                                    {hop.amount}g - <strong>{hop.name}</strong>
+                                    <div className="ingredients-list-button-group">
+                                        <button onClick={() => handleUpdateHop(hop.id)} type="button">
+                                          <FiEdit size={20} color="#a8a8b3" />
+                                        </button>
+                                        <button onClick={() => handleDeleteHop(hop.id)} type="button">
+                                          <FiTrash2 size={20} color="#a8a8b3" />
+                                        </button>
+                                    </div>
                                 </li>
                             ))}
                             {recipe.recipeYeasts.map((yeast) => (
                                 <li key={yeast.id}>
-                                    <strong>{yeast.name}</strong> - {yeast.amount}g
-                                    <button onClick={() => handleUpdateYeast(yeast.id)} type="button">
-                                      <FiEdit size={20} color="#a8a8b3" />
-                                    </button>
-                                    <button onClick={() => handleDeleteYeast(yeast.id)} type="button">
-                                      <FiTrash2 size={20} color="#a8a8b3" />
-                                    </button>
+                                    <object className="yeast-object" type="image/svg+xml" data="/yeast.svg"></object>
+                                    {yeast.amount}g - <strong>{yeast.name}</strong>
+                                    <div className="ingredients-list-button-group">
+                                        <button onClick={() => handleUpdateYeast(yeast.id)} type="button">
+                                          <FiEdit size={20} color="#a8a8b3" />
+                                        </button>
+                                        <button onClick={() => handleDeleteYeast(yeast.id)} type="button">
+                                          <FiTrash2 size={20} color="#a8a8b3" />
+                                        </button>
+                                    </div>
                                 </li>
                             ))}
                         </ul>
