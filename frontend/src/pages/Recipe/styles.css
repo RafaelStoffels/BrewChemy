@@ -63,9 +63,9 @@
 .top {
     width: 100%; 
     height: 50%; 
-    background-color: #d9b951; 
+    background-color: #aa8e69; 
     padding: 20px;
-    border: 1px solid #ccc;
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.4);
 }
 
 .form-fields {
@@ -94,8 +94,10 @@
 }
 
 .bottom-left {
-    background-color: #d9b951; 
+    background-color: #aa8452; 
     position: relative;
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.4);
+    padding-top: 5px;
 }
 
 .bottom-left li {
@@ -116,12 +118,25 @@
 }
 
 .bottom-right {
-    background-color: #c29b31; 
+    margin-left: 5px;
+    padding-left: 5px;
+    padding-top: 5px;
+    background-color: #987233; 
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.4);
+}
+
+.bottom-right-beer {
+    margin-left: 5px;
+    padding-left: 5px;
+    padding-top: 5px;
+    background-color: #987233; 
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.4);
 }
 
 .buttons-container {
     display: flex;
     gap: 10px;
+    margin-top: 5px;
 }
   
 .beerImg {

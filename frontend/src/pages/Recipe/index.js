@@ -6,9 +6,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 import api from '../../services/api';
 import AuthContext from '../../context/AuthContext';
-import { FermentableModal } from './modals';
-import { HopModal } from './modals';
-import { YeastModal } from './modals';
+import { AddFermentableModal, AddHopModal, AddYeastModal, UpdateFermentableModal } from './modals';
 import { fetchFermentables } from '../../services/Fermentables';
 import { fetchHops } from '../../services/Hops';
 import { fetchYeasts } from '../../services/Yeasts';
@@ -18,6 +16,8 @@ import './styles.css';
 import '../Recipe/styles.css';
 import Sidebar from '../../components/Sidebar';
 import Header from '../../components/Header';
+import { calculateOG, calculateIBU, calculateEBC } from '../../components/Recipe/Calculation';
+import { getBeerColor } from '../../components/Recipe/GetBeerColor';
 
 Modal.setAppElement('#root');
 
@@ -29,14 +29,30 @@ export default function NewRecipe() {
 
     const [isEditing, setIsEditing] = useState(false);
     const [isView, setIsView] = useState(false);
+    
+    /* Modals */
     const [isFermentableModalOpen, setIsFermentableModalOpen] = useState(false);
     const [isHopModalOpen, setIsHopModalOpen] = useState(false);
     const [isYeastModalOpen, setIsYeastModalOpen] = useState(false);
+    const [isUpdateFermentableModalOpen, setIsUpdateFermentableModalOpen] = useState(false);
+    const [isUpdateHopModalOpen, setIsUpdateHopModalOpen] = useState(false);
+    const [isUpdateYeastModalOpen, setIsUpdateYeastModalOpen] = useState(false);
 
+    const closeFermentableModal = () => setIsFermentableModalOpen(false);
+    const closeHopModal = () => setIsHopModalOpen(false);
+    const closeYeastModal = () => setIsYeastModalOpen(false);
+    const closeUpdateFermentableModal = () => setIsUpdateFermentableModalOpen(false);
+    const closeUpdateHopModal = () => setIsUpdateHopModalOpen(false);
+    const closeUpdateYeastModal = () => setIsUpdateYeastModalOpen(false);
+
+    const [selectedFermentable, setSelectedFermentable] = useState(null);
+
+    /* Lists */
     const [fermentableList, setFermentableList] = useState([]);
     const [hopList, setHopList] = useState([]);
     const [yeastList, setYeastList] = useState([]);
 
+    /* Dinamic Variables */
     const [OG, setOG] = useState("");
     const [FG, setFG] = useState("");
     const [EBC, setEBC] = useState(0);
@@ -73,16 +89,29 @@ export default function NewRecipe() {
     useEffect(() => {
         if (recipe) {
             console.log("useEffect Recipe")
-            setFG(1.010.toFixed(3)); // Define FG
-            calculateOG(); // Calcula OG
-            calculateEBC(); // Calcula EBC
-            calculateIBU(); // Calcula IBU
+
+            setFG(1.010.toFixed(3));
+
+            const OGResult = calculateOG(recipe);
+            setOG(OGResult);
+
+            if (recipe.recipeFermentables.length === 0) {
+                setABV(0);
+            }
+
+            const EBCResult = calculateEBC(recipe);
+            console.log("EBCResult: " + EBCResult);
+            setEBC(EBCResult);
+
+            const IBUresult = calculateIBU(recipe, OGResult);
+            setIBU(IBUresult);
         }
     }, [recipe]);
     
     useEffect(() => {
         if (EBC) {
-            const color = beerColor(EBC); // Atualiza a cor com base no novo EBC
+            const color = getBeerColor(EBC);
+            setEBCColor(color);
             console.log("assign " + EBCColor);
         }
     }, [EBC]);
@@ -120,6 +149,29 @@ export default function NewRecipe() {
     const fetchRecipe = async (recipeID) => {
         const recipeResponse = await fetchRecipeById(recipeID, user.token);
         setRecipe({...recipeResponse});
+    };
+
+    const openFermentableModal = async () => {
+        const fermentables = await fetchFermentables(api, user.token);
+        setFermentableList(fermentables);
+        setIsFermentableModalOpen(true);
+    };
+
+    const openHopModal = async () => {
+        const hops = await fetchHops(api, user.token);
+        setHopList(hops);
+        setIsHopModalOpen(true);
+    };
+
+    const openYeastModal = async () => {
+        const yeasts = await fetchYeasts(api, user.token);
+        setYeastList(yeasts);
+        setIsYeastModalOpen(true);
+    };
+
+    const handleUpdateFermentable = (fermentable) => {
+        setSelectedFermentable(fermentable); // Define o fermentável selecionado
+        setIsUpdateFermentableModalOpen(true); // Abre a modal
     };
 
     const handleAddFermentableRecipe = (selectedFermentable, quantity) => {
@@ -215,11 +267,14 @@ export default function NewRecipe() {
         }
     };
 
-    const handleUpdateFermentable = (fermentableID) => {
-        const updatedFermentables = recipe.recipeFermentables.filter(
-            (fermentable) => fermentable.id !== fermentableID
-        );
-        /* abrir o novo modal */
+    const handleUpdateFermentableRecipe = (updatedFermentable) => {
+
+        setRecipe((prevRecipe) => ({
+            ...prevRecipe,
+            recipeFermentables: prevRecipe.recipeFermentables.map((fermentable) =>
+                fermentable.id === updatedFermentable.id ? updatedFermentable : fermentable
+            ),
+        }));
     };
 
     const handleUpdateHop = (hopID) => {
@@ -292,163 +347,6 @@ export default function NewRecipe() {
         setRecipe((prevState) => ({ ...prevState, [name]: value }));
     };
 
-    const calculateOG = () => {
-        let totalGravityPoints = 0;
-    
-        const volumeLiters = 23;
-        const efficiency = 0.75;
-        const volumeGallons = volumeLiters / 3.78541;
-    
-        if (!recipe.recipeFermentables || recipe.recipeFermentables.length === 0) {
-            console.error("recipe.recipeFermentables está vazio ou indefinido");
-            setOG(1.000.toFixed(3))
-            setABV(0)
-            return;
-        }
-
-        recipe.recipeFermentables.forEach((fermentable) => {
-            const weightKg = fermentable.weightGrams / 1000;
-            const weightLb = weightKg * 2.20462;
-            const potential = fermentable.potentialExtract || 1.036;
-    
-            const gravityPoints = (potential - 1) * 1000;
-    
-            totalGravityPoints += weightLb * gravityPoints * efficiency;
-        });
-    
-        const OG = (totalGravityPoints / volumeGallons) / 1000 + 1;
-    
-        setOG(OG.toFixed(3));
-    };
-
-    const calculateEBC = () => {
-
-        const volumeLiters = 23;
-
-        if (!volumeLiters || volumeLiters <= 0) {
-            throw new Error("Volume deve ser maior que 0.");
-        }
-
-        let totalEBC = 0;
-
-        recipe.recipeFermentables.forEach((fermentable) => {
-            const weightKg = fermentable.weightGrams / 1000;
-            const ebc = fermentable.ebc || 0;
-
-            totalEBC += weightKg * ebc;
-        });
-    
-        const EBCValue = (totalEBC / volumeLiters) * 4.23;
-
-        setEBC(EBCValue.toFixed(1));
-    };
-
-    const beerColor = () => {
-
-        console.log("EBC beerColor: " + EBC);   
-
-        if (EBC >= 0 && EBC <= 2) {
-            setEBCColor("#FFE699"); // Muito clara, quase transparente
-        } else if (EBC <= 4) {
-            setEBCColor("#FFE37A"); // Amarelo palha claro
-        } else if (EBC <= 6) {
-            setEBCColor("#FFD878"); // Amarelo dourado
-        } else if (EBC <= 8) {
-            setEBCColor("#FFCA5A"); // Dourado claro
-        } else if (EBC <= 10) {
-            setEBCColor("#FFBF42"); // Dourado padrão
-        } else if (EBC <= 12) {
-            setEBCColor("#FFB742"); // Dourado intenso
-        } else if (EBC <= 14) {
-            setEBCColor("#FFA846"); // Laranja claro
-        } else if (EBC <= 17) {
-            setEBCColor("#F49C44"); // Laranja médio
-        } else if (EBC <= 20) {
-            setEBCColor("#E98F36"); // Âmbar claro
-        } else if (EBC <= 23) {
-            setEBCColor("#D77A32"); // Âmbar médio
-        } else if (EBC <= 26) {
-            setEBCColor("#BF5B23"); // Âmbar escuro
-        } else if (EBC <= 29) {
-            setEBCColor("#A64F1E"); // Marrom claro
-        } else if (EBC <= 32) {
-            setEBCColor("#8E3C1A"); // Marrom médio
-        } else if (EBC <= 35) {
-            setEBCColor("#6F2F1A"); // Marrom avermelhado
-        } else if (EBC <= 40) {
-            setEBCColor("#5D2614"); // Marrom escuro
-        } else if (EBC <= 45) {
-            setEBCColor("#4E1F0D"); // Marrom intenso
-        } else if (EBC <= 50) {
-            setEBCColor("#3B1E0E"); // Preto com reflexos marrons
-        } else if (EBC <= 55) {
-            setEBCColor("#2E160B"); // Preto com bordas marrons
-        } else if (EBC <= 60) {
-            setEBCColor("#26150C"); // Preto opaco com reflexos suaves
-        } else if (EBC <= 70) {
-            setEBCColor("#1C1009"); // Preto profundo com bordas marrons
-        } else if (EBC <= 80) {
-            setEBCColor("#16100C"); // Preto intenso e opaco
-        } else if (EBC <= 90) {
-            setEBCColor("#0F0D08"); // Preto muito profundo
-        } else if (EBC <= 100) {
-            setEBCColor("#080707"); // Preto absoluto
-        } else {
-            setEBCColor("#000000"); // Preto total, sem reflexos
-        }
-
-        console.log("EBCColor: " + EBCColor); 
-    };
-
-    const calculateIBU = () => {
-        const volumeLiters = 23;
-        
-        if (!recipe || !recipe.recipeHops || recipe.recipeHops.length === 0 || volumeLiters <= 0 || OG <= 0) {
-            console.error("Parâmetros inválidos para o cálculo do IBU.");
-        }
-      
-        let totalIBU = 0;
-
-        recipe.recipeHops.forEach((hop) => {
-          const { amount, alphaAcidContent, boilTime } = hop;
-      
-          if (!amount || !alphaAcidContent) {
-            console.error("Informações de lúpulo inválidas.");
-          }
-      
-          const utilization = (1.65 * Math.pow(0.000125, OG - 1)) *
-                              ((1 - Math.exp(-0.04 * boilTime)) / 4.15);
-
-          const ibu = ((utilization * (alphaAcidContent / 100) * amount * 1000) / volumeLiters);
-      
-          totalIBU += ibu;
-        });
-        
-        setIBU(totalIBU.toFixed(2));
-      };
-
-    const openFermentableModal = async () => {
-        const fermentables = await fetchFermentables(api, user.token);
-        setFermentableList(fermentables);
-        setIsFermentableModalOpen(true);
-    };
-
-    const openHopModal = async () => {
-        const hops = await fetchHops(api, user.token);
-        setHopList(hops);
-        setIsHopModalOpen(true);
-    };
-
-    const openYeastModal = async () => {
-        const yeasts = await fetchYeasts(api, user.token);
-        setYeastList(yeasts);
-        setIsYeastModalOpen(true);
-    };
-
-    const closeFermentableModal = () => setIsFermentableModalOpen(false);
-    const closeHopModal = () => setIsHopModalOpen(false);
-    const closeYeastModal = () => setIsYeastModalOpen(false);
-    
     async function handleSubmit(e) {
         e.preventDefault();
 
@@ -490,7 +388,6 @@ export default function NewRecipe() {
             <div className='content'>
 
                 <Sidebar />
-
                 <Header />
 
                 <section>
@@ -503,37 +400,55 @@ export default function NewRecipe() {
 
                 <div className="top">
                     <form onSubmit={handleSubmit}>
-                        <div className="form-fields">
-                            <input
-                                name="name"
-                                placeholder="Recipe Name"
-                                value={recipe.name}
-                                onChange={handleChange}
-                                disabled={isView}
-                            />
-                            <input
-                                name="style"
-                                placeholder="Style"
-                                value={recipe.style}
-                                onChange={handleChange}
-                                disabled={isView}
-                            />
-                            <input
-                                name="volumeLiters"
-                                placeholder="Volume (Liters)"
-                                type="number"
-                                value={recipe.volumeLiters}
-                                onChange={handleChange}
-                                disabled={isView}
-                            />
-                            <input
-                                name="batchTime"
-                                placeholder="Batch Time"
-                                type="number"
-                                value={recipe.batchTime}
-                                onChange={handleChange}
-                                disabled={isView}
-                            />
+                        <div className="inputs-row">
+                            <div className="input-field">
+                                <label htmlFor="name">Recipe Name</label>
+                                <input
+                                    name="name"
+                                    placeholder="Recipe Name"
+                                    value={recipe.name}
+                                    onChange={handleChange}
+                                    disabled={isView}
+                                    style={{ width: '520px' }}
+                                />
+                            </div>
+                            <div className="input-field">
+                                <label htmlFor="name">Type</label>
+                                <input
+                                    name="style"
+                                    placeholder="Style"
+                                    value={recipe.style}
+                                    onChange={handleChange}
+                                    disabled={isView}
+                                    style={{ width: '400px' }}
+                                />
+                            </div>
+                            <div className="input-field">
+                                <label htmlFor="name">Volume</label>
+                                <input
+                                    name="volumeLiters"
+                                    placeholder="Volume (Liters)"
+                                    type="number"
+                                    value={recipe.volumeLiters}
+                                    onChange={handleChange}
+                                    disabled={isView}
+                                    style={{ width: '120px' }}
+                                />
+                            </div>
+                        </div>
+                        <div className="inputs-row">
+                            <div className="input-field">
+                                <label htmlFor="name">Batch Time</label>
+                                <input
+                                    name="batchTime"
+                                    placeholder="Batch Time"
+                                    type="number"
+                                    value={recipe.batchTime}
+                                    onChange={handleChange}
+                                    disabled={isView}
+                                    style={{ width: '130px' }}
+                                />
+                            </div>
                         </div>
                     </form>
                 </div>
@@ -550,7 +465,7 @@ export default function NewRecipe() {
                                     <object className="malt-object" type="image/svg+xml" data="/malt.svg"></object>
                                     {fermentable.weightGrams}g - <strong>{fermentable.name}</strong>
                                     <div className="ingredients-list-button-group">
-                                        <button onClick={() => handleUpdateFermentable(fermentable.id)} type="button">
+                                        <button onClick={() => handleUpdateFermentable(fermentable)} type="button">
                                           <FiEdit size={20} color="#a8a8b3" />
                                         </button>
                                         <button onClick={() => handleDeleteFermentable(fermentable.id)} type="button">
@@ -601,7 +516,7 @@ export default function NewRecipe() {
                         <p></p>
                         ABV: <span>{ABV}</span>
                     </div>
-                    <div className="image-container" style={{ display: 'inline-block' }}>
+                    <div className="bottom-right-beer">
                         <object className="beer-object" type="image/svg+xml" data="/beer.svg"></object>
                     </div>
                 </div>
@@ -611,23 +526,29 @@ export default function NewRecipe() {
                     </button>
                 )}
             </div>
-            <FermentableModal
+            <AddFermentableModal
                 isOpen={isFermentableModalOpen}
                 closeModal={closeFermentableModal}
                 fermentableList={fermentableList}
                 handleAddFermentableRecipe={handleAddFermentableRecipe}
             />
-            <HopModal
+            <AddHopModal
                 isOpen={isHopModalOpen}
                 closeModal={closeHopModal}
                 hopList={hopList}
                 handleAddHopRecipe={handleAddHopRecipe}
             />
-            <YeastModal
+            <AddYeastModal
                 isOpen={isYeastModalOpen}
                 closeModal={closeYeastModal}
                 yeastList={yeastList}
                 handleAddYeastRecipe={handleAddYeastRecipe}
+            />
+            <UpdateFermentableModal
+                isOpen={isUpdateFermentableModalOpen}
+                closeModal={closeUpdateFermentableModal}
+                selectedFermentable={selectedFermentable}
+                handleUpdateFermentableRecipe={handleUpdateFermentableRecipe}
             />
         </div>
     );
