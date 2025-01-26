@@ -15,6 +15,17 @@
     margin-right: 30px;
 }
 
+.logon-container section.form form input,
+.logon-container section.form form textarea,
+.logon-container section.form form select {
+    margin-bottom: 5px; /* Espaçamento entre os campos */
+    width: 100%; /* Garante que eles ocupem a largura total */
+    height: 50px; /* Ajuste conforme necessário */
+    padding: 0 16px; /* Adiciona espaço interno */
+    border-radius: 8px;
+    font-size: 16px;
+}
+
 .logon-container section.form form {
     margin-top: 50px;
 }

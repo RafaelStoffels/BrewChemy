@@ -45,7 +45,7 @@
     max-width: 450px;
 }
 
-.recipe-container .content form input,
+.recipe-container .content form input, select,
 .recipe-container .content form textarea {
     margin-top: 8px;
 }

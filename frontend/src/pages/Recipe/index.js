@@ -6,7 +6,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 import api from '../../services/api';
 import AuthContext from '../../context/AuthContext';
-import { AddFermentableModal, AddHopModal, AddYeastModal, UpdateFermentableModal } from './modals';
+import { AddFermentableModal, AddHopModal, AddYeastModal, UpdateFermentableModal, UpdateHopModal, UpdateYeastModal } from './modals';
 import { fetchFermentables } from '../../services/Fermentables';
 import { fetchHops } from '../../services/Hops';
 import { fetchYeasts } from '../../services/Yeasts';
@@ -18,6 +18,8 @@ import Sidebar from '../../components/Sidebar';
 import Header from '../../components/Header';
 import { calculateOG, calculateIBU, calculateEBC } from '../../components/Recipe/Calculation';
 import { getBeerColor } from '../../components/Recipe/GetBeerColor';
+import { beerStyles } from '../../components/Recipe/getBeerStyles';
+
 
 Modal.setAppElement('#root');
 
@@ -46,6 +48,11 @@ export default function NewRecipe() {
     const closeUpdateYeastModal = () => setIsUpdateYeastModalOpen(false);
 
     const [selectedFermentable, setSelectedFermentable] = useState(null);
+    const [selectedHop, setSelectedHop] = useState(null);
+    const [selectedYeast, setSelectedYeast] = useState(null);
+
+    /* Beer Style */
+    const [selectedStyle, setSelectedStyle] = useState('');
 
     /* Lists */
     const [fermentableList, setFermentableList] = useState([]);
@@ -105,6 +112,8 @@ export default function NewRecipe() {
 
             const IBUresult = calculateIBU(recipe, OGResult);
             setIBU(IBUresult);
+
+            setSelectedStyle(recipe.style);
         }
     }, [recipe]);
     
@@ -146,6 +155,14 @@ export default function NewRecipe() {
         }
     }, [EBCColor]);
 
+    useEffect(() => {
+        setRecipe((prevRecipe) => ({
+            ...prevRecipe,
+            style: selectedStyle
+        }));
+    }, [selectedStyle, setRecipe]); // Esse useEffect será acionado toda vez que selectedStyle mudar
+
+
     const fetchRecipe = async (recipeID) => {
         const recipeResponse = await fetchRecipeById(recipeID, user.token);
         setRecipe({...recipeResponse});
@@ -172,6 +189,16 @@ export default function NewRecipe() {
     const handleUpdateFermentable = (fermentable) => {
         setSelectedFermentable(fermentable); // Define o fermentável selecionado
         setIsUpdateFermentableModalOpen(true); // Abre a modal
+    };
+
+    const handleUpdateHop = (hop) => {
+        setSelectedHop(hop); // Define o fermentável selecionado
+        setIsUpdateHopModalOpen(true); // Abre a modal
+    };
+
+    const handleUpdateYeast = (yeast) => {
+        setSelectedYeast(yeast); // Define o fermentável selecionado
+        setIsUpdateYeastModalOpen(true); // Abre a modal
     };
 
     const handleAddFermentableRecipe = (selectedFermentable, quantity) => {
@@ -277,18 +304,24 @@ export default function NewRecipe() {
         }));
     };
 
-    const handleUpdateHop = (hopID) => {
-        const updatedHops = recipe.recipeHops.filter(
-            (hop) => hop.id !== hopID
-        );
-        /* abrir o novo modal */
+    const handleUpdateHopRecipe = (updatedHop) => {
+
+        setRecipe((prevRecipe) => ({
+            ...prevRecipe,
+            recipeHops: prevRecipe.recipeHops.map((hop) =>
+                hop.id === updatedHop.id ? updatedHop : hop
+            ),
+        }));
     };
 
-    const handleUpdateYeast = (yeastID) => {
-        const updatedYeasts = recipe.recipeYeasts.filter(
-            (yeast) => yeast.id !== yeastID
-        );
-        /* abrir o novo modal */
+    const handleUpdateYeastRecipe = (updatedYeast) => {
+
+        setRecipe((prevRecipe) => ({
+            ...prevRecipe,
+            recipeYeasts: prevRecipe.recipeYeasts.map((yeast) =>
+                yeast.id === updatedYeast.id ? updatedYeast : yeast
+            ),
+        }));
     };
 
     const handleDeleteFermentable = (fermentableId) => {
@@ -413,15 +446,19 @@ export default function NewRecipe() {
                                 />
                             </div>
                             <div className="input-field">
-                                <label htmlFor="name">Type</label>
-                                <input
-                                    name="style"
-                                    placeholder="Style"
-                                    value={recipe.style}
-                                    onChange={handleChange}
-                                    disabled={isView}
-                                    style={{ width: '400px' }}
-                                />
+                                <label htmlFor="name">Style</label>
+                                <select
+                                    id="beer-style"
+                                    value={selectedStyle}
+                                    onChange={(e) => setSelectedStyle(e.target.value)}
+                                >
+                                    <option value="">Select a style</option>
+                                    {beerStyles.map((style, index) => (
+                                        <option key={index} value={style.name}>
+                                            {style.name}
+                                        </option>
+                                    ))}
+                                </select>
                             </div>
                             <div className="input-field">
                                 <label htmlFor="name">Volume</label>
@@ -479,7 +516,7 @@ export default function NewRecipe() {
                                     <object className="hop-object" type="image/svg+xml" data="/hop.svg"></object>
                                     {hop.amount}g - <strong>{hop.name}</strong>
                                     <div className="ingredients-list-button-group">
-                                        <button onClick={() => handleUpdateHop(hop.id)} type="button">
+                                        <button onClick={() => handleUpdateHop(hop)} type="button">
                                           <FiEdit size={20} color="#a8a8b3" />
                                         </button>
                                         <button onClick={() => handleDeleteHop(hop.id)} type="button">
@@ -493,7 +530,7 @@ export default function NewRecipe() {
                                     <object className="yeast-object" type="image/svg+xml" data="/yeast.svg"></object>
                                     {yeast.amount}g - <strong>{yeast.name}</strong>
                                     <div className="ingredients-list-button-group">
-                                        <button onClick={() => handleUpdateYeast(yeast.id)} type="button">
+                                        <button onClick={() => handleUpdateYeast(yeast)} type="button">
                                           <FiEdit size={20} color="#a8a8b3" />
                                         </button>
                                         <button onClick={() => handleDeleteYeast(yeast.id)} type="button">
@@ -549,6 +586,18 @@ export default function NewRecipe() {
                 closeModal={closeUpdateFermentableModal}
                 selectedFermentable={selectedFermentable}
                 handleUpdateFermentableRecipe={handleUpdateFermentableRecipe}
+            />
+            <UpdateHopModal
+                isOpen={isUpdateHopModalOpen}
+                closeModal={closeUpdateHopModal}
+                selectedHop={selectedHop}
+                handleUpdateHopRecipe={handleUpdateHopRecipe}
+            />
+            <UpdateYeastModal
+                isOpen={isUpdateYeastModalOpen}
+                closeModal={closeUpdateYeastModal}
+                selectedYeast={selectedYeast}
+                handleUpdateYeastRecipe={handleUpdateYeastRecipe}
             />
         </div>
     );

@@ -67,26 +67,58 @@ def create_fermentables_bp():
     @fermentables_bp.route("/fermentables", methods=["GET"])
     @token_required
     def get_fermentables(current_user_id):
-        # Query both tables
-        user_fermentables = Fermentable.query.filter_by(user_id=current_user_id).all()
-        official_fermentables = FermentableOfficial.query.all()
+        # Obtém o parâmetro 'source' da URL
+        source = request.args.get("source", "all")  # Padrão é 'all'
+    
+        print(source);
 
-        # Combine the results
-        combined_fermentables = [fermentable.to_dict() for fermentable in user_fermentables] + \
-                                [fermentable.to_dict() for fermentable in official_fermentables]
+        if source == "custom":
+            # Busca apenas na tabela 'fermentables'
+            user_fermentables = Fermentable.query.filter_by(user_id=current_user_id).all()
+            return jsonify([fermentable.to_dict() for fermentable in user_fermentables])
+    
+        elif source == "official":
+            # Busca apenas na tabela 'fermentables_official'
+            official_fermentables = FermentableOfficial.query.all()
+            return jsonify([fermentable.to_dict() for fermentable in official_fermentables])
+    
+        elif source == "all":
+            # Busca nas duas tabelas
+            user_fermentables = Fermentable.query.filter_by(user_id=current_user_id).all()
+            official_fermentables = FermentableOfficial.query.all()
+            combined_fermentables = [fermentable.to_dict() for fermentable in user_fermentables] + \
+                                    [fermentable.to_dict() for fermentable in official_fermentables]
+            return jsonify(combined_fermentables)
+    
+        else:
+            # Se 'source' não for válido, retorna erro
+            return jsonify({"error": "Parâmetro 'source' inválido. Use 'custom', 'official' ou 'all'."}), 400
 
-        return jsonify(combined_fermentables)
-
-    # Return a specific record
+    # By ID
     @fermentables_bp.route("/fermentables/<int:id>", methods=["GET"])
     @token_required
-    def get_fermentable(current_user_id, id): 
-        fermentable = Fermentable.query.filter_by(id=id, user_id=current_user_id).first()
-    
-        if fermentable is None:
-            return jsonify({"message": "Fermentable not found"}), 404
-    
-        return jsonify(fermentable.to_dict())
+    def get_fermentable(current_user_id, id):
+        # Obtém o parâmetro 'source' da URL
+        source = request.args.get("source", "custom")  # Padrão é 'custom'
+
+        if source == "custom":
+            # Busca apenas na tabela 'fermentables'
+            fermentable = Fermentable.query.filter_by(id=id, user_id=current_user_id).first()
+            if fermentable is None:
+                return jsonify({"message": "Fermentable not found in custom data"}), 404
+            return jsonify(fermentable.to_dict())
+
+        elif source == "official":
+            # Busca apenas na tabela 'fermentables_official'
+            fermentable = FermentableOfficial.query.filter_by(id=id).first()
+            if fermentable is None:
+                return jsonify({"message": "Fermentable not found in official data"}), 404
+            return jsonify(fermentable.to_dict())
+
+        else:
+            # Parâmetro 'source' inválido
+            return jsonify({"error": "Invalid 'source' parameter. Use 'custom' or 'official'."}), 400
+
 
     # Add record
     @fermentables_bp.route("/fermentables", methods=["POST"])

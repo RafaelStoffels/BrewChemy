@@ -196,15 +196,12 @@ export function UpdateFermentableModal({ isOpen, closeModal, selectedFermentable
         setLocalFermentableObject((prev) => ({
             ...prev,
             [key]: key === "colorDegreesLovibond" || 
-                  key === "potentialExtract" || 
-                  key === "unitPrice" || 
-                  key === "stockQuantity" 
+                  key === "potentialExtract" 
                   ? parseFloat(value) || 0 // Garante que números sejam tratados corretamente
                   : value,
         }));
     };
 
-    // Manipula o botão de salvar
     const handleSaveButton = (e) => {
         e.preventDefault();
         if (localFermentableObject) {
@@ -250,7 +247,7 @@ export function UpdateFermentableModal({ isOpen, closeModal, selectedFermentable
                             onChange={(e) => handleChange('supplier', e.target.value)}
                         />
                         
-                        <div className="input-group">
+                        <div className="inputs-row">
                             <div className="input-field">
                                 <label htmlFor="name">EBC</label>
                                 <input 
@@ -269,6 +266,259 @@ export function UpdateFermentableModal({ isOpen, closeModal, selectedFermentable
                                     type="number"
                                     value={localFermentableObject.potentialExtract || ''}
                                     onChange={(e) => handleChange('potentialExtract', e.target.value)}
+                                    style={{ width: '100px' }}
+                                />
+                            </div>
+                        </div>
+                        <button className="crud-save-button" type="submit">
+                            Save
+                        </button>
+                    </div>
+                </form>
+            ) : (
+                <p>Loading...</p>
+            )}
+        </Modal>
+    );
+}
+
+export function UpdateHopModal({ isOpen, closeModal, selectedHop, handleUpdateHopRecipe }) {
+    const [localHopObject, setLocalHopObject] = useState(null);
+
+    // Atualiza o estado local sempre que o Hop recebido como prop mudar
+    useEffect(() => {
+        if (selectedHop) {
+            setLocalHopObject(selectedHop);
+        }
+    }, [selectedHop]);
+
+    // Atualiza o estado local com base nos campos do formulário
+    const handleChange = (key, value) => {
+        setLocalHopObject((prev) => ({
+            ...prev,
+            [key]: key === "colorDegreesLovibond" || 
+                  key === "potentialExtract" 
+                  ? parseFloat(value) || 0 // Garante que números sejam tratados corretamente
+                  : value,
+        }));
+    };
+
+    // Manipula o botão de salvar
+    const handleSaveButton = (e) => {
+        e.preventDefault();
+        if (localHopObject) {
+            handleUpdateHopRecipe(localHopObject); // Salva alterações
+        }
+        closeModal(); // Fecha a modal
+    };
+
+    return (
+        <Modal
+            isOpen={isOpen}
+            onRequestClose={closeModal}
+            contentLabel="Hops Modal"
+            className="modal-content"  // Classe CSS para o conteúdo
+            overlayClassName="modal-overlay"  // Classe CSS para o overlay
+        >
+            {localHopObject ? (
+                <form onSubmit={handleSaveButton}>
+                    <div className="modal">
+                        <h2>Update Hop</h2>
+                        <label htmlFor="name">Name</label>
+                        <input 
+                            placeholder="Hop Name"
+                            value={localHopObject.name || ''}
+                            onChange={(e) => handleChange('name', e.target.value)}
+                        />
+                        <label htmlFor="name">Description</label>
+                        <textarea 
+                            placeholder="Hop Description"
+                            value={localHopObject.description || ''}
+                            onChange={(e) => handleChange('description', e.target.value)}
+                        />
+                        <label htmlFor="name">Alpha Acid</label>
+                        <input 
+                            placeholder="Fermentable Type"
+                            value={localHopObject.alphaAcidContent || ''}
+                            onChange={(e) => handleChange('alphaAcidContent', e.target.value)}
+                        />
+                        <label htmlFor="name">Beta Acid</label>
+                        <input 
+                            placeholder="Supplier"
+                            value={localHopObject.betaAcidContent || ''}
+                            onChange={(e) => handleChange('betaAcidContent', e.target.value)}
+                        />
+                        
+                        <div className="inputs-row">
+                            <div className="input-field">
+                                <label htmlFor="name">Boil Time</label>
+                                <input 
+                                    placeholder="Boil Time"
+                                    type="number"
+                                    value={localHopObject.boilTime || ''}
+                                    onChange={(e) => handleChange('boilTime', e.target.value)}
+                                    style={{ width: '100px' }}
+                                />
+                            </div>
+
+                            <div className="input-field">
+                                <label htmlFor="name">Use Type</label>
+                                <input 
+                                    placeholder="Potential Extract"
+                                    type="number"
+                                    value={localHopObject.useType || ''}
+                                    onChange={(e) => handleChange('useType', e.target.value)}
+                                    style={{ width: '100px' }}
+                                />
+                            </div>
+                        </div>
+                        <label htmlFor="name">Amount</label>
+                        <input 
+                            placeholder="Amount"
+                            value={localHopObject.amount || ''}
+                            onChange={(e) => handleChange('amount', e.target.value)}
+                        />
+                        <button className="crud-save-button" type="submit">
+                            Save
+                        </button>
+                    </div>
+                </form>
+            ) : (
+                <p>Loading...</p>
+            )}
+        </Modal>
+    );
+}
+
+export function UpdateYeastModal({ isOpen, closeModal, selectedYeast, handleUpdateYeastRecipe }) {
+    const [localYeastObject, setLocalYeastObject] = useState(null);
+
+    // Atualiza o estado local sempre que o Yeast recebido como prop mudar
+    useEffect(() => {
+        if (selectedYeast) {
+            console.log("selectedYeast: " + selectedYeast);
+            setLocalYeastObject(selectedYeast);
+        }
+    }, [selectedYeast]);
+
+    // Atualiza o estado local com base nos campos do formulário
+    const handleChange = (key, value) => {
+        setLocalYeastObject((prev) => ({
+            ...prev,
+            [key]: key === "colorDegreesLovibond" || 
+                  key === "potentialExtract" 
+                  ? parseFloat(value) || 0 // Garante que números sejam tratados corretamente
+                  : value,
+        }));
+    };
+
+    // Manipula o botão de salvar
+    const handleSaveButton = (e) => {
+        e.preventDefault();
+        if (localYeastObject) {
+            handleUpdateYeastRecipe(localYeastObject); // Salva alterações
+        }
+        closeModal(); // Fecha a modal
+    };
+
+    return (
+        <Modal
+            isOpen={isOpen}
+            onRequestClose={closeModal}
+            contentLabel="Yeasts Modal"
+            className="modal-content"  // Classe CSS para o conteúdo
+            overlayClassName="modal-overlay"  // Classe CSS para o overlay
+        >
+            {localYeastObject ? (
+                <form onSubmit={handleSaveButton}>
+                    <div className="modal">
+                        <h2>Update Yeast</h2>
+                        <label htmlFor="name">Name</label>
+                        <input 
+                            placeholder="Yeast Name"
+                            value={localYeastObject.name || ''}
+                            onChange={(e) => handleChange('name', e.target.value)}
+                        />
+                        <label htmlFor="name">Manufacturer</label>
+                        <input 
+                            placeholder="Manufacturer"
+                            value={localYeastObject.manufacturer || ''}
+                            onChange={(e) => handleChange('description', e.target.value)}
+                        />
+                        <label htmlFor="name">Description</label>
+                        <textarea 
+                            placeholder="Description"
+                            value={localYeastObject.description || ''}
+                            onChange={(e) => handleChange('description', e.target.value)}
+                        />
+                        <label htmlFor="name">Attenuation Range</label>
+                        <input 
+                            placeholder="Attenuation Range"
+                            value={localYeastObject.attenuationRange || ''}
+                            onChange={(e) => handleChange('attenuationRange', e.target.value)}
+                        />
+                        <label htmlFor="name">Flavor Profile</label>
+                        <input 
+                            placeholder="Flavor Profile"
+                            value={localYeastObject.flavorProfile || ''}
+                            onChange={(e) => handleChange('flavorProfile', e.target.value)}
+                        />
+                        <label htmlFor="name">Flocculation</label>
+                        <input 
+                            placeholder="Flocculation"
+                            value={localYeastObject.flocculation || ''}
+                            onChange={(e) => handleChange('flocculation', e.target.value)}
+                        />
+                        <label htmlFor="name">Form</label>
+                        <input 
+                            placeholder="Form"
+                            value={localYeastObject.form || ''}
+                            onChange={(e) => handleChange('form', e.target.value)}
+                        />
+                        <label htmlFor="name">Temperature Range</label>
+                        <input 
+                            placeholder="Temperature Range"
+                            value={localYeastObject.temperatureRange || ''}
+                            onChange={(e) => handleChange('temperatureRange', e.target.value)}
+                        />
+                        <label htmlFor="name">Type</label>
+                        <input 
+                            placeholder="Type"
+                            value={localYeastObject.type || ''}
+                            onChange={(e) => handleChange('type', e.target.value)}
+                        />
+                        <label htmlFor="name">Alcohol Tolerance</label>
+                        <input 
+                            placeholder="Alcohol Tolerance"
+                            value={localYeastObject.alcoholTolerance || ''}
+                            onChange={(e) => handleChange('alcoholTolerance', e.target.value)}
+                        />
+                        <label htmlFor="name">Amount</label>
+                        <input 
+                            placeholder="Amount"
+                            value={localYeastObject.amount || ''}
+                            onChange={(e) => handleChange('amount', e.target.value)}
+                        />
+
+                        <div className="input-group">
+                            <div className="input-field">
+                                <label htmlFor="name">Boil Time</label>
+                                <input 
+                                    placeholder="EBC"
+                                    type="number"
+                                    value={localYeastObject.boilTime || ''}
+                                    onChange={(e) => handleChange('boilTime', e.target.value)}
+                                    style={{ width: '100px' }}
+                                />
+                            </div>
+
+                            <div className="input-field">
+                                <label htmlFor="name">Use Type</label>
+                                <input 
+                                    placeholder="Potential Extract"
+                                    type="number"
+                                    value={localYeastObject.useType || ''}
+                                    onChange={(e) => handleChange('useType', e.target.value)}
                                     style={{ width: '100px' }}
                                 />
                             </div>
