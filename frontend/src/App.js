@@ -6,6 +6,7 @@ import './styles/global.css';
 
 import Logon from "./pages/Logon";
 import Main from "./pages/Main";
+import EquipmentList from "./pages/EquipmentList";
 import FermentableList from "./pages/FermentableList";
 import Fermentable from "./pages/Fermentables";
 import HopList from "./pages/HopList";
@@ -21,6 +22,7 @@ const App = () => {
         <Routes>
           <Route path="/" element={<Logon />} />
           <Route path="/Main" element={<Main />} />
+          <Route path="/EquipmentList" element={<EquipmentList />} />
           <Route path="/FermentableList" element={<FermentableList />} />
           <Route path="/Fermentables/:id/details" element={<Fermentable />} />
           <Route path="/Fermentables/:id/edit" element={<Fermentable />} />

@@ -13,13 +13,18 @@ class Recipe(db.Model):
     description = db.Column(db.Text)
     creation_date = db.Column(db.Date, default=db.func.current_date())
     volume_liters = db.Column(db.Numeric(5, 2))
+    equipment_id = db.Column(db.Integer)
     notes = db.Column(db.Text)
 
     recipe_fermentables = db.relationship('RecipeFermentable', backref='recipe', lazy=True, cascade="all, delete-orphan")
     recipe_hops = db.relationship('RecipeHop', backref='recipe', lazy=True, cascade="all, delete-orphan")
     recipe_yeasts = db.relationship('RecipeYeast', backref='recipe', lazy=True, cascade="all, delete-orphan")
+    recipe_equipment = db.relationship('RecipeEquipment', backref='recipe')
 
     def to_dict(self):
+        # Verifica se existe algum equipamento associado à receita
+        recipe_equipment = self.recipe_equipment[0] if self.recipe_equipment else None
+
         return {
             "id": self.id,
             "name": self.name,
@@ -28,6 +33,7 @@ class Recipe(db.Model):
             "creationDate": self.creation_date.isoformat() if self.creation_date else None,
             "volumeLiters": float(self.volume_liters) if self.volume_liters else None,
             "notes": self.notes,
+            "recipeEquipment": recipe_equipment.to_dict() if recipe_equipment else None,
             "recipeFermentables": [fermentable.to_dict() for fermentable in self.recipe_fermentables],
             "recipeHops": [hop.to_dict() for hop in self.recipe_hops],
             "recipeYeasts": [yeast.to_dict() for yeast in self.recipe_yeasts]
@@ -130,6 +136,33 @@ class RecipeYeast(db.Model):
             "description": self.description,
             "amount": float(self.amount) if self.amount else None
         }
+    
+class RecipeEquipment(db.Model):
+    __tablename__ = 'recipe_equipment'
+
+    # Table Definition
+    id = db.Column(db.Integer, primary_key=True)
+    recipe_id = db.Column(db.Integer, db.ForeignKey('recipes.id'), nullable=False)
+    name = db.Column(db.String(50), nullable=False)
+    description = db.Column(db.Text)
+    efficiency = db.Column(db.Numeric(5, 2), nullable=False)
+    batch_volume = db.Column(db.Numeric(10, 2), nullable=False)
+    pre_boil_volume = db.Column(db.Numeric(10, 2), nullable=False)
+    boil_time = db.Column(db.Integer, nullable=False)
+    boil_temperature = db.Column(db.Numeric(5, 2), nullable=False)
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "recipeId": self.recipe_id,
+            "name": self.name,
+            "description": self.description,
+            "efficiency": float(self.efficiency) if self.efficiency else None,
+            "batchVolume": float(self.batch_volume) if self.batch_volume else None,
+            "preBoilVolume": float(self.pre_boil_volume) if self.pre_boil_volume else None,
+            "boilTime": self.boil_time,
+            "boilTemperature": float(self.boil_temperature) if self.boil_temperature else None
+        }
 
 def create_recipes_bp():
     recipes_bp = Blueprint("recipes", __name__)
@@ -165,6 +198,7 @@ def create_recipes_bp():
             description=data.get("description"),
             volume_liters=sanitize(data.get("volumeLiters")),
             notes=data.get("notes"),
+            equipment_id=data.get("equipmentID"),
             user_id=current_user_id
         )
         db.session.add(new_recipe)
@@ -244,6 +278,7 @@ def create_recipes_bp():
         recipe.style = data.get("style", recipe.style)
         recipe.description = data.get("description", recipe.description)
         recipe.volume_liters = data.get("volumeLiters", recipe.volume_liters)
+        recipe.equipment_id = data.get("equipmentID", recipe.equipment_id)
         recipe.notes = data.get("notes", recipe.notes)
 
         fermentables_data = data.get("recipeFermentables", [])

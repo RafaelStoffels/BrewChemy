@@ -11,6 +11,7 @@ import { fetchFermentables } from '../../services/Fermentables';
 import { fetchHops } from '../../services/Hops';
 import { fetchYeasts } from '../../services/Yeasts';
 import { fetchRecipeById } from '../../services/recipes';
+import { fetchEquipmentById } from '../../services/Equipments';
 
 import './styles.css';
 import '../Recipe/styles.css';
@@ -51,13 +52,12 @@ export default function NewRecipe() {
     const [selectedHop, setSelectedHop] = useState(null);
     const [selectedYeast, setSelectedYeast] = useState(null);
 
-    /* Beer Style */
-    const [selectedStyle, setSelectedStyle] = useState('');
-
     /* Lists */
     const [fermentableList, setFermentableList] = useState([]);
     const [hopList, setHopList] = useState([]);
     const [yeastList, setYeastList] = useState([]);
+
+    const [equipment, setEquipment] = useState(0);
 
     /* Dinamic Variables */
     const [OG, setOG] = useState("");
@@ -66,6 +66,8 @@ export default function NewRecipe() {
     const [IBU, setIBU] = useState(0);
     const [ABV, setABV] = useState(0);
 
+    /* Components */
+    const [selectedStyle, setSelectedStyle] = useState('');
     const [EBCColor, setEBCColor] = useState("");
 
     const [recipe, setRecipe] = useState({
@@ -79,6 +81,7 @@ export default function NewRecipe() {
         recipeFermentables: [],
         recipeHops: [],
         recipeYeasts: [],
+        recipeEquipment: {},
     });
 
     useEffect(() => {
@@ -92,6 +95,14 @@ export default function NewRecipe() {
             }
         }
     }, [id, user]);
+
+    useEffect(() => {
+        if (EBC) {
+            const color = getBeerColor(EBC);
+            setEBCColor(color);
+            console.log("assign " + EBCColor);
+        }
+    }, [EBC]);
 
     useEffect(() => {
         if (recipe) {
@@ -127,12 +138,13 @@ export default function NewRecipe() {
     
     useEffect(() => {
         if (OG && FG) {
-            if (OG === "1.000") {
-                setABV(0);
-            } else {
-                const abvValue = ((OG - FG) * 131.25).toFixed(2);
-                setABV(abvValue > 0 ? abvValue : 0);
-            }
+
+            console.log("ABV Inicio");
+
+            const abvValue = ((OG - FG) * 131.25).toFixed(2);
+            setABV(abvValue > 0 ? abvValue : 0);
+
+            console.log("ABV Fim " + abvValue);
         }
     }, [OG, FG]);
     
@@ -187,18 +199,18 @@ export default function NewRecipe() {
     };
 
     const handleUpdateFermentable = (fermentable) => {
-        setSelectedFermentable(fermentable); // Define o fermentável selecionado
-        setIsUpdateFermentableModalOpen(true); // Abre a modal
+        setSelectedFermentable(fermentable);
+        setIsUpdateFermentableModalOpen(true);
     };
 
     const handleUpdateHop = (hop) => {
-        setSelectedHop(hop); // Define o fermentável selecionado
-        setIsUpdateHopModalOpen(true); // Abre a modal
+        setSelectedHop(hop);
+        setIsUpdateHopModalOpen(true);
     };
 
     const handleUpdateYeast = (yeast) => {
-        setSelectedYeast(yeast); // Define o fermentável selecionado
-        setIsUpdateYeastModalOpen(true); // Abre a modal
+        setSelectedYeast(yeast);
+        setIsUpdateYeastModalOpen(true);
     };
 
     const handleAddFermentableRecipe = (selectedFermentable, quantity) => {
@@ -222,7 +234,6 @@ export default function NewRecipe() {
                         },
                     ],
                 }));
-
                 closeFermentableModal();
             } else {
                 alert('Selected fermentable not found.');
@@ -272,7 +283,6 @@ export default function NewRecipe() {
                     ...selectedYeastDetails,
                     amount: parseFloat(amount),
                 };
-
                 setRecipe((prevRecipe) => ({
                     ...prevRecipe,
                     recipeYeasts: [
@@ -341,7 +351,6 @@ export default function NewRecipe() {
                 (fermentable) => fermentable.id !== fermentableId
               ),
             };
-        
             return updatedRecipe;
           });
         }
@@ -442,8 +451,7 @@ export default function NewRecipe() {
                                     value={recipe.name}
                                     onChange={handleChange}
                                     disabled={isView}
-                                    style={{ width: '520px' }}
-                                />
+                                    style={{ width: '520px' }}/>
                             </div>
                             <div className="input-field">
                                 <label htmlFor="name">Style</label>
@@ -451,6 +459,7 @@ export default function NewRecipe() {
                                     id="beer-style"
                                     value={selectedStyle}
                                     onChange={(e) => setSelectedStyle(e.target.value)}
+                                    style={{ width: '300px' }}
                                 >
                                     <option value="">Select a style</option>
                                     {beerStyles.map((style, index) => (
@@ -461,19 +470,39 @@ export default function NewRecipe() {
                                 </select>
                             </div>
                             <div className="input-field">
-                                <label htmlFor="name">Volume</label>
+                                <label htmlFor="name">Equipment</label>
                                 <input
-                                    name="volumeLiters"
-                                    placeholder="Volume (Liters)"
-                                    type="number"
-                                    value={recipe.volumeLiters}
+                                    name="equipment"
+                                    placeholder="Equipment"
+                                    value={recipe.equipment}
                                     onChange={handleChange}
                                     disabled={isView}
-                                    style={{ width: '120px' }}
-                                />
+                                    style={{ width: '220px' }}/>
                             </div>
                         </div>
                         <div className="inputs-row">
+                            <div className="input-field">
+                                <label htmlFor="name">Efficiency</label>
+                                <input
+                                    name="efficiency"
+                                    placeholder="Efficiency"
+                                    type="number"
+                                    value={recipe.recipeEquipment.efficiency}
+                                    onChange={handleChange}
+                                    disabled={isView}
+                                    style={{ width: '100px' }}/>
+                            </div>
+                            <div className="input-field">
+                                <label htmlFor="name">Batch Volume</label>
+                                <input
+                                    name="BatchVolume"
+                                    placeholder="Batch Volume (Liters)"
+                                    type="number"
+                                    value={recipe.recipeEquipment.batchVolume}
+                                    onChange={handleChange}
+                                    disabled={isView}
+                                    style={{ width: '100px' }}/>
+                            </div>
                             <div className="input-field">
                                 <label htmlFor="name">Batch Time</label>
                                 <input
@@ -483,8 +512,7 @@ export default function NewRecipe() {
                                     value={recipe.batchTime}
                                     onChange={handleChange}
                                     disabled={isView}
-                                    style={{ width: '130px' }}
-                                />
+                                    style={{ width: '100px' }}/>
                             </div>
                         </div>
                     </form>
