@@ -207,7 +207,7 @@ export function UpdateFermentableModal({ isOpen, closeModal, selectedFermentable
         if (localFermentableObject) {
             handleUpdateFermentableRecipe(localFermentableObject); // Salva alterações
         }
-        closeModal(); // Fecha a modal
+        closeModal();
     };
 
     return (
@@ -266,6 +266,16 @@ export function UpdateFermentableModal({ isOpen, closeModal, selectedFermentable
                                     type="number"
                                     value={localFermentableObject.potentialExtract || ''}
                                     onChange={(e) => handleChange('potentialExtract', e.target.value)}
+                                    style={{ width: '100px' }}
+                                />
+                            </div>
+                            <div className="input-field">
+                                <label htmlFor="name">Quantity</label>
+                                <input 
+                                    placeholder="Quantity"
+                                    type="number"
+                                    value={localFermentableObject.weightGrams || ''}
+                                    onChange={(e) => handleChange('weightGrams', e.target.value)}
                                     style={{ width: '100px' }}
                                 />
                             </div>

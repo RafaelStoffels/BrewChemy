@@ -28,10 +28,7 @@ class Fermentable(db.Model):
             "ebc": float(self.ebc),
             "potentialExtract": float(self.potential_extract),
             "maltType": self.malt_type,
-            "stockQuantity": self.stock_quantity,
-            "supplier": self.supplier,
-            "unitPrice": float(self.unit_price) if self.unit_price else None,
-            "notes": self.notes,
+            "supplier": self.supplier
         }
 
 class FermentableOfficial(db.Model):
@@ -45,7 +42,6 @@ class FermentableOfficial(db.Model):
     potential_extract = db.Column(db.Numeric(5, 3), nullable=False)
     malt_type = db.Column(db.String(50), nullable=False)
     supplier = db.Column(db.String(100), nullable=False)
-    notes = db.Column(db.Text)
 
     # Converte snake_case para camelCase no JSON
     def to_dict(self):
@@ -56,8 +52,7 @@ class FermentableOfficial(db.Model):
             "ebc": float(self.ebc),
             "potentialExtract": float(self.potential_extract),
             "maltType": self.malt_type,
-            "supplier": self.supplier,
-            "notes": self.notes,
+            "supplier": self.supplier
         }
 
 def create_fermentables_bp():
@@ -136,9 +131,7 @@ def create_fermentables_bp():
             ebc=sanitize(data.get("ebc")),
             potential_extract=sanitize(data.get("potentialExtract")),
             malt_type=data.get("maltType"),
-            stock_quantity=sanitize(data.get("stockQuantity")),
             supplier=data.get("supplier"),
-            unit_price=sanitize(data.get("unitPrice")),
             user_id=current_user_id
         )
         db.session.add(new_fermentable)
@@ -161,10 +154,7 @@ def create_fermentables_bp():
         fermentable.ebc = data.get("ebc", fermentable.ebc)
         fermentable.potential_extract = data.get("potentialExtract", fermentable.potential_extract)
         fermentable.malt_type = data.get("maltType", fermentable.malt_type)
-        fermentable.stock_quantity = data.get("stockQuantity", fermentable.stock_quantity)
         fermentable.supplier = data.get("supplier", fermentable.supplier)
-        fermentable.unit_price = data.get("unitPrice", fermentable.unit_price)
-        fermentable.notes = data.get("notes", fermentable.notes)
 
         db.session.commit()
 

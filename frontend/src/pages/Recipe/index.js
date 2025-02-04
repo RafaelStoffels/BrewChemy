@@ -335,59 +335,64 @@ export default function NewRecipe() {
     };
 
     const handleDeleteFermentable = (fermentableId) => {
-        const confirmDelete = window.confirm('Are you sure you want to delete this fermentable?');
-        if (confirmDelete) {
-          setRecipe((prevRecipe) => {
+        setRecipe((prevRecipe) => {
 
-            if (!prevRecipe || !prevRecipe.recipeFermentables) {
-              console.error("prevRecipe ou recipeFermentables estão indefinidos!");
-              return prevRecipe || {};
-            }
+          if (!prevRecipe || !prevRecipe.recipeFermentables) {
+            console.error("prevRecipe ou recipeFermentables estão indefinidos!");
+            return prevRecipe || {};
+          }
       
-            // Atualiza o estado com os fermentables filtrados
-            const updatedRecipe = {
-              ...prevRecipe,
-              recipeFermentables: prevRecipe.recipeFermentables.filter(
-                (fermentable) => fermentable.id !== fermentableId
-              ),
-            };
-            return updatedRecipe;
-          });
-        }
+          // Atualiza o estado com os fermentables filtrados
+          const updatedRecipe = {
+            ...prevRecipe,
+            recipeFermentables: prevRecipe.recipeFermentables.filter(
+              (fermentable) => fermentable.id !== fermentableId
+            ),
+          };
+          return updatedRecipe;
+        });
     };
 
     const handleDeleteHop = (hopID) => {
-        const confirmDelete = window.confirm('Are you sure you want to delete this hop?');
-        if (confirmDelete) {
-            const updatedHops = recipe.recipeHops.filter(
-                (hop) => hop.id !== hopID
-            );
-        
-            setRecipe((prevRecipe) => ({
-                ...prevRecipe,
-                recipeHops: updatedHops,
-            }));
-        }
+        const updatedHops = recipe.recipeHops.filter(
+            (hop) => hop.id !== hopID
+        );
+    
+        setRecipe((prevRecipe) => ({
+            ...prevRecipe,
+            recipeHops: updatedHops,
+        }));
     };
 
     const handleDeleteYeast = (yeastID) => {
-        const confirmDelete = window.confirm('Are you sure you want to delete this yeast?');
-        if (confirmDelete) {
-            const updatedYeasts = recipe.recipeYeasts.filter(
-                (yeast) => yeast.id !== yeastID
-            );
-        
-            setRecipe((prevRecipe) => ({
-                ...prevRecipe,
-                recipeYeasts: updatedYeasts,
-            }));
-        }
+        const updatedYeasts = recipe.recipeYeasts.filter(
+            (yeast) => yeast.id !== yeastID
+        );
+    
+        setRecipe((prevRecipe) => ({
+            ...prevRecipe,
+            recipeYeasts: updatedYeasts,
+        }));
     };
 
-    const handleChange = (e) => {
+    const handleRecipeChange = (e) => {
         const { name, value } = e.target;
-        setRecipe((prevState) => ({ ...prevState, [name]: value }));
+        setRecipe((prevState) => ({
+            ...prevState,
+            [name]: value
+        }));
     };
+
+    const handleEquipmentChange = (e) => {
+        const { name, value } = e.target;
+        setRecipe((prevState) => ({
+            ...prevState,
+            recipeEquipment: {
+                ...prevState.recipeEquipment,
+                [name]: value
+            }
+        }));
+    };    
 
     async function handleSubmit(e) {
         e.preventDefault();
@@ -403,10 +408,12 @@ export default function NewRecipe() {
             recipeFermentables: recipe.recipeFermentables,
             recipeHops: recipe.recipeHops,
             recipeYeasts: recipe.recipeYeasts,
+            recipeEquipment: recipe.recipeEquipment,
         };
 
         try {
             if (isEditing) {
+                console.log("update: ", JSON.stringify(data, null, 2));
                 await api.put(`/api/recipes/${id}`, data, {
                     headers: {
                         Authorization: `Bearer ${user.token}`,
@@ -449,7 +456,7 @@ export default function NewRecipe() {
                                     name="name"
                                     placeholder="Recipe Name"
                                     value={recipe.name}
-                                    onChange={handleChange}
+                                    onChange={handleRecipeChange}
                                     disabled={isView}
                                     style={{ width: '520px' }}/>
                             </div>
@@ -475,7 +482,7 @@ export default function NewRecipe() {
                                     name="equipment"
                                     placeholder="Equipment"
                                     value={recipe.equipment}
-                                    onChange={handleChange}
+                                    onChange={handleRecipeChange}
                                     disabled={isView}
                                     style={{ width: '220px' }}/>
                             </div>
@@ -488,7 +495,7 @@ export default function NewRecipe() {
                                     placeholder="Efficiency"
                                     type="number"
                                     value={recipe.recipeEquipment.efficiency}
-                                    onChange={handleChange}
+                                    onChange={handleEquipmentChange}
                                     disabled={isView}
                                     style={{ width: '100px' }}/>
                             </div>
@@ -499,7 +506,7 @@ export default function NewRecipe() {
                                     placeholder="Batch Volume (Liters)"
                                     type="number"
                                     value={recipe.recipeEquipment.batchVolume}
-                                    onChange={handleChange}
+                                    onChange={handleEquipmentChange}
                                     disabled={isView}
                                     style={{ width: '100px' }}/>
                             </div>
@@ -510,7 +517,7 @@ export default function NewRecipe() {
                                     placeholder="Batch Time"
                                     type="number"
                                     value={recipe.batchTime}
-                                    onChange={handleChange}
+                                    onChange={handleEquipmentChange}
                                     disabled={isView}
                                     style={{ width: '100px' }}/>
                             </div>
@@ -527,8 +534,12 @@ export default function NewRecipe() {
                         <ul>
                             {recipe.recipeFermentables.map((fermentable) => (
                                 <li key={fermentable.id}>
-                                    <object className="malt-object" type="image/svg+xml" data="/malt.svg"></object>
-                                    {fermentable.weightGrams}g - <strong>{fermentable.name}</strong>
+                                    <div className="weight-div">
+                                        <object className="malt-object" type="image/svg+xml" data="/malt.svg"></object> {fermentable.weightGrams/1000} kg
+                                    </div>
+                                    <div>
+                                        <strong>{fermentable.name}</strong>
+                                    </div>
                                     <div className="ingredients-list-button-group">
                                         <button onClick={() => handleUpdateFermentable(fermentable)} type="button">
                                           <FiEdit size={20} color="#a8a8b3" />
@@ -541,8 +552,12 @@ export default function NewRecipe() {
                             ))}
                             {recipe.recipeHops.map((hop) => (
                                 <li key={hop.id}>
-                                    <object className="hop-object" type="image/svg+xml" data="/hop.svg"></object>
-                                    {hop.amount}g - <strong>{hop.name}</strong>
+                                    <div className="weight-div">
+                                        <object className="hop-object" type="image/svg+xml" data="/hop.svg"></object> {hop.amount}g
+                                    </div>
+                                    <div>
+                                    <strong>{hop.name}</strong>
+                                    </div>
                                     <div className="ingredients-list-button-group">
                                         <button onClick={() => handleUpdateHop(hop)} type="button">
                                           <FiEdit size={20} color="#a8a8b3" />
@@ -555,8 +570,12 @@ export default function NewRecipe() {
                             ))}
                             {recipe.recipeYeasts.map((yeast) => (
                                 <li key={yeast.id}>
-                                    <object className="yeast-object" type="image/svg+xml" data="/yeast.svg"></object>
-                                    {yeast.amount}g - <strong>{yeast.name}</strong>
+                                    <div className="weight-div">
+                                        <object className="yeast-object" type="image/svg+xml" data="/yeast.svg"></object> {yeast.amount}g
+                                    </div>
+                                    <div>
+                                        <strong>{yeast.name}</strong>
+                                    </div>
                                     <div className="ingredients-list-button-group">
                                         <button onClick={() => handleUpdateYeast(yeast)} type="button">
                                           <FiEdit size={20} color="#a8a8b3" />

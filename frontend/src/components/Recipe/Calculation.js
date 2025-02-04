@@ -1,3 +1,14 @@
+/*
+function roundOG(value, precision = 3) {
+    // Multiplica o valor pela potência de 10 para mover a vírgula
+    const factor = Math.pow(10, precision);
+    
+    // Arredonda o valor
+    const roundedValue = Math.round(value * factor) / factor;
+
+    return roundedValue;
+}*/
+
 export const calculateOG = (recipe) => {
     if (!recipe.recipeEquipment || !recipe.recipeEquipment.batchVolume || recipe.recipeEquipment.batchVolume <= 0) {
         console.error("Volume deve ser maior que 0 para calcular a OG.");
@@ -30,9 +41,14 @@ export const calculateOG = (recipe) => {
     });
 
     const OG = (totalGravityPoints / volumeGallons) / 1000 + 1;
+    
+/*
+    console.log("OG: " + OG);
+    
+    const roundedOG = roundOG(OG, 3);
 
-    console.log("OG FIM: " + OG.toFixed(3));
-
+    console.log("roundedOG: " + roundedOG);
+*/
     return OG.toFixed(3);
 };
 
@@ -51,9 +67,13 @@ export const calculateEBC = (recipe) => {
         totalEBC += weightKg * ebc;
     });
 
-    const EBCValue = (totalEBC / recipe.recipeEquipment.batchVolume) * 4.23;
+ /*   Calculo retirado no forum: https://www.jimsbeerkit.co.uk/forum/viewtopic.php?t=26000
+ const EBCValue = (totalEBC * 10 * 0.75) / recipe.recipeEquipment.batchVolume;
+ */
 
-    return EBCValue.toFixed(1);
+    const EBCValue = totalEBC * 10 / recipe.recipeEquipment.batchVolume;
+
+    return EBCValue.toFixed(2);
 };
 
 export const calculateIBU = (recipe, OG) => {

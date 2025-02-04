@@ -89,15 +89,15 @@
 }
 
 .bottom-left, .bottom-right {
-    flex: 1;
     min-width: 0; 
 }
 
 .bottom-left {
-    background-color: #aa8452; 
+    background-color: #aa8e69; 
     position: relative;
     box-shadow: 0 5px 10px rgba(0, 0, 0, 0.4);
     padding-top: 5px;
+    width: 500px;
 }
 
 .bottom-left li {
@@ -123,6 +123,7 @@
     padding-top: 5px;
     background-color: #987233; 
     box-shadow: 0 5px 10px rgba(0, 0, 0, 0.4);
+    width: 400px;
 }
 
 .bottom-right-beer {
@@ -162,7 +163,7 @@
 .modalAddButtonFermentable {
     width: 140px;
     height: 40px;
-    background: #903615;
+    background: #744410;
     border: 0;
     border-radius: 8px;
     color: #FFF;
@@ -179,7 +180,7 @@
 .modalAddButtonHop {
     width: 140px;
     height: 40px;
-    background: #903615;
+    background: #744410;
     border: 0;
     border-radius: 8px;
     color: #FFF;
@@ -196,7 +197,7 @@
 .modalAddButtonYeast {
     width: 140px;
     height: 40px;
-    background: #903615;
+    background: #744410;
     border: 0;
     border-radius: 8px;
     color: #FFF;
@@ -216,7 +217,7 @@
 
 .bottom-left ul li .ingredients-list-button-group {
     position: absolute;
-    left: 390px;
+    left: 435px;
     display: flex;
     gap: 8px;
 }
@@ -229,4 +230,9 @@
 
 .bottom-left ul li .ingredients-list-button-group button:hover {
     opacity: 0.8;
+}
+
+.weight-div {
+    display: inline-block;
+    width: 65px; /* Tamanho fixo para garantir o alinhamento */
 }

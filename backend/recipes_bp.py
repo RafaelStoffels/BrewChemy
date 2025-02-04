@@ -384,6 +384,35 @@ def create_recipes_bp():
                 )
                 db.session.add(new_yeast)
 
+        # Atualizar equipment
+        equipment_data = data.get("recipeEquipment", {})
+        if equipment_data:
+            # Verifica se já existe um equipamento associado à receita
+            existing_equipment = RecipeEquipment.query.filter_by(recipe_id=recipe.id).first()
+
+            if existing_equipment:
+                # Atualiza os campos existentes
+                existing_equipment.name = equipment_data["name"]
+                existing_equipment.description = equipment_data.get("description")
+                existing_equipment.efficiency = equipment_data["efficiency"]
+                existing_equipment.batch_volume = equipment_data["batchVolume"]
+                existing_equipment.pre_boil_volume = equipment_data["preBoilVolume"]
+                existing_equipment.boil_time = equipment_data["boilTime"]
+                existing_equipment.boil_temperature = equipment_data["boilTemperature"]
+            else:
+                # Se não encontrar, cria um novo objeto de equipamento
+                new_equipment = RecipeEquipment(
+                    recipe_id=recipe.id,
+                    name=equipment_data["name"],
+                    description=equipment_data.get("description"),
+                    efficiency=equipment_data["efficiency"],
+                    batch_volume=equipment_data["batchVolume"],
+                    pre_boil_volume=equipment_data["preBoilVolume"],
+                    boil_time=equipment_data["boilTime"],
+                    boil_temperature=equipment_data["boilTemperature"]
+                )
+                db.session.add(new_equipment)
+
         # Remover fermentables deletados
         sent_fermentable_ids = {fermentable_data.get("id") for fermentable_data in fermentables_data if fermentable_data.get("id")}
         for fermentable_id, fermentable in existing_fermentables.items():
