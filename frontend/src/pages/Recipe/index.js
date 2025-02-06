@@ -6,9 +6,12 @@ import { v4 as uuidv4 } from 'uuid';
 
 import api from '../../services/api';
 import AuthContext from '../../context/AuthContext';
-import { AddFermentableModal, AddHopModal, AddYeastModal, UpdateFermentableModal, UpdateHopModal, UpdateYeastModal } from './modals';
+import { AddFermentableModal, AddHopModal, AddMiscModal, AddYeastModal, UpdateFermentableModal, UpdateHopModal, UpdateYeastModal } from './modals';
+
+import { getOpenAIResponse } from '../../services/OpenAI';
 import { fetchFermentables } from '../../services/Fermentables';
 import { fetchHops } from '../../services/Hops';
+import { fetchMisc } from '../../services/misc';
 import { fetchYeasts } from '../../services/Yeasts';
 import { fetchRecipeById } from '../../services/recipes';
 import { fetchEquipmentById } from '../../services/Equipments';
@@ -36,25 +39,31 @@ export default function NewRecipe() {
     /* Modals */
     const [isFermentableModalOpen, setIsFermentableModalOpen] = useState(false);
     const [isHopModalOpen, setIsHopModalOpen] = useState(false);
+    const [isMiscModalOpen, setIsMiscModalOpen] = useState(false);
     const [isYeastModalOpen, setIsYeastModalOpen] = useState(false);
     const [isUpdateFermentableModalOpen, setIsUpdateFermentableModalOpen] = useState(false);
     const [isUpdateHopModalOpen, setIsUpdateHopModalOpen] = useState(false);
+    const [isUpdateMiscModalOpen, setIsUpdateMiscModalOpen] = useState(false);
     const [isUpdateYeastModalOpen, setIsUpdateYeastModalOpen] = useState(false);
 
     const closeFermentableModal = () => setIsFermentableModalOpen(false);
     const closeHopModal = () => setIsHopModalOpen(false);
+    const closeMiscModal = () => setIsMiscModalOpen(false);
     const closeYeastModal = () => setIsYeastModalOpen(false);
     const closeUpdateFermentableModal = () => setIsUpdateFermentableModalOpen(false);
     const closeUpdateHopModal = () => setIsUpdateHopModalOpen(false);
+    const closeUpdateMiscModal = () => setIsUpdateMiscModalOpen(false);
     const closeUpdateYeastModal = () => setIsUpdateYeastModalOpen(false);
 
     const [selectedFermentable, setSelectedFermentable] = useState(null);
     const [selectedHop, setSelectedHop] = useState(null);
+    const [selectedMisc, setSelectedMisc] = useState(null);
     const [selectedYeast, setSelectedYeast] = useState(null);
 
     /* Lists */
     const [fermentableList, setFermentableList] = useState([]);
     const [hopList, setHopList] = useState([]);
+    const [miscList, setMiscList] = useState([]);
     const [yeastList, setYeastList] = useState([]);
 
     const [equipment, setEquipment] = useState(0);
@@ -65,6 +74,7 @@ export default function NewRecipe() {
     const [EBC, setEBC] = useState(0);
     const [IBU, setIBU] = useState(0);
     const [ABV, setABV] = useState(0);
+    const [openAI, setOpenAI] = useState("")
 
     /* Components */
     const [selectedStyle, setSelectedStyle] = useState('');
@@ -80,6 +90,7 @@ export default function NewRecipe() {
         notes: '',
         recipeFermentables: [],
         recipeHops: [],
+        recipeMisc: [],
         recipeYeasts: [],
         recipeEquipment: {},
     });
@@ -180,6 +191,11 @@ export default function NewRecipe() {
         setRecipe({...recipeResponse});
     };
 
+    const fetchOpenAIResponse = async () => {
+        const openAIResponse = await getOpenAIResponse(recipe, user.token);
+        setOpenAI(openAIResponse);
+    };
+
     const openFermentableModal = async () => {
         const fermentables = await fetchFermentables(api, user.token);
         setFermentableList(fermentables);
@@ -190,6 +206,12 @@ export default function NewRecipe() {
         const hops = await fetchHops(api, user.token);
         setHopList(hops);
         setIsHopModalOpen(true);
+    };
+
+    const openMiscModal = async () => {
+        const misc = await fetchMisc(api, user.token);
+        setMiscList(misc);
+        setIsMiscModalOpen(true);
     };
 
     const openYeastModal = async () => {
@@ -208,6 +230,11 @@ export default function NewRecipe() {
         setIsUpdateHopModalOpen(true);
     };
 
+    const handleUpdateMisc = (misc) => {
+        setSelectedMisc(misc);
+        setIsUpdateMiscModalOpen(true);
+    };
+
     const handleUpdateYeast = (yeast) => {
         setSelectedYeast(yeast);
         setIsUpdateYeastModalOpen(true);
@@ -218,19 +245,19 @@ export default function NewRecipe() {
             const selectedFermentableDetails = fermentableList.find((fermentable) => fermentable.id === selectedFermentable);
 
             if (selectedFermentableDetails) {
-                const fermentableWithWeight = {
+                const fermentableWithQuantity = {
                     ...selectedFermentableDetails,
-                    weightGrams: parseFloat(quantity),
+                    quantity: parseFloat(quantity),
                 };
 
                 setRecipe((prevRecipe) => ({
                     ...prevRecipe,
                     recipeFermentables: [
-                        ...prevRecipe.recipeFermentables,
+                        ...(Array.isArray(prevRecipe.recipeFermentables) ? prevRecipe.recipeFermentables : []), // Garante que seja um array
                         {
                             ...selectedFermentableDetails,
                             id: generateId(),
-                            weightGrams: parseFloat(quantity),
+                            quantity: parseFloat(quantity),
                         },
                     ],
                 }));
@@ -243,24 +270,24 @@ export default function NewRecipe() {
         }
     };
 
-    const handleAddHopRecipe = (selectedHop, amount) => {
-        if (selectedHop && amount) {
+    const handleAddHopRecipe = (selectedHop, quantity) => {
+        if (selectedHop && quantity) {
             const selectedHopDetails = hopList.find((hop) => hop.id === selectedHop);
 
             if (selectedHopDetails) {
-                const hopWithAmount = {
+                const hopWithQuantity = {
                     ...selectedHopDetails,
-                    amount: parseFloat(amount),
+                    quantity: parseFloat(quantity),
                 };
 
                 setRecipe((prevRecipe) => ({
                     ...prevRecipe,
                     recipeHops: [
-                        ...prevRecipe.recipeHops,
+                        ...(Array.isArray(prevRecipe.recipeHops) ? prevRecipe.recipeHops : []), // Garante que seja um array
                         {
                             ...selectedHopDetails,
                             id: generateId(),
-                            amount: parseFloat(amount),
+                            quantity: parseFloat(quantity),
                         },
                     ],
                 }));
@@ -274,23 +301,54 @@ export default function NewRecipe() {
         }
     };
 
-    const handleAddYeastRecipe = (selectedYeast, amount) => {
-        if (selectedYeast && amount) {
+    const handleAddMiscRecipe = (selectedMisc, quantity) => {
+        if (selectedMisc && quantity) {
+            const selectedMiscDetails = miscList.find((misc) => misc.id === selectedMisc);
+
+            if (selectedMiscDetails) {
+                const miscWithQuantity = {
+                    ...selectedMiscDetails,
+                    quantity: parseFloat(quantity),
+                };
+
+                setRecipe((prevRecipe) => ({
+                    ...prevRecipe,
+                    recipeMisc: [
+                        ...(Array.isArray(prevRecipe.recipeMisc) ? prevRecipe.recipeMisc : []), // Garante que seja um array
+                        {
+                            ...selectedMiscDetails,
+                            id: generateId(),
+                            quantity: parseFloat(quantity),
+                        },
+                    ],
+                }));
+
+                closeMiscModal();
+            } else {
+                alert('Selected misc not found.');
+            }
+        } else {
+            alert('Please select a misc and enter a quantity.');
+        }
+    };
+
+    const handleAddYeastRecipe = (selectedYeast, quantity) => {
+        if (selectedYeast && quantity) {
             const selectedYeastDetails = yeastList.find((yeast) => yeast.id === selectedYeast);
 
             if (selectedYeastDetails) {
-                const yeastWithAmount = {
+                const yeastWithQuantity = {
                     ...selectedYeastDetails,
-                    amount: parseFloat(amount),
+                    quantity: parseFloat(quantity),
                 };
                 setRecipe((prevRecipe) => ({
                     ...prevRecipe,
                     recipeYeasts: [
-                        ...prevRecipe.recipeYeasts,
+                        ...(Array.isArray(prevRecipe.recipeYeasts) ? prevRecipe.recipeYeasts : []), // Garante que seja um array
                         {
                             ...selectedYeastDetails,
                             id: generateId(),
-                            amount: parseFloat(amount),
+                            quantity: parseFloat(quantity),
                         },
                     ],
                 }));
@@ -320,6 +378,16 @@ export default function NewRecipe() {
             ...prevRecipe,
             recipeHops: prevRecipe.recipeHops.map((hop) =>
                 hop.id === updatedHop.id ? updatedHop : hop
+            ),
+        }));
+    };
+
+    const handleUpdateMiscRecipe = (updatedMisc) => {
+
+        setRecipe((prevRecipe) => ({
+            ...prevRecipe,
+            recipeMisc: prevRecipe.recipeMisc.map((misc) =>
+                misc.id === updatedMisc.id ? updatedMisc : misc
             ),
         }));
     };
@@ -364,6 +432,17 @@ export default function NewRecipe() {
         }));
     };
 
+    const handleDeleteMisc = (miscID) => {
+        const updatedMisc = recipe.recipeMisc.filter(
+            (misc) => misc.id !== miscID
+        );
+    
+        setRecipe((prevRecipe) => ({
+            ...prevRecipe,
+            recipeMisc: updatedMisc,
+        }));
+    };
+
     const handleDeleteYeast = (yeastID) => {
         const updatedYeasts = recipe.recipeYeasts.filter(
             (yeast) => yeast.id !== yeastID
@@ -397,6 +476,9 @@ export default function NewRecipe() {
     async function handleSubmit(e) {
         e.preventDefault();
 
+        console.log(recipe.recipeMisc);
+
+
         const data = {
             name: recipe.name,
             style: recipe.style,
@@ -407,6 +489,7 @@ export default function NewRecipe() {
             notes: recipe.notes,
             recipeFermentables: recipe.recipeFermentables,
             recipeHops: recipe.recipeHops,
+            recipeMisc: recipe.recipeMisc,
             recipeYeasts: recipe.recipeYeasts,
             recipeEquipment: recipe.recipeEquipment,
         };
@@ -476,6 +559,9 @@ export default function NewRecipe() {
                                     ))}
                                 </select>
                             </div>
+
+                        </div>
+                        <div className="inputs-row">
                             <div className="input-field">
                                 <label htmlFor="name">Equipment</label>
                                 <input
@@ -486,8 +572,6 @@ export default function NewRecipe() {
                                     disabled={isView}
                                     style={{ width: '220px' }}/>
                             </div>
-                        </div>
-                        <div className="inputs-row">
                             <div className="input-field">
                                 <label htmlFor="name">Efficiency</label>
                                 <input
@@ -527,15 +611,17 @@ export default function NewRecipe() {
                 <div className="buttons-container">
                     <button onClick={openFermentableModal} className="modalAddButtonFermentable">Add Fermentable</button>
                     <button onClick={openHopModal} className="modalAddButtonHop">Add Hop</button>
+                    <button onClick={openMiscModal} className="modalAddButtonMisc">Add Misc</button>
                     <button onClick={openYeastModal} className="modalAddButtonYeast">Add Yeast</button>
+                    <button onClick={fetchOpenAIResponse} className="modalAddButtonFermentable">Mystical Brew Wisdom</button>
                 </div>
                 <div className="bottom-container">
                     <div className="bottom-left">
                         <ul>
-                            {recipe.recipeFermentables.map((fermentable) => (
+                            {recipe.recipeFermentables?.map((fermentable) => (
                                 <li key={fermentable.id}>
-                                    <div className="weight-div">
-                                        <object className="malt-object" type="image/svg+xml" data="/malt.svg"></object> {fermentable.weightGrams/1000} kg
+                                    <div className="quantity-div">
+                                        <object className="malt-object" type="image/svg+xml" data="/malt.svg"></object> {fermentable.quantity/1000}kg
                                     </div>
                                     <div>
                                         <strong>{fermentable.name}</strong>
@@ -550,10 +636,10 @@ export default function NewRecipe() {
                                     </div>
                                 </li>
                             ))}
-                            {recipe.recipeHops.map((hop) => (
+                            {recipe.recipeHops?.map((hop) => (
                                 <li key={hop.id}>
-                                    <div className="weight-div">
-                                        <object className="hop-object" type="image/svg+xml" data="/hop.svg"></object> {hop.amount}g
+                                    <div className="quantity-div">
+                                        <object className="hop-object" type="image/svg+xml" data="/hop.svg"></object> {hop.quantity}g
                                     </div>
                                     <div>
                                     <strong>{hop.name}</strong>
@@ -568,10 +654,28 @@ export default function NewRecipe() {
                                     </div>
                                 </li>
                             ))}
-                            {recipe.recipeYeasts.map((yeast) => (
+                            {recipe.recipeMisc?.map((misc) => (
+                                <li key={misc.id}>
+                                    <div className="quantity-div">
+                                        <object className="misc-object" type="image/svg+xml" data="/misc.svg"></object> {misc.quantity}g
+                                    </div>
+                                    <div>
+                                    <strong>{misc.name}</strong>
+                                    </div>
+                                    <div className="ingredients-list-button-group">
+                                        <button onClick={() => handleUpdateMisc(misc)} type="button">
+                                          <FiEdit size={20} color="#a8a8b3" />
+                                        </button>
+                                        <button onClick={() => handleDeleteMisc(misc.id)} type="button">
+                                          <FiTrash2 size={20} color="#a8a8b3" />
+                                        </button>
+                                    </div>
+                                </li>
+                            ))}
+                            {recipe.recipeYeasts?.map((yeast) => (
                                 <li key={yeast.id}>
-                                    <div className="weight-div">
-                                        <object className="yeast-object" type="image/svg+xml" data="/yeast.svg"></object> {yeast.amount}g
+                                    <div className="quantity-div">
+                                        <object className="yeast-object" type="image/svg+xml" data="/yeast.svg"></object> {yeast.quantity}g
                                     </div>
                                     <div>
                                         <strong>{yeast.name}</strong>
@@ -604,6 +708,14 @@ export default function NewRecipe() {
                         <object className="beer-object" type="image/svg+xml" data="/beer.svg"></object>
                     </div>
                 </div>
+                <div className="top">
+                    <textarea
+                        name="IA"
+                        placeholder="Mystical Wisdom"
+                        value={openAI}
+                        disabled={true}
+                        style={{ width: '1070px' }}/>
+                </div>
                 {!isView && (
                     <button onClick={handleSubmit} className='crud-save-button' type="submit">
                         Save
@@ -621,6 +733,12 @@ export default function NewRecipe() {
                 closeModal={closeHopModal}
                 hopList={hopList}
                 handleAddHopRecipe={handleAddHopRecipe}
+            />
+            <AddMiscModal
+                isOpen={isMiscModalOpen}
+                closeModal={closeMiscModal}
+                miscList={miscList}
+                handleAddMiscRecipe={handleAddMiscRecipe}
             />
             <AddYeastModal
                 isOpen={isYeastModalOpen}

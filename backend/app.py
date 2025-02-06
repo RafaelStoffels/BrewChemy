@@ -1,9 +1,11 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 from flask_cors import CORS
 from db import db, configure_db
+from openai_bp import openai_route
 from equipments_bp import create_equipments_bp
 from fermentables_bp import create_fermentables_bp
 from hops_bp import create_hops_bp
+from misc_bp import create_misc_bp
 from recipes_bp import create_recipes_bp
 from users_bp import create_users_bp
 from yeasts_bp import create_yeasts_bp
@@ -22,6 +24,8 @@ def create_app():
     app.register_blueprint(create_recipes_bp(), url_prefix="/api/")
     app.register_blueprint(create_users_bp(), url_prefix="/api/")
     app.register_blueprint(create_yeasts_bp(), url_prefix="/api")
+    app.register_blueprint(create_misc_bp(), url_prefix="/api")
+    app.register_blueprint(openai_route(), url_prefix='/api')
 
     return app
 

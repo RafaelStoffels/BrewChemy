@@ -63,18 +63,18 @@ export function AddFermentableModal({ isOpen, closeModal, fermentableList, handl
 
 export function AddHopModal({ isOpen, closeModal, hopList, handleAddHopRecipe }) {
     const [selectedHop, setSelectedHop] = useState(null);
-    const [amount, setAmount] = useState('');
+    const [quantity, setQuantity] = useState('');
 
     const handleChange = (hopId) => {
         setSelectedHop(hopId);
     };
 
-    const handleAmountChange = (e) => {
-        setAmount(e.target.value);
+    const handleQuantityChange = (e) => {
+        setQuantity(e.target.value);
     };
 
     const handleSaveButton = () => {
-        handleAddHopRecipe(selectedHop, amount);
+        handleAddHopRecipe(selectedHop, quantity);
     };
 
     return (
@@ -111,9 +111,9 @@ export function AddHopModal({ isOpen, closeModal, hopList, handleAddHopRecipe })
             <div>
                 <input
                     type="number"
-                    placeholder="Amount"
-                    value={amount}
-                    onChange={handleAmountChange}
+                    placeholder="Quantity"
+                    value={quantity}
+                    onChange={handleQuantityChange}
                 />
             </div>
             <button onClick={handleSaveButton} className="crud-save-button">Add Hop</button>
@@ -121,20 +121,80 @@ export function AddHopModal({ isOpen, closeModal, hopList, handleAddHopRecipe })
     );
 }
 
+export function AddMiscModal({ isOpen, closeModal, miscList, handleAddMiscRecipe }) {
+    const [selectedMisc, setSelectedMisc] = useState(null);
+    const [quantity, setQuantity] = useState('');
+
+    const handleChange = (miscID) => {
+        setSelectedMisc(miscID);
+    };
+
+    const handleQuantityChange = (e) => {
+        setQuantity(e.target.value);
+    };
+
+    const handleSaveButton = () => {
+        handleAddMiscRecipe(selectedMisc, quantity);
+    };
+
+    return (
+        <Modal
+            isOpen={isOpen}
+            onRequestClose={closeModal}
+            contentLabel="Misc Modal"
+            className="modal-content"  // Classe CSS para o conteúdo
+            overlayClassName="modal-overlay"  // Classe CSS para o overlay
+        >
+            <h2>Select a misc</h2>
+            <ul>
+                {miscList.length > 0 ? (
+                    miscList.map((misc) => (
+                        <li key={misc.id} style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
+                            <input
+                                type="radio"
+                                id={`misc-${misc.id}`}
+                                name="misc"
+                                value={misc.id}
+                                checked={selectedMisc === misc.id}
+                                onChange={() => handleChange(misc.id)}
+                                style={{ marginRight: '10px' }}
+                            />
+                            <label htmlFor={`misc-${misc.id}`}>
+                                <strong>{misc.name}</strong>
+                            </label>
+                        </li>
+                    ))
+                ) : (
+                    <p>No miscs available.</p>
+                )}
+            </ul>
+            <div>
+                <input
+                    type="number"
+                    placeholder="Quantity"
+                    value={quantity}
+                    onChange={handleQuantityChange}
+                />
+            </div>
+            <button onClick={handleSaveButton} className="crud-save-button">Add misc</button>
+        </Modal>
+    );
+}
+
 export function AddYeastModal({ isOpen, closeModal, yeastList, handleAddYeastRecipe }) {
     const [selectedYeast, setSelectedYeast] = useState(null);
-    const [amount, setAmount] = useState('');
+    const [quantity, setQuantity] = useState('');
 
     const handleChange = (yeastID) => {
         setSelectedYeast(yeastID);
     };
 
-    const handleAmountChange = (e) => {
-        setAmount(e.target.value);
+    const handleQuantityChange = (e) => {
+        setQuantity(e.target.value);
     };
 
     const handleSaveButton = () => {
-        handleAddYeastRecipe(selectedYeast, amount);
+        handleAddYeastRecipe(selectedYeast, quantity);
     };
 
     return (
@@ -171,9 +231,9 @@ export function AddYeastModal({ isOpen, closeModal, yeastList, handleAddYeastRec
             <div>
                 <input
                     type="number"
-                    placeholder="Amount"
-                    value={amount}
-                    onChange={handleAmountChange}
+                    placeholder="Quantity"
+                    value={quantity}
+                    onChange={handleQuantityChange}
                 />
             </div>
             <button onClick={handleSaveButton} className="crud-save-button">Add yeast</button>
@@ -274,8 +334,8 @@ export function UpdateFermentableModal({ isOpen, closeModal, selectedFermentable
                                 <input 
                                     placeholder="Quantity"
                                     type="number"
-                                    value={localFermentableObject.weightGrams || ''}
-                                    onChange={(e) => handleChange('weightGrams', e.target.value)}
+                                    value={localFermentableObject.quantity || ''}
+                                    onChange={(e) => handleChange('quantity', e.target.value)}
                                     style={{ width: '100px' }}
                                 />
                             </div>
@@ -382,11 +442,11 @@ export function UpdateHopModal({ isOpen, closeModal, selectedHop, handleUpdateHo
                                 />
                             </div>
                         </div>
-                        <label htmlFor="name">Amount</label>
+                        <label htmlFor="name">Quantity</label>
                         <input 
-                            placeholder="Amount"
-                            value={localHopObject.amount || ''}
-                            onChange={(e) => handleChange('amount', e.target.value)}
+                            placeholder="Quantity"
+                            value={localHopObject.quantity || ''}
+                            onChange={(e) => handleChange('quantity', e.target.value)}
                         />
                         <button className="crud-save-button" type="submit">
                             Save
@@ -406,7 +466,6 @@ export function UpdateYeastModal({ isOpen, closeModal, selectedYeast, handleUpda
     // Atualiza o estado local sempre que o Yeast recebido como prop mudar
     useEffect(() => {
         if (selectedYeast) {
-            console.log("selectedYeast: " + selectedYeast);
             setLocalYeastObject(selectedYeast);
         }
     }, [selectedYeast]);
@@ -503,11 +562,11 @@ export function UpdateYeastModal({ isOpen, closeModal, selectedYeast, handleUpda
                             value={localYeastObject.alcoholTolerance || ''}
                             onChange={(e) => handleChange('alcoholTolerance', e.target.value)}
                         />
-                        <label htmlFor="name">Amount</label>
+                        <label htmlFor="name">Quantity</label>
                         <input 
-                            placeholder="Amount"
-                            value={localYeastObject.amount || ''}
-                            onChange={(e) => handleChange('amount', e.target.value)}
+                            placeholder="Quantity"
+                            value={localYeastObject.quantity || ''}
+                            onChange={(e) => handleChange('quantity', e.target.value)}
                         />
 
                         <div className="input-group">

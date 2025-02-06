@@ -31,7 +31,7 @@ export const calculateOG = (recipe) => {
     let totalGravityPoints = 0;
 
     recipe.recipeFermentables.forEach((fermentable) => {
-        const weightKg = fermentable.weightGrams / 1000;
+        const weightKg = fermentable.quantity / 1000;
         const weightLb = weightKg * 2.20462;
         const potential = fermentable.potentialExtract || 1.036;
 
@@ -61,7 +61,7 @@ export const calculateEBC = (recipe) => {
     let totalEBC = 0;
 
     recipe.recipeFermentables.forEach((fermentable) => {
-        const weightKg = fermentable.weightGrams / 1000;
+        const weightKg = fermentable.quantity / 1000;
         const ebc = fermentable.ebc || 0;
 
         totalEBC += weightKg * ebc;
@@ -89,16 +89,16 @@ export const calculateIBU = (recipe, OG) => {
     let totalIBU = 0;
 
     recipe.recipeHops.forEach((hop) => {
-      const { amount, alphaAcidContent, boilTime } = hop;
+      const { quantity, alphaAcidContent, boilTime } = hop;
   
-      if (!amount || !alphaAcidContent) {
+      if (!quantity || !alphaAcidContent) {
         console.error("Informações de lúpulo inválidas.");
       }
   
       const utilization = (1.65 * Math.pow(0.000125, OG - 1)) *
                           ((1 - Math.exp(-0.04 * boilTime)) / 4.15);
 
-      const ibu = ((utilization * (alphaAcidContent / 100) * amount * 1000) / recipe.recipeEquipment.batchVolume);
+      const ibu = ((utilization * (alphaAcidContent / 100) * quantity * 1000) / recipe.recipeEquipment.batchVolume);
   
       totalIBU += ibu;
     });

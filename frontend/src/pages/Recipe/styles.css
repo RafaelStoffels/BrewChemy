@@ -121,7 +121,7 @@
     margin-left: 5px;
     padding-left: 5px;
     padding-top: 5px;
-    background-color: #987233; 
+    background-color: #af8542; 
     box-shadow: 0 5px 10px rgba(0, 0, 0, 0.4);
     width: 400px;
 }
@@ -155,46 +155,12 @@
     fill: #ff5733;
 }
 
-.malt-object, .yeast-object, .hop-object{
+.malt-object, .yeast-object, .hop-object, .misc-object{
     width: 20px;
     height: 20px;
 }
 
-.modalAddButtonFermentable {
-    width: 140px;
-    height: 40px;
-    background: #744410;
-    border: 0;
-    border-radius: 8px;
-    color: #FFF;
-    font-weight: 700;
-    margin-top: 2px;
-    display: inline-block;
-    text-align: center;
-    text-decoration: none;
-    font-size: 15px;
-    transition: filter 0.2s;
-    cursor: pointer;
-}
-
-.modalAddButtonHop {
-    width: 140px;
-    height: 40px;
-    background: #744410;
-    border: 0;
-    border-radius: 8px;
-    color: #FFF;
-    font-weight: 700;
-    margin-top: 2px;
-    display: inline-block;
-    text-align: center;
-    text-decoration: none;
-    font-size: 15px;
-    transition: filter 0.2s;
-    cursor: pointer;
-}
-
-.modalAddButtonYeast {
+.modalAddButtonFermentable, .modalAddButtonHop, .modalAddButtonYeast, .modalAddButtonMisc {
     width: 140px;
     height: 40px;
     background: #744410;
@@ -232,7 +198,7 @@
     opacity: 0.8;
 }
 
-.weight-div {
+.quantity-div {
     display: inline-block;
     width: 65px; /* Tamanho fixo para garantir o alinhamento */
 }

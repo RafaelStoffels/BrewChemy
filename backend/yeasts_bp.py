@@ -17,7 +17,6 @@ class Yeast(db.Model):
     flavor_profile = db.Column(db.String(100))
     flocculation = db.Column(db.String(50))
     description = db.Column(db.Text)
-    notes = db.Column(db.Text)
 
     # Convert snake_case to camelCase in JSON
     def to_dict(self):
@@ -33,7 +32,6 @@ class Yeast(db.Model):
             "flavorProfile": self.flavor_profile,
             "flocculation": self.flocculation,
             "description": self.description,
-            "notes": self.notes,
         }
     
 class YeastOfficial(db.Model):
@@ -51,7 +49,6 @@ class YeastOfficial(db.Model):
     flavor_profile = db.Column(db.String(100))
     flocculation = db.Column(db.String(50))
     description = db.Column(db.Text)
-    notes = db.Column(db.Text)
 
     # Convert snake_case to camelCase in JSON
     def to_dict(self):
@@ -67,7 +64,6 @@ class YeastOfficial(db.Model):
             "flavorProfile": self.flavor_profile,
             "flocculation": self.flocculation,
             "description": self.description,
-            "notes": self.notes,
         }
 
 def create_yeasts_bp():
@@ -113,7 +109,6 @@ def create_yeasts_bp():
             flavor_profile=sanitize(data.get("flavorProfile")),
             flocculation=sanitize(data.get("flocculation")),
             description=sanitize(data.get("description")),
-            notes=sanitize(data.get("notes"))
         )
         db.session.add(new_yeast)
         db.session.commit()
@@ -140,7 +135,6 @@ def create_yeasts_bp():
         yeast.flavor_profile = data.get("flavorProfile", yeast.flavor_profile)
         yeast.flocculation = data.get("flocculation", yeast.flocculation)
         yeast.description = data.get("description", yeast.description)
-        yeast.notes = data.get("notes", yeast.notes)
 
         db.session.commit()
 
