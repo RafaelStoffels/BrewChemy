@@ -57,8 +57,6 @@ export default function YeastList() {
 
       <Sidebar />
 
-      <Header />
-
       <div className="div-addButton">
         <Link className="Addbutton" to="/Yeasts/new">Add new yeasts</Link>
       </div>

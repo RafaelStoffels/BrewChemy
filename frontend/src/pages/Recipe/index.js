@@ -6,7 +6,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 import api from '../../services/api';
 import AuthContext from '../../context/AuthContext';
-import { AddFermentableModal, AddHopModal, AddMiscModal, AddYeastModal, UpdateFermentableModal, UpdateHopModal, UpdateYeastModal } from './modals';
+import { AddFermentableModal, AddHopModal, AddMiscModal, AddYeastModal, UpdateFermentableModal, UpdateHopModal, UpdateMiscModal, UpdateYeastModal } from './modals';
 
 import { getOpenAIResponse } from '../../services/OpenAI';
 import { fetchFermentables } from '../../services/Fermentables';
@@ -132,7 +132,7 @@ export default function NewRecipe() {
             console.log("EBCResult: " + EBCResult);
             setEBC(EBCResult);
 
-            const IBUresult = calculateIBU(recipe, OGResult);
+            const IBUresult = calculateIBU(recipe, OGResult, setRecipe);
             setIBU(IBUresult);
 
             setSelectedStyle(recipe.style);
@@ -270,14 +270,15 @@ export default function NewRecipe() {
         }
     };
 
-    const handleAddHopRecipe = (selectedHop, quantity) => {
-        if (selectedHop && quantity) {
+    const handleAddHopRecipe = (selectedHop, quantity, boilTime) => {
+        if (selectedHop && quantity && boilTime) {
             const selectedHopDetails = hopList.find((hop) => hop.id === selectedHop);
 
             if (selectedHopDetails) {
                 const hopWithQuantity = {
                     ...selectedHopDetails,
                     quantity: parseFloat(quantity),
+                    boilTime: boilTime,
                 };
 
                 setRecipe((prevRecipe) => ({
@@ -288,6 +289,7 @@ export default function NewRecipe() {
                             ...selectedHopDetails,
                             id: generateId(),
                             quantity: parseFloat(quantity),
+                            boilTime: boilTime
                         },
                     ],
                 }));
@@ -520,15 +522,6 @@ export default function NewRecipe() {
             <div className='content'>
 
                 <Sidebar />
-                <Header />
-
-                <section>
-                    <h1>
-                        {isEditing ? 'Update Recipe' :
-                            isView ? 'Recipe Details' :
-                            'Add New Recipe'}
-                    </h1>
-                </section>
 
                 <div className="top">
                     <form onSubmit={handleSubmit}>
@@ -537,11 +530,10 @@ export default function NewRecipe() {
                                 <label htmlFor="name">Recipe Name</label>
                                 <input
                                     name="name"
-                                    placeholder="Recipe Name"
                                     value={recipe.name}
                                     onChange={handleRecipeChange}
                                     disabled={isView}
-                                    style={{ width: '520px' }}/>
+                                    style={{ width: '610px' }}/>
                             </div>
                             <div className="input-field">
                                 <label htmlFor="name">Style</label>
@@ -559,35 +551,42 @@ export default function NewRecipe() {
                                     ))}
                                 </select>
                             </div>
-
+                            <div className="input-field">
+                                <label htmlFor="name">Creation Date</label>
+                                <input
+                                    name="creation date"
+                                    value={recipe.creationDate}
+                                    onChange={handleRecipeChange}
+                                    disabled={isView}
+                                    style={{ width: '120px' }}/>
+                            </div>
+                        </div>
+                        <div className="inputs-row">
+                            <div className="input-field">
+                                <label htmlFor="name">Description</label>
+                                <textarea
+                                    name="description"
+                                    rows={1}
+                                    value={recipe.description}
+                                    onChange={handleRecipeChange}
+                                    disabled={isView}
+                                    style={{ width: '1070px', height: '50px' }}/>
+                            </div>
                         </div>
                         <div className="inputs-row">
                             <div className="input-field">
                                 <label htmlFor="name">Equipment</label>
                                 <input
                                     name="equipment"
-                                    placeholder="Equipment"
                                     value={recipe.equipment}
                                     onChange={handleRecipeChange}
                                     disabled={isView}
-                                    style={{ width: '220px' }}/>
-                            </div>
-                            <div className="input-field">
-                                <label htmlFor="name">Efficiency</label>
-                                <input
-                                    name="efficiency"
-                                    placeholder="Efficiency"
-                                    type="number"
-                                    value={recipe.recipeEquipment.efficiency}
-                                    onChange={handleEquipmentChange}
-                                    disabled={isView}
-                                    style={{ width: '100px' }}/>
+                                    style={{ width: '250px' }}/>
                             </div>
                             <div className="input-field">
                                 <label htmlFor="name">Batch Volume</label>
                                 <input
                                     name="BatchVolume"
-                                    placeholder="Batch Volume (Liters)"
                                     type="number"
                                     value={recipe.recipeEquipment.batchVolume}
                                     onChange={handleEquipmentChange}
@@ -598,9 +597,51 @@ export default function NewRecipe() {
                                 <label htmlFor="name">Batch Time</label>
                                 <input
                                     name="batchTime"
-                                    placeholder="Batch Time"
+                                    type="number"
+                                    value={recipe.recipeEquipment.batchTime}
+                                    onChange={handleEquipmentChange}
+                                    disabled={isView}
+                                    style={{ width: '100px' }}/>
+                            </div>
+
+                            <div className="input-field">
+                                <label htmlFor="name">Brewhouse Efficiency</label>
+                                <input
+                                    name="efficiency"
+                                    type="number"
+                                    value={recipe.recipeEquipment.efficiency}
+                                    onChange={handleEquipmentChange}
+                                    disabled={isView}
+                                    style={{ width: '100px' }}/>
+                            </div>
+                            <div className="input-field">
+                                <label htmlFor="name">Mash Efficiency</label>
+                                <input
+                                    name="efficiency"
+                                    type="number"
+                                    value={recipe.recipeEquipment.efficiency}
+                                    onChange={handleEquipmentChange}
+                                    disabled={isView}
+                                    style={{ width: '100px' }}/>
+                            </div>
+                        </div>
+                        <div className="inputs-row">
+                            <div className="input-field">
+                                <label htmlFor="name">Pre Boil Volume</label>
+                                <input
+                                    name="preBoilVolume"
                                     type="number"
                                     value={recipe.batchTime}
+                                    onChange={handleEquipmentChange}
+                                    disabled={isView}
+                                    style={{ width: '100px' }}/>
+                            </div>
+                            <div className="input-field">
+                                <label htmlFor="name">Boil Time</label>
+                                <input
+                                    name="boilTime"
+                                    type="number"
+                                    value={recipe.recipeEquipment.boilTime}
                                     onChange={handleEquipmentChange}
                                     disabled={isView}
                                     style={{ width: '100px' }}/>
@@ -642,7 +683,7 @@ export default function NewRecipe() {
                                         <object className="hop-object" type="image/svg+xml" data="/hop.svg"></object> {hop.quantity}g
                                     </div>
                                     <div>
-                                    <strong>{hop.name}</strong>
+                                        <strong>{hop.name}</strong> (IBU: {hop.ibu})
                                     </div>
                                     <div className="ingredients-list-button-group">
                                         <button onClick={() => handleUpdateHop(hop)} type="button">
@@ -757,6 +798,12 @@ export default function NewRecipe() {
                 closeModal={closeUpdateHopModal}
                 selectedHop={selectedHop}
                 handleUpdateHopRecipe={handleUpdateHopRecipe}
+            />
+            <UpdateMiscModal
+                isOpen={isUpdateMiscModalOpen}
+                closeModal={closeUpdateMiscModal}
+                selectedMisc={selectedMisc}
+                handleUpdateMiscRecipe={handleUpdateMiscRecipe}
             />
             <UpdateYeastModal
                 isOpen={isUpdateYeastModalOpen}

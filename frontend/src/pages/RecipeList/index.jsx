@@ -54,8 +54,6 @@ export default function MaltList() {
     <div className='list-container'>
 
       <Sidebar />
-      
-      <Header />
 
       <div className="div-addButton">
          <Link className="Addbutton" to="/Recipe/new">Add new Recipe</Link>

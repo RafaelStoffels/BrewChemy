@@ -8,19 +8,19 @@
 }
 
 body{
-    font: 400 14px Roboto, sans-serif;
+    font: 400 16px Roboto, sans-serif;
     background: #d9c07c;
     -webkit-font-smoothing: antialiased;
 }
 
 input, button, textarea, select {
-    font: 400 18px Roboto, sans-serif;
+    font: 400 16px Roboto, sans-serif;
 }
 
 input, textarea, select {
     background-color: #d1a877;
     border: 1px solid #663d00bd; /* Cor de borda */
-    
+    height: 35px;
 }
 
 input:focus, textarea:focus, select:focus {

@@ -48,6 +48,9 @@
 .recipe-container .content form input, select,
 .recipe-container .content form textarea {
     margin-top: 8px;
+    border: 1px solid #663d00bd;
+    height: 35px;
+    margin-top: 3px;
 }
 
 .recipe-container section a {
@@ -162,7 +165,7 @@
 
 .modalAddButtonFermentable, .modalAddButtonHop, .modalAddButtonYeast, .modalAddButtonMisc {
     width: 140px;
-    height: 40px;
+    height: 35px;
     background: #744410;
     border: 0;
     border-radius: 8px;
@@ -201,4 +204,29 @@
 .quantity-div {
     display: inline-block;
     width: 65px; /* Tamanho fixo para garantir o alinhamento */
+}
+
+
+/* Barra status */
+.barra {
+    width: 100%;
+    height: 30px;
+    background-color: #e0e0e0; /* Cor do fundo (min e max) */
+    position: relative;
+    border-radius: 5px;
+}
+
+.marca {
+    position: absolute;
+    top: 50%;
+    width: 2px;
+    height: 20px;
+    background-color: red; /* Cor da marca */
+    transform: translateY(-50%);
+}
+
+.marcas {
+    position: relative;
+    width: 100%;
+    height: 100%;
 }

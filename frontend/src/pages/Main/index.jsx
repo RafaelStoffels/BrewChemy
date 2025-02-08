@@ -22,8 +22,6 @@ export default function Main() {
 
             <Sidebar />
 
-            <Header />
-
         </div>
     );
 }

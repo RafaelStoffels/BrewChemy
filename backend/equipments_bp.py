@@ -13,7 +13,6 @@ class Equipment(db.Model):
     description = db.Column(db.Text)
     efficiency = db.Column(db.Numeric(5, 2), nullable=False)
     batch_volume = db.Column(db.Numeric(10, 2), nullable=False)
-    pre_boil_volume = db.Column(db.Numeric(10, 2), nullable=False)
     boil_time = db.Column(db.Integer, nullable=False)
     boil_temperature = db.Column(db.Numeric(5, 2), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
@@ -27,7 +26,6 @@ class Equipment(db.Model):
             "description": self.description,
             "efficiency": float(self.efficiency),
             "batchVolume": float(self.batch_volume),
-            "preBoilVolume": float(self.pre_boil_volume),
             "boilTime": self.boil_time,
             "boilTemperature": float(self.boil_temperature),
             "createdAt": self.created_at.isoformat()
@@ -42,7 +40,6 @@ class EquipmentOfficial(db.Model):
     description = db.Column(db.Text)
     efficiency = db.Column(db.Numeric(5, 2), nullable=False)
     batch_volume = db.Column(db.Numeric(10, 2), nullable=False)
-    pre_boil_volume = db.Column(db.Numeric(10, 2), nullable=False)
     boil_time = db.Column(db.Integer, nullable=False)
     boil_temperature = db.Column(db.Numeric(5, 2), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
@@ -55,7 +52,6 @@ class EquipmentOfficial(db.Model):
             "description": self.description,
             "efficiency": float(self.efficiency),
             "batchVolume": float(self.batch_volume),
-            "preBoilVolume": float(self.pre_boil_volume),
             "boilTime": self.boil_time,
             "boilTemperature": float(self.boil_temperature),
             "createdAt": self.created_at.isoformat()
@@ -137,7 +133,6 @@ def create_equipments_bp():
             description=data.get("description"),
             efficiency=data.get("efficiency"),
             batch_volume=data.get("batchVolume"),
-            pre_boil_volume=data.get("preBoilVolume"),
             boil_time=data.get("boilTime"),
             boil_temperature=data.get("boilTemperature")
         )
@@ -158,7 +153,6 @@ def create_equipments_bp():
         equipment.description = data.get("description", equipment.description)
         equipment.efficiency = data.get("efficiency", equipment.efficiency)
         equipment.batch_volume = data.get("batchVolume", equipment.batch_volume)
-        equipment.pre_boil_volume = data.get("preBoilVolume", equipment.pre_boil_volume)
         equipment.boil_time = data.get("boilTime", equipment.boil_time)
         equipment.boil_temperature = data.get("boilTemperature", equipment.boil_temperature)
 

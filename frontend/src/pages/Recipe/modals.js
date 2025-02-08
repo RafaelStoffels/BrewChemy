@@ -64,17 +64,27 @@ export function AddFermentableModal({ isOpen, closeModal, fermentableList, handl
 export function AddHopModal({ isOpen, closeModal, hopList, handleAddHopRecipe }) {
     const [selectedHop, setSelectedHop] = useState(null);
     const [quantity, setQuantity] = useState('');
+    const [boilTime, setBoilTime] = useState('');
 
     const handleChange = (hopId) => {
         setSelectedHop(hopId);
     };
 
-    const handleQuantityChange = (e) => {
+    const handleChangeQuantity = (e) => {
         setQuantity(e.target.value);
     };
 
+    const handleChangeBoilTime = (e) => {
+        setBoilTime(e.target.value);
+    };
+
     const handleSaveButton = () => {
-        handleAddHopRecipe(selectedHop, quantity);
+        if (selectedHop && quantity && boilTime) {
+            handleAddHopRecipe(selectedHop, quantity, boilTime);
+            closeModal();  // Fecha o modal após salvar
+        } else {
+            alert('Please fill in all fields.');
+        }
     };
 
     return (
@@ -113,7 +123,15 @@ export function AddHopModal({ isOpen, closeModal, hopList, handleAddHopRecipe })
                     type="number"
                     placeholder="Quantity"
                     value={quantity}
-                    onChange={handleQuantityChange}
+                    onChange={handleChangeQuantity}
+                />
+            </div>
+            <div>
+                <input
+                    type="number"
+                    placeholder="boilTime"
+                    value={boilTime}
+                    onChange={handleChangeBoilTime}
                 />
             </div>
             <button onClick={handleSaveButton} className="crud-save-button">Add Hop</button>
@@ -446,6 +464,102 @@ export function UpdateHopModal({ isOpen, closeModal, selectedHop, handleUpdateHo
                         <input 
                             placeholder="Quantity"
                             value={localHopObject.quantity || ''}
+                            onChange={(e) => handleChange('quantity', e.target.value)}
+                        />
+                        <button className="crud-save-button" type="submit">
+                            Save
+                        </button>
+                    </div>
+                </form>
+            ) : (
+                <p>Loading...</p>
+            )}
+        </Modal>
+    );
+}
+
+export function UpdateMiscModal({ isOpen, closeModal, selectedMisc, handleUpdateMiscRecipe }) {
+    const [localMiscObject, setLocalMiscObject] = useState(null);
+
+    // Atualiza o estado local sempre que o Misc recebido como prop mudar
+    useEffect(() => {
+        if (selectedMisc) {
+            setLocalMiscObject(selectedMisc);
+        }
+    }, [selectedMisc]);
+
+    // Atualiza o estado local com base nos campos do formulário
+    const handleChange = (key, value) => {
+        setLocalMiscObject((prev) => ({
+            ...prev,
+            [key]: key === "colorDegreesLovibond" || 
+                  key === "potentialExtract" 
+                  ? parseFloat(value) || 0 // Garante que números sejam tratados corretamente
+                  : value,
+        }));
+    };
+
+    // Manipula o botão de salvar
+    const handleSaveButton = (e) => {
+        e.preventDefault();
+        if (localMiscObject) {
+            handleUpdateMiscRecipe(localMiscObject); // Salva alterações
+        }
+        closeModal(); // Fecha a modal
+    };
+
+    return (
+        <Modal
+            isOpen={isOpen}
+            onRequestClose={closeModal}
+            contentLabel="Misc Modal"
+            className="modal-content"  // Classe CSS para o conteúdo
+            overlayClassName="modal-overlay"  // Classe CSS para o overlay
+        >
+            {localMiscObject ? (
+                <form onSubmit={handleSaveButton}>
+                    <div className="modal">
+                        <h2>Update Misc</h2>
+                        <label htmlFor="name">Name</label>
+                        <input 
+                            placeholder="Name"
+                            value={localMiscObject.name || ''}
+                            onChange={(e) => handleChange('name', e.target.value)}
+                        />
+                        <label htmlFor="name">Description</label>
+                        <textarea 
+                            placeholder="Description"
+                            value={localMiscObject.description || ''}
+                            onChange={(e) => handleChange('description', e.target.value)}
+                        />
+                        
+                        <div className="inputs-row">
+                            <div className="input-field">
+                                <label htmlFor="name">Boil Time</label>
+                                <input 
+                                    placeholder="Boil Time"
+                                    type="number"
+                                    value={localMiscObject.boilTime || ''}
+                                    onChange={(e) => handleChange('boilTime', e.target.value)}
+                                    style={{ width: '100px' }}
+                                />
+                            </div>
+
+                            <div className="input-field">
+                                <label htmlFor="name">Use Type</label>
+                                <input 
+                                    placeholder="Potential Extract"
+                                    type="number"
+                                    value={localMiscObject.useType || ''}
+                                    onChange={(e) => handleChange('useType', e.target.value)}
+                                    style={{ width: '100px' }}
+                                />
+                            </div>
+                        </div>
+                        <label htmlFor="name">Quantity</label>
+                        <input 
+                            placeholder="Quantity"
+                            value={localMiscObject.quantity || ''}
                             onChange={(e) => handleChange('quantity', e.target.value)}
                         />
                         <button className="crud-save-button" type="submit">

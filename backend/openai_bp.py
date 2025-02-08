@@ -13,7 +13,7 @@ class ChatGPT:
             response = openai.ChatCompletion.create(
                 model="gpt-3.5-turbo",  # Usando o modelo adequado
                 messages=[  # Dados enviados para a API, incluindo a mensagem do usuário
-                    {"role": "system", "content": "Você irá criticar a receita da forma mais objetiva possível em uma linha, e somente com as informações inputadas. Primeiro identificar discrepâncias e depois dar uma sugestão."},
+                    {"role": "system", "content": "Você irá criticar a receita de forma objetiva em três linhas."},
                     {"role": "user", "content": message}
                 ]
             )

@@ -64,44 +64,65 @@ export const calculateEBC = (recipe) => {
         const weightKg = fermentable.quantity / 1000;
         const ebc = fermentable.ebc || 0;
 
-        totalEBC += weightKg * ebc;
+        totalEBC += weightKg * ebc / recipe.recipeEquipment.batchVolume;
     });
 
- /*   Calculo retirado no forum: https://www.jimsbeerkit.co.uk/forum/viewtopic.php?t=26000
- const EBCValue = (totalEBC * 10 * 0.75) / recipe.recipeEquipment.batchVolume;
- */
 
-    const EBCValue = totalEBC * 10 / recipe.recipeEquipment.batchVolume;
+ //   Calculo retirado no forum: https://www.jimsbeerkit.co.uk/forum/viewtopic.php?t=26000
+ //const EBCValue = (totalEBC * 10 * (recipe.recipeEquipment.efficiency / 100)) / recipe.recipeEquipment.batchVolume;
+ 
+//  Igual ao de cima mas sem considerar a eficiencia
+    const EBCValue = totalEBC * 10;
 
     return EBCValue.toFixed(2);
 };
 
-export const calculateIBU = (recipe, OG) => {
-
+export const calculateIBU = (recipe, OG, setRecipe) => {
     if (!recipe.recipeEquipment || !recipe.recipeEquipment.batchVolume || recipe.recipeEquipment.batchVolume <= 0) {
         console.error("Volume deve ser maior que 0 para calcular IBU.");
+        return;
     }
-    
+
     if (!recipe || !recipe.recipeHops || recipe.recipeHops.length === 0 || OG <= 0) {
         console.error("Parâmetros inválidos para o cálculo do IBU.");
+        return;
     }
-  
+
     let totalIBU = 0;
+    let hasChanges = false;
 
-    recipe.recipeHops.forEach((hop) => {
-      const { quantity, alphaAcidContent, boilTime } = hop;
-  
-      if (!quantity || !alphaAcidContent) {
-        console.error("Informações de lúpulo inválidas.");
-      }
-  
-      const utilization = (1.65 * Math.pow(0.000125, OG - 1)) *
-                          ((1 - Math.exp(-0.04 * boilTime)) / 4.15);
+    const updatedHops = recipe.recipeHops.map((hop) => {
+        const { quantity, alphaAcidContent, boilTime, ibu: previousIbu } = hop;
 
-      const ibu = ((utilization * (alphaAcidContent / 100) * quantity * 1000) / recipe.recipeEquipment.batchVolume);
-  
-      totalIBU += ibu;
+        if (!quantity || !alphaAcidContent) {
+            console.error("Informações de lúpulo inválidas.");
+            return hop;
+        }
+
+        const utilization = (1.65 * Math.pow(0.000125, OG - 1)) *
+                            ((1 - Math.exp(-0.04 * boilTime)) / 4.15);
+
+        const ibu = ((utilization * (alphaAcidContent / 100) * quantity * 1000) / recipe.recipeEquipment.batchVolume);
+        const ibuFixed = ibu.toFixed(2);
+
+        totalIBU += ibu;
+
+        // Verifica se o valor mudou antes de atualizar
+        if (previousIbu !== ibuFixed) {
+            hasChanges = true;
+            return { ...hop, ibu: ibuFixed };
+        }
+        return hop;
     });
 
+    // Só atualiza o estado se houver mudanças nos valores do IBU
+    if (hasChanges) {
+        setRecipe(prevRecipe => ({
+            ...prevRecipe,
+            recipeHops: updatedHops
+        }));
+    }
+
+    console.log(`IBU total da receita: ${totalIBU.toFixed(2)}`);
     return totalIBU.toFixed(2);
-  };
+};

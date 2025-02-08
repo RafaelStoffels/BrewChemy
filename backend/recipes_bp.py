@@ -42,6 +42,33 @@ class Recipe(db.Model):
             
         }
 
+class RecipeEquipment(db.Model):
+    __tablename__ = 'recipe_equipment'
+
+    # Table Definition
+    id = db.Column(db.Integer, primary_key=True)
+    recipe_id = db.Column(db.Integer, db.ForeignKey('recipes.id'), nullable=False)
+    name = db.Column(db.String(50), nullable=False)
+    description = db.Column(db.Text)
+    efficiency = db.Column(db.Numeric(5, 2), nullable=False)
+    batch_volume = db.Column(db.Numeric(10, 2), nullable=False)
+    boil_time = db.Column(db.Integer, nullable=False)
+    boil_temperature = db.Column(db.Numeric(5, 2), nullable=False)
+    batch_time = db.Column(db.Integer, nullable=False)
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "recipeId": self.recipe_id,
+            "name": self.name,
+            "description": self.description,
+            "efficiency": float(self.efficiency) if self.efficiency else None,
+            "batchVolume": float(self.batch_volume) if self.batch_volume else None,
+            "boilTime": self.boil_time,
+            "boilTemperature": float(self.boil_temperature) if self.boil_temperature else None,
+            "batchTime": self.batch_time
+        }
+
 class RecipeFermentable(db.Model):
     __tablename__ = 'recipe_fermentables'
 
@@ -161,33 +188,6 @@ class RecipeYeast(db.Model):
             "flocculation": self.flocculation,
             "description": self.description,
             "quantity": float(self.quantity) if self.quantity else None
-        }
-    
-class RecipeEquipment(db.Model):
-    __tablename__ = 'recipe_equipment'
-
-    # Table Definition
-    id = db.Column(db.Integer, primary_key=True)
-    recipe_id = db.Column(db.Integer, db.ForeignKey('recipes.id'), nullable=False)
-    name = db.Column(db.String(50), nullable=False)
-    description = db.Column(db.Text)
-    efficiency = db.Column(db.Numeric(5, 2), nullable=False)
-    batch_volume = db.Column(db.Numeric(10, 2), nullable=False)
-    pre_boil_volume = db.Column(db.Numeric(10, 2), nullable=False)
-    boil_time = db.Column(db.Integer, nullable=False)
-    boil_temperature = db.Column(db.Numeric(5, 2), nullable=False)
-
-    def to_dict(self):
-        return {
-            "id": self.id,
-            "recipeId": self.recipe_id,
-            "name": self.name,
-            "description": self.description,
-            "efficiency": float(self.efficiency) if self.efficiency else None,
-            "batchVolume": float(self.batch_volume) if self.batch_volume else None,
-            "preBoilVolume": float(self.pre_boil_volume) if self.pre_boil_volume else None,
-            "boilTime": self.boil_time,
-            "boilTemperature": float(self.boil_temperature) if self.boil_temperature else None
         }
 
 def create_recipes_bp():
@@ -320,6 +320,36 @@ def create_recipes_bp():
         fermentables_data = data.get("recipeFermentables", [])
         existing_fermentables = {fermentable.id: fermentable for fermentable in recipe.recipe_fermentables}
 
+        # Update equipment
+        equipment_data = data.get("recipeEquipment", {})
+        if equipment_data:
+            # Verifica se já existe um equipamento associado à receita
+            existing_equipment = RecipeEquipment.query.filter_by(recipe_id=recipe.id).first()
+
+            if existing_equipment:
+                # Atualiza os campos existentes
+                existing_equipment.name = equipment_data["name"]
+                existing_equipment.description = equipment_data.get("description")
+                existing_equipment.efficiency = equipment_data["efficiency"]
+                existing_equipment.batch_volume = equipment_data["batchVolume"]
+                existing_equipment.boil_time = equipment_data["boilTime"]
+                existing_equipment.boil_temperature = equipment_data["boilTemperature"]
+                existing_equipment.batch_time = equipment_data["batchTime"]
+            else:
+                # Se não encontrar, cria um novo objeto de equipamento
+                new_equipment = RecipeEquipment(
+                    recipe_id=recipe.id,
+                    name=equipment_data["name"],
+                    description=equipment_data.get("description"),
+                    efficiency=equipment_data["efficiency"],
+                    batch_volume=equipment_data["batchVolume"],
+                    boil_time=equipment_data["boilTime"],
+                    boil_temperature=equipment_data["boilTemperature"],
+                    batch_time=equipment_data["batchTime"],
+                )
+                db.session.add(new_equipment)
+
+        # Update fermentable
         for fermentable_data in fermentables_data:
             fermentable_id = fermentable_data.get("id")
             if fermentable_id and fermentable_id in existing_fermentables:
@@ -443,35 +473,6 @@ def create_recipes_bp():
                     quantity=yeast_data_item.get("quantity")
                 )
                 db.session.add(new_yeast)
-
-        # Atualizar equipment
-        equipment_data = data.get("recipeEquipment", {})
-        if equipment_data:
-            # Verifica se já existe um equipamento associado à receita
-            existing_equipment = RecipeEquipment.query.filter_by(recipe_id=recipe.id).first()
-
-            if existing_equipment:
-                # Atualiza os campos existentes
-                existing_equipment.name = equipment_data["name"]
-                existing_equipment.description = equipment_data.get("description")
-                existing_equipment.efficiency = equipment_data["efficiency"]
-                existing_equipment.batch_volume = equipment_data["batchVolume"]
-                existing_equipment.pre_boil_volume = equipment_data["preBoilVolume"]
-                existing_equipment.boil_time = equipment_data["boilTime"]
-                existing_equipment.boil_temperature = equipment_data["boilTemperature"]
-            else:
-                # Se não encontrar, cria um novo objeto de equipamento
-                new_equipment = RecipeEquipment(
-                    recipe_id=recipe.id,
-                    name=equipment_data["name"],
-                    description=equipment_data.get("description"),
-                    efficiency=equipment_data["efficiency"],
-                    batch_volume=equipment_data["batchVolume"],
-                    pre_boil_volume=equipment_data["preBoilVolume"],
-                    boil_time=equipment_data["boilTime"],
-                    boil_temperature=equipment_data["boilTemperature"]
-                )
-                db.session.add(new_equipment)
 
         # Remover fermentables deletados
         sent_fermentable_ids = {fermentable_data.get("id") for fermentable_data in fermentables_data if fermentable_data.get("id")}

@@ -57,8 +57,6 @@ export default function EquipmentList() {
 
       <Sidebar />
 
-      <Header />
-
       <div className="div-addButton">
         <Link className="Addbutton" to="/Equipments/new">Add new equipment</Link>
       </div>

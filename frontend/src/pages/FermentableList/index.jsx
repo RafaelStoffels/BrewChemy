@@ -57,8 +57,6 @@ export default function FermentableList() {
 
       <Sidebar />
 
-      <Header />
-
       <div className="div-addButton">
         <Link className="Addbutton" to="/Fermentables/new">Add new fermentable</Link>
       </div>

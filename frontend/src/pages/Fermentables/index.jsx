@@ -98,8 +98,6 @@ export default function NewFermentable() {
 
             <Sidebar />
 
-            <Header />
-
             <section>
                 <h1>
                   {isEditing ? 'Update Fermentable' :

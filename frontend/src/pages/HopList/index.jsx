@@ -57,8 +57,6 @@ export default function HopList() {
 
       <Sidebar />
 
-      <Header />
-
       <div className="div-addButton">
         <Link className="Addbutton" to="/Hops/new">Add new hops</Link>
       </div>
