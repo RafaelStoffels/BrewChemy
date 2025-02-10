@@ -19,13 +19,10 @@ import { fetchEquipmentById } from '../../services/Equipments';
 import './styles.css';
 import '../Recipe/styles.css';
 import Sidebar from '../../components/Sidebar';
-import Header from '../../components/Header';
 import { calculateOG, calculateIBU, calculateEBC } from '../../components/Recipe/Calculation';
 import { getBeerColor } from '../../components/Recipe/GetBeerColor';
 import { beerStyles } from '../../components/Recipe/getBeerStyles';
-
-
-Modal.setAppElement('#root');
+import { OGBar } from '../../components/Recipe/Indicators';
 
 export default function NewRecipe() {
     const { user } = useContext(AuthContext);
@@ -80,6 +77,9 @@ export default function NewRecipe() {
     const [selectedStyle, setSelectedStyle] = useState('');
     const [EBCColor, setEBCColor] = useState("");
 
+    /* Barra */
+
+    
     const [recipe, setRecipe] = useState({
         name: '',
         style: '',
@@ -735,16 +735,27 @@ export default function NewRecipe() {
                     </div>
 
                     <div className="bottom-right">
-                        OG: <span>{OG}</span>
-                        <p></p>
-                        FG: <span>{FG}</span>
-                        <p></p>
-                        EBC: <span>{EBC}</span>
-                        <p></p>
-                        IBU: <span>{IBU}</span>
-                        <p></p>
-                        ABV: <span>{ABV}</span>
+                        <div className="bar-container">
+                            <strong>OG:</strong> {OG} 
+                            <OGBar valorInicial={1.000} valorFinal={1.100} margemInicial={1.040} margemFinal={1.060} OGAtual={OG} />
+                        </div>
+                        <div className="bar-container">
+                            <strong>EBC:</strong> {EBC}
+                            <OGBar valorInicial={0} valorFinal={60} margemInicial={3} margemFinal={12} OGAtual={EBC} />
+                        </div>
+                        <div className="bar-container">
+                            <strong>IBU:</strong> {IBU}
+                            <OGBar valorInicial={0} valorFinal={80} margemInicial={10} margemFinal={20} OGAtual={IBU} />
+                        </div>
+                        <div className="bar-container">
+                            <strong>ABV:</strong> {ABV}
+                            <OGBar valorInicial={0} valorFinal={20} margemInicial={3} margemFinal={6} OGAtual={ABV} />
+                        </div>
+                        <div>
+                            <strong>FG:</strong> {FG}
+                        </div>
                     </div>
+
                     <div className="bottom-right-beer">
                         <object className="beer-object" type="image/svg+xml" data="/beer.svg"></object>
                     </div>

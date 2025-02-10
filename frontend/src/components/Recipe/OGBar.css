@@ -1,0 +1,39 @@
+.og-bar {
+    width: 250px;
+    height: 15px;
+    display: flex;
+    position: relative;
+  }
+  
+  .segment {
+    height: 100%;
+  }
+  
+  .redleft {
+    background-color: red;
+    border-top-left-radius: 10px;
+    border-bottom-left-radius: 10px;
+  }
+
+  .redright {
+    background-color: red;
+    border-top-right-radius: 10px;
+    border-bottom-right-radius: 10px;
+  }
+  
+  .green {
+    background-color: green;
+    
+  }
+  
+  /* Marca para indicar o OG atual */
+  .og-marker {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background-color: black;
+    cursor: pointer;
+    
+  }
+  
