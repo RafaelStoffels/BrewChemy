@@ -1,5 +1,5 @@
 import React from 'react';
-import './OGBar.css';
+import './indicatorBar.css';
 
 export const OGBar = ({ valorInicial, valorFinal, margemInicial, margemFinal, OGAtual }) => {
   const calculatePercentage = (value, min, max) => {

@@ -117,27 +117,35 @@ export default function NewRecipe() {
 
     useEffect(() => {
         if (recipe) {
-            console.log("useEffect Recipe")
-
+            console.log("useEffect Recipe");
+    
             setFG(1.010.toFixed(3));
-
+    
             const OGResult = calculateOG(recipe);
             setOG(OGResult);
-
+    
             if (recipe.recipeFermentables.length === 0) {
                 setABV(0);
             }
-
+    
             const EBCResult = calculateEBC(recipe);
             console.log("EBCResult: " + EBCResult);
             setEBC(EBCResult);
-
+    
             const IBUresult = calculateIBU(recipe, OGResult, setRecipe);
             setIBU(IBUresult);
+    
+            const loadStyle = beerStyles.find(style => style.name === recipe.style);
+    
+            if (loadStyle) {
+                setSelectedStyle(loadStyle);
+            }
 
-            setSelectedStyle(recipe.style);
+            console.log(selectedStyle.initialOG);
+            console.log(selectedStyle.finalOG);
         }
     }, [recipe]);
+    
     
     useEffect(() => {
         if (EBC) {
@@ -181,7 +189,7 @@ export default function NewRecipe() {
     useEffect(() => {
         setRecipe((prevRecipe) => ({
             ...prevRecipe,
-            style: selectedStyle
+            style: selectedStyle.name
         }));
     }, [selectedStyle, setRecipe]); // Esse useEffect será acionado toda vez que selectedStyle mudar
 
@@ -539,8 +547,16 @@ export default function NewRecipe() {
                                 <label htmlFor="name">Style</label>
                                 <select
                                     id="beer-style"
-                                    value={selectedStyle}
-                                    onChange={(e) => setSelectedStyle(e.target.value)}
+                                    value={selectedStyle.name || ""}  // Exibe o nome do estilo
+                                    onChange={(e) => {
+                                        const selectedName = e.target.value;  // Armazena apenas o nome do estilo
+                                        setSelectedStyle(selectedName);  // Atualiza o estado com o nome
+                                    
+                                        const style = beerStyles.find(style => style.name === selectedName);
+                                        if (style) {
+                                            setSelectedStyle(style);  // Armazena o objeto completo
+                                        }
+                                    }}
                                     style={{ width: '300px' }}
                                 >
                                     <option value="">Select a style</option>
@@ -565,12 +581,11 @@ export default function NewRecipe() {
                             <div className="input-field">
                                 <label htmlFor="name">Description</label>
                                 <textarea
+                                    className="description-textarea"
                                     name="description"
-                                    rows={1}
                                     value={recipe.description}
                                     onChange={handleRecipeChange}
-                                    disabled={isView}
-                                    style={{ width: '1070px', height: '50px' }}/>
+                                    disabled={isView}/>
                             </div>
                         </div>
                         <div className="inputs-row">
@@ -735,22 +750,34 @@ export default function NewRecipe() {
                     </div>
 
                     <div className="bottom-right">
-                        <div className="bar-container">
+                        <div className="parameters-container">
                             <strong>OG:</strong> {OG} 
-                            <OGBar valorInicial={1.000} valorFinal={1.100} margemInicial={1.040} margemFinal={1.060} OGAtual={OG} />
                         </div>
                         <div className="bar-container">
+                            <OGBar valorInicial={1.000} valorFinal={1.100} margemInicial={selectedStyle.initialOG} margemFinal={selectedStyle.finalOG} OGAtual={OG} />
+                        </div>
+
+                        <div className="parameters-container">
                             <strong>EBC:</strong> {EBC}
-                            <OGBar valorInicial={0} valorFinal={60} margemInicial={3} margemFinal={12} OGAtual={EBC} />
                         </div>
                         <div className="bar-container">
+                            <OGBar valorInicial={0} valorFinal={120} margemInicial={selectedStyle.initialEBC} margemFinal={selectedStyle.finalEBC} OGAtual={EBC} />
+                        </div>
+
+                        <div className="parameters-container">
                             <strong>IBU:</strong> {IBU}
-                            <OGBar valorInicial={0} valorFinal={80} margemInicial={10} margemFinal={20} OGAtual={IBU} />
+                            </div>
+                        <div className="bar-container">
+                            <OGBar valorInicial={0} valorFinal={80} margemInicial={selectedStyle.initialIBU} margemFinal={selectedStyle.finalIBU} OGAtual={IBU} />
+                        </div>
+
+                        <div className="parameters-container">
+                            <strong>ABV:</strong> {ABV}
                         </div>
                         <div className="bar-container">
-                            <strong>ABV:</strong> {ABV}
-                            <OGBar valorInicial={0} valorFinal={20} margemInicial={3} margemFinal={6} OGAtual={ABV} />
+                            <OGBar valorInicial={0} valorFinal={20} margemInicial={selectedStyle.initialABV} margemFinal={selectedStyle.finalABV} OGAtual={ABV} />
                         </div>
+
                         <div>
                             <strong>FG:</strong> {FG}
                         </div>

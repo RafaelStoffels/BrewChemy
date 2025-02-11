@@ -45,11 +45,15 @@
     max-width: 450px;
 }
 
-.recipe-container .content form input, select,
-.recipe-container .content form textarea {
+.recipe-container .content form input, select{
     margin-top: 8px;
     border: 1px solid #663d00bd;
     height: 35px;
+    margin-top: 3px;
+}
+
+.recipe-container .content form textarea {
+    border: 1px solid #663d00bd;
     margin-top: 3px;
 }
 
@@ -124,7 +128,7 @@
     margin-left: 5px;
     padding-left: 5px;
     padding-top: 5px;
-    background-color: #af8542; 
+    background-color: #b38f56; 
     box-shadow: 0 5px 10px rgba(0, 0, 0, 0.4);
     width: 400px;
 
@@ -211,3 +215,6 @@
     opacity: 0.8;
 }
 
+.bar-container {
+    margin-bottom: 15px; /* Ajuste conforme necessário */
+}

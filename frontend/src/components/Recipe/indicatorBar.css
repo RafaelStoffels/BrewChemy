@@ -1,6 +1,6 @@
 .og-bar {
-    width: 250px;
-    height: 15px;
+    width: 230px;
+    height: 10px;
     display: flex;
     position: relative;
   }
@@ -10,19 +10,19 @@
   }
   
   .redleft {
-    background-color: red;
+    background-color: rgba(111, 63, 5, 0.906);
     border-top-left-radius: 10px;
     border-bottom-left-radius: 10px;
   }
 
   .redright {
-    background-color: red;
+    background-color: rgba(111, 63, 5, 0.906);
     border-top-right-radius: 10px;
     border-bottom-right-radius: 10px;
   }
   
   .green {
-    background-color: green;
+    background-color: rgb(71, 123, 19);
     
   }
   
