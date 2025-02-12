@@ -39,7 +39,6 @@ class Recipe(db.Model):
             "recipeHops": [hop.to_dict() for hop in self.recipe_hops],
             "recipeMisc": [misc.to_dict() for misc in self.recipe_misc],
             "recipeYeasts": [yeast.to_dict() for yeast in self.recipe_yeasts]
-            
         }
 
 class RecipeEquipment(db.Model):
@@ -55,6 +54,9 @@ class RecipeEquipment(db.Model):
     boil_time = db.Column(db.Integer, nullable=False)
     boil_temperature = db.Column(db.Numeric(5, 2), nullable=False)
     batch_time = db.Column(db.Integer, nullable=False)
+    boil_off = db.Column(db.Numeric(5, 2), nullable=False)
+    dead_space = db.Column(db.Numeric(5, 2), nullable=False)
+    trub_loss = db.Column(db.Numeric(5, 2), nullable=False)
 
     def to_dict(self):
         return {
@@ -66,7 +68,10 @@ class RecipeEquipment(db.Model):
             "batchVolume": float(self.batch_volume) if self.batch_volume else None,
             "boilTime": self.boil_time,
             "boilTemperature": float(self.boil_temperature) if self.boil_temperature else None,
-            "batchTime": self.batch_time
+            "batchTime": self.batch_time,
+            "boilOff": float(self.boil_off) if self.boil_off else None,
+            "deadSpace": float(self.dead_space) if self.dead_space else None,
+            "trubLoss": float(self.trub_loss) if self.trub_loss else None,
         }
 
 class RecipeFermentable(db.Model):
@@ -165,7 +170,7 @@ class RecipeYeast(db.Model):
     manufacturer = db.Column(db.String(100), nullable=False)
     type = db.Column(db.String(50), nullable=False)
     form = db.Column(db.String(50), nullable=False)
-    attenuation_range = db.Column(db.String(20), nullable=False)
+    attenuation = db.Column(db.String(20), nullable=False)
     temperature_range = db.Column(db.String(20), nullable=False)
     alcohol_tolerance = db.Column(db.String(50), nullable=False)
     flavor_profile = db.Column(db.Text) 
@@ -181,7 +186,7 @@ class RecipeYeast(db.Model):
             "manufacturer": self.manufacturer,
             "type": self.type,
             "form": self.form,
-            "attenuationRange": self.attenuation_range,
+            "attenuation": self.attenuation,
             "temperatureRange": self.temperature_range,
             "alcoholTolerance": self.alcohol_tolerance,
             "flavorProfile": self.flavor_profile,
@@ -282,7 +287,7 @@ def create_recipes_bp():
                 manufacturer=yeast_data_item["manufacturer"],
                 type=yeast_data_item["type"],
                 form=yeast_data_item["form"],
-                attenuation_range=yeast_data_item["attenuation_range"],
+                attenuation=yeast_data_item["attenuation"],
                 temperature_range=yeast_data_item["temperature_range"],
                 alcohol_tolerance=yeast_data_item["alcohol_tolerance"],
                 flavor_profile=yeast_data_item.get("flavor_profile"),
@@ -335,6 +340,9 @@ def create_recipes_bp():
                 existing_equipment.boil_time = equipment_data["boilTime"]
                 existing_equipment.boil_temperature = equipment_data["boilTemperature"]
                 existing_equipment.batch_time = equipment_data["batchTime"]
+                existing_equipment.boil_off = equipment_data["boilOff"]
+                existing_equipment.dead_space = equipment_data["deadSpace"]
+                existing_equipment.trub_loss = equipment_data["trubLoss"]
             else:
                 # Se não encontrar, cria um novo objeto de equipamento
                 new_equipment = RecipeEquipment(
@@ -346,6 +354,9 @@ def create_recipes_bp():
                     boil_time=equipment_data["boilTime"],
                     boil_temperature=equipment_data["boilTemperature"],
                     batch_time=equipment_data["batchTime"],
+                    boil_off=equipment_data["boilOff"],
+                    dead_space=equipment_data["deadSpace"],
+                    trub_loss=equipment_data["trubLoss"]
                 )
                 db.session.add(new_equipment)
 
@@ -449,7 +460,7 @@ def create_recipes_bp():
                 existing_yeast.manufacturer = yeast_data_item["manufacturer"]
                 existing_yeast.type = yeast_data_item["type"]
                 existing_yeast.form = yeast_data_item["form"]
-                existing_yeast.attenuation_range = yeast_data_item["attenuationRange"]
+                existing_yeast.attenuation = yeast_data_item["attenuation"]
                 existing_yeast.temperature_range = yeast_data_item["temperatureRange"]
                 existing_yeast.alcohol_tolerance = yeast_data_item["alcoholTolerance"]
                 existing_yeast.flavor_profile = yeast_data_item.get("flavorProfile")
@@ -464,7 +475,7 @@ def create_recipes_bp():
                     manufacturer=yeast_data_item["manufacturer"],
                     type=yeast_data_item["type"],
                     form=yeast_data_item["form"],
-                    attenuation_range=yeast_data_item["attenuationRange"],
+                    attenuation=yeast_data_item["attenuation"],
                     temperature_range=yeast_data_item["temperatureRange"],
                     alcohol_tolerance=yeast_data_item["alcoholTolerance"],
                     flavor_profile=yeast_data_item.get("flavorProfile"),

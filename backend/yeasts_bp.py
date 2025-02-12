@@ -11,7 +11,7 @@ class Yeast(db.Model):
     manufacturer = db.Column(db.String(100))
     type = db.Column(db.String(50))
     form = db.Column(db.String(50))
-    attenuation_range = db.Column(db.String(50))
+    attenuation = db.Column(db.String(50))
     temperature_range = db.Column(db.String(50))
     alcohol_tolerance = db.Column(db.String(50))
     flavor_profile = db.Column(db.String(100))
@@ -26,7 +26,7 @@ class Yeast(db.Model):
             "manufacturer": self.manufacturer,
             "type": self.type,
             "form": self.form,
-            "attenuationRange": self.attenuation_range,
+            "attenuation": self.attenuation,
             "temperatureRange": self.temperature_range,
             "alcoholTolerance": self.alcohol_tolerance,
             "flavorProfile": self.flavor_profile,
@@ -43,7 +43,7 @@ class YeastOfficial(db.Model):
     manufacturer = db.Column(db.String(100))
     type = db.Column(db.String(50))
     form = db.Column(db.String(50))
-    attenuation_range = db.Column(db.String(50))
+    attenuation = db.Column(db.String(50))
     temperature_range = db.Column(db.String(50))
     alcohol_tolerance = db.Column(db.String(50))
     flavor_profile = db.Column(db.String(100))
@@ -58,7 +58,7 @@ class YeastOfficial(db.Model):
             "manufacturer": self.manufacturer,
             "type": self.type,
             "form": self.form,
-            "attenuationRange": self.attenuation_range,
+            "attenuation": self.attenuation,
             "temperatureRange": self.temperature_range,
             "alcoholTolerance": self.alcohol_tolerance,
             "flavorProfile": self.flavor_profile,
@@ -103,7 +103,7 @@ def create_yeasts_bp():
             manufacturer=sanitize(data.get("manufacturer")),
             type=sanitize(data.get("type")),
             form=sanitize(data.get("form")),
-            attenuation_range=sanitize(data.get("attenuationRange")),
+            attenuation=sanitize(data.get("attenuation")),
             temperature_range=sanitize(data.get("temperatureRange")),
             alcohol_tolerance=sanitize(data.get("alcoholTolerance")),
             flavor_profile=sanitize(data.get("flavorProfile")),
@@ -129,7 +129,7 @@ def create_yeasts_bp():
         yeast.manufacturer = data.get("manufacturer", yeast.manufacturer)
         yeast.type = data.get("type", yeast.type)
         yeast.form = data.get("form", yeast.form)
-        yeast.attenuation_range = data.get("attenuationRange", yeast.attenuation_range)
+        yeast.attenuation = data.get("attenuation", yeast.attenuation)
         yeast.temperature_range = data.get("temperatureRange", yeast.temperature_range)
         yeast.alcohol_tolerance = data.get("alcoholTolerance", yeast.alcohol_tolerance)
         yeast.flavor_profile = data.get("flavorProfile", yeast.flavor_profile)

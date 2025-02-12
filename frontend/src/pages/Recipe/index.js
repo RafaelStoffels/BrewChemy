@@ -19,7 +19,7 @@ import { fetchEquipmentById } from '../../services/Equipments';
 import './styles.css';
 import '../Recipe/styles.css';
 import Sidebar from '../../components/Sidebar';
-import { calculateOG, calculateIBU, calculateEBC } from '../../components/Recipe/Calculation';
+import { calculateOG, calculateFG, calculateIBU, calculateEBC, getPreBoilVolume } from '../../components/Recipe/Calculation';
 import { getBeerColor } from '../../components/Recipe/GetBeerColor';
 import { beerStyles } from '../../components/Recipe/getBeerStyles';
 import { OGBar } from '../../components/Recipe/Indicators';
@@ -71,7 +71,9 @@ export default function NewRecipe() {
     const [EBC, setEBC] = useState(0);
     const [IBU, setIBU] = useState(0);
     const [ABV, setABV] = useState(0);
+    const [BUGU, setBUGU] = useState(0);
     const [openAI, setOpenAI] = useState("")
+    const [preBoilVolume, setpreBoilVolume] = useState(0)
 
     /* Components */
     const [selectedStyle, setSelectedStyle] = useState('');
@@ -111,7 +113,6 @@ export default function NewRecipe() {
         if (EBC) {
             const color = getBeerColor(EBC);
             setEBCColor(color);
-            console.log("assign " + EBCColor);
         }
     }, [EBC]);
 
@@ -119,30 +120,37 @@ export default function NewRecipe() {
         if (recipe) {
             console.log("useEffect Recipe");
     
-            setFG(1.010.toFixed(3));
-    
+            const preBoilCalc = getPreBoilVolume(recipe);
+
+            setpreBoilVolume(preBoilCalc);
+
             const OGResult = calculateOG(recipe);
             setOG(OGResult);
     
+            const FGResult = calculateFG(recipe, OGResult);
+
+            setFG(FGResult);
+
             if (recipe.recipeFermentables.length === 0) {
                 setABV(0);
             }
     
             const EBCResult = calculateEBC(recipe);
-            console.log("EBCResult: " + EBCResult);
+            
             setEBC(EBCResult);
     
             const IBUresult = calculateIBU(recipe, OGResult, setRecipe);
             setIBU(IBUresult);
     
+            const GU = (OGResult -1) * 1000;
+
+            setBUGU((IBU / GU).toFixed(2));
+
             const loadStyle = beerStyles.find(style => style.name === recipe.style);
     
             if (loadStyle) {
                 setSelectedStyle(loadStyle);
             }
-
-            console.log(selectedStyle.initialOG);
-            console.log(selectedStyle.finalOG);
         }
     }, [recipe]);
     
@@ -151,24 +159,17 @@ export default function NewRecipe() {
         if (EBC) {
             const color = getBeerColor(EBC);
             setEBCColor(color);
-            console.log("assign " + EBCColor);
         }
     }, [EBC]);
     
     useEffect(() => {
         if (OG && FG) {
-
-            console.log("ABV Inicio");
-
             const abvValue = ((OG - FG) * 131.25).toFixed(2);
             setABV(abvValue > 0 ? abvValue : 0);
-
-            console.log("ABV Fim " + abvValue);
         }
     }, [OG, FG]);
     
     useEffect(() => {
-        console.log("aqui " + EBCColor);
 
         const svgObject = document.querySelector('.beer-object');
         
@@ -478,7 +479,7 @@ export default function NewRecipe() {
             ...prevState,
             recipeEquipment: {
                 ...prevState.recipeEquipment,
-                [name]: value
+                [name]: Number(value)
             }
         }));
     };    
@@ -601,7 +602,7 @@ export default function NewRecipe() {
                             <div className="input-field">
                                 <label htmlFor="name">Batch Volume</label>
                                 <input
-                                    name="BatchVolume"
+                                    name="batchVolume"
                                     type="number"
                                     value={recipe.recipeEquipment.batchVolume}
                                     onChange={handleEquipmentChange}
@@ -646,9 +647,9 @@ export default function NewRecipe() {
                                 <input
                                     name="preBoilVolume"
                                     type="number"
-                                    value={recipe.batchTime}
+                                    value={preBoilVolume}
                                     onChange={handleEquipmentChange}
-                                    disabled={isView}
+                                    disabled={true}
                                     style={{ width: '100px' }}/>
                             </div>
                             <div className="input-field">
@@ -756,30 +757,35 @@ export default function NewRecipe() {
                         <div className="bar-container">
                             <OGBar valorInicial={1.000} valorFinal={1.100} margemInicial={selectedStyle.initialOG} margemFinal={selectedStyle.finalOG} OGAtual={OG} />
                         </div>
-
-                        <div className="parameters-container">
-                            <strong>EBC:</strong> {EBC}
+                        <div>
+                            <strong>FG:</strong> {FG}
                         </div>
                         <div className="bar-container">
-                            <OGBar valorInicial={0} valorFinal={120} margemInicial={selectedStyle.initialEBC} margemFinal={selectedStyle.finalEBC} OGAtual={EBC} />
+                            <OGBar valorInicial={0} valorFinal={25} margemInicial={selectedStyle.initialFG} margemFinal={selectedStyle.finalFG} OGAtual={FG} />
                         </div>
-
-                        <div className="parameters-container">
-                            <strong>IBU:</strong> {IBU}
-                            </div>
-                        <div className="bar-container">
-                            <OGBar valorInicial={0} valorFinal={80} margemInicial={selectedStyle.initialIBU} margemFinal={selectedStyle.finalIBU} OGAtual={IBU} />
-                        </div>
-
                         <div className="parameters-container">
                             <strong>ABV:</strong> {ABV}
                         </div>
                         <div className="bar-container">
                             <OGBar valorInicial={0} valorFinal={20} margemInicial={selectedStyle.initialABV} margemFinal={selectedStyle.finalABV} OGAtual={ABV} />
                         </div>
-
-                        <div>
-                            <strong>FG:</strong> {FG}
+                        <div className="parameters-container">
+                            <strong>EBC:</strong> {EBC}
+                        </div>
+                        <div className="bar-container">
+                            <OGBar valorInicial={0} valorFinal={120} margemInicial={selectedStyle.initialEBC} margemFinal={selectedStyle.finalEBC} OGAtual={EBC} />
+                        </div>
+                        <div className="parameters-container">
+                            <strong>IBU:</strong> {IBU}
+                        </div>
+                        <div className="bar-container">
+                            <OGBar valorInicial={0} valorFinal={80} margemInicial={selectedStyle.initialIBU} margemFinal={selectedStyle.finalIBU} OGAtual={IBU} />
+                        </div>
+                        <div className="parameters-container">
+                            <strong>BU/GU:</strong> {BUGU}
+                        </div>
+                        <div className="bar-container">
+                            <OGBar valorInicial={0} valorFinal={3} margemInicial={selectedStyle.initialBuGu} margemFinal={selectedStyle.finalBuGu} OGAtual={BUGU} />
                         </div>
                     </div>
 

@@ -1,14 +1,3 @@
-/*
-function roundOG(value, precision = 3) {
-    // Multiplica o valor pela potência de 10 para mover a vírgula
-    const factor = Math.pow(10, precision);
-    
-    // Arredonda o valor
-    const roundedValue = Math.round(value * factor) / factor;
-
-    return roundedValue;
-}*/
-
 export const calculateOG = (recipe) => {
     if (!recipe.recipeEquipment || !recipe.recipeEquipment.batchVolume || recipe.recipeEquipment.batchVolume <= 0) {
         console.error("Volume deve ser maior que 0 para calcular a OG.");
@@ -42,14 +31,24 @@ export const calculateOG = (recipe) => {
 
     const OG = (totalGravityPoints / volumeGallons) / 1000 + 1;
     
-/*
-    console.log("OG: " + OG);
-    
-    const roundedOG = roundOG(OG, 3);
-
-    console.log("roundedOG: " + roundedOG);
-*/
     return OG.toFixed(3);
+};
+
+export const calculateFG = (recipe, OGResult) => {
+    if (!recipe || !recipe.recipeYeasts || recipe.recipeYeasts.length === 0) {
+        console.error("Receita inválida ou sem leveduras.");
+    }
+
+    let attenuation = 100;
+    
+    recipe.recipeYeasts.forEach((yeast) => {
+        if (yeast.attenuation < attenuation) {
+            attenuation = yeast.attenuation;
+        }
+    });
+
+    const FG = OGResult - ((OGResult - 1) * (attenuation / 100));
+    return FG.toFixed(3);
 };
 
 export const calculateEBC = (recipe) => {
@@ -125,4 +124,14 @@ export const calculateIBU = (recipe, OG, setRecipe) => {
 
     console.log(`IBU total da receita: ${totalIBU.toFixed(2)}`);
     return totalIBU.toFixed(2);
+};
+
+export const getPreBoilVolume = (recipe) => {
+
+    const preBoilCalc = recipe.recipeEquipment.batchVolume 
+                      + recipe.recipeEquipment.deadSpace 
+                      + (recipe.recipeEquipment.boilOff * (recipe.recipeEquipment.boilTime / 60))
+                      + recipe.recipeEquipment.trubLoss;
+
+    return preBoilCalc.toFixed(3);
 };

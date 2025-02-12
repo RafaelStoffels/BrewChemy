@@ -1,91 +1,23 @@
 .recipe-container {
-    margin-left: 250px;
-    width: 100%;
+    width: 1200px;
     max-width: 1180px;
     padding: 0 30px;
-    margin: 30px auto;
-}
-
-.header-crud {
-    position: relative;
-    display: flex;
-    align-items: center;
-    gap: 20px;
-}
-
-.div-logout-button{
-    position: relative;
-    margin-left: 670px;
-}
-
-.recipe-container header span {
-    font-size: 20px;
-    margin-left: -70px;
-    margin-top: 25px;
-}
-
-.recipe-container section {
-    width: 100%;
-    max-width: 380px;
-}
-
-.recipe-container section h1 {
-    margin: 0 0 32px;
-    font-size: 32px;
-}
-
-.recipe-container section p {
-    font-size: 18px;
-    color: #737380;
-    line-height: 32px;
-}
-
-.recipe-container section form {
-    width: 100%;
-    max-width: 450px;
+    margin: 25px auto;
 }
 
 .recipe-container .content form input, select{
-    margin-top: 8px;
-    border: 1px solid #663d00bd;
-    height: 35px;
-    margin-top: 3px;
+    height: 30px;
 }
 
 .recipe-container .content form textarea {
     border: 1px solid #663d00bd;
-    margin-top: 3px;
-}
-
-.recipe-container section a {
-    position: absolute;
-    top: 20px;
-    left: 20px;
-}
-
-.recipe-container section a svg {
-    margin-right: 8px;
 }
 
 .top {
-    width: 100%; 
-    height: 50%; 
+    width: 100%;
     background-color: #aa8e69; 
-    padding: 20px;
+    padding: 15px;
     box-shadow: 0 5px 10px rgba(0, 0, 0, 0.4);
-}
-
-.form-fields {
-    display: flex;       
-    gap: 20px;           
-}
-
-.input-name { 
-    width: 45%;
-    font-size: 14px;
-    height: 30px;
-    padding: 5px;
-    line-height: 20px;
 }
 
 .bottom-container {
@@ -103,8 +35,8 @@
     background-color: #aa8e69; 
     position: relative;
     box-shadow: 0 5px 10px rgba(0, 0, 0, 0.4);
-    padding-top: 5px;
     width: 500px;
+    padding: 10px;
 }
 
 .bottom-left li {
@@ -121,7 +53,7 @@
 }
 
 .bottom-left ul li button:hover {
-    opacity: 0.8;
+    opacity: 1;
 }
 
 .bottom-right {
@@ -131,10 +63,11 @@
     background-color: #b38f56; 
     box-shadow: 0 5px 10px rgba(0, 0, 0, 0.4);
     width: 400px;
+    padding: 10px;
 
     flex-direction: column; /* Coloca cada elemento em uma nova linha */
     display: flex;
-    gap: 4px; /* Adiciona um pequeno espaço entre os itens */
+    gap: 3px; /* Adiciona um pequeno espaço entre os itens */
 }
 
 .bar-container {
@@ -153,23 +86,12 @@
 
 .buttons-container {
     display: flex;
-    gap: 10px;
-    margin-top: 5px;
-}
-  
-.beerImg {
-    width: 150px;
-    height: auto;
+    gap: 12px;
+    margin-top: 10px;
 }
 
 .beer-object {
-    fill: #ff5733;
     width: 200px;
-    height: 200px;
-}
-
-.beer-object path {
-    fill: #ff5733;
 }
 
 .malt-object, .yeast-object, .hop-object, .misc-object{
@@ -178,23 +100,23 @@
 }
 
 .modalAddButtonFermentable, .modalAddButtonHop, .modalAddButtonYeast, .modalAddButtonMisc {
-    width: 140px;
-    height: 35px;
+    width: 160px;
+    height: 33px;
     background: #744410;
     border: 0;
     border-radius: 8px;
     color: #FFF;
-    font-weight: 700;
-    margin-top: 2px;
+    font-weight: 500;
+    margin-top: 5px;
     display: inline-block;
     text-align: center;
     text-decoration: none;
-    font-size: 15px;
+    font-size: 14px;
     transition: filter 0.2s;
     cursor: pointer;
 }
 
-.modalAddButtonFermentable:hover, .modalAddButtonHop:hover, .modalAddButtonYeast:hover {
+.modalAddButtonFermentable:hover, .modalAddButtonHop:hover, .modalAddButtonYeast:hover, .modalAddButtonMisc:hover {
     filter: brightness(90%);
 }
 

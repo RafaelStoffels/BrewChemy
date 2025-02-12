@@ -463,6 +463,7 @@ export function UpdateHopModal({ isOpen, closeModal, selectedHop, handleUpdateHo
                         <label htmlFor="name">Quantity</label>
                         <input 
                             placeholder="Quantity"
+                            type="number"
                             value={localHopObject.quantity || ''}
                             onChange={(e) => handleChange('quantity', e.target.value)}
                         />
@@ -559,6 +560,7 @@ export function UpdateMiscModal({ isOpen, closeModal, selectedMisc, handleUpdate
                         <label htmlFor="name">Quantity</label>
                         <input 
                             placeholder="Quantity"
+                            type="number"
                             value={localMiscObject.quantity || ''}
                             onChange={(e) => handleChange('quantity', e.target.value)}
                         />
@@ -634,11 +636,11 @@ export function UpdateYeastModal({ isOpen, closeModal, selectedYeast, handleUpda
                             value={localYeastObject.description || ''}
                             onChange={(e) => handleChange('description', e.target.value)}
                         />
-                        <label htmlFor="name">Attenuation Range</label>
+                        <label htmlFor="name">Attenuation</label>
                         <input 
-                            placeholder="Attenuation Range"
-                            value={localYeastObject.attenuationRange || ''}
-                            onChange={(e) => handleChange('attenuationRange', e.target.value)}
+                            placeholder="Attenuation"
+                            value={localYeastObject.attenuation || ''}
+                            onChange={(e) => handleChange('attenuation', e.target.value)}
                         />
                         <label htmlFor="name">Flavor Profile</label>
                         <input 
@@ -679,6 +681,7 @@ export function UpdateYeastModal({ isOpen, closeModal, selectedYeast, handleUpda
                         <label htmlFor="name">Quantity</label>
                         <input 
                             placeholder="Quantity"
+                            type="number"
                             value={localYeastObject.quantity || ''}
                             onChange={(e) => handleChange('quantity', e.target.value)}
                         />
