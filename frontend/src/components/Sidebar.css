@@ -38,8 +38,8 @@
 }
 
 .sidebar .menu ul li.active {
-  background-color: rgba(203, 139, 0, 0.4);
-  border-left: 4px solid #d4a91c;
+  background-color: rgba(75, 67, 67, 0.4);
+  border-left: 2px solid #564d4d;
 }
 
 .submenu {

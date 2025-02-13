@@ -27,11 +27,20 @@ const Sidebar = () => {
         </span>
       </li>
 
+      {/* Submenu */}
       <ul className={`submenu ${isInventoryOpen ? "open" : ""}`}>
-        <li><Link to="/FermentableList">Fermentables</Link></li>
-        <li><Link to="/HopList">Hops</Link></li>
-        <li><Link to="/Misc">Misc</Link></li>
-        <li><Link to="/YeastList">Yeasts</Link></li>
+        <li className={location.pathname === "/FermentableList" ? "active" : ""}>
+          <Link to="/FermentableList">Fermentables</Link>
+        </li>
+        <li className={location.pathname === "/HopList" ? "active" : ""}>
+          <Link to="/HopList">Hops</Link>
+        </li>
+        <li className={location.pathname === "/Misc" ? "active" : ""}>
+          <Link to="/Misc">Misc</Link>
+        </li>
+        <li className={location.pathname === "/YeastList" ? "active" : ""}>
+          <Link to="/YeastList">Yeasts</Link>
+        </li>
       </ul>
 
       <li className={location.pathname === "/RecipeList" ? "active" : ""}>
@@ -46,7 +55,7 @@ const Sidebar = () => {
 
   return (
     <div className="sidebar">
-        <img className="Brewchemy-logo" src="/logo.svg" alt="Logo" />
+      <img className="Brewchemy-logo" src="/logo.svg" alt="Logo" />
       <nav className="menu">
         {menuItems}
       </nav>
