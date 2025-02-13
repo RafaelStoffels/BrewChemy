@@ -11,6 +11,7 @@ import EquipmentList from "./pages/EquipmentList";
 import FermentableList from "./pages/FermentableList";
 import Fermentable from "./pages/Fermentables";
 import HopList from "./pages/HopList";
+import MiscList from "./pages/MiscList";
 import RecipeList from "./pages/RecipeList";
 import Recipe from "./pages/Recipe";
 import YeastList from "./pages/YeastList";
@@ -36,6 +37,7 @@ const App = () => {
               <Route path="/Fermentables/:id/edit" element={<Fermentable />} />
               <Route path="/Fermentables/new" element={<Fermentable />} />
               <Route path="/HopList" element={<HopList />} />
+              <Route path="/MiscList" element={<MiscList />} />
               <Route path="/RecipeList" element={<RecipeList />} />
               <Route path="/Recipes/:id/details" element={<Recipe />} />
               <Route path="/Recipes/:id/edit" element={<Recipe />} />

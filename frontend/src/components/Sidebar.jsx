@@ -35,8 +35,8 @@ const Sidebar = () => {
         <li className={location.pathname === "/HopList" ? "active" : ""}>
           <Link to="/HopList">Hops</Link>
         </li>
-        <li className={location.pathname === "/Misc" ? "active" : ""}>
-          <Link to="/Misc">Misc</Link>
+        <li className={location.pathname === "/MiscList" ? "active" : ""}>
+          <Link to="/MiscList">Misc</Link>
         </li>
         <li className={location.pathname === "/YeastList" ? "active" : ""}>
           <Link to="/YeastList">Yeasts</Link>

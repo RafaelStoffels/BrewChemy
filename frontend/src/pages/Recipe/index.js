@@ -11,7 +11,7 @@ import { AddFermentableModal, AddHopModal, AddMiscModal, AddYeastModal, UpdateFe
 import { getOpenAIResponse } from '../../services/OpenAI';
 import { fetchFermentables } from '../../services/Fermentables';
 import { fetchHops } from '../../services/Hops';
-import { fetchMisc } from '../../services/misc';
+import { fetchMisc } from '../../services/Misc';
 import { fetchYeasts } from '../../services/Yeasts';
 import { fetchRecipeById } from '../../services/recipes';
 import { fetchEquipmentById } from '../../services/Equipments';
