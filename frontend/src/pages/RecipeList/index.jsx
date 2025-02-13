@@ -51,42 +51,42 @@ export default function MaltList() {
   }
 
   return (
-    <div className='list-container'>
-
+    <div>        
       <Sidebar />
+      <div className='list-container'>
+        <div className="div-addButton">
+           <Link className="Addbutton" to="/Recipe/new">Add new Recipe</Link>
+        </div>
 
-      <div className="div-addButton">
-         <Link className="Addbutton" to="/Recipe/new">Add new Recipe</Link>
-      </div>
+        <div className="content">
 
-      <div className="content">
-
-        <h1>Recipes</h1>
-        {loading ? <p>Loading...</p> : error ? <p>{error}</p> : (
-          itemList.length > 0 ? (
-            <ul>
-              {itemList.map((itemList) => (
-                <li key={itemList.id}>
-                  <h2>{itemList.name}</h2>
-                  <p>Description: {itemList.description}</p>
-                  <div className="button-group">
-                    <button onClick={() => handleDetails(itemList.id)} type="button">
-                    <FiBookOpen  size={20} color="#a8a8b3" />
-                    </button>
-                    <button onClick={() => handleUpdate(itemList.id)} type="button">
-                      <FiEdit size={20} color="#a8a8b3" />
-                    </button>
-                    <button onClick={() => handleDelete(itemList.id)} type="button">
-                      <FiTrash2 size={20} color="#a8a8b3" />
-                    </button>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p>No recipes found.</p>
-          )
-        )}
+          <h1>Recipes</h1>
+          {loading ? <p>Loading...</p> : error ? <p>{error}</p> : (
+            itemList.length > 0 ? (
+              <ul>
+                {itemList.map((itemList) => (
+                  <li key={itemList.id}>
+                    <h2>{itemList.name}</h2>
+                    <p>Description: {itemList.description}</p>
+                    <div className="button-group">
+                      <button onClick={() => handleDetails(itemList.id)} type="button">
+                      <FiBookOpen  size={20} color="#a8a8b3" />
+                      </button>
+                      <button onClick={() => handleUpdate(itemList.id)} type="button">
+                        <FiEdit size={20} color="#a8a8b3" />
+                      </button>
+                      <button onClick={() => handleDelete(itemList.id)} type="button">
+                        <FiTrash2 size={20} color="#a8a8b3" />
+                      </button>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p>No recipes found.</p>
+            )
+          )}
+        </div>
       </div>
     </div>
   );

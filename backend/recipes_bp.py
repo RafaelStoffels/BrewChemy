@@ -15,6 +15,8 @@ class Recipe(db.Model):
     volume_liters = db.Column(db.Numeric(5, 2))
     equipment_id = db.Column(db.Integer)
     notes = db.Column(db.Text)
+    author = db.Column(db.String(50), nullable=False)
+    type = db.Column(db.String(20), nullable=False)
 
     recipe_fermentables = db.relationship('RecipeFermentable', backref='recipe', lazy=True, cascade="all, delete-orphan")
     recipe_hops = db.relationship('RecipeHop', backref='recipe', lazy=True, cascade="all, delete-orphan")
@@ -34,6 +36,8 @@ class Recipe(db.Model):
             "creationDate": self.creation_date.isoformat() if self.creation_date else None,
             "volumeLiters": float(self.volume_liters) if self.volume_liters else None,
             "notes": self.notes,
+            "author": self.author,
+            "type": self.type,
             "recipeEquipment": recipe_equipment.to_dict() if recipe_equipment else None,
             "recipeFermentables": [fermentable.to_dict() for fermentable in self.recipe_fermentables],
             "recipeHops": [hop.to_dict() for hop in self.recipe_hops],
@@ -230,6 +234,8 @@ def create_recipes_bp():
             volume_liters=sanitize(data.get("volumeLiters")),
             notes=data.get("notes"),
             equipment_id=data.get("equipmentID"),
+            author=data.get("author"),
+            type=data.get("type"),
             user_id=current_user_id
         )
         db.session.add(new_recipe)
@@ -321,6 +327,8 @@ def create_recipes_bp():
         recipe.volume_liters = data.get("volumeLiters", recipe.volume_liters)
         recipe.equipment_id = data.get("equipmentID", recipe.equipment_id)
         recipe.notes = data.get("notes", recipe.notes)
+        recipe.author = data.get("author", recipe.author)
+        recipe.type = data.get("type", recipe.type)
 
         fermentables_data = data.get("recipeFermentables", [])
         existing_fermentables = {fermentable.id: fermentable for fermentable in recipe.recipe_fermentables}

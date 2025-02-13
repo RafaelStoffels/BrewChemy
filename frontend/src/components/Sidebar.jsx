@@ -1,30 +1,54 @@
-import React, {useContext} from "react";
-import { Link} from 'react-router-dom';
-import "./Sidebar.css";
-
-import AuthContext from '../context/AuthContext';
+import React, { useContext, useMemo } from 'react';
+import { Link, useLocation } from "react-router-dom";
+import { useSidebar } from '../context/SidebarContext';
+import { ChevronDown, ChevronRight } from "lucide-react";
+import AuthContext from "../context/AuthContext";
+import './Sidebar.css';
 
 const Sidebar = () => {
-
   const { logout } = useContext(AuthContext);
-  
+  const { isInventoryOpen, setIsInventoryOpen, resetSidebarState } = useSidebar();
+  const location = useLocation();
+
+  const handleLogout = () => {
+    logout();
+    resetSidebarState();
+  };
+
+  const menuItems = useMemo(() => (
+    <ul>
+      <li className={location.pathname.startsWith("/EquipmentList") ? "active" : ""}>
+        <Link to="/EquipmentList">Equipments</Link>
+      </li>
+
+      <li className="dropdown" onClick={() => setIsInventoryOpen(!isInventoryOpen)}>
+        <span className="dropdown-header">
+          Inventory {isInventoryOpen ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+        </span>
+      </li>
+
+      <ul className={`submenu ${isInventoryOpen ? "open" : ""}`}>
+        <li><Link to="/FermentableList">Fermentables</Link></li>
+        <li><Link to="/HopList">Hops</Link></li>
+        <li><Link to="/Misc">Misc</Link></li>
+        <li><Link to="/YeastList">Yeasts</Link></li>
+      </ul>
+
+      <li className={location.pathname === "/RecipeList" ? "active" : ""}>
+        <Link to="/RecipeList">Recipes</Link>
+      </li>
+
+      <li>
+        <Link to="#" onClick={handleLogout}>Logout</Link>
+      </li>
+    </ul>
+  ), [location.pathname, isInventoryOpen, setIsInventoryOpen]);
+
   return (
     <div className="sidebar">
-      <object className="Brewchemy-object" type="image/svg+xml" data="/logo.svg"></object>
+        <img className="Brewchemy-logo" src="/logo.svg" alt="Logo" />
       <nav className="menu">
-        <ul>
-          <hr></hr>
-          <li><Link to="/EquipmentList">Equipments</Link></li>
-          <hr></hr>
-          <li><Link to="/FermentableList">Fermentables</Link></li>
-          <li><Link to="/HopList">Hops</Link></li>
-          <li><Link to="/Misc">Misc</Link></li>
-          <li><Link to="/YeastList">Yeasts</Link></li>
-          <hr></hr>
-          <li><Link to="/RecipeList">Recipes</Link></li>
-          <hr></hr>
-          <li><Link onClick={logout}>Logout</Link></li> 
-        </ul>
+        {menuItems}
       </nav>
     </div>
   );

@@ -53,40 +53,41 @@ export default function HopList() {
   }
 
   return (
-    <div className='list-container'>
-
+    <div>
       <Sidebar />
+      
+      <div className='list-container'>
+        <div className="div-addButton">
+          <Link className="Addbutton" to="/Hops/new">Add new hops</Link>
+        </div>
 
-      <div className="div-addButton">
-        <Link className="Addbutton" to="/Hops/new">Add new hops</Link>
+        <h1>Hops</h1>
+        {loading ? <p>Loading...</p> : error ? <p>{error}</p> : (
+          itemList.length > 0 ? (
+            <ul>
+              {itemList.map((item) => (
+                <li key={item.id}>
+                  <h2>{item.name}</h2>
+                  <p>Description: {item.description}</p>
+                  <div className="button-group">
+                    <button onClick={() => handleDetails(item.id)} type="button">
+                      <FiBookOpen size={20} color="#a8a8b3" />
+                    </button>
+                    <button onClick={() => handleUpdate(item.id)} type="button">
+                      <FiEdit size={20} color="#a8a8b3" />
+                    </button>
+                    <button onClick={() => handleDelete(item.id)} type="button">
+                      <FiTrash2 size={20} color="#a8a8b3" />
+                    </button>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p>No hops found.</p>
+          )
+        )}
       </div>
-
-      <h1>Hops</h1>
-      {loading ? <p>Loading...</p> : error ? <p>{error}</p> : (
-        itemList.length > 0 ? (
-          <ul>
-            {itemList.map((item) => (
-              <li key={item.id}>
-                <h2>{item.name}</h2>
-                <p>Description: {item.description}</p>
-                <div className="button-group">
-                  <button onClick={() => handleDetails(item.id)} type="button">
-                    <FiBookOpen size={20} color="#a8a8b3" />
-                  </button>
-                  <button onClick={() => handleUpdate(item.id)} type="button">
-                    <FiEdit size={20} color="#a8a8b3" />
-                  </button>
-                  <button onClick={() => handleDelete(item.id)} type="button">
-                    <FiTrash2 size={20} color="#a8a8b3" />
-                  </button>
-                </div>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p>No hops found.</p>
-        )
-      )}
     </div>
   );
 }

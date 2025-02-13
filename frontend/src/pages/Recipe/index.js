@@ -77,6 +77,7 @@ export default function NewRecipe() {
 
     /* Components */
     const [selectedStyle, setSelectedStyle] = useState('');
+    const [selectedType, setSelectedType] = useState('');
     const [EBCColor, setEBCColor] = useState("");
 
     /* Barra */
@@ -84,6 +85,8 @@ export default function NewRecipe() {
     
     const [recipe, setRecipe] = useState({
         name: '',
+        author: '',
+        type: '',
         style: '',
         volumeLiters: '',
         batchTime: '',
@@ -467,11 +470,13 @@ export default function NewRecipe() {
 
     const handleRecipeChange = (e) => {
         const { name, value } = e.target;
-        setRecipe((prevState) => ({
+        setRecipe((prevState) => {
+          return {
             ...prevState,
-            [name]: value
-        }));
-    };
+            [name]: value,
+          };
+        });
+      };
 
     const handleEquipmentChange = (e) => {
         const { name, value } = e.target;
@@ -495,6 +500,8 @@ export default function NewRecipe() {
             style: recipe.style,
             volumeLiters: recipe.volumeLiters,
             batchTime: recipe.batchTime,
+            author: recipe.author,
+            type: recipe.type,
             description: recipe.description,
             creationDate: recipe.creationDate,
             notes: recipe.notes,
@@ -527,334 +534,359 @@ export default function NewRecipe() {
     }
 
     return (
-        <div className='recipe-container'>
-            <div className='content'>
+        <div>
+            <Sidebar />
+            <div className='recipe-container'>
+                <div className='content'>
+                    <div className="top">
+                        <form onSubmit={handleSubmit}>
+                            <div className="inputs-row">
+                                <div className="input-field">
+                                    <label htmlFor="name">Recipe Name</label>
+                                    <input
+                                        name="name"
+                                        value={recipe.name}
+                                        onChange={handleRecipeChange}
+                                        disabled={isView}
+                                        style={{ width: '380px' }}/>
+                                </div>
+                                <div className="input-field">
+                                    <label htmlFor="name">Author</label>
+                                    <input
+                                        name="author"
+                                        value={recipe.author}
+                                        onChange={handleRecipeChange}
+                                        disabled={isView}
+                                        style={{ width: '220px' }}/>
+                                </div>
+                                <div className="input-field">
+                                    <label htmlFor="name">Style</label>
+                                    <select
+                                        id="beer-style"
+                                        value={selectedStyle.name || ""}
+                                        onChange={(e) => {
+                                            const selectedName = e.target.value;
+                                            setSelectedStyle(selectedName);
+                                        
+                                            const style = beerStyles.find(style => style.name === selectedName);
+                                            if (style) {
+                                                setSelectedStyle(style);
+                                            }
+                                        }}
+                                        style={{ width: '200px' }}
+                                    >
+                                        <option value="">Select a style</option>
+                                        {beerStyles.map((style, index) => (
+                                            <option key={index} value={style.name}>
+                                                {style.name}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+                                <div className="input-field">
+                                    <label htmlFor="name">Type</label>
+                                    <select
+                                        id="beer-type"
+                                        value={recipe.type || ""}
+                                        onChange={(e) => {
+                                            setRecipe({
+                                              ...recipe,
+                                              type: e.target.value,
+                                            });
+                                          }}
+                                        style={{ width: '100px' }}
+                                    >
+                                        <option value="All Grain">All Grain</option>
+                                        <option value="Extract">Extract</option>
+                                        <option value="Partial Mash">Partial Mash</option>
+                                    </select>
+                                </div>
+                                <div className="input-field">
+                                    <label htmlFor="name">Creation Date</label>
+                                    <input
+                                        name="creation date"
+                                        value={recipe.creationDate}
+                                        onChange={handleRecipeChange}
+                                        disabled={isView}
+                                        style={{ width: '100px' }}/>
+                                </div>
+                            </div>
+                            <div className="inputs-row">
+                                <div className="input-field">
+                                    <label htmlFor="name">Description</label>
+                                    <textarea
+                                        className="description-textarea"
+                                        name="description"
+                                        value={recipe.description}
+                                        onChange={handleRecipeChange}
+                                        disabled={isView}/>
+                                </div>
+                            </div>
+                            <div className="inputs-row">
+                                <div className="input-field">
+                                    <label htmlFor="name">Equipment</label>
+                                    <input
+                                        name="equipment"
+                                        value={recipe.equipment}
+                                        onChange={handleRecipeChange}
+                                        disabled={isView}
+                                        style={{ width: '240px' }}/>
+                                </div>
+                                <div className="input-field">
+                                    <label htmlFor="name">Batch Volume</label>
+                                    <input
+                                        name="batchVolume"
+                                        type="number"
+                                        value={recipe.recipeEquipment.batchVolume}
+                                        onChange={handleEquipmentChange}
+                                        disabled={isView}
+                                        style={{ width: '90px' }}/>
+                                </div>
+                                <div className="input-field">
+                                    <label htmlFor="name">Batch Time</label>
+                                    <input
+                                        name="batchTime"
+                                        type="number"
+                                        value={recipe.recipeEquipment.batchTime}
+                                        onChange={handleEquipmentChange}
+                                        disabled={isView}
+                                        style={{ width: '90px' }}/>
+                                </div>
 
-                <Sidebar />
-
-                <div className="top">
-                    <form onSubmit={handleSubmit}>
-                        <div className="inputs-row">
-                            <div className="input-field">
-                                <label htmlFor="name">Recipe Name</label>
-                                <input
-                                    name="name"
-                                    value={recipe.name}
-                                    onChange={handleRecipeChange}
-                                    disabled={isView}
-                                    style={{ width: '610px' }}/>
+                                <div className="input-field">
+                                    <label htmlFor="name">Brew. Efficiency</label>
+                                    <input
+                                        name="efficiency"
+                                        type="number"
+                                        value={recipe.recipeEquipment.efficiency}
+                                        onChange={handleEquipmentChange}
+                                        disabled={isView}
+                                        style={{ width: '90px' }}/>
+                                </div>
+                                <div className="input-field">
+                                    <label htmlFor="name">Mash Efficiency</label>
+                                    <input
+                                        name="efficiency"
+                                        type="number"
+                                        value={recipe.recipeEquipment.efficiency}
+                                        onChange={handleEquipmentChange}
+                                        disabled={isView}
+                                        style={{ width: '90px' }}/>
+                                </div>
+                                <div className="input-field">
+                                    <label htmlFor="name">Pre Boil Volume</label>
+                                    <input
+                                        name="preBoilVolume"
+                                        type="number"
+                                        value={preBoilVolume}
+                                        onChange={handleEquipmentChange}
+                                        disabled={true}
+                                        style={{ width: '90px' }}/>
+                                </div>
+                                <div className="input-field">
+                                    <label htmlFor="name">Boil Time</label>
+                                    <input
+                                        name="boilTime"
+                                        type="number"
+                                        value={recipe.recipeEquipment.boilTime}
+                                        onChange={handleEquipmentChange}
+                                        disabled={isView}
+                                        style={{ width: '90px' }}/>
+                                </div>
                             </div>
-                            <div className="input-field">
-                                <label htmlFor="name">Style</label>
-                                <select
-                                    id="beer-style"
-                                    value={selectedStyle.name || ""}  // Exibe o nome do estilo
-                                    onChange={(e) => {
-                                        const selectedName = e.target.value;  // Armazena apenas o nome do estilo
-                                        setSelectedStyle(selectedName);  // Atualiza o estado com o nome
-                                    
-                                        const style = beerStyles.find(style => style.name === selectedName);
-                                        if (style) {
-                                            setSelectedStyle(style);  // Armazena o objeto completo
-                                        }
-                                    }}
-                                    style={{ width: '300px' }}
-                                >
-                                    <option value="">Select a style</option>
-                                    {beerStyles.map((style, index) => (
-                                        <option key={index} value={style.name}>
-                                            {style.name}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
-                            <div className="input-field">
-                                <label htmlFor="name">Creation Date</label>
-                                <input
-                                    name="creation date"
-                                    value={recipe.creationDate}
-                                    onChange={handleRecipeChange}
-                                    disabled={isView}
-                                    style={{ width: '120px' }}/>
-                            </div>
-                        </div>
-                        <div className="inputs-row">
-                            <div className="input-field">
-                                <label htmlFor="name">Description</label>
-                                <textarea
-                                    className="description-textarea"
-                                    name="description"
-                                    value={recipe.description}
-                                    onChange={handleRecipeChange}
-                                    disabled={isView}/>
-                            </div>
-                        </div>
-                        <div className="inputs-row">
-                            <div className="input-field">
-                                <label htmlFor="name">Equipment</label>
-                                <input
-                                    name="equipment"
-                                    value={recipe.equipment}
-                                    onChange={handleRecipeChange}
-                                    disabled={isView}
-                                    style={{ width: '250px' }}/>
-                            </div>
-                            <div className="input-field">
-                                <label htmlFor="name">Batch Volume</label>
-                                <input
-                                    name="batchVolume"
-                                    type="number"
-                                    value={recipe.recipeEquipment.batchVolume}
-                                    onChange={handleEquipmentChange}
-                                    disabled={isView}
-                                    style={{ width: '100px' }}/>
-                            </div>
-                            <div className="input-field">
-                                <label htmlFor="name">Batch Time</label>
-                                <input
-                                    name="batchTime"
-                                    type="number"
-                                    value={recipe.recipeEquipment.batchTime}
-                                    onChange={handleEquipmentChange}
-                                    disabled={isView}
-                                    style={{ width: '100px' }}/>
-                            </div>
-
-                            <div className="input-field">
-                                <label htmlFor="name">Brewhouse Efficiency</label>
-                                <input
-                                    name="efficiency"
-                                    type="number"
-                                    value={recipe.recipeEquipment.efficiency}
-                                    onChange={handleEquipmentChange}
-                                    disabled={isView}
-                                    style={{ width: '100px' }}/>
-                            </div>
-                            <div className="input-field">
-                                <label htmlFor="name">Mash Efficiency</label>
-                                <input
-                                    name="efficiency"
-                                    type="number"
-                                    value={recipe.recipeEquipment.efficiency}
-                                    onChange={handleEquipmentChange}
-                                    disabled={isView}
-                                    style={{ width: '100px' }}/>
-                            </div>
-                        </div>
-                        <div className="inputs-row">
-                            <div className="input-field">
-                                <label htmlFor="name">Pre Boil Volume</label>
-                                <input
-                                    name="preBoilVolume"
-                                    type="number"
-                                    value={preBoilVolume}
-                                    onChange={handleEquipmentChange}
-                                    disabled={true}
-                                    style={{ width: '100px' }}/>
-                            </div>
-                            <div className="input-field">
-                                <label htmlFor="name">Boil Time</label>
-                                <input
-                                    name="boilTime"
-                                    type="number"
-                                    value={recipe.recipeEquipment.boilTime}
-                                    onChange={handleEquipmentChange}
-                                    disabled={isView}
-                                    style={{ width: '100px' }}/>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-                <div className="buttons-container">
-                    <button onClick={openFermentableModal} className="modalAddButtonFermentable">Add Fermentable</button>
-                    <button onClick={openHopModal} className="modalAddButtonHop">Add Hop</button>
-                    <button onClick={openMiscModal} className="modalAddButtonMisc">Add Misc</button>
-                    <button onClick={openYeastModal} className="modalAddButtonYeast">Add Yeast</button>
-                    <button onClick={fetchOpenAIResponse} className="modalAddButtonFermentable">Mystical Brew Wisdom</button>
-                </div>
-                <div className="bottom-container">
-                    <div className="bottom-left">
-                        <ul>
-                            {recipe.recipeFermentables?.map((fermentable) => (
-                                <li key={fermentable.id}>
-                                    <div className="quantity-div">
-                                        <object className="malt-object" type="image/svg+xml" data="/malt.svg"></object> {fermentable.quantity/1000}kg
-                                    </div>
-                                    <div>
-                                        <strong>{fermentable.name}</strong>
-                                    </div>
-                                    <div className="ingredients-list-button-group">
-                                        <button onClick={() => handleUpdateFermentable(fermentable)} type="button">
-                                          <FiEdit size={20} color="#a8a8b3" />
-                                        </button>
-                                        <button onClick={() => handleDeleteFermentable(fermentable.id)} type="button">
-                                          <FiTrash2 size={20} color="#a8a8b3" />
-                                        </button>
-                                    </div>
-                                </li>
-                            ))}
-                            {recipe.recipeHops?.map((hop) => (
-                                <li key={hop.id}>
-                                    <div className="quantity-div">
-                                        <object className="hop-object" type="image/svg+xml" data="/hop.svg"></object> {hop.quantity}g
-                                    </div>
-                                    <div>
-                                        <strong>{hop.name}</strong> (IBU: {hop.ibu})
-                                    </div>
-                                    <div className="ingredients-list-button-group">
-                                        <button onClick={() => handleUpdateHop(hop)} type="button">
-                                          <FiEdit size={20} color="#a8a8b3" />
-                                        </button>
-                                        <button onClick={() => handleDeleteHop(hop.id)} type="button">
-                                          <FiTrash2 size={20} color="#a8a8b3" />
-                                        </button>
-                                    </div>
-                                </li>
-                            ))}
-                            {recipe.recipeMisc?.map((misc) => (
-                                <li key={misc.id}>
-                                    <div className="quantity-div">
-                                        <object className="misc-object" type="image/svg+xml" data="/misc.svg"></object> {misc.quantity}g
-                                    </div>
-                                    <div>
-                                    <strong>{misc.name}</strong>
-                                    </div>
-                                    <div className="ingredients-list-button-group">
-                                        <button onClick={() => handleUpdateMisc(misc)} type="button">
-                                          <FiEdit size={20} color="#a8a8b3" />
-                                        </button>
-                                        <button onClick={() => handleDeleteMisc(misc.id)} type="button">
-                                          <FiTrash2 size={20} color="#a8a8b3" />
-                                        </button>
-                                    </div>
-                                </li>
-                            ))}
-                            {recipe.recipeYeasts?.map((yeast) => (
-                                <li key={yeast.id}>
-                                    <div className="quantity-div">
-                                        <object className="yeast-object" type="image/svg+xml" data="/yeast.svg"></object> {yeast.quantity}g
-                                    </div>
-                                    <div>
-                                        <strong>{yeast.name}</strong>
-                                    </div>
-                                    <div className="ingredients-list-button-group">
-                                        <button onClick={() => handleUpdateYeast(yeast)} type="button">
-                                          <FiEdit size={20} color="#a8a8b3" />
-                                        </button>
-                                        <button onClick={() => handleDeleteYeast(yeast.id)} type="button">
-                                          <FiTrash2 size={20} color="#a8a8b3" />
-                                        </button>
-                                    </div>
-                                </li>
-                            ))}
-                        </ul>
+                        </form>
                     </div>
+                    <div className="buttons-container">
+                        <button onClick={openFermentableModal} className="modalAddButtonFermentable">Add Fermentable</button>
+                        <button onClick={openHopModal} className="modalAddButtonHop">Add Hop</button>
+                        <button onClick={openMiscModal} className="modalAddButtonMisc">Add Misc</button>
+                        <button onClick={openYeastModal} className="modalAddButtonYeast">Add Yeast</button>
+                        <button onClick={fetchOpenAIResponse} className="modalAddButtonFermentable">Mystical Brew Wisdom</button>
+                    </div>
+                    <div className="bottom-container">
+                        <div className="bottom-left">
+                            <ul>
+                                {recipe.recipeFermentables?.map((fermentable) => (
+                                    <li key={fermentable.id}>
+                                        <div className="quantity-div">
+                                            <object className="malt-object" type="image/svg+xml" data="/malt.svg"></object> {fermentable.quantity/1000}kg
+                                        </div>
+                                        <div>
+                                            <strong>{fermentable.name}</strong>
+                                        </div>
+                                        <div className="ingredients-list-button-group">
+                                            <button onClick={() => handleUpdateFermentable(fermentable)} type="button">
+                                              <FiEdit size={20} color="#a8a8b3" />
+                                            </button>
+                                            <button onClick={() => handleDeleteFermentable(fermentable.id)} type="button">
+                                              <FiTrash2 size={20} color="#a8a8b3" />
+                                            </button>
+                                        </div>
+                                    </li>
+                                ))}
+                                {recipe.recipeHops?.map((hop) => (
+                                    <li key={hop.id}>
+                                        <div className="quantity-div">
+                                            <object className="hop-object" type="image/svg+xml" data="/hop.svg"></object> {hop.quantity}g
+                                        </div>
+                                        <div>
+                                            <strong>{hop.name}</strong> (IBU: {hop.ibu})
+                                        </div>
+                                        <div className="ingredients-list-button-group">
+                                            <button onClick={() => handleUpdateHop(hop)} type="button">
+                                              <FiEdit size={20} color="#a8a8b3" />
+                                            </button>
+                                            <button onClick={() => handleDeleteHop(hop.id)} type="button">
+                                              <FiTrash2 size={20} color="#a8a8b3" />
+                                            </button>
+                                        </div>
+                                    </li>
+                                ))}
+                                {recipe.recipeMisc?.map((misc) => (
+                                    <li key={misc.id}>
+                                        <div className="quantity-div">
+                                            <object className="misc-object" type="image/svg+xml" data="/misc.svg"></object> {misc.quantity}g
+                                        </div>
+                                        <div>
+                                        <strong>{misc.name}</strong>
+                                        </div>
+                                        <div className="ingredients-list-button-group">
+                                            <button onClick={() => handleUpdateMisc(misc)} type="button">
+                                              <FiEdit size={20} color="#a8a8b3" />
+                                            </button>
+                                            <button onClick={() => handleDeleteMisc(misc.id)} type="button">
+                                              <FiTrash2 size={20} color="#a8a8b3" />
+                                            </button>
+                                        </div>
+                                    </li>
+                                ))}
+                                {recipe.recipeYeasts?.map((yeast) => (
+                                    <li key={yeast.id}>
+                                        <div className="quantity-div">
+                                            <object className="yeast-object" type="image/svg+xml" data="/yeast.svg"></object> {yeast.quantity}g
+                                        </div>
+                                        <div>
+                                            <strong>{yeast.name}</strong>
+                                        </div>
+                                        <div className="ingredients-list-button-group">
+                                            <button onClick={() => handleUpdateYeast(yeast)} type="button">
+                                              <FiEdit size={20} color="#a8a8b3" />
+                                            </button>
+                                            <button onClick={() => handleDeleteYeast(yeast.id)} type="button">
+                                              <FiTrash2 size={20} color="#a8a8b3" />
+                                            </button>
+                                        </div>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
 
-                    <div className="bottom-right">
-                        <div className="parameters-container">
-                            <strong>OG:</strong> {OG} 
+                        <div className="bottom-right">
+                            <div className="parameters-container">
+                                <strong>OG:</strong> {OG} 
+                            </div>
+                            <div className="bar-container">
+                                <OGBar valorInicial={1.000} valorFinal={1.100} margemInicial={selectedStyle.initialOG} margemFinal={selectedStyle.finalOG} OGAtual={OG} />
+                            </div>
+                            <div>
+                                <strong>FG:</strong> {FG}
+                            </div>
+                            <div className="bar-container">
+                                <OGBar valorInicial={0} valorFinal={25} margemInicial={selectedStyle.initialFG} margemFinal={selectedStyle.finalFG} OGAtual={FG} />
+                            </div>
+                            <div className="parameters-container">
+                                <strong>ABV:</strong> {ABV}
+                            </div>
+                            <div className="bar-container">
+                                <OGBar valorInicial={0} valorFinal={20} margemInicial={selectedStyle.initialABV} margemFinal={selectedStyle.finalABV} OGAtual={ABV} />
+                            </div>
+                            <div className="parameters-container">
+                                <strong>EBC:</strong> {EBC}
+                            </div>
+                            <div className="bar-container">
+                                <OGBar valorInicial={0} valorFinal={120} margemInicial={selectedStyle.initialEBC} margemFinal={selectedStyle.finalEBC} OGAtual={EBC} />
+                            </div>
+                            <div className="parameters-container">
+                                <strong>IBU:</strong> {IBU}
+                            </div>
+                            <div className="bar-container">
+                                <OGBar valorInicial={0} valorFinal={80} margemInicial={selectedStyle.initialIBU} margemFinal={selectedStyle.finalIBU} OGAtual={IBU} />
+                            </div>
+                            <div className="parameters-container">
+                                <strong>BU/GU:</strong> {BUGU}
+                            </div>
+                            <div className="bar-container">
+                                <OGBar valorInicial={0} valorFinal={3} margemInicial={selectedStyle.initialBuGu} margemFinal={selectedStyle.finalBuGu} OGAtual={BUGU} />
+                            </div>
                         </div>
-                        <div className="bar-container">
-                            <OGBar valorInicial={1.000} valorFinal={1.100} margemInicial={selectedStyle.initialOG} margemFinal={selectedStyle.finalOG} OGAtual={OG} />
-                        </div>
-                        <div>
-                            <strong>FG:</strong> {FG}
-                        </div>
-                        <div className="bar-container">
-                            <OGBar valorInicial={0} valorFinal={25} margemInicial={selectedStyle.initialFG} margemFinal={selectedStyle.finalFG} OGAtual={FG} />
-                        </div>
-                        <div className="parameters-container">
-                            <strong>ABV:</strong> {ABV}
-                        </div>
-                        <div className="bar-container">
-                            <OGBar valorInicial={0} valorFinal={20} margemInicial={selectedStyle.initialABV} margemFinal={selectedStyle.finalABV} OGAtual={ABV} />
-                        </div>
-                        <div className="parameters-container">
-                            <strong>EBC:</strong> {EBC}
-                        </div>
-                        <div className="bar-container">
-                            <OGBar valorInicial={0} valorFinal={120} margemInicial={selectedStyle.initialEBC} margemFinal={selectedStyle.finalEBC} OGAtual={EBC} />
-                        </div>
-                        <div className="parameters-container">
-                            <strong>IBU:</strong> {IBU}
-                        </div>
-                        <div className="bar-container">
-                            <OGBar valorInicial={0} valorFinal={80} margemInicial={selectedStyle.initialIBU} margemFinal={selectedStyle.finalIBU} OGAtual={IBU} />
-                        </div>
-                        <div className="parameters-container">
-                            <strong>BU/GU:</strong> {BUGU}
-                        </div>
-                        <div className="bar-container">
-                            <OGBar valorInicial={0} valorFinal={3} margemInicial={selectedStyle.initialBuGu} margemFinal={selectedStyle.finalBuGu} OGAtual={BUGU} />
+
+                        <div className="bottom-right-beer">
+                            <object className="beer-object" type="image/svg+xml" data="/beer.svg"></object>
                         </div>
                     </div>
-
-                    <div className="bottom-right-beer">
-                        <object className="beer-object" type="image/svg+xml" data="/beer.svg"></object>
+                    <div className="top">
+                        <textarea
+                            name="IA"
+                            placeholder="Mystical Wisdom"
+                            value={openAI}
+                            disabled={true}
+                            style={{ width: '1070px' }}/>
                     </div>
+                    {!isView && (
+                        <button onClick={handleSubmit} className='crud-save-button' type="submit">
+                            Save
+                        </button>
+                    )}
                 </div>
-                <div className="top">
-                    <textarea
-                        name="IA"
-                        placeholder="Mystical Wisdom"
-                        value={openAI}
-                        disabled={true}
-                        style={{ width: '1070px' }}/>
-                </div>
-                {!isView && (
-                    <button onClick={handleSubmit} className='crud-save-button' type="submit">
-                        Save
-                    </button>
-                )}
+                <AddFermentableModal
+                    isOpen={isFermentableModalOpen}
+                    closeModal={closeFermentableModal}
+                    fermentableList={fermentableList}
+                    handleAddFermentableRecipe={handleAddFermentableRecipe}
+                />
+                <AddHopModal
+                    isOpen={isHopModalOpen}
+                    closeModal={closeHopModal}
+                    hopList={hopList}
+                    handleAddHopRecipe={handleAddHopRecipe}
+                />
+                <AddMiscModal
+                    isOpen={isMiscModalOpen}
+                    closeModal={closeMiscModal}
+                    miscList={miscList}
+                    handleAddMiscRecipe={handleAddMiscRecipe}
+                />
+                <AddYeastModal
+                    isOpen={isYeastModalOpen}
+                    closeModal={closeYeastModal}
+                    yeastList={yeastList}
+                    handleAddYeastRecipe={handleAddYeastRecipe}
+                />
+                <UpdateFermentableModal
+                    isOpen={isUpdateFermentableModalOpen}
+                    closeModal={closeUpdateFermentableModal}
+                    selectedFermentable={selectedFermentable}
+                    handleUpdateFermentableRecipe={handleUpdateFermentableRecipe}
+                />
+                <UpdateHopModal
+                    isOpen={isUpdateHopModalOpen}
+                    closeModal={closeUpdateHopModal}
+                    selectedHop={selectedHop}
+                    handleUpdateHopRecipe={handleUpdateHopRecipe}
+                />
+                <UpdateMiscModal
+                    isOpen={isUpdateMiscModalOpen}
+                    closeModal={closeUpdateMiscModal}
+                    selectedMisc={selectedMisc}
+                    handleUpdateMiscRecipe={handleUpdateMiscRecipe}
+                />
+                <UpdateYeastModal
+                    isOpen={isUpdateYeastModalOpen}
+                    closeModal={closeUpdateYeastModal}
+                    selectedYeast={selectedYeast}
+                    handleUpdateYeastRecipe={handleUpdateYeastRecipe}
+                />
             </div>
-            <AddFermentableModal
-                isOpen={isFermentableModalOpen}
-                closeModal={closeFermentableModal}
-                fermentableList={fermentableList}
-                handleAddFermentableRecipe={handleAddFermentableRecipe}
-            />
-            <AddHopModal
-                isOpen={isHopModalOpen}
-                closeModal={closeHopModal}
-                hopList={hopList}
-                handleAddHopRecipe={handleAddHopRecipe}
-            />
-            <AddMiscModal
-                isOpen={isMiscModalOpen}
-                closeModal={closeMiscModal}
-                miscList={miscList}
-                handleAddMiscRecipe={handleAddMiscRecipe}
-            />
-            <AddYeastModal
-                isOpen={isYeastModalOpen}
-                closeModal={closeYeastModal}
-                yeastList={yeastList}
-                handleAddYeastRecipe={handleAddYeastRecipe}
-            />
-            <UpdateFermentableModal
-                isOpen={isUpdateFermentableModalOpen}
-                closeModal={closeUpdateFermentableModal}
-                selectedFermentable={selectedFermentable}
-                handleUpdateFermentableRecipe={handleUpdateFermentableRecipe}
-            />
-            <UpdateHopModal
-                isOpen={isUpdateHopModalOpen}
-                closeModal={closeUpdateHopModal}
-                selectedHop={selectedHop}
-                handleUpdateHopRecipe={handleUpdateHopRecipe}
-            />
-            <UpdateMiscModal
-                isOpen={isUpdateMiscModalOpen}
-                closeModal={closeUpdateMiscModal}
-                selectedMisc={selectedMisc}
-                handleUpdateMiscRecipe={handleUpdateMiscRecipe}
-            />
-            <UpdateYeastModal
-                isOpen={isUpdateYeastModalOpen}
-                closeModal={closeUpdateYeastModal}
-                selectedYeast={selectedYeast}
-                handleUpdateYeastRecipe={handleUpdateYeastRecipe}
-            />
         </div>
     );
 }

@@ -1,14 +1,13 @@
 import React, { useContext, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
-import Header from '../../components/Header';
 import './styles.css';
 
 import AuthContext from '../../context/AuthContext';
 import Sidebar from '../../components/Sidebar';
 
 export default function Main() {
-    const { user, logout } = useContext(AuthContext);
+    const { user } = useContext(AuthContext);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -18,10 +17,11 @@ export default function Main() {
       }, [user, navigate]);
 
     return (
+      <div>
+        <Sidebar />
         <div className='main-container'>
 
-            <Sidebar />
-
         </div>
+      </div>
     );
 }
