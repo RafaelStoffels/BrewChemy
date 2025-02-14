@@ -1,3 +1,15 @@
+export async function searchYeasts(api, userToken, term) {
+    try {
+        const response = await api.get('/api/yeasts/search', {
+            headers: { Authorization: `Bearer ${userToken}` },
+            params: { searchTerm: term }
+        });
+        return response.data;
+    } catch (err) {
+        throw new Error('Error loading hops');
+    }
+}
+
 export async function fetchYeasts(api, userToken) {
     try {
         const response = await api.get('api/yeasts', {

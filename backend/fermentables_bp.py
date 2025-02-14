@@ -58,6 +58,30 @@ class FermentableOfficial(db.Model):
 def create_fermentables_bp():
     fermentables_bp = Blueprint("fermentables", __name__)
 
+    @fermentables_bp.route("/fermentables/search", methods=["GET"])
+    @token_required
+    def search_fermentables(current_user_id):
+        search_term = request.args.get("searchTerm", "").strip()
+
+        if not search_term:
+            return jsonify({"error": "O parâmetro 'searchTerm' é obrigatório."}), 400
+
+        # Consulta nas duas tabelas usando filtro por nome
+        user_fermentables = Fermentable.query.filter(
+            Fermentable.user_id == current_user_id,
+            Fermentable.name.ilike(f"%{search_term}%")
+        ).all()
+
+        official_fermentables = FermentableOfficial.query.filter(
+            FermentableOfficial.name.ilike(f"%{search_term}%")
+        ).all()
+
+        # Combina os resultados
+        combined_fermentables = [fermentable.to_dict() for fermentable in user_fermentables] + \
+                                [fermentable.to_dict() for fermentable in official_fermentables]
+
+        return jsonify(combined_fermentables)
+
     # Return all records (including fermentable_official)
     @fermentables_bp.route("/fermentables", methods=["GET"])
     @token_required

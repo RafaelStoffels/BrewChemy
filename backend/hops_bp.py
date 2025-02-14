@@ -7,6 +7,7 @@ class Hop(db.Model):
 
     # Table Definition
     id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'), nullable=False)
     name = db.Column(db.String(100), nullable=False)
     alpha_acid_content = db.Column(db.Numeric(5, 2))
     beta_acid_content = db.Column(db.Numeric(5, 2))
@@ -18,6 +19,7 @@ class Hop(db.Model):
     def to_dict(self):
         return {
             "id": self.id,
+            "userId": self.user_id,
             "name": self.name,
             "alphaAcidContent": float(self.alpha_acid_content) if self.alpha_acid_content else None,
             "betaAcidContent": float(self.beta_acid_content) if self.beta_acid_content else None,
@@ -52,6 +54,30 @@ class HopOfficial(db.Model):
 
 def create_hops_bp():
     hops_bp = Blueprint("hops", __name__)
+
+    @hops_bp.route("/hops/search", methods=["GET"])
+    @token_required
+    def search_hops(current_user_id):
+        search_term = request.args.get("searchTerm", "").strip()
+
+        if not search_term:
+            return jsonify({"error": "O parâmetro 'searchTerm' é obrigatório."}), 400
+
+        # Consulta nas duas tabelas usando filtro por nome
+        user_hops = Hop.query.filter(
+            Hop.user_id == current_user_id,
+            Hop.name.ilike(f"%{search_term}%")
+        ).all()
+
+        official_hops = HopOfficial.query.filter(
+            HopOfficial.name.ilike(f"%{search_term}%")
+        ).all()
+
+        # Combina os resultados
+        combined_hops = [hop.to_dict() for hop in user_hops] + \
+                                [hop.to_dict() for hop in official_hops]
+
+        return jsonify(combined_hops)
 
     # Return all hops
     @hops_bp.route("/hops", methods=["GET"])

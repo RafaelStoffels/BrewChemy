@@ -7,6 +7,7 @@ class Yeast(db.Model):
 
     # Table Definition
     id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'), nullable=False)
     name = db.Column(db.String(100), nullable=False)
     manufacturer = db.Column(db.String(100))
     type = db.Column(db.String(50))
@@ -22,6 +23,7 @@ class Yeast(db.Model):
     def to_dict(self):
         return {
             "id": self.id,
+            "userId": self.user_id,
             "name": self.name,
             "manufacturer": self.manufacturer,
             "type": self.type,
@@ -68,6 +70,30 @@ class YeastOfficial(db.Model):
 
 def create_yeasts_bp():
     yeasts_bp = Blueprint("yeasts", __name__)
+
+    @yeasts_bp.route("/yeasts/search", methods=["GET"])
+    @token_required
+    def search_yeasts(current_user_id):
+        search_term = request.args.get("searchTerm", "").strip()
+
+        if not search_term:
+            return jsonify({"error": "O parâmetro 'searchTerm' é obrigatório."}), 400
+
+        # Consulta nas duas tabelas usando filtro por nome
+        user_yeasts = Yeast.query.filter(
+            Yeast.user_id == current_user_id,
+            Yeast.name.ilike(f"%{search_term}%")
+        ).all()
+
+        official_yeasts = YeastOfficial.query.filter(
+            YeastOfficial.name.ilike(f"%{search_term}%")
+        ).all()
+
+        # Combina os resultados
+        combined_yeasts = [yeast.to_dict() for yeast in user_yeasts] + \
+                          [yeast.to_dict() for yeast in official_yeasts]
+
+        return jsonify(combined_yeasts)
 
     # Return all yeasts
     @yeasts_bp.route("/yeasts", methods=["GET"])

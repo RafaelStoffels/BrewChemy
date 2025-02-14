@@ -6,7 +6,6 @@ import { fetchYeasts, deleteYeast } from '../../services/Yeasts';
 import api from '../../services/api';
 import AuthContext from '../../context/AuthContext';
 import Sidebar from '../../components/Sidebar';
-import Header from '../../components/Header';
 import '../../styles/list.css';
 
 export default function YeastList() {

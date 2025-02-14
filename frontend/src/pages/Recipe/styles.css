@@ -9,12 +9,13 @@
     height: 30px;
 }
 
-.recipe-container .content form textarea {
+.recipe-container .content textarea {
     border: 1px solid #663d00bd;
+    height: 90px;
 }
 
 .top {
-    width: 100%;
+    width: 1115px;
     background-color: #aa8e69; 
     padding: 15px;
     box-shadow: 0 5px 10px rgba(0, 0, 0, 0.4);
