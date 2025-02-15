@@ -12,12 +12,12 @@ export function AddFermentableModal({ isOpen, closeModal, handleAddFermentableRe
     const [quantity, setQuantity] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
     const [fermentableList, setFermentableList] = useState([]);
-    const [isSelecting, setIsSelecting] = useState(false); // Evita busca extra ao selecionar
+    const [isSelecting, setIsSelecting] = useState(false);
 
     const { user } = useContext(AuthContext);
 
     useEffect(() => {
-        if (isSelecting) return; // Se estiver selecionando, não faz nova busca
+        if (isSelecting) return; 
         
         const delayDebounce = setTimeout(() => {
             if (searchTerm.length > 2) {
@@ -36,12 +36,11 @@ export function AddFermentableModal({ isOpen, closeModal, handleAddFermentableRe
     };
 
     const handleSelectFermentable = (fermentable) => {
-        setIsSelecting(true); // Indica que estamos selecionando um item (evita nova busca)
+        setIsSelecting(true); 
         setSelectedFermentable(fermentable.id);
-        setSearchTerm(fermentable.name); // Preenche o input com o nome
-        setFermentableList([]); // Oculta a lista após a seleção
+        setSearchTerm(fermentable.name);
+        setFermentableList([]);
 
-        // Reseta a flag depois de um curto período para permitir futuras buscas
         setTimeout(() => setIsSelecting(false), 100);
     };
 
@@ -54,42 +53,46 @@ export function AddFermentableModal({ isOpen, closeModal, handleAddFermentableRe
             overlayClassName="modal-overlay"
         >
             <h2>Select a fermentable</h2>
+            <form onSubmit={handleAddFermentableRecipe}>
+                <div className="modal">
+                    <input
+                        type="text"
+                        placeholder="Search fermentables"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        style={{ marginBottom: '15px', padding: '5px' }}
+                    />
 
-            {/* Campo de busca */}
-            <input
-                type="text"
-                placeholder="Search fermentables"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                style={{ marginBottom: '15px', padding: '5px' }}
-            />
+                    {fermentableList.length > 0 && (
+                        <ul style={{ border: '1px solid #ccc', padding: '5px', maxHeight: '150px', overflowY: 'auto' }}>
+                            {fermentableList.map((fermentable) => (
+                                <li 
+                                    key={fermentable.id} 
+                                    style={{ cursor: 'pointer', padding: '5px' }}
+                                    onMouseDown={() => handleSelectFermentable(fermentable)}
+                                >
+                                    {fermentable.name}
+                                </li>
+                            ))}
+                        </ul>
+                    )}
 
-            {/* Lista de fermentáveis */}
-            {fermentableList.length > 0 && (
-                <ul style={{ border: '1px solid #ccc', padding: '5px', maxHeight: '150px', overflowY: 'auto' }}>
-                    {fermentableList.map((fermentable) => (
-                        <li 
-                            key={fermentable.id} 
-                            style={{ cursor: 'pointer', padding: '5px' }}
-                            onMouseDown={() => handleSelectFermentable(fermentable)} // Usa onMouseDown para evitar re-render antes do clique
-                        >
-                            {fermentable.name}
-                        </li>
-                    ))}
-                </ul>
-            )}
-
-            {/* Campo de quantidade */}
-            <input
-                type="number"
-                placeholder="Quantity"
-                value={quantity}
-                onChange={(e) => setQuantity(e.target.value)}
-            />
-
+                    <div className="inputs-row">
+                        <div className="input-field">
+                            <label htmlFor="name">Quantity</label>
+                            <input
+                                type="number"
+                                placeholder="Quantity"
+                                value={quantity}
+                                onChange={(e) => setQuantity(e.target.value)}
+                            />
+                        </div>
+                    </div>
+                </div>
             <button onClick={() => handleAddFermentableRecipe(selectedFermentable, quantity)} className="crud-save-button">
                 Add Fermentable
             </button>
+            </form>
         </Modal>
     );
 }
@@ -97,15 +100,17 @@ export function AddFermentableModal({ isOpen, closeModal, handleAddFermentableRe
 export function AddHopModal({ isOpen, closeModal, handleAddHopRecipe }) {
     const [selectedHop, setSelectedHop] = useState(null);
     const [quantity, setQuantity] = useState('');
+    const [alphaAcid, setAlphaAcid] = useState('');
     const [boilTime, setBoilTime] = useState('');
+    const [useType, setUseType] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
     const [hopList, setHopList] = useState([]);
-    const [isSelecting, setIsSelecting] = useState(false); // Evita busca ao selecionar
+    const [isSelecting, setIsSelecting] = useState(false);
 
     const { user } = useContext(AuthContext);
 
     useEffect(() => {
-        if (isSelecting) return; // Não faz nova busca se estiver selecionando
+        if (isSelecting) return;
 
         const delayDebounce = setTimeout(() => {
             if (searchTerm.length > 2) {
@@ -126,15 +131,15 @@ export function AddHopModal({ isOpen, closeModal, handleAddHopRecipe }) {
     const handleSelectHop = (hop) => {
         setIsSelecting(true);
         setSelectedHop(hop.id);
-        setSearchTerm(hop.name); // Mostra o nome no input
-        setHopList([]); // Oculta a lista
+        setSearchTerm(hop.name);
+        setHopList([]);
 
         setTimeout(() => setIsSelecting(false), 100);
     };
 
     const handleSaveButton = () => {
         if (selectedHop && quantity && boilTime) {
-            handleAddHopRecipe(selectedHop, quantity, boilTime);
+            handleAddHopRecipe(selectedHop, quantity, boilTime, alphaAcid, useType);
             closeModal();
         } else {
             alert('Please fill in all fields.');
@@ -150,52 +155,76 @@ export function AddHopModal({ isOpen, closeModal, handleAddHopRecipe }) {
             overlayClassName="modal-overlay"
         >
             <h2>Select a Hop</h2>
-            
-            {/* Campo de busca */}
-            <input
-                type="text"
-                placeholder="Search hops"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                style={{ marginBottom: '15px', padding: '5px' }}
-            />
+            <form onSubmit={handleSaveButton}>
+                <div className="modal">
+                    <input
+                        type="text"
+                        placeholder="Search hops"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        style={{ marginBottom: '15px', padding: '5px' }}
+                    />
 
-            {/* Lista de lúpulos */}
-            {hopList.length > 0 && (
-                <ul style={{ border: '1px solid #ccc', padding: '5px', maxHeight: '150px', overflowY: 'auto' }}>
-                    {hopList.map((hop) => (
-                        <li 
-                            key={hop.id} 
-                            style={{ cursor: 'pointer', padding: '5px' }}
-                            onMouseDown={() => handleSelectHop(hop)} // Evita re-render antes do clique
-                        >
-                            {hop.name}
-                        </li>
-                    ))}
-                </ul>
-            )}
-
-            {/* Campos de quantidade e tempo de fervura */}
-            <div>
-                <input
-                    type="number"
-                    placeholder="Quantity"
-                    value={quantity}
-                    onChange={(e) => setQuantity(e.target.value)}
-                />
-            </div>
-            <div>
-                <input
-                    type="number"
-                    placeholder="Boil Time"
-                    value={boilTime}
-                    onChange={(e) => setBoilTime(e.target.value)}
-                />
-            </div>
-
-            <button onClick={handleSaveButton} className="crud-save-button">
-                Add Hop
-            </button>
+                    {hopList.length > 0 && (
+                        <ul style={{ border: '1px solid #ccc', padding: '5px', maxHeight: '150px', overflowY: 'auto' }}>
+                            {hopList.map((hop) => (
+                                <li 
+                                    key={hop.id} 
+                                    style={{ cursor: 'pointer', padding: '5px' }}
+                                    onMouseDown={() => handleSelectHop(hop)}
+                                >
+                                    {hop.name}
+                                </li>
+                            ))}
+                        </ul>
+                    )}
+                    <div className="inputs-row">
+                        <div className="input-field">
+                            <label htmlFor="name">Use Type</label>
+                            <select
+                                value={useType}
+                                onChange={(e) => setUseType(e.target.value)}
+                            >
+                                <option value="Boil">Boil</option>
+                                <option value="Dry Hop">Dry Hop</option>
+                                <option value="Aroma">Aroma</option>
+                                <option value="Mash">Mash</option>
+                                <option value="First Wort">First Wort</option>
+                            </select>
+                        </div>
+                        <div className="input-field">
+                            <label htmlFor="name">Boil Time</label>
+                            <input
+                                type="number"
+                                value={boilTime}
+                                onChange={(e) => setBoilTime(e.target.value)}
+                            />
+                        </div>
+                        <div className="input-field">
+                            <label htmlFor="name">Alpha Acid</label>
+                            <input
+                                type="number"
+                                value={alphaAcid}
+                                onChange={(e) => setBoilTime(e.target.value)}
+                            />
+                        </div>
+                    </div>
+                    <div className="inputs-row">
+                        <div className="input-field">
+                            <label htmlFor="name">Quantity</label>
+                            <input
+                                type="number"
+                                placeholder="Quantity"
+                                value={quantity}
+                                onChange={(e) => setQuantity(e.target.value)}
+                            />
+                        </div>
+                    </div>
+                </div>
+                <button onClick={handleSaveButton} className="crud-save-button">
+                    Add Hop
+                </button>
+            </form>
         </Modal>
     );
 }
@@ -205,9 +234,9 @@ export function AddMiscModal({ isOpen, closeModal, handleAddMiscRecipe }) {
     const [quantity, setQuantity] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
     const [filteredMiscList, setFilteredMiscList] = useState([]);
-    const [isSelecting, setIsSelecting] = useState(false); // Prevent search during selection
+    const [isSelecting, setIsSelecting] = useState(false); 
 
-    const { user } = useContext(AuthContext);  // Certifique-se de que o contexto de autenticação está correto.
+    const { user } = useContext(AuthContext); 
 
     const handleChange = (miscID) => {
         setSelectedMisc(miscID);
@@ -227,7 +256,7 @@ export function AddMiscModal({ isOpen, closeModal, handleAddMiscRecipe }) {
     };
 
     useEffect(() => {
-        if (isSelecting) return; // Do not perform new search while selecting
+        if (isSelecting) return;
 
         const delayDebounce = setTimeout(() => {
             if (searchTerm.length > 2) {
@@ -241,22 +270,22 @@ export function AddMiscModal({ isOpen, closeModal, handleAddMiscRecipe }) {
     }, [searchTerm]);
 
     const filterMiscList = async (term) => {
-        console.log('Searching for:', term);  // Verifique o termo da busca
+        console.log('Searching for:', term); 
         try {
             const response = await searchMiscs(api, user.token, term);
-            console.log('Search result:', response);  // Verifique o que está sendo retornado
+            console.log('Search result:', response); 
             setFilteredMiscList(response);
         } catch (error) {
             console.error('Error fetching misc data:', error);
-            setFilteredMiscList([]); // Caso haja erro, não mostre nada
+            setFilteredMiscList([]); 
         }
     };
 
     const handleSelectMisc = (misc) => {
         setIsSelecting(true);
         setSelectedMisc(misc.id);
-        setSearchTerm(misc.name); // Display name in the input field
-        setFilteredMiscList([]); // Hide the list after selection
+        setSearchTerm(misc.name); 
+        setFilteredMiscList([]); 
 
         setTimeout(() => setIsSelecting(false), 100);
     };
@@ -270,44 +299,46 @@ export function AddMiscModal({ isOpen, closeModal, handleAddMiscRecipe }) {
             overlayClassName="modal-overlay"
         >
             <h2>Select a Misc</h2>
+            <form onSubmit={handleSaveButton}>
+                <div className="modal">
+                    <input
+                        type="text"
+                        placeholder="Search misc"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        style={{ marginBottom: '15px', padding: '5px' }}
+                    />
 
-            {/* Search input */}
-            <input
-                type="text"
-                placeholder="Search misc"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                style={{ marginBottom: '15px', padding: '5px' }}
-            />
+                    {filteredMiscList.length > 0 && (
+                        <ul style={{ border: '1px solid #ccc', padding: '5px', maxHeight: '150px', overflowY: 'auto' }}>
+                            {filteredMiscList.map((misc) => (
+                                <li
+                                    key={misc.id}
+                                    style={{ cursor: 'pointer', padding: '5px' }}
+                                    onClick={() => handleSelectMisc(misc)}
+                                >
+                                    {misc.name}
+                                </li>
+                            ))}
+                        </ul>
+                    )}
 
-            {/* List of filtered miscs */}
-            {filteredMiscList.length > 0 && (
-                <ul style={{ border: '1px solid #ccc', padding: '5px', maxHeight: '150px', overflowY: 'auto' }}>
-                    {filteredMiscList.map((misc) => (
-                        <li
-                            key={misc.id}
-                            style={{ cursor: 'pointer', padding: '5px' }}
-                            onClick={() => handleSelectMisc(misc)} // Select item
-                        >
-                            {misc.name}
-                        </li>
-                    ))}
-                </ul>
-            )}
-
-            {/* Quantity input */}
-            <div>
-                <input
-                    type="number"
-                    placeholder="Quantity"
-                    value={quantity}
-                    onChange={handleQuantityChange}
-                />
-            </div>
-
-            <button onClick={handleSaveButton} className="crud-save-button">
-                Add Misc
-            </button>
+                    <div className="inputs-row">
+                        <div className="input-field">
+                            <label htmlFor="name">Quantity</label>
+                            <input
+                                type="number"
+                                placeholder="Quantity"
+                                value={quantity}
+                                onChange={handleQuantityChange}
+                            />
+                        </div>
+                    </div>
+                <button onClick={handleSaveButton} className="crud-save-button">
+                    Add Misc
+                </button>
+                </div>
+        </form>
         </Modal>
     );
 }
@@ -317,12 +348,12 @@ export function AddYeastModal({ isOpen, closeModal, handleAddYeastRecipe }) {
     const [quantity, setQuantity] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
     const [filteredYeastList, setFilteredYeastList] = useState([]);
-    const [isSelecting, setIsSelecting] = useState(false); // Evita busca ao selecionar
+    const [isSelecting, setIsSelecting] = useState(false);
 
     const { user } = useContext(AuthContext);
 
     useEffect(() => {
-        if (isSelecting) return; // Não faz nova busca se estiver selecionando
+        if (isSelecting) return;
 
         const delayDebounce = setTimeout(() => {
             if (searchTerm.length > 2) {
@@ -336,10 +367,10 @@ export function AddYeastModal({ isOpen, closeModal, handleAddYeastRecipe }) {
     }, [searchTerm]);
 
     const filterYeastList = async (term) => {
-        // Substitua com a função de busca que acessa a API
+
         try {
             const response = await searchYeasts(api, user.token, term);
-            setFilteredYeastList(response);  // Atualize a lista de leveduras filtradas
+            setFilteredYeastList(response); 
         } catch (error) {
             console.error('Erro ao buscar leveduras:', error);
         }
@@ -348,8 +379,8 @@ export function AddYeastModal({ isOpen, closeModal, handleAddYeastRecipe }) {
     const handleSelectYeast = (yeast) => {
         setIsSelecting(true);
         setSelectedYeast(yeast.id);
-        setSearchTerm(yeast.name); // Mostra o nome da levedura no campo de busca
-        setFilteredYeastList([]); // Oculta a lista filtrada
+        setSearchTerm(yeast.name);
+        setFilteredYeastList([]); 
 
         setTimeout(() => setIsSelecting(false), 100);
     };
@@ -372,44 +403,46 @@ export function AddYeastModal({ isOpen, closeModal, handleAddYeastRecipe }) {
             overlayClassName="modal-overlay"
         >
             <h2>Select a Yeast</h2>
+            <form onSubmit={handleSaveButton}>
+                <div className="modal">
+                    <input
+                        type="text"
+                        placeholder="Search yeast"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        style={{ marginBottom: '15px', padding: '5px' }}
+                    />
 
-            {/* Campo de busca */}
-            <input
-                type="text"
-                placeholder="Search yeast"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                style={{ marginBottom: '15px', padding: '5px' }}
-            />
+                    {filteredYeastList.length > 0 && (
+                        <ul style={{ border: '1px solid #ccc', padding: '5px', maxHeight: '150px', overflowY: 'auto' }}>
+                            {filteredYeastList.map((yeast) => (
+                                <li 
+                                    key={yeast.id} 
+                                    style={{ cursor: 'pointer', padding: '5px' }}
+                                    onMouseDown={() => handleSelectYeast(yeast)}
+                                >
+                                    {yeast.name}
+                                </li>
+                            ))}
+                        </ul>
+                    )}
 
-            {/* Lista de leveduras */}
-            {filteredYeastList.length > 0 && (
-                <ul style={{ border: '1px solid #ccc', padding: '5px', maxHeight: '150px', overflowY: 'auto' }}>
-                    {filteredYeastList.map((yeast) => (
-                        <li 
-                            key={yeast.id} 
-                            style={{ cursor: 'pointer', padding: '5px' }}
-                            onMouseDown={() => handleSelectYeast(yeast)} // Evita re-render antes do clique
-                        >
-                            {yeast.name}
-                        </li>
-                    ))}
-                </ul>
-            )}
-
-            {/* Campos de quantidade */}
-            <div>
-                <input
-                    type="number"
-                    placeholder="Quantity"
-                    value={quantity}
-                    onChange={(e) => setQuantity(e.target.value)}
-                />
-            </div>
-
-            <button onClick={handleSaveButton} className="crud-save-button">
-                Add Yeast
-            </button>
+                    <div className="inputs-row">
+                        <div className="input-field">
+                            <label htmlFor="name">Quantity</label>
+                            <input
+                                type="number"
+                                placeholder="Quantity"
+                                value={quantity}
+                                onChange={(e) => setQuantity(e.target.value)}
+                            />
+                        </div>
+                    </div>
+                    <button onClick={handleSaveButton} className="crud-save-button">
+                    Add Yeast
+                    </button>
+                </div>
+            </form>
         </Modal>
     );
 }
@@ -418,20 +451,19 @@ export function AddYeastModal({ isOpen, closeModal, handleAddYeastRecipe }) {
 export function UpdateFermentableModal({ isOpen, closeModal, selectedFermentable, handleUpdateFermentableRecipe }) {
     const [localFermentableObject, setLocalFermentableObject] = useState(null);
 
-    // Atualiza o estado local sempre que o fermentable recebido como prop mudar
+
     useEffect(() => {
         if (selectedFermentable) {
             setLocalFermentableObject(selectedFermentable);
         }
     }, [selectedFermentable]);
 
-    // Atualiza o estado local com base nos campos do formulário
     const handleChange = (key, value) => {
         setLocalFermentableObject((prev) => ({
             ...prev,
             [key]: key === "colorDegreesLovibond" || 
                   key === "potentialExtract" 
-                  ? parseFloat(value) || 0 // Garante que números sejam tratados corretamente
+                  ? parseFloat(value) || 0
                   : value,
         }));
     };
@@ -439,7 +471,7 @@ export function UpdateFermentableModal({ isOpen, closeModal, selectedFermentable
     const handleSaveButton = (e) => {
         e.preventDefault();
         if (localFermentableObject) {
-            handleUpdateFermentableRecipe(localFermentableObject); // Salva alterações
+            handleUpdateFermentableRecipe(localFermentableObject); 
         }
         closeModal();
     };
@@ -449,8 +481,8 @@ export function UpdateFermentableModal({ isOpen, closeModal, selectedFermentable
             isOpen={isOpen}
             onRequestClose={closeModal}
             contentLabel="Fermentables Modal"
-            className="modal-content"  // Classe CSS para o conteúdo
-            overlayClassName="modal-overlay"  // Classe CSS para o overlay
+            className="modal-content" 
+            overlayClassName="modal-overlay" 
         >
             {localFermentableObject ? (
                 <form onSubmit={handleSaveButton}>
@@ -541,31 +573,28 @@ export function UpdateFermentableModal({ isOpen, closeModal, selectedFermentable
 export function UpdateHopModal({ isOpen, closeModal, selectedHop, handleUpdateHopRecipe }) {
     const [localHopObject, setLocalHopObject] = useState(null);
 
-    // Atualiza o estado local sempre que o Hop recebido como prop mudar
     useEffect(() => {
         if (selectedHop) {
             setLocalHopObject(selectedHop);
         }
     }, [selectedHop]);
 
-    // Atualiza o estado local com base nos campos do formulário
     const handleChange = (key, value) => {
         setLocalHopObject((prev) => ({
             ...prev,
             [key]: key === "colorDegreesLovibond" || 
                   key === "potentialExtract" 
-                  ? parseFloat(value) || 0 // Garante que números sejam tratados corretamente
+                  ? parseFloat(value) || 0
                   : value,
         }));
     };
 
-    // Manipula o botão de salvar
     const handleSaveButton = (e) => {
         e.preventDefault();
         if (localHopObject) {
-            handleUpdateHopRecipe(localHopObject); // Salva alterações
+            handleUpdateHopRecipe(localHopObject);
         }
-        closeModal(); // Fecha a modal
+        closeModal();
     };
 
     return (
@@ -573,8 +602,8 @@ export function UpdateHopModal({ isOpen, closeModal, selectedHop, handleUpdateHo
             isOpen={isOpen}
             onRequestClose={closeModal}
             contentLabel="Hops Modal"
-            className="modal-content"  // Classe CSS para o conteúdo
-            overlayClassName="modal-overlay"  // Classe CSS para o overlay
+            className="modal-content"
+            overlayClassName="modal-overlay"
         >
             {localHopObject ? (
                 <form onSubmit={handleSaveButton}>
@@ -667,31 +696,28 @@ export function UpdateHopModal({ isOpen, closeModal, selectedHop, handleUpdateHo
 export function UpdateMiscModal({ isOpen, closeModal, selectedMisc, handleUpdateMiscRecipe }) {
     const [localMiscObject, setLocalMiscObject] = useState(null);
 
-    // Atualiza o estado local sempre que o Misc recebido como prop mudar
     useEffect(() => {
         if (selectedMisc) {
             setLocalMiscObject(selectedMisc);
         }
     }, [selectedMisc]);
 
-    // Atualiza o estado local com base nos campos do formulário
     const handleChange = (key, value) => {
         setLocalMiscObject((prev) => ({
             ...prev,
             [key]: key === "colorDegreesLovibond" || 
                   key === "potentialExtract" 
-                  ? parseFloat(value) || 0 // Garante que números sejam tratados corretamente
+                  ? parseFloat(value) || 0
                   : value,
         }));
     };
 
-    // Manipula o botão de salvar
     const handleSaveButton = (e) => {
         e.preventDefault();
         if (localMiscObject) {
-            handleUpdateMiscRecipe(localMiscObject); // Salva alterações
+            handleUpdateMiscRecipe(localMiscObject); 
         }
-        closeModal(); // Fecha a modal
+        closeModal(); 
     };
 
     return (
@@ -699,8 +725,8 @@ export function UpdateMiscModal({ isOpen, closeModal, selectedMisc, handleUpdate
             isOpen={isOpen}
             onRequestClose={closeModal}
             contentLabel="Misc Modal"
-            className="modal-content"  // Classe CSS para o conteúdo
-            overlayClassName="modal-overlay"  // Classe CSS para o overlay
+            className="modal-content" 
+            overlayClassName="modal-overlay" 
         >
             {localMiscObject ? (
                 <form onSubmit={handleSaveButton}>
@@ -794,31 +820,28 @@ export function UpdateMiscModal({ isOpen, closeModal, selectedMisc, handleUpdate
 export function UpdateYeastModal({ isOpen, closeModal, selectedYeast, handleUpdateYeastRecipe }) {
     const [localYeastObject, setLocalYeastObject] = useState(null);
 
-    // Atualiza o estado local sempre que o Yeast recebido como prop mudar
     useEffect(() => {
         if (selectedYeast) {
             setLocalYeastObject(selectedYeast);
         }
     }, [selectedYeast]);
 
-    // Atualiza o estado local com base nos campos do formulário
     const handleChange = (key, value) => {
         setLocalYeastObject((prev) => ({
             ...prev,
             [key]: key === "colorDegreesLovibond" || 
                   key === "potentialExtract" 
-                  ? parseFloat(value) || 0 // Garante que números sejam tratados corretamente
+                  ? parseFloat(value) || 0 
                   : value,
         }));
     };
 
-    // Manipula o botão de salvar
     const handleSaveButton = (e) => {
         e.preventDefault();
         if (localYeastObject) {
-            handleUpdateYeastRecipe(localYeastObject); // Salva alterações
+            handleUpdateYeastRecipe(localYeastObject);
         }
-        closeModal(); // Fecha a modal
+        closeModal();
     };
 
     return (
@@ -826,8 +849,8 @@ export function UpdateYeastModal({ isOpen, closeModal, selectedYeast, handleUpda
             isOpen={isOpen}
             onRequestClose={closeModal}
             contentLabel="Yeasts Modal"
-            className="modal-content"  // Classe CSS para o conteúdo
-            overlayClassName="modal-overlay"  // Classe CSS para o overlay
+            className="modal-content"
+            overlayClassName="modal-overlay"
         >
             {localYeastObject ? (
                 <form onSubmit={handleSaveButton}>
