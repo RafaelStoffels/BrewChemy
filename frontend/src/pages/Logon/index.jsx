@@ -10,26 +10,24 @@ export default function Logon() {
   const { login } = useContext(AuthContext);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
 
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setErrorMessage(''); // Limpa erro anterior
   
-    api.post('api/login', { email, password })
-      .then((response) => {
-
-        const { token } = response.data;
-  
-        const userData = {token};
-  
-        login(userData);
-  
-        navigate('/Main');
-      })
-      .catch((error) => {
-        console.error('Erro ao fazer login:', error);
-      });
+    try {
+      const response = await api.post('api/login', { email, password });
+      const { token } = response.data;
+      
+      login({ token });
+      navigate('/Main');
+    } catch (error) {
+      console.error('Erro ao fazer login:', error);
+      setErrorMessage('Erro ao fazer login. Verifique suas credenciais e tente novamente.');
+    }
   };
 
   return (
@@ -38,6 +36,7 @@ export default function Logon() {
         <object className="Brewchemy-object" type="image/svg+xml" data="/logo.svg"></object>
         <form onSubmit={handleSubmit}>
           <h1>Faça seu login</h1>
+          {errorMessage && <p className="error-message">{errorMessage}</p>}
           <input
             placeholder="E-mail"
             value={email}

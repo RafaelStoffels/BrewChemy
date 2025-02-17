@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FiTrash2, FiEdit, FiBookOpen } from 'react-icons/fi';
-import { fetchMisc, deleteMisc } from '../../services/Misc';
+import { searchMiscs, fetchMisc, deleteMisc } from '../../services/Misc';
+import SearchInput from '../../components/SearchInput';
+
 
 import api from '../../services/api';
 import AuthContext from '../../context/AuthContext';
@@ -34,6 +36,11 @@ export default function MiscList() {
     }
   }, [user, navigate]);
 
+  const searchItemsFunction = async (term) => {
+      const response = await searchMiscs(api, user.token, term);
+      setItemList(response);
+  };
+
   async function handleDetails(itemListId) {
     navigate(`/Misc/${itemListId}/details`);
   }
@@ -59,6 +66,8 @@ export default function MiscList() {
         <div className="div-addButton">
           <Link className="Addbutton" to="/Misc/new">Add new misc</Link>
         </div>
+
+        <SearchInput onSearch={searchItemsFunction} />
 
         <h1>Misc</h1>
         {loading ? <p>Loading...</p> : error ? <p>{error}</p> : (

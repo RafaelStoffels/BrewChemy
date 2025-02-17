@@ -6,7 +6,7 @@ export async function searchMiscs(api, userToken, term) {
         });
         return response.data;
     } catch (err) {
-        throw new Error('Error loading hops');
+        throw new Error('Error loading miscs');
     }
 }
 

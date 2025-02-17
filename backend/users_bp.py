@@ -65,14 +65,14 @@ def create_users_bp():
         new_user = User(
             name=data.get("name"),
             email=data.get("email"),
-            password_hash=data.get("password_hash"),
+            password_hash=data.get("password"),
             brewery=data.get("brewery"),
         )
         db.session.add(new_user)  # Adiciona o novo usuário ao banco
         db.session.commit()  # Comita as mudanças no banco
         return jsonify(new_user.to_dict()), 201  # Retorna o usuário recém-adicionado
 
-    # Rota para atualizar um usuário
+
     @users_bp.route("/users/<int:user_id>", methods=["PUT"])
     def update_user(user_id):
         user = User.query.get(user_id)
@@ -84,12 +84,20 @@ def create_users_bp():
 
         user.name = data.get("name", user.name)
         user.email = data.get("email", user.email)
-        user.password_hash = data.get("password_hash", user.password_hash)
+
+        new_password = data.get("password")
+
+        print(new_password)
+
+        if new_password:
+            user.set_password(new_password)  # 🔹 Agora a senha será armazenada como hash
+
         user.brewery = data.get("brewery", user.brewery)
         user.is_active = data.get("is_active", user.is_active)
 
         db.session.commit()
         return jsonify(user.to_dict()), 200
+
 
     # Rota para deletar um usuário
     @users_bp.route("/users/<int:user_id>", methods=["DELETE"])

@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FiTrash2, FiEdit, FiBookOpen } from 'react-icons/fi';
-import { fetchYeasts, deleteYeast } from '../../services/Yeasts';
+import { searchYeasts, fetchYeasts, deleteYeast } from '../../services/Yeasts';
+import SearchInput from '../../components/SearchInput';
 
 import api from '../../services/api';
 import AuthContext from '../../context/AuthContext';
@@ -34,6 +35,11 @@ export default function YeastList() {
     }
   }, [user, navigate]);
 
+  const searchItemsFunction = async (term) => {
+    const response = await searchYeasts(api, user.token, term);
+    setItemList(response);
+};
+
   async function handleDetails(itemListId) {
     navigate(`/Yeasts/${itemListId}/details`);
   }
@@ -58,6 +64,8 @@ export default function YeastList() {
         <div className="div-addButton">
           <Link className="Addbutton" to="/Yeasts/new">Add new yeasts</Link>
         </div>
+
+        <SearchInput onSearch={searchItemsFunction} />
 
         <h1>Yeasts</h1>
         {loading ? <p>Loading...</p> : error ? <p>{error}</p> : (

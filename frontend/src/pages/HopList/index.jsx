@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FiTrash2, FiEdit, FiBookOpen } from 'react-icons/fi';
-import { fetchHops, deleteHop } from '../../services/Hops';
+import { searchHops, fetchHops, deleteHop } from '../../services/Hops';
+import SearchInput from '../../components/SearchInput';
 
 import api from '../../services/api';
 import AuthContext from '../../context/AuthContext';
 import Sidebar from '../../components/Sidebar';
-import Header from '../../components/Header';
 import '../../styles/list.css';
 
 export default function HopList() {
@@ -35,6 +35,11 @@ export default function HopList() {
     }
   }, [user, navigate]);
 
+  const searchItemsFunction = async (term) => {
+      const recipeResponse = await searchHops(api, user.token, term);
+      setItemList(recipeResponse);
+  };
+
   async function handleDetails(itemListId) {
     navigate(`/Hops/${itemListId}/details`);
   }
@@ -60,6 +65,8 @@ export default function HopList() {
         <div className="div-addButton">
           <Link className="Addbutton" to="/Hops/new">Add new hops</Link>
         </div>
+
+        <SearchInput onSearch={searchItemsFunction} />
 
         <h1>Hops</h1>
         {loading ? <p>Loading...</p> : error ? <p>{error}</p> : (

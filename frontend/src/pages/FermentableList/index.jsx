@@ -1,12 +1,14 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FiTrash2, FiEdit, FiBookOpen } from 'react-icons/fi';
-import { fetchFermentables, deleteFermentable } from '../../services/Fermentables';
+import { searchFermentables, fetchFermentables, deleteFermentable } from '../../services/Fermentables';
+import SearchInput from '../../components/SearchInput';
 
 import api from '../../services/api';
 import AuthContext from '../../context/AuthContext';
 import Sidebar from '../../components/Sidebar';
 import '../../styles/list.css';
+
 
 export default function FermentableList() {
   const { user } = useContext(AuthContext);
@@ -20,20 +22,25 @@ export default function FermentableList() {
     if (!user) {
       navigate('/');
     } else {
-      const loadFermentables = async () => {
+      const loaditems = async () => {
         try {
-          const fermentables = await fetchFermentables(api, user.token);
-          setItemList(fermentables);
+          const items = await fetchFermentables(api, user.token);
+          setItemList(items);
         } catch (err) {
           setError('Error loading fermentables');
         } finally {
           setLoading(false);
         }
       };
-      loadFermentables();
+      loaditems();
     }
   }, [user, navigate]);
 
+  const searchItemsFunction = async (term) => {
+      const recipeResponse = await searchFermentables(api, user.token, term);
+      setItemList(recipeResponse);
+  };
+  
   async function handleDetails(itemListId) {
     navigate(`/Fermentables/${itemListId}/details`);
   }
@@ -59,6 +66,8 @@ export default function FermentableList() {
         <div className="div-addButton">
           <Link className="Addbutton" to="/Fermentables/new">Add new fermentable</Link>
         </div>
+
+        <SearchInput onSearch={searchItemsFunction} />
 
         <h1>Fermentables</h1>
         {loading ? <p>Loading...</p> : error ? <p>{error}</p> : (
