@@ -1,6 +1,9 @@
 import React, { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FiLogIn } from 'react-icons/fi';
+import { showErrorToast } from "../../utils/notifications";
+
+
 
 import './styles.css';
 import api from '../../services/api';
@@ -25,8 +28,18 @@ export default function Logon() {
       login({ token });
       navigate('/Main');
     } catch (error) {
-      console.error('Erro ao fazer login:', error);
-      setErrorMessage('Erro ao fazer login. Verifique suas credenciais e tente novamente.');
+      if (error.response) {
+        // Quando a resposta da API contém um status de erro
+        if (error.response.status === 404) {
+          showErrorToast("Endpoint não encontrado. Verifique a URL.");
+        } else if (error.response.status === 401) {
+          showErrorToast("Credenciais inválidas. Verifique seu e-mail ou senha.");
+        } else {
+          showErrorToast("Erro ao fazer login. Tente novamente mais tarde.");
+        }
+      } else {
+        showErrorToast("Erro de rede ou servidor. Verifique sua conexão e tente novamente.");
+      }
     }
   };
 

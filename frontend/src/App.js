@@ -2,6 +2,8 @@ import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { AuthProvider } from './context/AuthContext';  // Importa o AuthProvider
 import { SidebarProvider } from './context/SidebarContext'; // Importando o SidebarProvider
+import { ToastContainer } from "react-toastify"; // Importa o ToastContainer
+import "react-toastify/dist/ReactToastify.css"; // Importa os estilos do Toastify
 
 import './styles/global.css';
 
@@ -23,6 +25,7 @@ const App = () => {
     <AuthProvider>  {/* Envolvendo a aplicação com o AuthProvider */}
       <SidebarProvider>
         <Router>
+          <ToastContainer autoClose={3000} position="top-right" /> {/* Adicionando o ToastContainer */}
           <Routes>
 
             {/* Página de Logon não precisa de layout */}
