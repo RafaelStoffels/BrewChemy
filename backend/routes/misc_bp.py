@@ -1,44 +1,8 @@
 from flask import Blueprint, jsonify, request
 from db import db
+from models import Misc
 from AuthTokenVerifier import token_required
 
-class Misc(db.Model):
-    __tablename__ = 'misc'
-
-    # Table Definition
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'), nullable=False)
-    name = db.Column(db.String(100), nullable=False)
-    description = db.Column(db.Text)
-    type = db.Column(db.String(30))
-
-    # Convert snake_case to camelCase in JSON
-    def to_dict(self):
-        return {
-            "id": self.id,
-            "user_id": self.user_id,
-            "name": self.name,
-            "description": self.description,
-            "type": self.type,
-        }
-    
-class MiscOfficial(db.Model):
-    __tablename__ = 'misc_official'
-
-    # Table Definition
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), nullable=False)
-    description = db.Column(db.Text)
-    type = db.Column(db.String(30))
-
-    # Convert snake_case to camelCase in JSON
-    def to_dict(self):
-        return {
-            "id": self.id,
-            "name": self.name,
-            "description": self.description,
-            "type": self.type,
-        }
 
 def create_misc_bp():
     misc_bp = Blueprint("misc", __name__)
@@ -56,7 +20,7 @@ def create_misc_bp():
             Misc.user_id == current_user_id,
             Misc.name.ilike(f"%{search_term}%")
         ).all()
-
+    """
         official_miscs = MiscOfficial.query.filter(
             MiscOfficial.name.ilike(f"%{search_term}%")
         ).all()
@@ -64,17 +28,41 @@ def create_misc_bp():
         # Combina os resultados
         combined_miscs = [misc.to_dict() for misc in user_miscs] + \
                          [misc.to_dict() for misc in official_miscs]
-
+    
         return jsonify(combined_miscs)
+    """
 
     # Return all misc items
     @misc_bp.route("/misc", methods=["GET"])
     @token_required
     def get_misc(current_user_id):
+        source = request.args.get("source", "all") 
+        
+        print(source)
 
-        official_misc = MiscOfficial.query.all()
+        if source == "custom":
 
-        return jsonify([misc.to_dict() for misc in official_misc])
+            user_miscs = Misc.query.filter(
+                Misc.user_id == current_user_id
+            ).all()
+            return jsonify([misc.to_dict() for misc in user_miscs])
+
+        elif source == "official":
+
+            official_miscs = Misc.query.filter(
+                Misc.user_id == 1
+            ).all()
+            return jsonify([misc.to_dict() for misc in official_miscs])
+
+        elif source == "all":
+
+            all_miscs = Misc.query.filter(
+                (Misc.user_id == current_user_id) | (Misc.user_id == 1)
+            ).all()
+            return jsonify([misc.to_dict() for misc in all_miscs])
+
+        else:
+            return jsonify({"error": "Parâmetro 'source' inválido. Use 'custom', 'official' ou 'all'."}), 400
 
     # Return a specific misc item
     @misc_bp.route("/misc/<int:id>", methods=["GET"])
@@ -87,7 +75,7 @@ def create_misc_bp():
             if misc is None:
                 return jsonify({"message": "Misc not found in custom data"}), 404
             return jsonify(misc.to_dict())
-
+        """
         elif source == "official":
             # Busca apenas na tabela 'fermentables_official'
             misc = MiscOfficial.query.filter_by(id=id).first()
@@ -98,7 +86,7 @@ def create_misc_bp():
         else:
             # Parâmetro 'source' inválido
             return jsonify({"error": "Invalid 'source' parameter. Use 'custom' or 'official'."}), 400
-
+        """
     # Add a new misc item
     @misc_bp.route("/misc", methods=["POST"])
     @token_required

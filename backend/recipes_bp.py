@@ -1,215 +1,20 @@
 from flask import Blueprint, jsonify, request
 from db import db
+from models import Recipe, RecipeEquipment, RecipeFermentable, RecipeHop, RecipeMisc, RecipeYeast
 from AuthTokenVerifier import token_required
 
-class Recipe(db.Model):
-    __tablename__ = 'recipes'
-
-    # Table Definition
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'), nullable=False)
-    name = db.Column(db.String(255), nullable=False)
-    style = db.Column(db.String(100))
-    description = db.Column(db.Text)
-    creation_date = db.Column(db.Date, default=db.func.current_date())
-    volume_liters = db.Column(db.Numeric(5, 2))
-    equipment_id = db.Column(db.Integer)
-    notes = db.Column(db.Text)
-    author = db.Column(db.String(50), nullable=False)
-    type = db.Column(db.String(20), nullable=False)
-
-    recipe_fermentables = db.relationship('RecipeFermentable', backref='recipe', lazy=True, cascade="all, delete-orphan")
-    recipe_hops = db.relationship('RecipeHop', backref='recipe', lazy=True, cascade="all, delete-orphan")
-    recipe_misc = db.relationship('RecipeMisc', backref='recipe', lazy=True, cascade="all, delete-orphan")
-    recipe_yeasts = db.relationship('RecipeYeast', backref='recipe', lazy=True, cascade="all, delete-orphan")
-    recipe_equipment = db.relationship('RecipeEquipment', backref='recipe')
-
-    def to_dict(self):
-        # Verifica se existe algum equipamento associado à receita
-        recipe_equipment = self.recipe_equipment[0] if self.recipe_equipment else None
-
-        return {
-            "id": self.id,
-            "name": self.name,
-            "style": self.style,
-            "description": self.description,
-            "creationDate": self.creation_date.isoformat() if self.creation_date else None,
-            "volumeLiters": float(self.volume_liters) if self.volume_liters else None,
-            "notes": self.notes,
-            "author": self.author,
-            "type": self.type,
-            "recipeEquipment": recipe_equipment.to_dict() if recipe_equipment else None,
-            "recipeFermentables": [fermentable.to_dict() for fermentable in self.recipe_fermentables],
-            "recipeHops": [hop.to_dict() for hop in self.recipe_hops],
-            "recipeMisc": [misc.to_dict() for misc in self.recipe_misc],
-            "recipeYeasts": [yeast.to_dict() for yeast in self.recipe_yeasts]
-        }
-
-class RecipeEquipment(db.Model):
-    __tablename__ = 'recipe_equipment'
-
-    # Table Definition
-    id = db.Column(db.Integer, primary_key=True)
-    recipe_id = db.Column(db.Integer, db.ForeignKey('recipes.id'), nullable=False)
-    name = db.Column(db.String(50), nullable=False)
-    description = db.Column(db.Text)
-    efficiency = db.Column(db.Numeric(5, 2), nullable=False)
-    batch_volume = db.Column(db.Numeric(10, 2), nullable=False)
-    boil_time = db.Column(db.Integer, nullable=False)
-    boil_temperature = db.Column(db.Numeric(5, 2), nullable=False)
-    batch_time = db.Column(db.Integer, nullable=False)
-    boil_off = db.Column(db.Numeric(5, 2), nullable=False)
-    dead_space = db.Column(db.Numeric(5, 2), nullable=False)
-    trub_loss = db.Column(db.Numeric(5, 2), nullable=False)
-
-    def to_dict(self):
-        return {
-            "id": self.id,
-            "recipeId": self.recipe_id,
-            "name": self.name,
-            "description": self.description,
-            "efficiency": float(self.efficiency) if self.efficiency else None,
-            "batchVolume": float(self.batch_volume) if self.batch_volume else None,
-            "boilTime": self.boil_time,
-            "boilTemperature": float(self.boil_temperature) if self.boil_temperature else None,
-            "batchTime": self.batch_time,
-            "boilOff": float(self.boil_off) if self.boil_off else None,
-            "deadSpace": float(self.dead_space) if self.dead_space else None,
-            "trubLoss": float(self.trub_loss) if self.trub_loss else None,
-        }
-
-class RecipeFermentable(db.Model):
-    __tablename__ = 'recipe_fermentables'
-
-    # Table Definition
-    id = db.Column(db.Integer, primary_key=True)
-    recipe_id = db.Column(db.Integer, db.ForeignKey('recipes.id'), nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'), nullable=False)
-    name = db.Column(db.String(100), nullable=False)
-    description = db.Column(db.Text)
-    ebc = db.Column(db.Numeric(5, 2), nullable=False)
-    potential_extract = db.Column(db.Numeric(5, 3), nullable=False)
-    malt_type = db.Column(db.String(50))
-    supplier = db.Column(db.String(100))
-    unit_price = db.Column(db.Numeric(10, 2))
-    notes = db.Column(db.Text)
-    quantity = db.Column(db.Numeric)
-
-    def to_dict(self):
-        return {
-            "id": self.id,
-            "recipeId": self.recipe_id,
-            "name": self.name,
-            "description": self.description,
-            "ebc": float(self.ebc),
-            "potentialExtract": float(self.potential_extract),
-            "maltType": self.malt_type,
-            "supplier": self.supplier,
-            "unitPrice": float(self.unit_price) if self.unit_price else None,
-            "notes": self.notes,
-            "quantity": float(self.quantity) if self.quantity else None
-        }
-    
-class RecipeHop(db.Model):
-    __tablename__ = 'recipe_hops'
-
-    # Table Definition
-    id = db.Column(db.Integer, primary_key=True)
-    recipe_id = db.Column(db.Integer, db.ForeignKey('recipes.id'), nullable=False)
-    name = db.Column(db.String(100), nullable=False)
-    alpha_acid_content = db.Column(db.Numeric(5, 2))
-    beta_acid_content = db.Column(db.Numeric(5, 2))
-    use_type = db.Column(db.String(50))
-    country_of_origin = db.Column(db.String(50))
-    description = db.Column(db.Text)
-    quantity = db.Column(db.Numeric)
-    boil_time = db.Column(db.Integer)
-
-    def to_dict(self):
-        return {
-            "id": self.id,
-            "recipeId": self.recipe_id,
-            "name": self.name,
-            "alphaAcidContent": float(self.alpha_acid_content) if self.alpha_acid_content else None,
-            "betaAcidContent": float(self.beta_acid_content) if self.beta_acid_content else None,
-            "useType": self.use_type,
-            "countryOfOrigin": self.country_of_origin,
-            "description": self.description,
-            "quantity": float(self.quantity) if self.quantity else None,
-            "boilTime": self.boil_time
-        }
-    
-class RecipeMisc(db.Model):
-    __tablename__ = 'recipe_misc'
-
-    # Table Definition
-    id = db.Column(db.Integer, primary_key=True)
-    recipe_id = db.Column(db.Integer, db.ForeignKey('recipes.id'), nullable=False)
-    name = db.Column(db.String(100), nullable=False)
-    description = db.Column(db.Text)
-    type = db.Column(db.String(30))
-    quantity = db.Column(db.Numeric)
-    use = db.Column(db.String(30))
-    time = db.Column(db.Integer)
-
-    def to_dict(self):
-        return {
-            "id": self.id,
-            "recipeId": self.recipe_id,
-            "name": self.name,
-            "description": self.description,
-            "type": self.type,
-            "quantity": float(self.quantity) if self.quantity else None,
-            "use": self.use,
-            "time": self.time
-        }
-
-class RecipeYeast(db.Model):
-    __tablename__ = 'recipe_yeasts'
-
-    # Table Definition
-    id = db.Column(db.Integer, primary_key=True)
-    recipe_id = db.Column(db.Integer, db.ForeignKey('recipes.id'), nullable=False)
-    name = db.Column(db.String(100), nullable=False)
-    manufacturer = db.Column(db.String(100), nullable=False)
-    type = db.Column(db.String(50), nullable=False)
-    form = db.Column(db.String(50), nullable=False)
-    attenuation = db.Column(db.String(20), nullable=False)
-    temperature_range = db.Column(db.String(20), nullable=False)
-    alcohol_tolerance = db.Column(db.String(50), nullable=False)
-    flavor_profile = db.Column(db.Text) 
-    flocculation = db.Column(db.String(20), nullable=False)
-    description = db.Column(db.Text)
-    quantity = db.Column(db.Numeric)
-
-    def to_dict(self):
-        return {
-            "id": self.id,
-            "recipeId": self.recipe_id,
-            "name": self.name,
-            "manufacturer": self.manufacturer,
-            "type": self.type,
-            "form": self.form,
-            "attenuation": self.attenuation,
-            "temperatureRange": self.temperature_range,
-            "alcoholTolerance": self.alcohol_tolerance,
-            "flavorProfile": self.flavor_profile,
-            "flocculation": self.flocculation,
-            "description": self.description,
-            "quantity": float(self.quantity) if self.quantity else None
-        }
 
 def create_recipes_bp():
     recipes_bp = Blueprint("recipes", __name__)
 
-    # Return all records
+
     @recipes_bp.route("/recipes", methods=["GET"])
     @token_required
     def get_recipes(current_user_id):
         recipes = Recipe.query.filter_by(user_id=current_user_id).all()
         return jsonify([recipe.to_dict() for recipe in recipes])
 
-    # Return a specific record
+
     @recipes_bp.route("/recipes/<int:id>", methods=["GET"])
     @token_required
     def get_recipe(current_user_id, id):
@@ -218,7 +23,7 @@ def create_recipes_bp():
             return jsonify({"message": "Recipe not found"}), 404
         return jsonify(recipe.to_dict())
 
-    # Add record
+
     @recipes_bp.route("/recipes", methods=["POST"])
     @token_required
     def add_recipe(current_user_id):
@@ -306,7 +111,7 @@ def create_recipes_bp():
         db.session.commit()
         return jsonify(new_recipe.to_dict()), 201
 
-    # Update record
+
     @recipes_bp.route("/recipes/<int:id>", methods=["PUT"])
     @token_required
     def update_recipe(current_user_id, id):
@@ -333,14 +138,13 @@ def create_recipes_bp():
         fermentables_data = data.get("recipeFermentables", [])
         existing_fermentables = {fermentable.id: fermentable for fermentable in recipe.recipe_fermentables}
 
-        # Update equipment
         equipment_data = data.get("recipeEquipment", {})
         if equipment_data:
-            # Verifica se já existe um equipamento associado à receita
+
             existing_equipment = RecipeEquipment.query.filter_by(recipe_id=recipe.id).first()
 
             if existing_equipment:
-                # Atualiza os campos existentes
+
                 existing_equipment.name = equipment_data["name"]
                 existing_equipment.description = equipment_data.get("description")
                 existing_equipment.efficiency = equipment_data["efficiency"]
@@ -352,7 +156,6 @@ def create_recipes_bp():
                 existing_equipment.dead_space = equipment_data["deadSpace"]
                 existing_equipment.trub_loss = equipment_data["trubLoss"]
             else:
-                # Se não encontrar, cria um novo objeto de equipamento
                 new_equipment = RecipeEquipment(
                     recipe_id=recipe.id,
                     name=equipment_data["name"],
@@ -368,7 +171,6 @@ def create_recipes_bp():
                 )
                 db.session.add(new_equipment)
 
-        # Update fermentable
         for fermentable_data in fermentables_data:
             fermentable_id = fermentable_data.get("id")
             if fermentable_id and fermentable_id in existing_fermentables:
@@ -398,7 +200,7 @@ def create_recipes_bp():
                 )
                 db.session.add(new_fermentable)
 
-        # Atualização de hops
+
         hops_data = data.get("recipeHops", [])
         existing_hops = {hop.id: hop for hop in recipe.recipe_hops}
 
@@ -428,7 +230,7 @@ def create_recipes_bp():
                 )
                 db.session.add(new_hop)
 
-        # Atualização de misc
+
         miscs_data = data.get("recipeMisc", [])
         existing_misc = {misc.id: misc for misc in recipe.recipe_misc}
         
@@ -454,17 +256,16 @@ def create_recipes_bp():
                 )
                 db.session.add(new_misc)
 
-        # Atualizar yeast
+
         yeast_data = data.get("recipeYeasts", [])
         existing_yeasts = {yeast.id: yeast for yeast in recipe.recipe_yeasts}
         for yeast_data_item in yeast_data:
-            # Verifique se o yeast já existe (por exemplo, por id ou nome, conforme seu modelo)
+
             existing_yeast = RecipeYeast.query.filter_by(
                 recipe_id=recipe.id, name=yeast_data_item["name"]
             ).first()
 
             if existing_yeast:
-                # Atualiza os campos existentes
                 existing_yeast.manufacturer = yeast_data_item["manufacturer"]
                 existing_yeast.type = yeast_data_item["type"]
                 existing_yeast.form = yeast_data_item["form"]
@@ -476,7 +277,6 @@ def create_recipes_bp():
                 existing_yeast.description = yeast_data_item.get("description")
                 existing_yeast.quantity = yeast_data_item.get("quantity")
             else:
-                # Se não encontrar, cria um novo objeto de yeast
                 new_yeast = RecipeYeast(
                     recipe_id=recipe.id,
                     name=yeast_data_item["name"],
@@ -493,25 +293,22 @@ def create_recipes_bp():
                 )
                 db.session.add(new_yeast)
 
-        # Remover fermentables deletados
+
         sent_fermentable_ids = {fermentable_data.get("id") for fermentable_data in fermentables_data if fermentable_data.get("id")}
         for fermentable_id, fermentable in existing_fermentables.items():
             if fermentable_id not in sent_fermentable_ids:
                 db.session.delete(fermentable)
 
-        # Remover hops deletados
         sent_hop_ids = {hop_data.get("id") for hop_data in hops_data if hop_data.get("id")}
         for hop_id, hop in existing_hops.items():
             if hop_id not in sent_hop_ids:
                 db.session.delete(hop)
 
-        # Remover misc deletados
         sent_misc_ids = {misc_data.get("id") for misc_data in miscs_data if misc_data.get("id")}
         for misc_id, misc in existing_misc.items():
             if misc_id not in sent_misc_ids:
                 db.session.delete(misc)
 
-        # Remover hops deletados
         sent_yeast_ids = {yeast_data.get("id") for yeast_data in yeast_data if yeast_data.get("id")}
         for yeast_id, yeast in existing_yeasts.items():
             if yeast_id not in sent_yeast_ids:
@@ -520,7 +317,7 @@ def create_recipes_bp():
         db.session.commit()
         return jsonify(recipe.to_dict()), 200
 
-    # Delete record
+
     @recipes_bp.route("/recipes/<int:id>", methods=["DELETE"])
     @token_required
     def delete_recipe(current_user_id, id):

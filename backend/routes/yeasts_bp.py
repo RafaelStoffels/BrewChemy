@@ -1,72 +1,8 @@
 from flask import Blueprint, jsonify, request
 from db import db
+from models import Yeast
 from AuthTokenVerifier import token_required
 
-class Yeast(db.Model):
-    __tablename__ = 'yeasts'
-
-    # Table Definition
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'), nullable=False)
-    name = db.Column(db.String(100), nullable=False)
-    manufacturer = db.Column(db.String(100))
-    type = db.Column(db.String(50))
-    form = db.Column(db.String(50))
-    attenuation = db.Column(db.String(50))
-    temperature_range = db.Column(db.String(50))
-    alcohol_tolerance = db.Column(db.String(50))
-    flavor_profile = db.Column(db.String(100))
-    flocculation = db.Column(db.String(50))
-    description = db.Column(db.Text)
-
-    # Convert snake_case to camelCase in JSON
-    def to_dict(self):
-        return {
-            "id": self.id,
-            "userId": self.user_id,
-            "name": self.name,
-            "manufacturer": self.manufacturer,
-            "type": self.type,
-            "form": self.form,
-            "attenuation": self.attenuation,
-            "temperatureRange": self.temperature_range,
-            "alcoholTolerance": self.alcohol_tolerance,
-            "flavorProfile": self.flavor_profile,
-            "flocculation": self.flocculation,
-            "description": self.description,
-        }
-    
-class YeastOfficial(db.Model):
-    __tablename__ = 'yeasts_official'
-
-    # Table Definition
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), nullable=False)
-    manufacturer = db.Column(db.String(100))
-    type = db.Column(db.String(50))
-    form = db.Column(db.String(50))
-    attenuation = db.Column(db.String(50))
-    temperature_range = db.Column(db.String(50))
-    alcohol_tolerance = db.Column(db.String(50))
-    flavor_profile = db.Column(db.String(100))
-    flocculation = db.Column(db.String(50))
-    description = db.Column(db.Text)
-
-    # Convert snake_case to camelCase in JSON
-    def to_dict(self):
-        return {
-            "id": self.id,
-            "name": self.name,
-            "manufacturer": self.manufacturer,
-            "type": self.type,
-            "form": self.form,
-            "attenuation": self.attenuation,
-            "temperatureRange": self.temperature_range,
-            "alcoholTolerance": self.alcohol_tolerance,
-            "flavorProfile": self.flavor_profile,
-            "flocculation": self.flocculation,
-            "description": self.description,
-        }
 
 def create_yeasts_bp():
     yeasts_bp = Blueprint("yeasts", __name__)
@@ -84,7 +20,7 @@ def create_yeasts_bp():
             Yeast.user_id == current_user_id,
             Yeast.name.ilike(f"%{search_term}%")
         ).all()
-
+        """
         official_yeasts = YeastOfficial.query.filter(
             YeastOfficial.name.ilike(f"%{search_term}%")
         ).all()
@@ -94,14 +30,38 @@ def create_yeasts_bp():
                           [yeast.to_dict() for yeast in official_yeasts]
 
         return jsonify(combined_yeasts)
-
+        """
     # Return all yeasts
     @yeasts_bp.route("/yeasts", methods=["GET"])
     @token_required
     def get_yeasts(current_user_id):
-        official_yeasts = YeastOfficial.query.all()
+        source = request.args.get("source", "all") 
+        
+        print(source)
 
-        return jsonify([yeast.to_dict() for yeast in official_yeasts])
+        if source == "custom":
+
+            user_yeasts = Yeast.query.filter(
+                Yeast.user_id == current_user_id
+            ).all()
+            return jsonify([yeast.to_dict() for yeast in user_yeasts])
+
+        elif source == "official":
+
+            official_yeasts = Yeast.query.filter(
+                Yeast.user_id == 1
+            ).all()
+            return jsonify([yeast.to_dict() for yeast in official_yeasts])
+
+        elif source == "all":
+
+            all_yeasts = Yeast.query.filter(
+                (Yeast.user_id == current_user_id) | (Yeast.user_id == 1)
+            ).all()
+            return jsonify([yeast.to_dict() for yeast in all_yeasts])
+
+        else:
+            return jsonify({"error": "Parâmetro 'source' inválido. Use 'custom', 'official' ou 'all'."}), 400
 
     # Return a specific yeast
     @yeasts_bp.route("/yeasts/<int:id>", methods=["GET"])

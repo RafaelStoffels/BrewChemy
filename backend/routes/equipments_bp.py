@@ -1,61 +1,9 @@
 from flask import Blueprint, jsonify, request
 from db import db
+from models import Equipment
 from AuthTokenVerifier import token_required
 from datetime import datetime
 
-class Equipment(db.Model):
-    __tablename__ = 'equipments'
-
-    # Table Definition
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'), nullable=False)
-    name = db.Column(db.String(50), nullable=False)
-    description = db.Column(db.Text)
-    efficiency = db.Column(db.Numeric(5, 2), nullable=False)
-    batch_volume = db.Column(db.Numeric(10, 2), nullable=False)
-    boil_time = db.Column(db.Integer, nullable=False)
-    boil_temperature = db.Column(db.Numeric(5, 2), nullable=False)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-
-    # Convert snake_case to camelCase in JSON
-    def to_dict(self):
-        return {
-            "id": self.id,
-            "userId": self.user_id,
-            "name": self.name,
-            "description": self.description,
-            "efficiency": float(self.efficiency),
-            "batchVolume": float(self.batch_volume),
-            "boilTime": self.boil_time,
-            "boilTemperature": float(self.boil_temperature),
-            "createdAt": self.created_at.isoformat()
-        }
-    
-class EquipmentOfficial(db.Model):
-    __tablename__ = 'equipments_official'
-
-    # Table Definition
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(50), nullable=False)
-    description = db.Column(db.Text)
-    efficiency = db.Column(db.Numeric(5, 2), nullable=False)
-    batch_volume = db.Column(db.Numeric(10, 2), nullable=False)
-    boil_time = db.Column(db.Integer, nullable=False)
-    boil_temperature = db.Column(db.Numeric(5, 2), nullable=False)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-
-    # Convert snake_case to camelCase in JSON
-    def to_dict(self):
-        return {
-            "id": self.id,
-            "name": self.name,
-            "description": self.description,
-            "efficiency": float(self.efficiency),
-            "batchVolume": float(self.batch_volume),
-            "boilTime": self.boil_time,
-            "boilTemperature": float(self.boil_temperature),
-            "createdAt": self.created_at.isoformat()
-        }
 
 def create_equipments_bp():
     equipments_bp = Blueprint("equipments", __name__)
@@ -73,7 +21,7 @@ def create_equipments_bp():
             # Busca apenas na tabela 'equipments'
             user_equipments = Equipment.query.filter_by(user_id=current_user_id).all()
             return jsonify([equipment.to_dict() for equipment in user_equipments])
-    
+        """
         elif source == "official":
             # Busca apenas na tabela 'equipment_official'
             official_equipments = EquipmentOfficial.query.all()
@@ -90,7 +38,7 @@ def create_equipments_bp():
         else:
             # Se 'source' não for válido, retorna erro
             return jsonify({"error": "Parâmetro 'source' inválido. Use 'custom', 'official' ou 'all'."}), 400
-
+        """
     # By ID
     @equipments_bp.route("/equipments/<int:id>", methods=["GET"])
     @token_required
@@ -104,7 +52,7 @@ def create_equipments_bp():
             if equipment is None:
                 return jsonify({"message": "equipment not found in custom data"}), 404
             return jsonify(equipment.to_dict())
-
+        """
         elif source == "official":
             # Busca apenas na tabela 'equipments'
             equipment = EquipmentOfficial.query.filter_by(id=id).first()
@@ -121,7 +69,7 @@ def create_equipments_bp():
         if equipment is None:
             return jsonify({"message": "Equipment not found"}), 404
         return jsonify(equipment.to_dict())
-
+        """
     # Add record
     @equipments_bp.route("/equipments", methods=["POST"])
     @token_required
