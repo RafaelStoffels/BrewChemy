@@ -67,20 +67,24 @@ class Hop(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'), nullable=False)
     name = db.Column(db.String(100), nullable=False)
+    supplier = db.Column(db.String(50))
     alpha_acid_content = db.Column(db.Numeric(5, 2))
     beta_acid_content = db.Column(db.Numeric(5, 2))
     type = db.Column(db.String(50))
     country_of_origin = db.Column(db.String(50))
     description = db.Column(db.Text)
+    use_type = db.Column(db.String(50))
 
     def to_dict(self):
         return {
             "id": self.id,
             "userId": self.user_id,
             "name": self.name,
+            "supplier": self.supplier,
             "alphaAcidContent": float(self.alpha_acid_content) if self.alpha_acid_content else None,
             "betaAcidContent": float(self.beta_acid_content) if self.beta_acid_content else None,
             "type": self.type,
+            "useType": self.use_type,
             "countryOfOrigin": self.country_of_origin,
             "description": self.description,
         } 

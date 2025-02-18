@@ -611,13 +611,11 @@ export function UpdateHopModal({ isOpen, closeModal, selectedHop, handleUpdateHo
                         <h2>Update Hop</h2>
                         <label htmlFor="name">Name</label>
                         <input 
-                            placeholder="Hop Name"
                             value={localHopObject.name || ''}
                             onChange={(e) => handleChange('name', e.target.value)}
                         />
                         <label htmlFor="name">Description</label>
                         <textarea 
-                            placeholder="Hop Description"
                             value={localHopObject.description || ''}
                             onChange={(e) => handleChange('description', e.target.value)}
                         />
@@ -626,7 +624,6 @@ export function UpdateHopModal({ isOpen, closeModal, selectedHop, handleUpdateHo
                                 <label htmlFor="name">Alpha Acid</label>
                                 <input 
                                     type="number"
-                                    placeholder="Fermentable Type"
                                     value={localHopObject.alphaAcidContent || ''}
                                     onChange={(e) => handleChange('alphaAcidContent', e.target.value)}
                                 />
@@ -635,7 +632,6 @@ export function UpdateHopModal({ isOpen, closeModal, selectedHop, handleUpdateHo
                                 <label htmlFor="name">Beta Acid</label>
                                 <input 
                                     type="number"
-                                    placeholder="Supplier"
                                     value={localHopObject.betaAcidContent || ''}
                                     onChange={(e) => handleChange('betaAcidContent', e.target.value)}
                                 />
@@ -643,7 +639,6 @@ export function UpdateHopModal({ isOpen, closeModal, selectedHop, handleUpdateHo
                             <div className="input-field">
                                 <label htmlFor="name">Boil Time</label>
                                 <input 
-                                    placeholder="Boil Time"
                                     type="number"
                                     value={localHopObject.boilTime || ''}
                                     onChange={(e) => handleChange('boilTime', e.target.value)}
@@ -673,7 +668,6 @@ export function UpdateHopModal({ isOpen, closeModal, selectedHop, handleUpdateHo
                             <div className="input-field">
                                 <label htmlFor="name">Quantity</label>
                                 <input 
-                                    placeholder="Quantity"
                                     type="number"
                                     value={localHopObject.quantity || ''}
                                     onChange={(e) => handleChange('quantity', e.target.value)}

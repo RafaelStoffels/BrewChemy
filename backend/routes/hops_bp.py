@@ -75,12 +75,15 @@ def create_hops_bp():
             return value if value != "" else None
 
         new_hop = Hop(
+            user_id=current_user_id,
             name=data.get("name"),
             alpha_acid_content=sanitize(data.get("alphaAcidContent")),
             beta_acid_content=sanitize(data.get("betaAcidContent")),
             type=data.get("type"),
+            use_type=data.get("useType"),
             country_of_origin=data.get("countryOfOrigin"),
-            description=data.get("description")
+            description=data.get("description"),
+            supplier=data.get("supplier")
         )
         db.session.add(new_hop)
         db.session.commit()
@@ -98,9 +101,11 @@ def create_hops_bp():
         data = request.json
 
         hop.name = data.get("name", hop.name)
+        hop.supplier = data.get("supplier", hop.supplier)
         hop.alpha_acid_content = data.get("alphaAcidContent", hop.alpha_acid_content)
         hop.beta_acid_content = data.get("betaAcidContent", hop.beta_acid_content)
         hop.type = data.get("type", hop.type)
+        hop.use_type = data.get("useType", hop.use_type)
         hop.country_of_origin = data.get("countryOfOrigin", hop.country_of_origin)
         hop.description = data.get("description", hop.description)
 

@@ -1,26 +1,25 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate, useParams  } from 'react-router-dom';
-import { fetchHopById } from '../../services/Hops';
+import { fetchFermentableById } from '../../services/Fermentables';
 
 import api from '../../services/api';
 import AuthContext from '../../context/AuthContext';
 
 import '../../styles/crud.css';
 
-export default function NewHop() {
+export default function NewFermentable() {
     const { user } = useContext(AuthContext);
     const { id } = useParams();
     const navigate = useNavigate();
 
     const [name, setName] = useState('');
     const [description, setDescription] = useState('');
+    const [maltType, setFermentableType] = useState('Base');
     const [supplier, setSupplier] = useState('');
-    const [useType, setUseType] = useState('Boil');
-    const [type, setType] = useState('Pellet');
-    const [countryOfOrigin, setCountryOfOrigin] = useState('');
-    const [alphaAcidContent, setAlphaAcidContent] = useState('');
-    const [betaAcidContent, setBetaAcidContent] = useState('');
-
+    const [ebc, setEBC] = useState('');
+    const [potentialExtract, setPotentialExtract] = useState('');
+    const [unit_price, setUnitPrice] = useState('');
+    const [stock_quantity, setStockQuantity] = useState('');
     const [isEditing, setIsEditing] = useState(false);
     const [isView, setIsView] = useState(false);
 
@@ -36,26 +35,25 @@ export default function NewHop() {
                     setIsView(false); 
                     setIsEditing(true); 
                 }
-                fetchHop(id); 
+                fetchFermentable(id); 
             }
         }
     }, [id, user, navigate]); 
 
-    async function fetchHop(itemID) {
+    async function fetchFermentable(itemID) {
         try {
-            const hop = await fetchHopById(api, user.token, itemID);
-            setName(hop.name);
-            setDescription(hop.description);
-            setSupplier(hop.supplier);
-            setCountryOfOrigin(hop.countryOfOrigin);
-            setUseType(hop.useType);
-            setType(hop.type);
-            setAlphaAcidContent(hop.alphaAcidContent);
-            setBetaAcidContent(hop.betaAcidContent);
-
+            const fermentable = await fetchFermentableById(api, user.token, itemID);
+            setName(fermentable.name);
+            setDescription(fermentable.description);
+            setFermentableType(fermentable.maltType);
+            setSupplier(fermentable.supplier);
+            setEBC(fermentable.ebc);
+            setPotentialExtract(fermentable.potentialExtract);
+            setUnitPrice(fermentable.unit_price);
+            setStockQuantity(fermentable.stock_quantity);
         } catch (err) {
-            alert('Error loading hop record.');
-            navigate('/HopList');
+            alert('Error loading fermentable record.');
+            navigate('/FermentableList');
         }
     }
 
@@ -65,31 +63,31 @@ export default function NewHop() {
         const data = {
             name,
             description,
-            supplier, 
-            useType,
-            type,
-            countryOfOrigin,
-            alphaAcidContent,
-            betaAcidContent
+            maltType,
+            supplier,
+            ebc,
+            potentialExtract,
+            unit_price,
+            stock_quantity,
         };
 
         console.log(data);
 
         try {
             if (isEditing) {
-                await api.put(`/api/hops/${id}`, data, {
+                await api.put(`/api/fermentables/${id}`, data, {
                     headers: {
                         Authorization: `Bearer ${user.token}`,
                     },
                 });
             } else {
-                await api.post('/api/hops', data, {
+                await api.post('/api/fermentables', data, {
                     headers: {
                         Authorization: `Bearer ${user.token}`,
                     },
                 });
             }
-            navigate('/HopList');
+            navigate('/FermentableList');
         } catch (err) {
             alert('Error saving record. Please try again.');
         }
@@ -99,9 +97,9 @@ export default function NewHop() {
         <div>
             <section>
                 <h1>
-                  {isEditing ? 'Update Hop' :
-                   isView ? 'Hop Details' : 
-                   'Add New Hop'}
+                  {isEditing ? 'Update Fermentable' :
+                   isView ? 'Fermentable Details' : 
+                   'Add New Fermentable'}
                 </h1>
             </section>
             <div className='crud-container'>
@@ -138,51 +136,31 @@ export default function NewHop() {
                         </div>
                         <div className='inputs-row'>
                             <div className='input-field'>
-                                <label htmlFor="name">Country of Origin</label>
-                                <input 
-                                    value={countryOfOrigin}
-                                    onChange={e => setCountryOfOrigin(e.target.value)}
-                                    disabled={isView}
-                                />
-                            </div>
-                            <div className='input-field'>
                                 <label htmlFor="name">Type</label>
-                                    <select
-                                        value={type}
-                                        onChange={e => setType(e.target.value)}
-                                    >
-                                      <option value="Pellet">Pellet</option>
-                                      <option value="Whole">Whole</option>
-                                      <option value="Cryo">Cryo</option>
-                                      <option value="CO2 Extract">CO2 Extract</option>
-                                    </select>
-                                </div>
-                            <div className='input-field'>
-                                <label htmlFor="name">Use Type</label>
                                 <select
-                                    value={useType}
-                                    onChange={e => setUseType(e.target.value)}
-                                >
-                                  <option value="Boil">Boil</option>
-                                  <option value="Dry Hop">Dry Hop</option>
-                                  <option value="Aroma">Aroma</option>
-                                  <option value="Mash">Mash</option>
-                                  <option value="First Wort">First Wort</option>
+                                      value={maltType}
+                                      onChange={e => setFermentableType(e.target.value)}
+                                    >
+                                      <option value="base">Base</option>
+                                      <option value="Specialty">Specialty</option>
+                                      <option value="Adjunct">Adjunct</option>
                                 </select>
                             </div>
                             <div className='input-field'>
-                                <label htmlFor="name">Alpha Acid</label>
+                                <label htmlFor="name">Color Degree</label>
                                 <input 
-                                    value={alphaAcidContent}
-                                    onChange={e => setAlphaAcidContent(e.target.value)}
+                                    type="number"
+                                    value={ebc}
+                                    onChange={e => setEBC(e.target.value)}
                                     disabled={isView}
                                 />
                             </div>
                             <div className='input-field'>
-                                <label htmlFor="name">Beta Acid</label>
+                                <label htmlFor="name">Potencial Extract</label>
                                 <input 
-                                    value={betaAcidContent}
-                                    onChange={e => setBetaAcidContent(e.target.value)}
+                                    type="number"
+                                    value={potentialExtract}
+                                    onChange={e => setPotentialExtract(e.target.value)}
                                     disabled={isView}
                                 />
                             </div>
