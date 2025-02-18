@@ -15,22 +15,13 @@ def create_yeasts_bp():
         if not search_term:
             return jsonify({"error": "O parâmetro 'searchTerm' é obrigatório."}), 400
 
-        # Consulta nas duas tabelas usando filtro por nome
         user_yeasts = Yeast.query.filter(
-            Yeast.user_id == current_user_id,
+            (Yeast.user_id == current_user_id) | (Yeast.user_id == 1),
             Yeast.name.ilike(f"%{search_term}%")
         ).all()
-        """
-        official_yeasts = YeastOfficial.query.filter(
-            YeastOfficial.name.ilike(f"%{search_term}%")
-        ).all()
 
-        # Combina os resultados
-        combined_yeasts = [yeast.to_dict() for yeast in user_yeasts] + \
-                          [yeast.to_dict() for yeast in official_yeasts]
+        return jsonify([yeast.to_dict() for yeast in user_yeasts])
 
-        return jsonify(combined_yeasts)
-        """
     # Return all yeasts
     @yeasts_bp.route("/yeasts", methods=["GET"])
     @token_required

@@ -14,14 +14,13 @@ def create_hops_bp():
 
         if not search_term:
             return jsonify({"error": "O parâmetro 'searchTerm' é obrigatório."}), 400
-        """
+
         user_hops = Hop.query.filter(
-            Hop.user_id == current_user_id,
-            Hop.name.ilike(f"%{search_term}%"),
-            Hop.official_hop_id.is_(None)
+            (Hop.user_id == current_user_id) | (Hop.user_id == 1),
+            Hop.name.ilike(f"%{search_term}%")
         ).all()
-    
-        return jsonify([hop.to_dict() for hop in user_hops])"""
+
+        return jsonify([hop.to_dict() for hop in user_hops])
 
 
     @hops_bp.route("/hops", methods=["GET"])

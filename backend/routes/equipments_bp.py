@@ -8,37 +8,30 @@ from datetime import datetime
 def create_equipments_bp():
     equipments_bp = Blueprint("equipments", __name__)
 
+    @equipments_bp.route("/equipments/search", methods=["GET"])
+    @token_required
+    def search_equipments(current_user_id):
+        search_term = request.args.get("searchTerm", "").strip()
+
+        if not search_term:
+            return jsonify({"error": "O parâmetro 'searchTerm' é obrigatório."}), 400
+
+        user_equipments = Equipment.query.filter(
+            (Equipment.user_id == current_user_id) | (Equipment.user_id == 1),
+            Equipment.name.ilike(f"%{search_term}%")
+        ).all()
+
+        return jsonify([equipment.to_dict() for equipment in user_equipments])
+
     # Return all records
     @equipments_bp.route("/equipments", methods=["GET"])
     @token_required
     def get_equipments(current_user_id):
-        # Obtém o parâmetro 'source' da URL
-        source = request.args.get("source", "all")  # Padrão é 'all'
+        all_equipments = Equipment.query.filter(
+            (Equipment.user_id == current_user_id) | (Equipment.user_id == 1)
+        ).all()
+        return jsonify([equipment.to_dict() for equipment in all_equipments])
     
-        print(source);
-
-        if source == "custom":
-            # Busca apenas na tabela 'equipments'
-            user_equipments = Equipment.query.filter_by(user_id=current_user_id).all()
-            return jsonify([equipment.to_dict() for equipment in user_equipments])
-        """
-        elif source == "official":
-            # Busca apenas na tabela 'equipment_official'
-            official_equipments = EquipmentOfficial.query.all()
-            return jsonify([equipment.to_dict() for equipment in official_equipments])
-    
-        elif source == "all":
-            # Busca nas duas tabelas
-            user_equipments = Equipment.query.filter_by(user_id=current_user_id).all()
-            official_equipments = EquipmentOfficial.query.all()
-            combined_equipments = [equipment.to_dict() for equipment in user_equipments] + \
-                                  [equipment.to_dict() for equipment in official_equipments]
-            return jsonify(combined_equipments)
-    
-        else:
-            # Se 'source' não for válido, retorna erro
-            return jsonify({"error": "Parâmetro 'source' inválido. Use 'custom', 'official' ou 'all'."}), 400
-        """
     # By ID
     @equipments_bp.route("/equipments/<int:id>", methods=["GET"])
     @token_required

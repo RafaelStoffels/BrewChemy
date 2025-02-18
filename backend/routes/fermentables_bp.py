@@ -16,9 +16,8 @@ def create_fermentables_bp():
             return jsonify({"error": "O parâmetro 'searchTerm' é obrigatório."}), 400
 
         user_fermentables = Fermentable.query.filter(
-            Fermentable.user_id == current_user_id,
-            Fermentable.name.ilike(f"%{search_term}%"),
-            Fermentable.official_fermentable_id.is_(None)
+            (Fermentable.user_id == current_user_id) | (Fermentable.user_id == 1),
+            Fermentable.name.ilike(f"%{search_term}%")
         ).all()
 
         return jsonify([fermentable.to_dict() for fermentable in user_fermentables])
@@ -28,33 +27,10 @@ def create_fermentables_bp():
     @token_required
     def get_fermentables(current_user_id):
 
-        source = request.args.get("source", "all") 
-        
-        print(source)
-
-        if source == "custom":
-
-            user_fermentables = Fermentable.query.filter(
-                Fermentable.user_id == current_user_id
-            ).all()
-            return jsonify([fermentable.to_dict() for fermentable in user_fermentables])
-
-        elif source == "official":
-
-            official_fermentables = Fermentable.query.filter(
-                Fermentable.user_id == 1
-            ).all()
-            return jsonify([fermentable.to_dict() for fermentable in official_fermentables])
-
-        elif source == "all":
-
-            all_fermentables = Fermentable.query.filter(
-                (Fermentable.user_id == current_user_id) | (Fermentable.user_id == 1)
-            ).all()
-            return jsonify([fermentable.to_dict() for fermentable in all_fermentables])
-
-        else:
-            return jsonify({"error": "Parâmetro 'source' inválido. Use 'custom', 'official' ou 'all'."}), 400
+        all_fermentables = Fermentable.query.filter(
+            (Fermentable.user_id == current_user_id) | (Fermentable.user_id == 1)
+        ).all()
+        return jsonify([fermentable.to_dict() for fermentable in all_fermentables])
 
 
     @fermentables_bp.route("/fermentables/<int:id>", methods=["GET"])

@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FiTrash2, FiEdit, FiBookOpen } from 'react-icons/fi';
-import { fetchEquipments, deleteEquipment } from '../../services/Equipments';
+import { searchEquipments, fetchEquipments, deleteEquipment } from '../../services/Equipments';
 
 import api from '../../services/api';
 import AuthContext from '../../context/AuthContext';
 import Sidebar from '../../components/Sidebar';
-import Header from '../../components/Header';
+import SearchInput from '../../components/SearchInput';
 import '../../styles/list.css';
 
 export default function EquipmentList() {
@@ -35,6 +35,11 @@ export default function EquipmentList() {
     }
   }, [user, navigate]);
 
+  const searchItemsFunction = async (term) => {
+    const recipeResponse = await searchEquipments(api, user.token, term);
+    setItemList(recipeResponse);
+};
+
   async function handleDetails(itemListId) {
     navigate(`/Equipments/${itemListId}/details`);
   }
@@ -60,6 +65,8 @@ export default function EquipmentList() {
             <Link className="Addbutton" to="/Equipments/new">Add new equipment</Link>
           </div>
        
+          <SearchInput onSearch={searchItemsFunction} />
+
           <h1>Equipments</h1>
           {loading ? <p>Loading...</p> : error ? <p>{error}</p> : (
             itemList.length > 0 ? (

@@ -15,22 +15,12 @@ def create_misc_bp():
         if not search_term:
             return jsonify({"error": "O parâmetro 'searchTerm' é obrigatório."}), 400
 
-        # Consulta nas duas tabelas usando filtro por nome
         user_miscs = Misc.query.filter(
-            Misc.user_id == current_user_id,
+            (Misc.user_id == current_user_id) | (Misc.user_id == 1),
             Misc.name.ilike(f"%{search_term}%")
         ).all()
-    """
-        official_miscs = MiscOfficial.query.filter(
-            MiscOfficial.name.ilike(f"%{search_term}%")
-        ).all()
 
-        # Combina os resultados
-        combined_miscs = [misc.to_dict() for misc in user_miscs] + \
-                         [misc.to_dict() for misc in official_miscs]
-    
-        return jsonify(combined_miscs)
-    """
+        return jsonify([misc.to_dict() for misc in user_miscs])
 
     # Return all misc items
     @misc_bp.route("/misc", methods=["GET"])

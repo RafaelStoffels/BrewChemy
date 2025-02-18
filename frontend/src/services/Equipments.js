@@ -1,3 +1,15 @@
+export async function searchEquipments(api, userToken, term) {
+    try {
+        const response = await api.get('/api/equipments/search', {
+            headers: { Authorization: `Bearer ${userToken}` },
+            params: { searchTerm: term }
+        });
+        return response.data;
+    } catch (err) {
+        throw new Error('Error loading equipments');
+    }
+}
+
 export async function fetchEquipments(api, userToken) {
     try {
         const response = await api.get('api/equipments', {

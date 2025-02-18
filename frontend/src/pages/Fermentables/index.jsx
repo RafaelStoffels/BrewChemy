@@ -4,11 +4,8 @@ import { fetchFermentableById } from '../../services/Fermentables';
 
 import api from '../../services/api';
 import AuthContext from '../../context/AuthContext';
-import { SidebarProvider } from '../../context/SidebarContext';
 
 import '../../styles/crud.css';
-import Sidebar from '../../components/Sidebar';
-import Header from '../../components/Header';
 
 export default function NewFermentable() {
     const { user } = useContext(AuthContext);
@@ -96,74 +93,80 @@ export default function NewFermentable() {
 
     return (
         <div>
+            <section>
+                <h1>
+                  {isEditing ? 'Update Fermentable' :
+                   isView ? 'Fermentable Details' : 
+                   'Add New Fermentable'}
+                </h1>
+            </section>
             <div className='crud-container'>
-                <section>
-                    <h1>
-                      {isEditing ? 'Update Fermentable' :
-                       isView ? 'Fermentable Details' : 
-                       'Add New Fermentable'}
-                    </h1>
-                </section>
-
                 <form onSubmit={handleSubmit}>
-                    <input 
-                        placeholder='Fermentable name'
-                        value={name}
-                        onChange={e => setName(e.target.value)}
-                        disabled={isView}
-                    />
-                    <textarea type='Description' 
-                        placeholder='Fermentable Description'
-                        value={description}
-                        onChange={e => setDescription(e.target.value)}
-                        disabled={isView}
-                    />
-                    <input type='Fermentable type' 
-                        placeholder='Fermentable Type'
-                        value={fermentable_type}
-                        onChange={e => setFermentableType(e.target.value)}
-                        disabled={isView}
-                    />
-                    <input 
-                        placeholder='Supplier'
-                        value={supplier}
-                        onChange={e => setSupplier(e.target.value)}
-                        disabled={isView}
-                    />
-                    <input 
-                        placeholder='Color Degree'
-                        type="number"
-                        value={color_degrees_lovibond}
-                        onChange={e => setColorDegree(e.target.value)}
-                        disabled={isView}
-                    />
-                    <input 
-                        placeholder='Potential extract'
-                        type="number"
-                        value={potential_extract}
-                        onChange={e => setPotentialExtract(e.target.value)}
-                        disabled={isView}
-                    />
-                    <input 
-                        placeholder='Unit Price'
-                        type="number"
-                        onChange={e => setUnitPrice(e.target.value)}
-                        disabled={isView}
-                    />
-                    <input 
-                        placeholder='Stock Quantity'
-                        type="number"
-                        value={stock_quantity}
-                        onChange={e => setStockQuantity(e.target.value)}
-                        disabled={isView}
-                    />
-                    {!isView && (
-                        <button onClick={handleSubmit} className='crud-save-button' type="submit">
-                            Save
-                        </button>
-                    )}
+                    <div className='inputs-row'>
+                        <div className='input-field'>
+                            <input 
+                                placeholder='Fermentable name'
+                                value={name}
+                                onChange={e => setName(e.target.value)}
+                                disabled={isView}
+                            />
+                        </div>
+                    </div>
+                    <div className='inputs-row'>
+                        <div className='input-field'>
+                            <textarea type='Description' 
+                                placeholder='Fermentable Description'
+                                value={description}
+                                onChange={e => setDescription(e.target.value)}
+                                disabled={isView}
+                            />
+                        </div>
+                    </div>
+                    <div className='inputs-row'>
+                        <div className='input-field'>
+                            <input type='Fermentable type' 
+                                placeholder='Fermentable Type'
+                                value={fermentable_type}
+                                onChange={e => setFermentableType(e.target.value)}
+                                disabled={isView}
+                            />
+                        </div>
+                        <div className='input-field'>
+                            <input 
+                                placeholder='Supplier'
+                                value={supplier}
+                                onChange={e => setSupplier(e.target.value)}
+                                disabled={isView}
+                            />
+                        </div>
+                    </div>
+                    <div className='inputs-row'>
+                        <div className='input-field'>
+                            <input 
+                                placeholder='Color Degree'
+                                type="number"
+                                value={color_degrees_lovibond}
+                                onChange={e => setColorDegree(e.target.value)}
+                                disabled={isView}
+                            />
+                        </div>
+                        <div className='input-field'>
+                            <input 
+                                placeholder='Potential extract'
+                                type="number"
+                                value={potential_extract}
+                                onChange={e => setPotentialExtract(e.target.value)}
+                                disabled={isView}
+                            />
+                        </div>
+                    </div>
                 </form>
             </div>
+            {!isView && (
+                 <button onClick={handleSubmit} className='crud-save-button' type="submit">
+                     Save
+                 </button>
+             )}
         </div>
     );
 }
