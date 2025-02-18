@@ -88,6 +88,7 @@ def create_misc_bp():
             return value if value != "" else None
 
         new_misc = Misc(
+            user_id=current_user_id,
             name=data.get("name"),
             description=data.get("description"),
             type=data.get("type")

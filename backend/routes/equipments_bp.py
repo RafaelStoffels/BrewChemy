@@ -36,46 +36,40 @@ def create_equipments_bp():
     @equipments_bp.route("/equipments/<int:id>", methods=["GET"])
     @token_required
     def get_equipment(current_user_id, id):
-        # Obtém o parâmetro 'source' da URL
-        source = request.args.get("source", "custom")  # Padrão é 'custom'
-
-        if source == "custom":
-            # Busca apenas na tabela 'equipments'
-            equipment = Equipment.query.filter_by(id=id, user_id=current_user_id).first()
-            if equipment is None:
-                return jsonify({"message": "equipment not found in custom data"}), 404
-            return jsonify(equipment.to_dict())
-        """
-        elif source == "official":
-            # Busca apenas na tabela 'equipments'
-            equipment = EquipmentOfficial.query.filter_by(id=id).first()
-            if equipment is None:
-                return jsonify({"message": "Equipment not found in official data"}), 404
-            return jsonify(equipment.to_dict())
-
-        else:
-            # Parâmetro 'source' inválido
-            return jsonify({"error": "Invalid 'source' parameter. Use 'custom' or 'official'."}), 400
-
 
         equipment = Equipment.query.filter_by(id=id, user_id=current_user_id).first()
         if equipment is None:
-            return jsonify({"message": "Equipment not found"}), 404
+            return jsonify({"message": "equipment not found in custom data"}), 404
+
+        # Usando logging para mostrar os dados
+        print(f"BatchTime do equipamento: {equipment.batch_time}")
+
+        # Se quiser ver todos os dados do equipamento:
+        print(f"Equipamento encontrado: {equipment.to_dict()}")
+
         return jsonify(equipment.to_dict())
-        """
+
     # Add record
     @equipments_bp.route("/equipments", methods=["POST"])
     @token_required
     def add_equipment(current_user_id):
+
         data = request.json
+
+        print(data.get("boilOff"));
+
         new_equipment = Equipment(
             user_id=current_user_id,
             name=data.get("name"),
             description=data.get("description"),
             efficiency=data.get("efficiency"),
             batch_volume=data.get("batchVolume"),
+            batch_time=data.get("batchTime"),
             boil_time=data.get("boilTime"),
-            boil_temperature=data.get("boilTemperature")
+            boil_temperature=data.get("boilTemperature"),
+            boil_off=data.get("boilOff"),
+            trub_loss=data.get("trubLoss"),
+            dead_space=data.get("deadSpace")
         )
         db.session.add(new_equipment)
         db.session.commit()
@@ -90,12 +84,19 @@ def create_equipments_bp():
             return jsonify({"message": "Equipment not found"}), 404
 
         data = request.json
+
+        print(request.json);
+
         equipment.name = data.get("name", equipment.name)
         equipment.description = data.get("description", equipment.description)
         equipment.efficiency = data.get("efficiency", equipment.efficiency)
         equipment.batch_volume = data.get("batchVolume", equipment.batch_volume)
+        equipment.batch_time = data.get("batchTime", equipment.batch_time)
         equipment.boil_time = data.get("boilTime", equipment.boil_time)
         equipment.boil_temperature = data.get("boilTemperature", equipment.boil_temperature)
+        equipment.boil_off = data.get("boilOff", equipment.boil_off)
+        equipment.trub_loss = data.get("trubLoss", equipment.trub_loss)
+        equipment.dead_space = data.get("deadSpace", equipment.dead_space)
 
         db.session.commit()
         return jsonify(equipment.to_dict()), 200

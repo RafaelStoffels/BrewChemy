@@ -12,8 +12,14 @@ class Equipment(db.Model):
     description = db.Column(db.Text)
     efficiency = db.Column(db.Numeric(5, 2), nullable=False)
     batch_volume = db.Column(db.Numeric(10, 2), nullable=False)
+    batch_time = db.Column(db.Numeric(5, 2), nullable=False)
     boil_time = db.Column(db.Integer, nullable=False)
     boil_temperature = db.Column(db.Numeric(5, 2), nullable=False)
+    boil_off = db.Column(db.Numeric(5, 2), nullable=False)
+    trub_loss = db.Column(db.Numeric(5, 2), nullable=False)
+    dead_space = db.Column(db.Numeric(5, 2), nullable=False)
+
+
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     # Convert snake_case to camelCase in JSON
@@ -25,8 +31,12 @@ class Equipment(db.Model):
             "description": self.description,
             "efficiency": float(self.efficiency),
             "batchVolume": float(self.batch_volume),
-            "boilTime": self.boil_time,
+            "batchTime": float(self.batch_time),
+            "boilTime": float(self.boil_time),
             "boilTemperature": float(self.boil_temperature),
+            "boilOff": float(self.boil_off),
+            "trubLoss": float(self.trub_loss),
+            "deadSpace": float(self.dead_space),
             "createdAt": self.created_at.isoformat()
         }
 
