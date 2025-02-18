@@ -76,6 +76,7 @@ def create_yeasts_bp():
             return value if value != "" else None
 
         new_yeast = Yeast(
+            user_id=current_user_id,
             name=data.get("name"),
             manufacturer=sanitize(data.get("manufacturer")),
             type=sanitize(data.get("type")),

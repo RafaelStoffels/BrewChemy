@@ -18,6 +18,7 @@ import MiscList from "./pages/MiscList";
 import RecipeList from "./pages/RecipeList";
 import Recipe from "./pages/Recipe";
 import YeastList from "./pages/YeastList";
+import Yeast from "./pages/Yeast";
 
 import Layout from './components/Layout'; // Importando o Layout
 
@@ -50,6 +51,9 @@ const App = () => {
               <Route path="/Recipes/:id/edit" element={<Recipe />} />
               <Route path="/Recipes/new" element={<Recipe />} />
               <Route path="/YeastList" element={<YeastList />} />
+              <Route path="/Yeasts/:id/details" element={<Yeast />} />
+              <Route path="/Yeasts/:id/edit" element={<Yeast />} />
+              <Route path="/Yeasts/new" element={<Yeast />} />
             </Route>
 
           </Routes>
