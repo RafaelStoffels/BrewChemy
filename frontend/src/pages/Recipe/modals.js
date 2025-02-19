@@ -6,42 +6,25 @@ import { searchFermentables } from '../../services/Fermentables';
 import { searchHops } from '../../services/Hops';
 import { searchMiscs } from '../../services/Misc';
 import { searchYeasts } from '../../services/Yeasts';
+import SearchInput from '../../components/SearchInput';
 
 export function AddFermentableModal({ isOpen, closeModal, handleAddFermentableRecipe }) {
     const [selectedFermentable, setSelectedFermentable] = useState(null);
     const [quantity, setQuantity] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
     const [fermentableList, setFermentableList] = useState([]);
-    const [isSelecting, setIsSelecting] = useState(false);
 
     const { user } = useContext(AuthContext);
 
-    useEffect(() => {
-        if (isSelecting) return; 
-        
-        const delayDebounce = setTimeout(() => {
-            if (searchTerm.length > 2) {
-                searchFermentablesFunction(searchTerm);
-            } else {
-                setFermentableList([]);
-            }
-        }, 300);
-
-        return () => clearTimeout(delayDebounce);
-    }, [searchTerm]);
-
-    const searchFermentablesFunction = async (term) => {
+    const searchItemsFunction = async (term) => {
         const recipeResponse = await searchFermentables(api, user.token, term);
         setFermentableList(recipeResponse);
     };
 
     const handleSelectFermentable = (fermentable) => {
-        setIsSelecting(true); 
         setSelectedFermentable(fermentable.id);
         setSearchTerm(fermentable.name);
         setFermentableList([]);
-
-        setTimeout(() => setIsSelecting(false), 100);
     };
 
     return (
@@ -55,13 +38,7 @@ export function AddFermentableModal({ isOpen, closeModal, handleAddFermentableRe
             <h2>Select a fermentable</h2>
             <form onSubmit={handleAddFermentableRecipe}>
                 <div className="modal">
-                    <input
-                        type="text"
-                        placeholder="Search fermentables"
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        style={{ marginBottom: '15px', padding: '5px' }}
-                    />
+                <SearchInput searchTerm={searchTerm} setSearchTerm={setSearchTerm} onSearch={searchItemsFunction} />
 
                     {fermentableList.length > 0 && (
                         <ul style={{ border: '1px solid #ccc', padding: '5px', maxHeight: '150px', overflowY: 'auto' }}>
@@ -105,36 +82,18 @@ export function AddHopModal({ isOpen, closeModal, handleAddHopRecipe }) {
     const [useType, setUseType] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
     const [hopList, setHopList] = useState([]);
-    const [isSelecting, setIsSelecting] = useState(false);
 
     const { user } = useContext(AuthContext);
 
-    useEffect(() => {
-        if (isSelecting) return;
-
-        const delayDebounce = setTimeout(() => {
-            if (searchTerm.length > 2) {
-                searchHopsFunction(searchTerm);
-            } else {
-                setHopList([]);
-            }
-        }, 300);
-
-        return () => clearTimeout(delayDebounce);
-    }, [searchTerm]);
-
-    const searchHopsFunction = async (term) => {
+    const searchItemsFunction = async (term) => {
         const response = await searchHops(api, user.token, term);
         setHopList(response);
     };
 
     const handleSelectHop = (hop) => {
-        setIsSelecting(true);
         setSelectedHop(hop.id);
         setSearchTerm(hop.name);
         setHopList([]);
-
-        setTimeout(() => setIsSelecting(false), 100);
     };
 
     const handleSaveButton = () => {
@@ -157,13 +116,7 @@ export function AddHopModal({ isOpen, closeModal, handleAddHopRecipe }) {
             <h2>Select a Hop</h2>
             <form onSubmit={handleSaveButton}>
                 <div className="modal">
-                    <input
-                        type="text"
-                        placeholder="Search hops"
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        style={{ marginBottom: '15px', padding: '5px' }}
-                    />
+                    <SearchInput searchTerm={searchTerm} setSearchTerm={setSearchTerm} onSearch={searchItemsFunction} />
 
                     {hopList.length > 0 && (
                         <ul style={{ border: '1px solid #ccc', padding: '5px', maxHeight: '150px', overflowY: 'auto' }}>
@@ -205,7 +158,7 @@ export function AddHopModal({ isOpen, closeModal, handleAddHopRecipe }) {
                             <input
                                 type="number"
                                 value={alphaAcid}
-                                onChange={(e) => setBoilTime(e.target.value)}
+                                onChange={(e) => setAlphaAcid(e.target.value)}
                             />
                         </div>
                     </div>
@@ -234,7 +187,6 @@ export function AddMiscModal({ isOpen, closeModal, handleAddMiscRecipe }) {
     const [quantity, setQuantity] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
     const [filteredMiscList, setFilteredMiscList] = useState([]);
-    const [isSelecting, setIsSelecting] = useState(false); 
 
     const { user } = useContext(AuthContext); 
 
@@ -255,25 +207,10 @@ export function AddMiscModal({ isOpen, closeModal, handleAddMiscRecipe }) {
         }
     };
 
-    useEffect(() => {
-        if (isSelecting) return;
-
-        const delayDebounce = setTimeout(() => {
-            if (searchTerm.length > 2) {
-                filterMiscList(searchTerm);
-            } else {
-                setFilteredMiscList([]);
-            }
-        }, 300);
-
-        return () => clearTimeout(delayDebounce);
-    }, [searchTerm]);
-
-    const filterMiscList = async (term) => {
+    const searchItemsFunction = async (term) => {
         console.log('Searching for:', term); 
         try {
             const response = await searchMiscs(api, user.token, term);
-            console.log('Search result:', response); 
             setFilteredMiscList(response);
         } catch (error) {
             console.error('Error fetching misc data:', error);
@@ -282,12 +219,9 @@ export function AddMiscModal({ isOpen, closeModal, handleAddMiscRecipe }) {
     };
 
     const handleSelectMisc = (misc) => {
-        setIsSelecting(true);
         setSelectedMisc(misc.id);
         setSearchTerm(misc.name); 
         setFilteredMiscList([]); 
-
-        setTimeout(() => setIsSelecting(false), 100);
     };
 
     return (
@@ -301,13 +235,7 @@ export function AddMiscModal({ isOpen, closeModal, handleAddMiscRecipe }) {
             <h2>Select a Misc</h2>
             <form onSubmit={handleSaveButton}>
                 <div className="modal">
-                    <input
-                        type="text"
-                        placeholder="Search misc"
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        style={{ marginBottom: '15px', padding: '5px' }}
-                    />
+                    <SearchInput searchTerm={searchTerm} setSearchTerm={setSearchTerm} onSearch={searchItemsFunction} />    
 
                     {filteredMiscList.length > 0 && (
                         <ul style={{ border: '1px solid #ccc', padding: '5px', maxHeight: '150px', overflowY: 'auto' }}>
@@ -348,25 +276,10 @@ export function AddYeastModal({ isOpen, closeModal, handleAddYeastRecipe }) {
     const [quantity, setQuantity] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
     const [filteredYeastList, setFilteredYeastList] = useState([]);
-    const [isSelecting, setIsSelecting] = useState(false);
 
     const { user } = useContext(AuthContext);
 
-    useEffect(() => {
-        if (isSelecting) return;
-
-        const delayDebounce = setTimeout(() => {
-            if (searchTerm.length > 2) {
-                filterYeastList(searchTerm);
-            } else {
-                setFilteredYeastList([]);
-            }
-        }, 300);
-
-        return () => clearTimeout(delayDebounce);
-    }, [searchTerm]);
-
-    const filterYeastList = async (term) => {
+    const searchItemsFunction = async (term) => {
 
         try {
             const response = await searchYeasts(api, user.token, term);
@@ -377,12 +290,9 @@ export function AddYeastModal({ isOpen, closeModal, handleAddYeastRecipe }) {
     };
 
     const handleSelectYeast = (yeast) => {
-        setIsSelecting(true);
         setSelectedYeast(yeast.id);
         setSearchTerm(yeast.name);
         setFilteredYeastList([]); 
-
-        setTimeout(() => setIsSelecting(false), 100);
     };
 
     const handleSaveButton = () => {
@@ -405,13 +315,7 @@ export function AddYeastModal({ isOpen, closeModal, handleAddYeastRecipe }) {
             <h2>Select a Yeast</h2>
             <form onSubmit={handleSaveButton}>
                 <div className="modal">
-                    <input
-                        type="text"
-                        placeholder="Search yeast"
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        style={{ marginBottom: '15px', padding: '5px' }}
-                    />
+                    <SearchInput searchTerm={searchTerm} setSearchTerm={setSearchTerm} onSearch={searchItemsFunction} />   
 
                     {filteredYeastList.length > 0 && (
                         <ul style={{ border: '1px solid #ccc', padding: '5px', maxHeight: '150px', overflowY: 'auto' }}>
