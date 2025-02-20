@@ -1,12 +1,11 @@
 import React, { useState, useEffect, useContext, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import Modal from 'react-modal';
-import { FiTrash2, FiEdit } from 'react-icons/fi';
+import { FiTrash2, FiEdit, FiRepeat  } from 'react-icons/fi';
 import { v4 as uuidv4 } from 'uuid';
 
 import api from '../../services/api';
 import AuthContext from '../../context/AuthContext';
-import { AddFermentableModal, AddHopModal, AddMiscModal, AddYeastModal, UpdateFermentableModal, UpdateHopModal, UpdateMiscModal, UpdateYeastModal } from './modals';
+import { AddFermentableModal, AddHopModal, AddMiscModal, AddYeastModal, ChangeEquipmentModal, UpdateFermentableModal, UpdateHopModal, UpdateMiscModal, UpdateYeastModal } from './modals';
 
 import { getOpenAIResponse } from '../../services/OpenAI';
 import { fetchFermentables } from '../../services/Fermentables';
@@ -38,6 +37,7 @@ export default function NewRecipe() {
     const [isHopModalOpen, setIsHopModalOpen] = useState(false);
     const [isMiscModalOpen, setIsMiscModalOpen] = useState(false);
     const [isYeastModalOpen, setIsYeastModalOpen] = useState(false);
+    const [isChangeEquipmentModalOpen, setIsChangeEquipmentModalOpen] = useState(false);
     const [isUpdateFermentableModalOpen, setIsUpdateFermentableModalOpen] = useState(false);
     const [isUpdateHopModalOpen, setIsUpdateHopModalOpen] = useState(false);
     const [isUpdateMiscModalOpen, setIsUpdateMiscModalOpen] = useState(false);
@@ -47,6 +47,7 @@ export default function NewRecipe() {
     const closeHopModal = () => setIsHopModalOpen(false);
     const closeMiscModal = () => setIsMiscModalOpen(false);
     const closeYeastModal = () => setIsYeastModalOpen(false);
+    const closeChangeEquipmentModal = () => setIsChangeEquipmentModalOpen(false);
     const closeUpdateFermentableModal = () => setIsUpdateFermentableModalOpen(false);
     const closeUpdateHopModal = () => setIsUpdateHopModalOpen(false);
     const closeUpdateMiscModal = () => setIsUpdateMiscModalOpen(false);
@@ -58,6 +59,7 @@ export default function NewRecipe() {
     const [selectedYeast, setSelectedYeast] = useState(null);
 
     /* Lists */
+    const [equipmentList, setEquipmentList] = useState([]);
     const [fermentableList, setFermentableList] = useState([]);
     const [hopList, setHopList] = useState([]);
     const [miscList, setMiscList] = useState([]);
@@ -232,6 +234,10 @@ export default function NewRecipe() {
         setIsYeastModalOpen(true);
     };
 
+    const openChangeEquipmentModal = async () => {
+        setIsChangeEquipmentModalOpen(true);
+    };
+
     const handleUpdateFermentable = (fermentable) => {
         setSelectedFermentable(fermentable);
         setIsUpdateFermentableModalOpen(true);
@@ -376,8 +382,27 @@ export default function NewRecipe() {
         }
     };
 
-    const handleUpdateFermentableRecipe = (updatedFermentable) => {
+    const handleChangeEquipmentRecipe = (selectedItem) => {
+        if (selectedItem) {
+            const confirmChange = window.confirm(
+                "Deseja mesmo trocar o equipamento? A troca irá atualizar a receita."
+            );
+    
+            if (confirmChange) {
+                setRecipe((prevRecipe) => ({
+                    ...prevRecipe,
+                    recipeEquipment: {
+                        ...selectedItem,  // Substitui recipeEquipment com o objeto do equipamento selecionado
+                    },
+                }));
+                closeChangeEquipmentModal();
+            }
+        } else {
+            alert('Please select an equipment.');
+        }
+    };
 
+    const handleUpdateFermentableRecipe = (updatedFermentable) => {
         setRecipe((prevRecipe) => ({
             ...prevRecipe,
             recipeFermentables: prevRecipe.recipeFermentables.map((fermentable) =>
@@ -387,7 +412,6 @@ export default function NewRecipe() {
     };
 
     const handleUpdateHopRecipe = (updatedHop) => {
-
         setRecipe((prevRecipe) => ({
             ...prevRecipe,
             recipeHops: prevRecipe.recipeHops.map((hop) =>
@@ -397,7 +421,6 @@ export default function NewRecipe() {
     };
 
     const handleUpdateMiscRecipe = (updatedMisc) => {
-
         setRecipe((prevRecipe) => ({
             ...prevRecipe,
             recipeMisc: prevRecipe.recipeMisc.map((misc) =>
@@ -407,7 +430,6 @@ export default function NewRecipe() {
     };
 
     const handleUpdateYeastRecipe = (updatedYeast) => {
-
         setRecipe((prevRecipe) => ({
             ...prevRecipe,
             recipeYeasts: prevRecipe.recipeYeasts.map((yeast) =>
@@ -493,7 +515,6 @@ export default function NewRecipe() {
         e.preventDefault();
 
         console.log(recipe.recipeMisc);
-
 
         const data = {
             name: recipe.name,
@@ -623,11 +644,17 @@ export default function NewRecipe() {
                                 </div>
                             </div>
                             <div className="inputs-row">
+                                <div className="input-field no-flex">
+                                    <button type="button" onClick={openChangeEquipmentModal} className="transparent-button">
+                                        <FiRepeat size={20} />
+                                    </button>
+                                </div>
+
                                 <div className="input-field">
                                     <label htmlFor="name">Equipment</label>
                                     <input
                                         name="equipment"
-                                        value={recipe.equipment}
+                                        value={recipe.recipeEquipment.name}
                                         onChange={handleRecipeChange}
                                         disabled={isView}
                                         style={{ width: '240px' }}/>
@@ -716,10 +743,10 @@ export default function NewRecipe() {
                                         </div>
                                         <div className="ingredients-list-button-group">
                                             <button onClick={() => handleUpdateFermentable(fermentable)} type="button">
-                                              <FiEdit size={20} color="#a8a8b3" />
+                                              <FiEdit size={20} color="#744410" />
                                             </button>
                                             <button onClick={() => handleDeleteFermentable(fermentable.id)} type="button">
-                                              <FiTrash2 size={20} color="#a8a8b3" />
+                                              <FiTrash2 size={20} color="#744410" />
                                             </button>
                                         </div>
                                     </li>
@@ -734,10 +761,10 @@ export default function NewRecipe() {
                                         </div>
                                         <div className="ingredients-list-button-group">
                                             <button onClick={() => handleUpdateHop(hop)} type="button">
-                                              <FiEdit size={20} color="#a8a8b3" />
+                                              <FiEdit size={20} color="#744410" />
                                             </button>
                                             <button onClick={() => handleDeleteHop(hop.id)} type="button">
-                                              <FiTrash2 size={20} color="#a8a8b3" />
+                                              <FiTrash2 size={20} color="#744410" />
                                             </button>
                                         </div>
                                     </li>
@@ -752,10 +779,10 @@ export default function NewRecipe() {
                                         </div>
                                         <div className="ingredients-list-button-group">
                                             <button onClick={() => handleUpdateMisc(misc)} type="button">
-                                              <FiEdit size={20} color="#a8a8b3" />
+                                              <FiEdit size={20} color="#744410" />
                                             </button>
                                             <button onClick={() => handleDeleteMisc(misc.id)} type="button">
-                                              <FiTrash2 size={20} color="#a8a8b3" />
+                                              <FiTrash2 size={20} color="#744410" />
                                             </button>
                                         </div>
                                     </li>
@@ -770,10 +797,10 @@ export default function NewRecipe() {
                                         </div>
                                         <div className="ingredients-list-button-group">
                                             <button onClick={() => handleUpdateYeast(yeast)} type="button">
-                                              <FiEdit size={20} color="#a8a8b3" />
+                                              <FiEdit size={20} color="#744410" />
                                             </button>
                                             <button onClick={() => handleDeleteYeast(yeast.id)} type="button">
-                                              <FiTrash2 size={20} color="#a8a8b3" />
+                                              <FiTrash2 size={20} color="#744410" />
                                             </button>
                                         </div>
                                     </li>
@@ -861,6 +888,12 @@ export default function NewRecipe() {
                     closeModal={closeYeastModal}
                     yeastList={yeastList}
                     handleAddYeastRecipe={handleAddYeastRecipe}
+                />
+                <ChangeEquipmentModal
+                    isOpen={isChangeEquipmentModalOpen}
+                    closeModal={closeChangeEquipmentModal}
+                    equipmentList={equipmentList}
+                    handleChangeEquipmentRecipe={handleChangeEquipmentRecipe}
                 />
                 <UpdateFermentableModal
                     isOpen={isUpdateFermentableModalOpen}

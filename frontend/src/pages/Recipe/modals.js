@@ -2,10 +2,12 @@ import React, { useState, useEffect, useContext } from 'react';
 import Modal from 'react-modal';
 import AuthContext from '../../context/AuthContext';
 import api from '../../services/api';
+import { searchEquipments } from '../../services/Equipments';
 import { searchFermentables } from '../../services/Fermentables';
 import { searchHops } from '../../services/Hops';
 import { searchMiscs } from '../../services/Misc';
 import { searchYeasts } from '../../services/Yeasts';
+
 import SearchInput from '../../components/SearchInput';
 
 export function AddFermentableModal({ isOpen, closeModal, handleAddFermentableRecipe }) {
@@ -280,7 +282,6 @@ export function AddYeastModal({ isOpen, closeModal, handleAddYeastRecipe }) {
     const { user } = useContext(AuthContext);
 
     const searchItemsFunction = async (term) => {
-
         try {
             const response = await searchYeasts(api, user.token, term);
             setFilteredYeastList(response); 
@@ -351,6 +352,70 @@ export function AddYeastModal({ isOpen, closeModal, handleAddYeastRecipe }) {
     );
 }
 
+export function ChangeEquipmentModal({ isOpen, closeModal, handleChangeEquipmentRecipe }) {
+    const [selectedItem, setSelectedItem] = useState(null);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [filteredItemList, setFilteredItemList] = useState([]);
+
+    const { user } = useContext(AuthContext);
+
+    const searchItemsFunction = async (term) => {
+        try {
+            const response = await searchEquipments(api, user.token, term);
+            setFilteredItemList(response); 
+        } catch (error) {
+            console.error('Error searching equipments:', error);
+        }
+    };
+
+    const handleSelectItem = (item) => {
+        setSelectedItem(item);
+        setSearchTerm(item.name);
+        setFilteredItemList([]); 
+    };
+
+    const handleSaveButton = () => {
+        if (selectedItem) {
+            handleChangeEquipmentRecipe(selectedItem);
+            closeModal();
+        } else {
+            alert('Please fill in all fields.');
+        }
+    };
+
+    return (
+        <Modal
+            isOpen={isOpen}
+            onRequestClose={closeModal}
+            contentLabel="Equipment Modal"
+            className="modal-content"
+            overlayClassName="modal-overlay"
+        >
+            <h2>Select an Equipment</h2>
+                <div className="modal">
+                    <SearchInput searchTerm={searchTerm} setSearchTerm={setSearchTerm} onSearch={searchItemsFunction} />   
+
+                    {filteredItemList.length > 0 && (
+                        <ul style={{ border: '1px solid #ccc', padding: '5px', maxHeight: '150px', overflowY: 'auto' }}>
+                            {filteredItemList.map((item) => (
+                                <li 
+                                    key={item.id} 
+                                    style={{ cursor: 'pointer', padding: '5px' }}
+                                    onMouseDown={() => handleSelectItem(item)}
+                                >
+                                    {item.name}
+                                </li>
+                            ))}
+                        </ul>
+                    )}
+
+                    <button onClick={handleSaveButton} className="crud-save-button">
+                        Change Equipment
+                    </button>
+                </div>
+        </Modal>
+    );
+}
 
 export function UpdateFermentableModal({ isOpen, closeModal, selectedFermentable, handleUpdateFermentableRecipe }) {
     const [localFermentableObject, setLocalFermentableObject] = useState(null);

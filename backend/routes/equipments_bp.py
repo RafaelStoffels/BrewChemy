@@ -39,13 +39,7 @@ def create_equipments_bp():
 
         equipment = Equipment.query.filter_by(id=id, user_id=current_user_id).first()
         if equipment is None:
-            return jsonify({"message": "equipment not found in custom data"}), 404
-
-        # Usando logging para mostrar os dados
-        print(f"BatchTime do equipamento: {equipment.batch_time}")
-
-        # Se quiser ver todos os dados do equipamento:
-        print(f"Equipamento encontrado: {equipment.to_dict()}")
+            return jsonify({"message": "equipment not found"}), 404
 
         return jsonify(equipment.to_dict())
 

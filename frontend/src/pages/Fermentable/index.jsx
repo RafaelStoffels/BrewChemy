@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate, useParams  } from 'react-router-dom';
 import { fetchFermentableById } from '../../services/Fermentables';
+import { showErrorToast } from "../../utils/notifications";
 
 import api from '../../services/api';
 import AuthContext from '../../context/AuthContext';
@@ -52,7 +53,7 @@ export default function NewFermentable() {
             setUnitPrice(fermentable.unit_price);
             setStockQuantity(fermentable.stock_quantity);
         } catch (err) {
-            alert('Error loading fermentable record.');
+            showErrorToast("Error loading fermentable record." + err);
             navigate('/FermentableList');
         }
     }

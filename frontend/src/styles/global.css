@@ -44,8 +44,22 @@ input:focus, textarea:focus, select:focus {
     margin-bottom: 8px; /* Adiciona um pouco de espaçamento entre os campos */
 }
 
+/* used in recipe page to change equipment */
+.inputs-row .input-field.no-flex {
+    flex: unset; /* remove flex */
+    width: 25px;
+    height: 25px;
+}
+
 .inputs-row .input-field {
     flex: 1; /* Faz os campos ocuparem espaço igual, se necessário */
+}
+
+.transparent-button {
+    background: transparent;
+    cursor: pointer;
+    color: #744410;
+    border: none;
 }
 
 form input, select{
