@@ -2,6 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import Modal from 'react-modal';
 import AuthContext from '../../context/AuthContext';
 import api from '../../services/api';
+import { showErrorToast } from "../../utils/notifications";
 import { searchEquipments } from '../../services/Equipments';
 import { searchFermentables } from '../../services/Fermentables';
 import { searchHops } from '../../services/Hops';
@@ -27,6 +28,15 @@ export function AddFermentableModal({ isOpen, closeModal, handleAddFermentableRe
         setSelectedFermentable(fermentable.id);
         setSearchTerm(fermentable.name);
         setFermentableList([]);
+    };
+
+    const handleSaveButton = () => {
+        if (selectedFermentable && quantity) {
+            handleAddFermentableRecipe(selectedFermentable, quantity);
+            closeModal();
+        } else {
+            showErrorToast("Please fill in all fields.");
+        }
     };
 
     return (
@@ -68,9 +78,9 @@ export function AddFermentableModal({ isOpen, closeModal, handleAddFermentableRe
                         </div>
                     </div>
                 </div>
-            <button onClick={() => handleAddFermentableRecipe(selectedFermentable, quantity)} className="crud-save-button">
-                Add Fermentable
-            </button>
+                <button type="button" onClick={handleSaveButton} className="crud-save-button">
+                    Add Fermentable
+                </button>
             </form>
         </Modal>
     );
@@ -103,7 +113,7 @@ export function AddHopModal({ isOpen, closeModal, handleAddHopRecipe }) {
             handleAddHopRecipe(selectedHop, quantity, boilTime, alphaAcid, useType);
             closeModal();
         } else {
-            alert('Please fill in all fields.');
+            showErrorToast("Please fill in all fields.");
         }
     };
 
@@ -176,7 +186,7 @@ export function AddHopModal({ isOpen, closeModal, handleAddHopRecipe }) {
                         </div>
                     </div>
                 </div>
-                <button onClick={handleSaveButton} className="crud-save-button">
+                <button type="button" onClick={handleSaveButton} className="crud-save-button">
                     Add Hop
                 </button>
             </form>
@@ -205,7 +215,7 @@ export function AddMiscModal({ isOpen, closeModal, handleAddMiscRecipe }) {
             handleAddMiscRecipe(selectedMisc, quantity);
             closeModal();
         } else {
-            alert('Please fill in all fields.');
+            showErrorToast("Please fill in all fields.");
         }
     };
 
@@ -215,7 +225,7 @@ export function AddMiscModal({ isOpen, closeModal, handleAddMiscRecipe }) {
             const response = await searchMiscs(api, user.token, term);
             setFilteredMiscList(response);
         } catch (error) {
-            console.error('Error fetching misc data:', error);
+            showErrorToast("Error fetching misc data: ", error);
             setFilteredMiscList([]); 
         }
     };
@@ -264,7 +274,7 @@ export function AddMiscModal({ isOpen, closeModal, handleAddMiscRecipe }) {
                             />
                         </div>
                     </div>
-                <button onClick={handleSaveButton} className="crud-save-button">
+                <button type="button" onClick={handleSaveButton} className="crud-save-button">
                     Add Misc
                 </button>
                 </div>
@@ -286,7 +296,7 @@ export function AddYeastModal({ isOpen, closeModal, handleAddYeastRecipe }) {
             const response = await searchYeasts(api, user.token, term);
             setFilteredYeastList(response); 
         } catch (error) {
-            console.error('Erro ao buscar leveduras:', error);
+            showErrorToast("Error searching yeasts:", error);
         }
     };
 
@@ -301,7 +311,7 @@ export function AddYeastModal({ isOpen, closeModal, handleAddYeastRecipe }) {
             handleAddYeastRecipe(selectedYeast, quantity);
             closeModal();
         } else {
-            alert('Please fill in all fields.');
+            showErrorToast("Please fill in all fields.");
         }
     };
 
@@ -343,7 +353,7 @@ export function AddYeastModal({ isOpen, closeModal, handleAddYeastRecipe }) {
                             />
                         </div>
                     </div>
-                    <button onClick={handleSaveButton} className="crud-save-button">
+                    <button type="button" onClick={handleSaveButton} className="crud-save-button">
                     Add Yeast
                     </button>
                 </div>
@@ -379,7 +389,7 @@ export function ChangeEquipmentModal({ isOpen, closeModal, handleChangeEquipment
             handleChangeEquipmentRecipe(selectedItem);
             closeModal();
         } else {
-            alert('Please fill in all fields.');
+            alert('Select an equipment.');
         }
     };
 

@@ -12,6 +12,9 @@ export const OGBar = ({ valorInicial, valorFinal, margemInicial, margemFinal, OG
   const finalRedPercentage = 100 - greenPercentage;
   const currentOGPercentage = calculatePercentage(OGAtual, valorInicial, valorFinal);
 
+  const markerColor =
+  parseFloat(OGAtual) < margemInicial || parseFloat(OGAtual) > margemFinal ? "rgb(187, 36, 36) " : "black";
+
   return (
     <div className="og-bar">
       <div
@@ -31,7 +34,7 @@ export const OGBar = ({ valorInicial, valorFinal, margemInicial, margemFinal, OG
       {/* Marca indicando o OG atual */}
       <div
         className="og-marker"
-        style={{ left: `${currentOGPercentage}%` }}
+        style={{ left: `${currentOGPercentage}%`, backgroundColor: markerColor  }}
       ></div>
     </div>
   );
