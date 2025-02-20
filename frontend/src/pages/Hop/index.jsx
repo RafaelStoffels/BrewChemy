@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate, useParams  } from 'react-router-dom';
 import { fetchHopById } from '../../services/Hops';
+import { showErrorToast } from "../../utils/notifications";
 
 import api from '../../services/api';
 import AuthContext from '../../context/AuthContext';
@@ -54,7 +55,7 @@ export default function NewHop() {
             setBetaAcidContent(hop.betaAcidContent);
 
         } catch (err) {
-            alert('Error loading hop record.');
+            showErrorToast("Error loading hop record." + err);
             navigate('/HopList');
         }
     }
@@ -91,7 +92,7 @@ export default function NewHop() {
             }
             navigate('/HopList');
         } catch (err) {
-            alert('Error saving record. Please try again.');
+            showErrorToast("Error saving record. Please try again." + err);
         }
     }
 

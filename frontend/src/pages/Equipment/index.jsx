@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate, useParams  } from 'react-router-dom';
 import { fetchEquipmentById } from '../../services/Equipments';
+import { showErrorToast } from "../../utils/notifications";
 
 import api from '../../services/api';
 import AuthContext from '../../context/AuthContext';
@@ -57,7 +58,7 @@ export default function NewEquipment() {
             setTrubLoss(equipment.trubLoss);
             setDeadSpace(equipment.deadSpace);
         } catch (err) {
-            alert('Error loading equipment record.');
+            showErrorToast("Error loading equipment record." + err);
             navigate('/EquipmentList');
         }
     }
@@ -96,7 +97,7 @@ export default function NewEquipment() {
             }
             navigate('/EquipmentList');
         } catch (err) {
-            alert('Error saving record. Please try again.');
+            showErrorToast("Error loading equipment record." + err);
         }
     }
 

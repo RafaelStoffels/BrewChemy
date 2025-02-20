@@ -90,7 +90,7 @@ export default function NewFermentable() {
             }
             navigate('/FermentableList');
         } catch (err) {
-            alert('Error saving record. Please try again.');
+            showErrorToast("Error saving record. Please try again." + err);
         }
     }
 

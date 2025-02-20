@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate, useParams  } from 'react-router-dom';
 import { fetchMiscById } from '../../services/Misc';
+import { showErrorToast } from "../../utils/notifications";
 
 import api from '../../services/api';
 import AuthContext from '../../context/AuthContext';
@@ -44,7 +45,7 @@ export default function NewMisc() {
             setType(misc.type);
 
         } catch (err) {
-            alert('Error loading misc record.');
+            showErrorToast("Error loading misc record." + err);
             navigate('/MiscList');
         }
     }
@@ -76,7 +77,7 @@ export default function NewMisc() {
             }
             navigate('/MiscList');
         } catch (err) {
-            alert('Error saving record. Please try again.');
+            showErrorToast("Error loading misc record." + err);
         }
     }
 

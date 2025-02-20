@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate, useParams  } from 'react-router-dom';
 import { fetchYeastById } from '../../services/Yeasts';
+import { showErrorToast } from "../../utils/notifications";
 
 import api from '../../services/api';
 import AuthContext from '../../context/AuthContext';
@@ -58,7 +59,7 @@ export default function NewYeast() {
             setFlocculation(yeast.flocculation);
 
         } catch (err) {
-            alert('Error loading yeast record.');
+            showErrorToast("Error loading yeast record." + err);
             navigate('/YeastList');
         }
     }
@@ -97,7 +98,7 @@ export default function NewYeast() {
             }
             navigate('/YeastList');
         } catch (err) {
-            alert('Error saving record. Please try again.');
+            showErrorToast("Error loading yeast record." + err);
         }
     }
 

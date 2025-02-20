@@ -2,6 +2,7 @@ import React, { useState, useEffect, useContext, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { FiTrash2, FiEdit, FiRepeat  } from 'react-icons/fi';
 import { v4 as uuidv4 } from 'uuid';
+import { showSuccessToast, showErrorToast } from "../../utils/notifications";
 
 import api from '../../services/api';
 import AuthContext from '../../context/AuthContext';
@@ -281,10 +282,10 @@ export default function NewRecipe() {
                 }));
                 closeFermentableModal();
             } else {
-                alert('Selected fermentable not found.');
+                showErrorToast("Selected fermentable not found.");
             }
         } else {
-            alert('Please select a fermentable and enter a quantity.');
+            showErrorToast("Please select a fermentable and enter a quantity.");
         }
     };
 
@@ -314,10 +315,10 @@ export default function NewRecipe() {
 
                 closeHopModal();
             } else {
-                alert('Selected hop not found.');
+                showErrorToast("Selected hop not found.");
             }
         } else {
-            alert('Please select a hop and enter a quantity.');
+            showErrorToast("Please select a hop and enter a quantity.");
         }
     };
 
@@ -345,10 +346,10 @@ export default function NewRecipe() {
 
                 closeMiscModal();
             } else {
-                alert('Selected misc not found.');
+                showErrorToast("Selected misc not found.");
             }
         } else {
-            alert('Please select a misc and enter a quantity.');
+            showErrorToast("Please select a misc and enter a quantity.");
         }
     };
 
@@ -375,10 +376,10 @@ export default function NewRecipe() {
 
                 closeYeastModal();
             } else {
-                alert('Selected yeast not found.');
+                showErrorToast("Selected yeast not found.");
             }
         } else {
-            alert('Please select a yeast and enter a quantity.');
+            showErrorToast("Please select a yeast and enter a quantity.");
         }
     };
 
@@ -398,7 +399,7 @@ export default function NewRecipe() {
                 closeChangeEquipmentModal();
             }
         } else {
-            alert('Please select an equipment.');
+            showErrorToast("Please select an equipment.");
         }
     };
 
@@ -442,7 +443,6 @@ export default function NewRecipe() {
         setRecipe((prevRecipe) => {
 
           if (!prevRecipe || !prevRecipe.recipeFermentables) {
-            console.error("prevRecipe ou recipeFermentables estão indefinidos!");
             return prevRecipe || {};
           }
       
@@ -535,7 +535,6 @@ export default function NewRecipe() {
 
         try {
             if (isEditing) {
-                console.log("update: ", JSON.stringify(data, null, 2));
                 await api.put(`/api/recipes/${id}`, data, {
                     headers: {
                         Authorization: `Bearer ${user.token}`,
@@ -548,9 +547,10 @@ export default function NewRecipe() {
                     },
                 });
             }
-            navigate('/RecipeList');
+            showSuccessToast("Recipe saved successfully.");
+
         } catch (err) {
-            alert('Error saving recipe. Please, try again.');
+            showErrorToast("Error saving recipe. Please, try again.");
         }
     }
 
