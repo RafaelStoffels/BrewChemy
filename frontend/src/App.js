@@ -7,6 +7,7 @@ import "react-toastify/dist/ReactToastify.css"; // Importa os estilos do Toastif
 
 import './styles/global.css';
 
+import CreateAccount from "./pages/Logon/CreateAccount";
 import Logon from "./pages/Logon";
 import Main from "./pages/Main";
 import EquipmentList from "./pages/EquipmentList";
@@ -34,6 +35,7 @@ const App = () => {
 
             {/* Página de Logon não precisa de layout */}
             <Route path="/" element={<Logon />} />
+            <Route path="/CreateAccount" element={<CreateAccount />} />
 
             {/* Aqui estamos utilizando o Layout para envolver as páginas que precisam do Sidebar */}
             <Route element={<Layout />}>

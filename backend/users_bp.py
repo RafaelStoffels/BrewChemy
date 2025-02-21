@@ -4,6 +4,9 @@ import jwt
 import datetime
 import os
 from db import db
+from flask_mail import Mail, Message
+
+mail = Mail()
 
 SECRET_KEY = os.getenv('SECRET_KEY', 'default-secret-key')  # Chave secreta da variável de ambiente
 
@@ -41,6 +44,16 @@ class User(db.Model):
 # Função para criar o Blueprint de usuários e autenticação
 def create_users_bp():
     users_bp = Blueprint("users", __name__)
+
+    @users_bp.route("/send_email", methods=["POST"])
+    def send_email():
+        msg = Message(
+            "Confirmação de Cadastro",
+            recipients=["destinatario@example.com"],
+        )
+        msg.body = "Clique no link para confirmar seu cadastro."
+        mail.send(msg)
+        return jsonify({"message": "E-mail de confirmação enviado!"}), 200
 
     # Rota para obter todos os usuários
     @users_bp.route("/users", methods=["GET"])
@@ -105,7 +118,7 @@ def create_users_bp():
         user = User.query.get(user_id)
 
         if user is None:
-            return jsonify({"message": "Usuário não encontrado"}), 404
+            return jsonify({"message": "User not found"}), 404
 
         db.session.delete(user)
         db.session.commit()

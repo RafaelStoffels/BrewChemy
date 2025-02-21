@@ -1,5 +1,6 @@
 import React, { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Link } from "react-router-dom";
 import { FiLogIn } from 'react-icons/fi';
 import { showErrorToast } from "../../utils/notifications";
 
@@ -59,10 +60,13 @@ export default function Logon() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
+          
           <button className="buttonLogin" type="submit">
             Login
             <FiLogIn size={16} color="#fff" />
           </button>
+          <Link to="/passwordRecover">Forgot password?</Link>
+          <Link to="/CreateAccount">Create account</Link>
         </form>
       </section>
     </div>
