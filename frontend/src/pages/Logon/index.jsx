@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { FiLogIn } from 'react-icons/fi';
 import { showErrorToast } from "../../utils/notifications";
 
+import './styles.css';
 import api from '../../services/api';
 import AuthContext from '../../context/AuthContext';
 
