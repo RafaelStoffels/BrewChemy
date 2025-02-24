@@ -3,3 +3,4 @@
 /frontend/build
 __pycache__
 .env
+.env.production
