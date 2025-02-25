@@ -357,3 +357,27 @@ class RecipeYeast(db.Model):
             "description": self.description,
             "quantity": float(self.quantity) if self.quantity else None
         }
+    
+class User(db.Model):
+    __tablename__ = 'users'
+
+    user_id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(50), nullable=False)
+    email = db.Column(db.String(100), unique=True, nullable=False)
+    password_hash = db.Column(db.String(255), nullable=False)
+    created_at = db.Column(db.TIMESTAMP, default=db.func.current_timestamp())
+    last_login = db.Column(db.TIMESTAMP, nullable=True)
+    is_active = db.Column(db.Boolean, default=True)
+    brewery = db.Column(db.String(60), nullable=True)
+
+    def to_dict(self):
+        return {
+            "user_id": self.user_id,
+            "name": self.name,
+            "email": self.email,
+            "created_at": self.created_at,
+            "last_login": self.last_login,
+            "is_active": self.is_active,
+            "brewery": self.brewery,
+        }
+

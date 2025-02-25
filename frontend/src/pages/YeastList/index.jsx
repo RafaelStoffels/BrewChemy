@@ -2,6 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FiTrash2, FiEdit, FiBookOpen } from 'react-icons/fi';
 import { searchYeasts, fetchYeasts, deleteYeast } from '../../services/Yeasts';
+import { showErrorToast } from "../../utils/notifications";
 import SearchInput from '../../components/SearchInput';
 
 import api from '../../services/api';
@@ -36,8 +37,12 @@ export default function YeastList() {
   }, [user, navigate]);
 
   const searchItemsFunction = async (term) => {
-    const response = await searchYeasts(api, user.token, term);
-    setItemList(response);
+    try{
+      const response = await searchYeasts(api, user.token, term);
+      setItemList(response);
+    } catch (err) {
+      showErrorToast("No data found." + err);
+    }
 };
 
   async function handleDetails(itemListId) {
@@ -53,7 +58,7 @@ export default function YeastList() {
       await deleteYeast(api, user.token, itemListId);
       setItemList(itemList.filter(item => item.id !== itemListId));
     } catch (err) {
-      alert(`${err.message}`);
+      showErrorToast("Error deleting data." + err);
     }
   }
 

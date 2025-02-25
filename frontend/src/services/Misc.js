@@ -2,10 +2,13 @@ export async function searchMiscs(api, userToken, term) {
     try {
         const response = await api.get('/api/miscs/search', {
             headers: { Authorization: `Bearer ${userToken}` },
-            params: { searchTerm: term } // Para passar o parâmetro searchTerm na URL
+            params: { searchTerm: term }
         });
         return response.data;
     } catch (err) {
+        if (err.response && err.response.status === 401) {
+            throw new Error('Your session has expired. Please log in again.');
+        }
         throw new Error('Error loading miscs');
     }
 }
@@ -17,6 +20,9 @@ export async function fetchMisc(api, userToken) {
         });
         return response.data;
     } catch (err) {
+        if (err.response && err.response.status === 401) {
+            throw new Error('Your session has expired. Please log in again.');
+        }
         throw new Error('Error loading misc');
     }
 }
@@ -28,6 +34,9 @@ export async function fetchMiscById(api, userToken, miscID) {
         });
         return response.data;
     } catch (err) {
+        if (err.response && err.response.status === 401) {
+            throw new Error('Your session has expired. Please log in again.');
+        }
         throw new Error('Error loading misc');
     }
 }
@@ -39,6 +48,9 @@ export async function deleteMisc(api, userToken, miscID) {
         });
         return response.data;
     } catch (err) {
+        if (err.response && err.response.status === 401) {
+            throw new Error('Your session has expired. Please log in again.');
+        }
         throw new Error('Error deleting misc');
     }
 }

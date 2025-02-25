@@ -2,6 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FiTrash2, FiEdit, FiBookOpen } from 'react-icons/fi';
 import { searchHops, fetchHops, deleteHop } from '../../services/Hops';
+import { showErrorToast } from "../../utils/notifications";
 import SearchInput from '../../components/SearchInput';
 
 import api from '../../services/api';
@@ -36,8 +37,12 @@ export default function HopList() {
   }, [user, navigate]);
 
   const searchItemsFunction = async (term) => {
+    try{
       const recipeResponse = await searchHops(api, user.token, term);
       setItemList(recipeResponse);
+    } catch (err) {
+      showErrorToast("No data found." + err);
+    }
   };
 
   async function handleDetails(itemListId) {
@@ -53,7 +58,7 @@ export default function HopList() {
       await deleteHop(api, user.token, itemListId);
       setItemList(itemList.filter(item => item.id !== itemListId));
     } catch (err) {
-      alert(`${err.message}`);
+      showErrorToast("Error deleting data." + err);
     }
   }
 

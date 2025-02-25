@@ -2,6 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FiTrash2, FiEdit, FiBookOpen } from 'react-icons/fi';
 import { searchMiscs, fetchMisc, deleteMisc } from '../../services/Misc';
+import { showErrorToast } from "../../utils/notifications";
 import SearchInput from '../../components/SearchInput';
 
 
@@ -37,8 +38,12 @@ export default function MiscList() {
   }, [user, navigate]);
 
   const searchItemsFunction = async (term) => {
+    try{
       const response = await searchMiscs(api, user.token, term);
       setItemList(response);
+    } catch (err) {
+      showErrorToast("No data found." + err);
+    }
   };
 
   async function handleDetails(itemListId) {
@@ -54,7 +59,7 @@ export default function MiscList() {
       await deleteMisc(api, user.token, itemListId);
       setItemList(itemList.filter(item => item.id !== itemListId));
     } catch (err) {
-      alert(`${err.message}`);
+      showErrorToast("Error deleting data." + err);
     }
   }
 

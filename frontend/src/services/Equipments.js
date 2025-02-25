@@ -6,6 +6,9 @@ export async function searchEquipments(api, userToken, term) {
         });
         return response.data;
     } catch (err) {
+        if (err.response && err.response.status === 401) {
+            throw new Error('Your session has expired. Please log in again.');
+        }
         throw new Error('Error loading equipments');
     }
 }
@@ -17,6 +20,9 @@ export async function fetchEquipments(api, userToken) {
         });
         return response.data;
     } catch (err) {
+        if (err.response && err.response.status === 401) {
+            throw new Error('Your session has expired. Please log in again.');
+        }
         throw new Error('Error loading equipments');
     }
 }
@@ -28,6 +34,9 @@ export async function fetchEquipmentById(api, userToken, equipmentId) {
         });
         return response.data;
     } catch (err) {
+        if (err.response && err.response.status === 401) {
+            throw new Error('Your session has expired. Please log in again.');
+        }
         throw new Error('Error loading equipment');
     }
 }
@@ -39,6 +48,9 @@ export async function deleteEquipment(api, userToken, equipmentId) {
         });
         return response.data;
     } catch (err) {
+        if (err.response && err.response.status === 401) {
+            throw new Error('Your session has expired. Please log in again.');
+        }
         throw new Error('Error deleting equipment');
     }
 }

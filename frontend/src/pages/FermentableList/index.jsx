@@ -2,6 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FiTrash2, FiEdit, FiBookOpen } from 'react-icons/fi';
 import { searchFermentables, fetchFermentables, deleteFermentable } from '../../services/Fermentables';
+import { showErrorToast } from "../../utils/notifications";
 import SearchInput from '../../components/SearchInput';
 
 import api from '../../services/api';
@@ -37,8 +38,12 @@ export default function FermentableList() {
   }, [user, navigate]);
 
   const searchItemsFunction = async (term) => {
+    try{
       const recipeResponse = await searchFermentables(api, user.token, term);
       setItemList(recipeResponse);
+    } catch (err) {
+      showErrorToast("No data found." + err);
+    }
   };
   
   async function handleDetails(itemListId) {
@@ -54,7 +59,7 @@ export default function FermentableList() {
       await deleteFermentable(api, user.token, itemListId);
       setItemList(itemList.filter(item => item.id !== itemListId));
     } catch (err) {
-      alert(`${err.message}`);
+      showErrorToast("Error deleting data." + err);
     }
   }
 

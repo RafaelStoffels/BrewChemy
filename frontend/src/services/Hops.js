@@ -2,10 +2,13 @@ export async function searchHops(api, userToken, term) {
     try {
         const response = await api.get('/api/hops/search', {
             headers: { Authorization: `Bearer ${userToken}` },
-            params: { searchTerm: term } // Para passar o parâmetro searchTerm na URL
+            params: { searchTerm: term }
         });
         return response.data;
     } catch (err) {
+        if (err.response && err.response.status === 401) {
+            throw new Error('Your session has expired. Please log in again.');
+        }
         throw new Error('Error loading hops');
     }
 }
@@ -17,6 +20,9 @@ export async function fetchHops(api, userToken) {
         });
         return response.data;
     } catch (err) {
+        if (err.response && err.response.status === 401) {
+            throw new Error('Your session has expired. Please log in again.');
+        }
         throw new Error('Error loading hops');
     }
 }
@@ -28,6 +34,9 @@ export async function fetchHopById(api, userToken, hopId) {
         });
         return response.data;
     } catch (err) {
+        if (err.response && err.response.status === 401) {
+            throw new Error('Your session has expired. Please log in again.');
+        }
         throw new Error('Error loading hop');
     }
 }
@@ -39,6 +48,9 @@ export async function deleteHop(api, userToken, hopId) {
         });
         return response.data;
     } catch (err) {
+        if (err.response && err.response.status === 401) {
+            throw new Error('Your session has expired. Please log in again.');
+        }
         throw new Error('Error deleting hops');
     }
 }

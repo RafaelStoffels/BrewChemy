@@ -1,13 +1,12 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FiTrash2, FiEdit, FiBookOpen  } from 'react-icons/fi';
-
+import { showErrorToast } from "../../utils/notifications";
 
 import AuthContext from '../../context/AuthContext';
 import { fetchRecipes, deleteRecipe } from '../../services/recipes';
 import '../../styles/list.css';
 import Sidebar from '../../components/Sidebar';
-import Header from '../../components/Header';
 
 export default function MaltList() {
   const { user, logout } = useContext(AuthContext);
@@ -46,7 +45,7 @@ export default function MaltList() {
       await deleteRecipe(itemListId, user.token);
       setItemList(itemList.filter(itemList => itemList.id !== itemListId));
     } catch (err) {
-      alert('Error: recipe cannot be deleted, try again.');
+      showErrorToast("Error deleting data." + err);
     }
   }
 

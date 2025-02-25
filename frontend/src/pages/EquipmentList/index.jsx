@@ -2,6 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FiTrash2, FiEdit, FiBookOpen } from 'react-icons/fi';
 import { searchEquipments, fetchEquipments, deleteEquipment } from '../../services/Equipments';
+import { showErrorToast } from "../../utils/notifications";
 
 import api from '../../services/api';
 import AuthContext from '../../context/AuthContext';
@@ -36,8 +37,12 @@ export default function EquipmentList() {
   }, [user, navigate]);
 
   const searchItemsFunction = async (term) => {
-    const recipeResponse = await searchEquipments(api, user.token, term);
-    setItemList(recipeResponse);
+    try {
+      const recipeResponse = await searchEquipments(api, user.token, term);
+      setItemList(recipeResponse);
+    } catch (err) {
+      showErrorToast("No data found." + err);
+    }
 };
 
   async function handleDetails(itemListId) {
@@ -53,7 +58,7 @@ export default function EquipmentList() {
       await deleteEquipment(api, user.token, itemListId);
       setItemList(itemList.filter(item => item.id !== itemListId));
     } catch (err) {
-      alert(`${err.message}`);
+      showErrorToast("Error deleting data." + err);
     }
   }
 
