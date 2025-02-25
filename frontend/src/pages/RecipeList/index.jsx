@@ -15,19 +15,20 @@ export default function MaltList() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!user) {
-      navigate('/');
-    } else {
-      fetchRecipes(user.token)
-        .then((data) => {
+    const fetchData = async () => {
+      if (!user) {
+        navigate('/');
+      } else {
+        try {
+          const data = await fetchRecipes(user.token);
           setItemList(data);
-          setLoading(false);
-        })
-        .catch((err) => {
-          setError('Error loading recipes');
-          setLoading(false);
-        });
-    }
+        } catch (err) {
+          showErrorToast('Error loading recipes');
+        }
+      }
+    };
+  
+    fetchData();
   }, [user, navigate]);
 
   async function handleDetails(itemListId) {

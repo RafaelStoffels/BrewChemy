@@ -46,7 +46,7 @@ export default function NewFermentable() {
             const fermentable = await fetchFermentableById(api, user.token, itemID);
             setName(fermentable.name);
             setDescription(fermentable.description);
-            setFermentableType(fermentable.type);
+            setType(fermentable.type);
             setSupplier(fermentable.supplier);
             setEBC(fermentable.ebc);
             setPotentialExtract(fermentable.potentialExtract);
