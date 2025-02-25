@@ -483,11 +483,11 @@ export function UpdateFermentableModal({ isOpen, closeModal, selectedFermentable
                             <div className="input-field">
                                 <label htmlFor="name">Fermentable Type</label>
                                 <select
-                                  value={localFermentableObject.maltType}
+                                  value={localFermentableObject.type}
                                   onChange={(e) =>
                                     setLocalFermentableObject((prev) => ({
                                       ...prev,
-                                      maltType: e.target.value,
+                                      type: e.target.value,
                                     }))
                                   }
                                 >

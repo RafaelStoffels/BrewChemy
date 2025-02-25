@@ -15,7 +15,7 @@ export default function NewFermentable() {
 
     const [name, setName] = useState('');
     const [description, setDescription] = useState('');
-    const [maltType, setFermentableType] = useState('Base');
+    const [type, setType] = useState('Base');
     const [supplier, setSupplier] = useState('');
     const [ebc, setEBC] = useState('');
     const [potentialExtract, setPotentialExtract] = useState('');
@@ -46,7 +46,7 @@ export default function NewFermentable() {
             const fermentable = await fetchFermentableById(api, user.token, itemID);
             setName(fermentable.name);
             setDescription(fermentable.description);
-            setFermentableType(fermentable.maltType);
+            setFermentableType(fermentable.type);
             setSupplier(fermentable.supplier);
             setEBC(fermentable.ebc);
             setPotentialExtract(fermentable.potentialExtract);
@@ -64,7 +64,7 @@ export default function NewFermentable() {
         const data = {
             name,
             description,
-            maltType,
+            type,
             supplier,
             ebc,
             potentialExtract,
@@ -139,8 +139,8 @@ export default function NewFermentable() {
                             <div className='input-field'>
                                 <label htmlFor="name">Type</label>
                                 <select
-                                      value={maltType}
-                                      onChange={e => setFermentableType(e.target.value)}
+                                      value={type}
+                                      onChange={e => setType(e.target.value)}
                                     >
                                       <option value="base">Base</option>
                                       <option value="Specialty">Specialty</option>

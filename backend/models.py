@@ -54,7 +54,6 @@ class Fermentable(db.Model):
     stock_quantity = db.Column(db.Integer, nullable=False)
     supplier = db.Column(db.String(100), nullable=False)
     unit_price = db.Column(db.Numeric(10, 2))
-    notes = db.Column(db.Text)
     official_fermentable_id = db.Column(db.Integer, nullable=False)
 
     # Converte snake_case para camelCase no JSON

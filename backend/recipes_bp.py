@@ -55,7 +55,7 @@ def create_recipes_bp():
                 description=fermentable_data.get("description"),
                 ebc=fermentable_data["ebc"],
                 potential_extract=fermentable_data["potentialExtract"],
-                malt_type=fermentable_data.get("maltType"),
+                type=fermentable_data.get("type"),
                 supplier=fermentable_data.get("supplier"),
                 unit_price=fermentable_data.get("unitPrice"),
                 notes=fermentable_data.get("notes"),
@@ -179,7 +179,7 @@ def create_recipes_bp():
                 fermentable.description = fermentable_data.get("description", fermentable.description)
                 fermentable.ebc = fermentable_data.get("ebc", fermentable.ebc)
                 fermentable.potential_extract = fermentable_data.get("potentialExtract", fermentable.potential_extract)
-                fermentable.malt_type = fermentable_data.get("maltType", fermentable.malt_type)
+                fermentable.type = fermentable_data.get("type", fermentable.type)
                 fermentable.supplier = fermentable_data.get("supplier", fermentable.supplier)
                 fermentable.unit_price = fermentable_data.get("unitPrice", fermentable.unit_price)
                 fermentable.notes = fermentable_data.get("notes", fermentable.notes)
@@ -192,7 +192,7 @@ def create_recipes_bp():
                     description=fermentable_data.get("description"),
                     ebc=fermentable_data["ebc"],
                     potential_extract=fermentable_data["potentialExtract"],
-                    malt_type=fermentable_data.get("maltType"),
+                    type=fermentable_data.get("type"),
                     supplier=fermentable_data.get("supplier"),
                     unit_price=fermentable_data.get("unitPrice"),
                     notes=fermentable_data.get("notes"),
