@@ -1,5 +1,4 @@
 from flask import Blueprint, request, jsonify
-from werkzeug.security import generate_password_hash, check_password_hash
 import jwt
 import datetime
 import os
@@ -10,11 +9,6 @@ from models import User
 mail = Mail()
 
 SECRET_KEY = os.getenv('SECRET_KEY', 'default-secret-key')
-
-def check_password(self, password):
-    return check_password_hash(self.password_hash, password)
-def set_password(self, password):
-    self.password_hash = generate_password_hash(password)
 
 
 def create_users_bp():

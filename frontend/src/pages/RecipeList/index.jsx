@@ -9,10 +9,8 @@ import '../../styles/list.css';
 import Sidebar from '../../components/Sidebar';
 
 export default function MaltList() {
-  const { user, logout } = useContext(AuthContext);
+  const { user } = useContext(AuthContext);
   const [itemList, setItemList] = useState([]); 
-  const [loading, setLoading] = useState(true); 
-  const [error, setError] = useState(null);
 
   const navigate = useNavigate();
 
@@ -60,8 +58,6 @@ export default function MaltList() {
         <div className="content">
 
           <h1>Recipes</h1>
-          {loading ? <p>Loading...</p> : error ? <p>{error}</p> : (
-            itemList.length > 0 ? (
               <ul>
                 {itemList.map((itemList) => (
                   <li key={itemList.id}>
@@ -81,10 +77,6 @@ export default function MaltList() {
                   </li>
                 ))}
               </ul>
-            ) : (
-              <p>No recipes found.</p>
-            )
-          )}
         </div>
       </div>
     </div>

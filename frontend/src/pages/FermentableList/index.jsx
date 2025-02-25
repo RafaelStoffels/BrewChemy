@@ -14,8 +14,6 @@ import '../../styles/list.css';
 export default function FermentableList() {
   const { user } = useContext(AuthContext);
   const [itemList, setItemList] = useState([]); 
-  const [loading, setLoading] = useState(true); 
-  const [error, setError] = useState(null);
 
   const navigate = useNavigate();
 
@@ -75,8 +73,6 @@ export default function FermentableList() {
         <SearchInput onSearch={searchItemsFunction} />
 
         <h1>Fermentables</h1>
-        {loading ? <p>Loading...</p> : error ? <p>{error}</p> : (
-          itemList.length > 0 ? (
             <ul>
               {itemList.map((item) => (
                 <li key={item.id}>
@@ -96,10 +92,6 @@ export default function FermentableList() {
                 </li>
               ))}
             </ul>
-          ) : (
-            <p>No fermentable found.</p>
-          )
-        )}
       </div>
     </div>
   );

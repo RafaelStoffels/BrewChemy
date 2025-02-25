@@ -13,8 +13,6 @@ import '../../styles/list.css';
 export default function YeastList() {
   const { user } = useContext(AuthContext);
   const [itemList, setItemList] = useState([]); 
-  const [loading, setLoading] = useState(true); 
-  const [error, setError] = useState(null);
 
   const navigate = useNavigate();
 
@@ -73,8 +71,6 @@ export default function YeastList() {
         <SearchInput onSearch={searchItemsFunction} />
 
         <h1>Yeasts</h1>
-        {loading ? <p>Loading...</p> : error ? <p>{error}</p> : (
-          itemList.length > 0 ? (
             <ul>
               {itemList.map((item) => (
                 <li key={item.id}>
@@ -94,10 +90,6 @@ export default function YeastList() {
                 </li>
               ))}
             </ul>
-          ) : (
-            <p>No yeasts found.</p>
-          )
-        )}
       </div>
     </div>
   );
