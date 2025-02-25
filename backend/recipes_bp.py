@@ -58,7 +58,6 @@ def create_recipes_bp():
                 type=fermentable_data.get("type"),
                 supplier=fermentable_data.get("supplier"),
                 unit_price=fermentable_data.get("unitPrice"),
-                notes=fermentable_data.get("notes"),
                 quantity=fermentable_data.get("quantity")
             )
             db.session.add(new_fermentable)
@@ -182,7 +181,6 @@ def create_recipes_bp():
                 fermentable.type = fermentable_data.get("type", fermentable.type)
                 fermentable.supplier = fermentable_data.get("supplier", fermentable.supplier)
                 fermentable.unit_price = fermentable_data.get("unitPrice", fermentable.unit_price)
-                fermentable.notes = fermentable_data.get("notes", fermentable.notes)
                 fermentable.quantity = fermentable_data.get("quantity", fermentable.quantity)
             else:
                 new_fermentable = RecipeFermentable(
@@ -195,7 +193,6 @@ def create_recipes_bp():
                     type=fermentable_data.get("type"),
                     supplier=fermentable_data.get("supplier"),
                     unit_price=fermentable_data.get("unitPrice"),
-                    notes=fermentable_data.get("notes"),
                     quantity=fermentable_data["quantity"]
                 )
                 db.session.add(new_fermentable)

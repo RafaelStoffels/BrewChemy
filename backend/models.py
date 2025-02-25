@@ -246,7 +246,6 @@ class RecipeFermentable(db.Model):
     type = db.Column(db.String(15))
     supplier = db.Column(db.String(40))
     unit_price = db.Column(db.Numeric(10, 2))
-    notes = db.Column(db.Text)
     quantity = db.Column(db.Numeric)
 
     def to_dict(self):
@@ -261,7 +260,6 @@ class RecipeFermentable(db.Model):
             "type": self.type,
             "supplier": self.supplier,
             "unitPrice": float(self.unit_price) if self.unit_price else None,
-            "notes": self.notes,
             "quantity": float(self.quantity) if self.quantity else None
         }
     
