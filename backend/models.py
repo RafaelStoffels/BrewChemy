@@ -46,13 +46,13 @@ class Fermentable(db.Model):
     # Table Definition
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'), nullable=False)
-    name = db.Column(db.String(100), nullable=False)
+    name = db.Column(db.String(40), nullable=False)
     description = db.Column(db.Text)
     ebc = db.Column(db.Numeric(5, 2), nullable=False)
     potential_extract = db.Column(db.Numeric(5, 3), nullable=False)
-    type = db.Column(db.String(50), nullable=False)
+    type = db.Column(db.String(15), nullable=False)
     stock_quantity = db.Column(db.Integer, nullable=False)
-    supplier = db.Column(db.String(100), nullable=False)
+    supplier = db.Column(db.String(40), nullable=False)
     unit_price = db.Column(db.Numeric(10, 2))
     official_fermentable_id = db.Column(db.Integer, nullable=False)
 
@@ -75,14 +75,14 @@ class Hop(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'), nullable=False)
-    name = db.Column(db.String(100), nullable=False)
-    supplier = db.Column(db.String(50))
+    name = db.Column(db.String(40), nullable=False)
+    supplier = db.Column(db.String(40))
     alpha_acid_content = db.Column(db.Numeric(5, 2))
     beta_acid_content = db.Column(db.Numeric(5, 2))
-    type = db.Column(db.String(50))
+    type = db.Column(db.String(15))
     country_of_origin = db.Column(db.String(50))
     description = db.Column(db.Text)
-    use_type = db.Column(db.String(50))
+    use_type = db.Column(db.String(15))
 
     def to_dict(self):
         return {
@@ -104,9 +104,9 @@ class Misc(db.Model):
     # Table Definition
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'), nullable=False)
-    name = db.Column(db.String(100), nullable=False)
+    name = db.Column(db.String(40), nullable=False)
     description = db.Column(db.Text)
-    type = db.Column(db.String(30))
+    type = db.Column(db.String(15))
 
     # Convert snake_case to camelCase in JSON
     def to_dict(self):
@@ -124,15 +124,15 @@ class Yeast(db.Model):
     # Table Definition
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'), nullable=False)
-    name = db.Column(db.String(100), nullable=False)
-    manufacturer = db.Column(db.String(100))
-    type = db.Column(db.String(50))
-    form = db.Column(db.String(50))
-    attenuation = db.Column(db.String(50))
-    temperature_range = db.Column(db.String(50))
-    alcohol_tolerance = db.Column(db.String(50))
+    name = db.Column(db.String(40), nullable=False)
+    manufacturer = db.Column(db.String(60))
+    type = db.Column(db.String(15))
+    form = db.Column(db.String(15))
+    attenuation = db.Column(db.Numeric(5, 2))
+    temperature_range = db.Column(db.String(15))
+    alcohol_tolerance = db.Column(db.String(15))
     flavor_profile = db.Column(db.String(100))
-    flocculation = db.Column(db.String(50))
+    flocculation = db.Column(db.String(15))
     description = db.Column(db.Text)
 
     # Convert snake_case to camelCase in JSON
@@ -144,7 +144,7 @@ class Yeast(db.Model):
             "manufacturer": self.manufacturer,
             "type": self.type,
             "form": self.form,
-            "attenuation": self.attenuation,
+            "attenuation": float(self.attenuation) if self.attenuation else None,
             "temperatureRange": self.temperature_range,
             "alcoholTolerance": self.alcohol_tolerance,
             "flavorProfile": self.flavor_profile,
@@ -158,21 +158,21 @@ class Recipe(db.Model):
     # Table Definition
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'), nullable=False)
-    name = db.Column(db.String(255), nullable=False)
-    style = db.Column(db.String(100))
+    name = db.Column(db.String(40), nullable=False)
+    style = db.Column(db.String(30))
     description = db.Column(db.Text)
     creation_date = db.Column(db.Date, default=db.func.current_date())
     volume_liters = db.Column(db.Numeric(5, 2))
     equipment_id = db.Column(db.Integer)
     notes = db.Column(db.Text)
-    author = db.Column(db.String(50), nullable=False)
+    author = db.Column(db.String(40), nullable=False)
     type = db.Column(db.String(20), nullable=False)
 
+    recipe_equipment = db.relationship('RecipeEquipment', backref='recipe')
     recipe_fermentables = db.relationship('RecipeFermentable', backref='recipe', lazy=True, cascade="all, delete-orphan")
     recipe_hops = db.relationship('RecipeHop', backref='recipe', lazy=True, cascade="all, delete-orphan")
     recipe_misc = db.relationship('RecipeMisc', backref='recipe', lazy=True, cascade="all, delete-orphan")
     recipe_yeasts = db.relationship('RecipeYeast', backref='recipe', lazy=True, cascade="all, delete-orphan")
-    recipe_equipment = db.relationship('RecipeEquipment', backref='recipe')
 
     def to_dict(self):
         # Verifica se existe algum equipamento associado à receita
@@ -239,12 +239,12 @@ class RecipeFermentable(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'), nullable=False)
     recipe_id = db.Column(db.Integer, db.ForeignKey('recipes.id'), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'), nullable=False)
-    name = db.Column(db.String(100), nullable=False)
+    name = db.Column(db.String(40), nullable=False)
     description = db.Column(db.Text)
     ebc = db.Column(db.Numeric(5, 2), nullable=False)
     potential_extract = db.Column(db.Numeric(5, 3), nullable=False)
-    malt_type = db.Column(db.String(50))
-    supplier = db.Column(db.String(100))
+    type = db.Column(db.String(15))
+    supplier = db.Column(db.String(40))
     unit_price = db.Column(db.Numeric(10, 2))
     notes = db.Column(db.Text)
     quantity = db.Column(db.Numeric)
@@ -258,7 +258,7 @@ class RecipeFermentable(db.Model):
             "description": self.description,
             "ebc": float(self.ebc),
             "potentialExtract": float(self.potential_extract),
-            "maltType": self.malt_type,
+            "type": self.type,
             "supplier": self.supplier,
             "unitPrice": float(self.unit_price) if self.unit_price else None,
             "notes": self.notes,
@@ -272,10 +272,10 @@ class RecipeHop(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'), nullable=False)
     recipe_id = db.Column(db.Integer, db.ForeignKey('recipes.id'), nullable=False)
-    name = db.Column(db.String(100), nullable=False)
+    name = db.Column(db.String(40), nullable=False)
     alpha_acid_content = db.Column(db.Numeric(5, 2))
     beta_acid_content = db.Column(db.Numeric(5, 2))
-    use_type = db.Column(db.String(50))
+    use_type = db.Column(db.String(15))
     country_of_origin = db.Column(db.String(50))
     description = db.Column(db.Text)
     quantity = db.Column(db.Numeric)
@@ -303,11 +303,11 @@ class RecipeMisc(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'), nullable=False)
     recipe_id = db.Column(db.Integer, db.ForeignKey('recipes.id'), nullable=False)
-    name = db.Column(db.String(100), nullable=False)
+    name = db.Column(db.String(40), nullable=False)
     description = db.Column(db.Text)
-    type = db.Column(db.String(30))
+    type = db.Column(db.String(15))
     quantity = db.Column(db.Numeric)
-    use = db.Column(db.String(30))
+    use = db.Column(db.String(15))
     time = db.Column(db.Integer)
 
     def to_dict(self):
@@ -330,15 +330,15 @@ class RecipeYeast(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'), nullable=False)
     recipe_id = db.Column(db.Integer, db.ForeignKey('recipes.id'), nullable=False)
-    name = db.Column(db.String(100), nullable=False)
+    name = db.Column(db.String(40), nullable=False)
     manufacturer = db.Column(db.String(100), nullable=False)
-    type = db.Column(db.String(50), nullable=False)
-    form = db.Column(db.String(50), nullable=False)
+    type = db.Column(db.String(15), nullable=False)
+    form = db.Column(db.String(15), nullable=False)
     attenuation = db.Column(db.String(20), nullable=False)
-    temperature_range = db.Column(db.String(20), nullable=False)
-    alcohol_tolerance = db.Column(db.String(50), nullable=False)
+    temperature_range = db.Column(db.String(15), nullable=False)
+    alcohol_tolerance = db.Column(db.String(15), nullable=False)
     flavor_profile = db.Column(db.Text) 
-    flocculation = db.Column(db.String(20), nullable=False)
+    flocculation = db.Column(db.String(15), nullable=False)
     description = db.Column(db.Text)
     quantity = db.Column(db.Numeric)
 
