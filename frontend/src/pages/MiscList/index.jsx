@@ -34,14 +34,20 @@ export default function MiscList() {
   }, [user, navigate]);
 
   const searchItemsFunction = async (term) => {
-    try{
-      showInfoToast("Searching data...")
+    try {
+      showInfoToast("Searching data...");
       const response = await searchMiscs(api, user.token, term);
-      setItemList(response);
+  
+      if (Array.isArray(response) && response.length === 0) {
+        showInfoToast("Data not found");
+      } else {
+        setItemList(response);
+      }
     } catch (err) {
-      showErrorToast("No data found." + err);
+      showErrorToast("Error: " + err);
     }
   };
+  
 
   async function handleDetails(itemListId) {
     navigate(`/Misc/${itemListId}/details`);

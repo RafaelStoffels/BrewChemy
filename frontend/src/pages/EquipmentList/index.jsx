@@ -34,13 +34,18 @@ export default function EquipmentList() {
 
   const searchItemsFunction = async (term) => {
     try {
-      showInfoToast("Searching data...")
+      showInfoToast("Searching data...");
       const recipeResponse = await searchEquipments(api, user.token, term);
-      setItemList(recipeResponse);
+  
+      if (Array.isArray(recipeResponse) && recipeResponse.length === 0) {
+        showInfoToast("Data not found");
+      } else {
+        setItemList(recipeResponse);
+      }
     } catch (err) {
-      showErrorToast("No data found." + err);
+      showErrorToast("Error: " + err);
     }
-};
+  };
 
   async function handleDetails(itemListId) {
     navigate(`/Equipments/${itemListId}/details`);
