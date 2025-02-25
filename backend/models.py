@@ -12,7 +12,7 @@ class Equipment(db.Model):
     description = db.Column(db.Text)
     efficiency = db.Column(db.Numeric(5, 2), nullable=False)
     batch_volume = db.Column(db.Numeric(10, 2), nullable=False)
-    batch_time = db.Column(db.Numeric(5, 2), nullable=False)
+    batch_time = db.Column(db.Integer, nullable=False)
     boil_time = db.Column(db.Integer, nullable=False)
     boil_temperature = db.Column(db.Numeric(5, 2), nullable=False)
     boil_off = db.Column(db.Numeric(5, 2), nullable=False)
@@ -31,8 +31,8 @@ class Equipment(db.Model):
             "description": self.description,
             "efficiency": float(self.efficiency),
             "batchVolume": float(self.batch_volume),
-            "batchTime": float(self.batch_time),
-            "boilTime": float(self.boil_time),
+            "batchTime": self.batch_time,
+            "boilTime": self.boil_time,
             "boilTemperature": float(self.boil_temperature),
             "boilOff": float(self.boil_off),
             "trubLoss": float(self.trub_loss),
@@ -50,7 +50,7 @@ class Fermentable(db.Model):
     description = db.Column(db.Text)
     ebc = db.Column(db.Numeric(5, 2), nullable=False)
     potential_extract = db.Column(db.Numeric(5, 3), nullable=False)
-    malt_type = db.Column(db.String(50), nullable=False)
+    type = db.Column(db.String(50), nullable=False)
     stock_quantity = db.Column(db.Integer, nullable=False)
     supplier = db.Column(db.String(100), nullable=False)
     unit_price = db.Column(db.Numeric(10, 2))
@@ -66,7 +66,7 @@ class Fermentable(db.Model):
             "description": self.description,
             "ebc": float(self.ebc),
             "potentialExtract": float(self.potential_extract),
-            "maltType": self.malt_type,
+            "type": self.type,
             "supplier": self.supplier,
             "officialFermentableId": self.official_fermentable_id
         }

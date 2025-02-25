@@ -70,7 +70,7 @@ def create_fermentables_bp():
             description=data.get("description"),
             ebc=sanitize(data.get("ebc")),
             potential_extract=sanitize(data.get("potentialExtract")),
-            malt_type=data.get("maltType"),
+            type=data.get("type"),
             supplier=data.get("supplier"),
             user_id=current_user_id,
             official_fermentable_id=data.get("officialFermentableId")
@@ -94,7 +94,7 @@ def create_fermentables_bp():
         fermentable.description = data.get("description", fermentable.description)
         fermentable.ebc = data.get("ebc", fermentable.ebc)
         fermentable.potential_extract = data.get("potentialExtract", fermentable.potential_extract)
-        fermentable.malt_type = data.get("maltType", fermentable.malt_type)
+        fermentable.type = data.get("type", fermentable.type)
         fermentable.supplier = data.get("supplier", fermentable.supplier)
 
         db.session.commit()
