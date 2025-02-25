@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FiTrash2, FiEdit, FiBookOpen } from 'react-icons/fi';
 import { searchFermentables, fetchFermentables, deleteFermentable } from '../../services/Fermentables';
-import { showErrorToast } from "../../utils/notifications";
+import { showInfoToast, showErrorToast } from "../../utils/notifications";
 import SearchInput from '../../components/SearchInput';
 
 import api from '../../services/api';
@@ -26,9 +26,7 @@ export default function FermentableList() {
           const items = await fetchFermentables(api, user.token);
           setItemList(items);
         } catch (err) {
-          setError('Error loading fermentables');
-        } finally {
-          setLoading(false);
+          showErrorToast('Error loading fermentables');
         }
       };
       loaditems();
@@ -37,6 +35,7 @@ export default function FermentableList() {
 
   const searchItemsFunction = async (term) => {
     try{
+      showInfoToast("Searching data...")
       const recipeResponse = await searchFermentables(api, user.token, term);
       setItemList(recipeResponse);
     } catch (err) {

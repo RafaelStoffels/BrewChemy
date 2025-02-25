@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FiTrash2, FiEdit, FiBookOpen } from 'react-icons/fi';
 import { searchYeasts, fetchYeasts, deleteYeast } from '../../services/Yeasts';
-import { showErrorToast } from "../../utils/notifications";
+import { showInfoToast, showErrorToast } from "../../utils/notifications";
 import SearchInput from '../../components/SearchInput';
 
 import api from '../../services/api';
@@ -25,9 +25,7 @@ export default function YeastList() {
           const yeasts = await fetchYeasts(api, user.token);
           setItemList(yeasts);
         } catch (err) {
-          setError('Error loading yeast');
-        } finally {
-          setLoading(false);
+          showErrorToast('Error loading yeast');
         }
       };
       loadYeasts();
@@ -36,6 +34,7 @@ export default function YeastList() {
 
   const searchItemsFunction = async (term) => {
     try{
+      showInfoToast("Searching data...")
       const response = await searchYeasts(api, user.token, term);
       setItemList(response);
     } catch (err) {

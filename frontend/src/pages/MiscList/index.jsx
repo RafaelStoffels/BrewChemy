@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FiTrash2, FiEdit, FiBookOpen } from 'react-icons/fi';
 import { searchMiscs, fetchMisc, deleteMisc } from '../../services/Misc';
-import { showErrorToast } from "../../utils/notifications";
+import { showInfoToast, showErrorToast } from "../../utils/notifications";
 import SearchInput from '../../components/SearchInput';
 
 
@@ -26,9 +26,7 @@ export default function MiscList() {
           const misc = await fetchMisc(api, user.token);
           setItemList(misc);
         } catch (err) {
-          setError('Error loading misc');
-        } finally {
-          setLoading(false);
+          showErrorToast('Error loading misc');
         }
       };
       loadMisc();
@@ -37,6 +35,7 @@ export default function MiscList() {
 
   const searchItemsFunction = async (term) => {
     try{
+      showInfoToast("Searching data...")
       const response = await searchMiscs(api, user.token, term);
       setItemList(response);
     } catch (err) {

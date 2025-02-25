@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FiTrash2, FiEdit, FiBookOpen } from 'react-icons/fi';
 import { searchHops, fetchHops, deleteHop } from '../../services/Hops';
-import { showErrorToast } from "../../utils/notifications";
+import { showInfoToast, showErrorToast } from "../../utils/notifications";
 import SearchInput from '../../components/SearchInput';
 
 import api from '../../services/api';
@@ -25,9 +25,7 @@ export default function HopList() {
           const hops = await fetchHops(api, user.token);
           setItemList(hops);
         } catch (err) {
-          setError('Error loading hops');
-        } finally {
-          setLoading(false);
+          showErrorToast('Error loading hops');
         }
       };
       loadHops();
@@ -36,6 +34,7 @@ export default function HopList() {
 
   const searchItemsFunction = async (term) => {
     try{
+      showInfoToast("Searching data...")
       const recipeResponse = await searchHops(api, user.token, term);
       setItemList(recipeResponse);
     } catch (err) {

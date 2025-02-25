@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FiTrash2, FiEdit, FiBookOpen } from 'react-icons/fi';
 import { searchEquipments, fetchEquipments, deleteEquipment } from '../../services/Equipments';
-import { showErrorToast } from "../../utils/notifications";
+import { showInfoToast, showErrorToast } from "../../utils/notifications";
 
 import api from '../../services/api';
 import AuthContext from '../../context/AuthContext';
@@ -25,9 +25,7 @@ export default function EquipmentList() {
           const equipments = await fetchEquipments(api, user.token);
           setItemList(equipments);
         } catch (err) {
-          setError('Error loading equipments');
-        } finally {
-          setLoading(false);
+          showErrorToast('Error loading equipments');
         }
       };
       loadEquipments();
@@ -36,6 +34,7 @@ export default function EquipmentList() {
 
   const searchItemsFunction = async (term) => {
     try {
+      showInfoToast("Searching data...")
       const recipeResponse = await searchEquipments(api, user.token, term);
       setItemList(recipeResponse);
     } catch (err) {
