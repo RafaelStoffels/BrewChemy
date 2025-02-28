@@ -1,15 +1,35 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, redirect, session, current_app
 import jwt
 import datetime
 import os
+import random
+import string
 from db import db
 from flask_mail import Mail, Message
 from models import User
+from requests_oauthlib import OAuth2Session
 
 mail = Mail()
 
 SECRET_KEY = os.getenv('SECRET_KEY', 'default-secret-key')
+CLIENT_ID = os.getenv('GOOGLE_CLIENT_ID')
+CLIENT_SECRET = os.getenv('GOOGLE_CLIENT_SECRET')
 
+
+if os.getenv('ENVIRONMENT') == 'production':
+    REDIRECT_URI = os.getenv('GOOGLE_REDIRECT_URI_PROD')
+else:
+    REDIRECT_URI = os.getenv('GOOGLE_REDIRECT_URI')
+
+# URLs do Google OAuth
+SCOPE = ["openid", "profile", "email"]
+AUTHORIZATION_BASE_URL = "https://accounts.google.com/o/oauth2/auth"
+TOKEN_URL = "https://accounts.google.com/o/oauth2/token"
+
+
+def generate_state():
+    """Função para gerar um valor aleatório para o state"""
+    return ''.join(random.choices(string.ascii_letters + string.digits, k=32))
 
 def create_users_bp():
     users_bp = Blueprint("users", __name__)
@@ -22,7 +42,7 @@ def create_users_bp():
         )
         msg.body = "Clique no link para confirmar seu cadastro."
         mail.send(msg)
-        return jsonify({"message": "E-mail de confirmação enviado!"}), 200
+        return jsonify({"message": "Confirmation email sent!"}), 200
 
 
     @users_bp.route("/users", methods=["GET"])
@@ -60,7 +80,7 @@ def create_users_bp():
         user = User.query.get(user_id)
 
         if user is None:
-            return jsonify({"message": "Usuário não encontrado"}), 404
+            return jsonify({"message": "User not found"}), 404
 
         data = request.json
 
@@ -104,11 +124,86 @@ def create_users_bp():
         if user and user.check_password(password_hash):
             token = jwt.encode(
                 {'user_id': user.user_id, 'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=8)},
-                SECRET_KEY,
+                current_app.secret_key,
                 algorithm='HS256'
             )
             return jsonify({'token': token}), 200
 
         return jsonify({'message': 'Invalid password or user account'}), 401
+
+    
+    @users_bp.route("/google-login")
+    def google_login():
+        google = OAuth2Session(CLIENT_ID, redirect_uri=REDIRECT_URI, scope=["openid", "email", "profile"])
+        authorization_url, state = google.authorization_url(AUTHORIZATION_BASE_URL, access_type="offline", prompt="select_account")
+
+        session['oauth_state'] = state  # ⚠️ Salva o state na sessão
+
+        print("authorization_url: ", authorization_url)
+
+        return redirect(authorization_url)  # Redireciona para o Google
+    
+
+    @users_bp.route("/callback", methods=["GET"])
+    def callback():
+        print("Callback iniciado")
+    
+        # O estado retornado pelo Google
+        state = request.args.get('state')
+        
+        # Verifica se o estado da URL é o mesmo armazenado na sessão
+        if state != session.get('oauth_state'):
+            return jsonify({"error": "State invalido"}), 400
+    
+        # Agora, criamos uma sessão OAuth2 com o token de acesso
+        google = OAuth2Session(CLIENT_ID, redirect_uri=REDIRECT_URI, state=session['oauth_state'])
+        
+        # Obtém o token de acesso
+        token = google.fetch_token(TOKEN_URL, client_secret=CLIENT_SECRET, authorization_response=request.url)
+    
+        # Armazena o token de autenticação na sessão
+        session['oauth_token'] = token
+    
+        # Recupera informações do usuário autenticado no Google
+        user_info = google.get("https://www.googleapis.com/oauth2/v3/userinfo").json()
+        google_id = user_info.get("sub")  # O "sub" é o Google ID único do usuário
+    
+        print(f"Informações do usuário: {user_info}")
+    
+        # Verifica se o usuário já existe no banco de dados
+        user = User.query.filter(
+            (User.email == user_info.get("email")) | (User.google_id == google_id)
+        ).first()
+    
+        if not user:
+            # Cria um novo usuário com as informações do Google
+            user = User(
+                name=user_info.get("name"),
+                email=user_info.get("email"),
+                google_id=google_id,  # Armazena o Google ID
+                password_hash=None,  # Sem senha para usuários do Google
+                brewery=None  # Preenchido depois, se necessário
+            )
+            db.session.add(user)
+            db.session.commit()
+        else:
+            # Se o usuário já existe, mas não tem o Google ID, atualiza o Google ID
+            if not user.google_id:
+                user.google_id = google_id
+                db.session.commit()
+    
+        # Cria um token JWT para o usuário
+        token = jwt.encode(
+            {
+                'user_id': user.user_id,
+                'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=8),
+                'iat': datetime.datetime.utcnow(),
+                'nbf': datetime.datetime.utcnow()
+            },
+            current_app.secret_key,
+            algorithm='HS256'
+        )
+    
+        return redirect(f"https://localhost:3000/?token={token}")
 
     return users_bp
