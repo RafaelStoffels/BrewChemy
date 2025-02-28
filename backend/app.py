@@ -53,7 +53,7 @@ def create_app():
 
     @app.route('/')
     def home():
-        return jsonify({'message': 'Bem-vindo à aplicação!'})
+        return jsonify({'message': 'Welcome app!'})
 
     return app
 

@@ -18,11 +18,12 @@ CLIENT_SECRET = os.getenv('GOOGLE_CLIENT_SECRET')
 
 if os.getenv('ENVIRONMENT') == 'production':
     FRONTEND_URL = os.getenv('FRONTEND_URL_PROD')
-    REDIRECT_URI = f"{FRONTEND_URL}/api/callback"
+    REDIRECT_URI = os.getenv('BACKEND_URL_PROD') + "/api/callback"
 else:
     FRONTEND_URL = os.getenv('FRONTEND_URL')
-    REDIRECT_URI = f"{FRONTEND_URL}/api/callback"
+    REDIRECT_URI = os.getenv('BACKEND_URL') + "/api/callback"
 
+print(REDIRECT_URI)
 
 # URLs do Google OAuth
 SCOPE = ["openid", "profile", "email"]
