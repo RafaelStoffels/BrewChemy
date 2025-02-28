@@ -17,9 +17,12 @@ CLIENT_SECRET = os.getenv('GOOGLE_CLIENT_SECRET')
 
 
 if os.getenv('ENVIRONMENT') == 'production':
-    REDIRECT_URI = os.getenv('GOOGLE_REDIRECT_URI_PROD')
+    FRONTEND_URL = os.getenv('FRONTEND_URL_PROD')
+    REDIRECT_URI = f"{FRONTEND_URL}/api/callback"
 else:
-    REDIRECT_URI = os.getenv('GOOGLE_REDIRECT_URI')
+    FRONTEND_URL = os.getenv('FRONTEND_URL')
+    REDIRECT_URI = f"{FRONTEND_URL}/api/callback"
+
 
 # URLs do Google OAuth
 SCOPE = ["openid", "profile", "email"]
@@ -204,6 +207,6 @@ def create_users_bp():
             algorithm='HS256'
         )
     
-        return redirect(f"https://localhost:3000/?token={token}")
+        return redirect(f"{FRONTEND_URL}/?token={token}")
 
     return users_bp
