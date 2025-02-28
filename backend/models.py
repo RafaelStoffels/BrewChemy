@@ -370,10 +370,12 @@ class User(db.Model):
     last_login = db.Column(db.TIMESTAMP, nullable=True)
     is_active = db.Column(db.Boolean, default=True)
     brewery = db.Column(db.String(60), nullable=True)
+    google_id = db.Column(db.String(100), unique=True, nullable=True)
 
     def to_dict(self):
         return {
             "user_id": self.user_id,
+            "google_id": self.google_id,
             "name": self.name,
             "email": self.email,
             "created_at": self.created_at,

@@ -1,5 +1,5 @@
-import React, { useState, useContext } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useEffect, useState, useContext } from 'react';
+import { useNavigate, useSearchParams  } from 'react-router-dom';
 import { Link } from "react-router-dom";
 import { FiLogIn } from 'react-icons/fi';
 import { showErrorToast } from "../../utils/notifications";
@@ -9,16 +9,36 @@ import api from '../../services/api';
 import AuthContext from '../../context/AuthContext';
 
 export default function Logon() {
-  const { login } = useContext(AuthContext);
+  const { login, isAuthenticated } = useContext(AuthContext);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
-
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [isRedirecting, setIsRedirecting] = useState(false);
+
+
+  useEffect(() => {
+    const token = searchParams.get("token");
+
+    if (token && !isRedirecting) {
+      login({ token });
+
+      setSearchParams({}, { replace: true });
+
+      setIsRedirecting(true);
+
+      navigate('/Main');
+    } else if (isAuthenticated && !isRedirecting) {
+      setIsRedirecting(true);
+      navigate('/Main');
+    }
+  }, [searchParams, login, navigate, setSearchParams, isAuthenticated, isRedirecting]);
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setErrorMessage(''); // Limpa erro anterior
+    setErrorMessage('');
   
     try {
       const response = await api.post('api/login', { email, password });
@@ -28,7 +48,6 @@ export default function Logon() {
       navigate('/Main');
     } catch (error) {
       if (error.response) {
-        // Quando a resposta da API contém um status de erro
         if (error.response.status === 404) {
           showErrorToast("Endpoint não encontrado. Verifique a URL.");
         } else if (error.response.status === 401) {
@@ -41,6 +60,11 @@ export default function Logon() {
       }
     }
   };
+
+  const handleGoogleLoginRedirect = () => {
+    window.location.href = process.env.REACT_APP_GOOGLE_LOGIN_URL;
+  };
+
 
   return (
     <div className="logon-container">
@@ -65,6 +89,15 @@ export default function Logon() {
             Login
             <FiLogIn size={16} color="#fff" />
           </button>
+        
+          <button type="button" 
+            onClick={handleGoogleLoginRedirect} 
+            className="buttonGoogleLogIn">
+            <img
+              src="googleSignin.png"
+            />
+          </button>
+
           <Link to="/passwordRecover">Forgot password?</Link>
           <Link to="/CreateAccount">Create account</Link>
         </form>

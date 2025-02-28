@@ -160,3 +160,13 @@ form textarea{
     text-align: center;  /* Centraliza o texto */
     margin-bottom: 20px;  /* Adiciona um espaçamento abaixo do título */
 }
+
+.buttonLogin {
+    margin-bottom: 20px; /* Espaçamento entre o botão de login e o botão do Google */
+}
+
+.buttonGoogleLogIn img {
+    width: auto;
+    height: 50px; /* Ajuste a altura conforme necessário */
+    width: 350px;
+}
