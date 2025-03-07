@@ -493,7 +493,7 @@ export function UpdateFermentableModal({ isOpen, closeModal, selectedFermentable
                                 >
                                   <option value="base">Base</option>
                                   <option value="especial">Specialty</option>
-                                  <option value="adjunto">Adjunct</option>
+                                  <option value="adjunct">Adjunct</option>
                                 </select>
                             </div>
                             <div className="input-field">

@@ -36,7 +36,7 @@
     background-color: #aa8e69; 
     position: relative;
     box-shadow: 0 5px 10px rgba(0, 0, 0, 0.4);
-    width: 500px;
+    width: 600px;
     padding: 10px;
 }
 
@@ -64,7 +64,7 @@
     padding-top: 5px;
     background-color: #b38f56; 
     box-shadow: 0 5px 10px rgba(0, 0, 0, 0.4);
-    width: 400px;
+    width: 300px;
     padding: 10px;
 
     flex-direction: column; /* Coloca cada elemento em uma nova linha */
@@ -141,4 +141,17 @@
 
 .bar-container {
     margin-bottom: 15px; /* Ajuste conforme necessário */
+}
+
+.ingredients-list-button-group button {
+    background-color: transparent; /* Fundo transparente */
+    border: none; /* Remove a borda */
+    color: #744410; /* Cor do texto */
+    cursor: pointer; /* Cursor de ponteiro ao passar o mouse */
+    padding: 0px 5px; /* Ajuste o padding conforme necessário */
+    transition: background-color 0.3s ease; /* Transição suave ao passar o mouse */
+}
+
+.ingredients-list-button-group button:hover {
+    background-color: rgba(0, 0, 0, 0.1); /* Fundo suave ao passar o mouse */
 }

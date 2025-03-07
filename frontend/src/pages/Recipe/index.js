@@ -19,7 +19,7 @@ import { fetchEquipmentById } from '../../services/Equipments';
 import './styles.css';
 import '../Recipe/styles.css';
 import Sidebar from '../../components/Sidebar';
-import { calculateOG, calculateFG, calculateIBU, calculateEBC, getPreBoilVolume } from '../../components/Recipe/Calculation';
+import { calculateOG, calculateFG, calculateIBU, calculateEBC, getPreBoilVolume, getIngredientsPorcentage } from '../../components/Recipe/Calculation';
 import { getBeerColor } from '../../components/Recipe/GetBeerColor';
 import { beerStyles } from '../../components/Recipe/getBeerStyles';
 import { OGBar } from '../../components/Recipe/Indicators';
@@ -123,16 +123,19 @@ export default function NewRecipe() {
     }, [EBC]);
 
     useEffect(() => {
+        
         if (recipe) {
             console.log("useEffect Recipe");
-    
+
+            getIngredientsPorcentage(recipe, setRecipe);
+
             const preBoilCalc = getPreBoilVolume(recipe);
 
             setpreBoilVolume(preBoilCalc);
 
             const OGResult = calculateOG(recipe);
             setOG(OGResult);
-    
+            
             const FGResult = calculateFG(recipe, OGResult);
 
             setFG(FGResult);
@@ -140,20 +143,20 @@ export default function NewRecipe() {
             if (recipe.recipeFermentables.length === 0) {
                 setABV(0);
             }
-    
+        
             const EBCResult = calculateEBC(recipe);
-            
+
             setEBC(EBCResult);
-    
+        
             const IBUresult = calculateIBU(recipe, OGResult, setRecipe);
             setIBU(IBUresult);
-    
+        
             const GU = (OGResult -1) * 1000;
 
             setBUGU((IBU / GU).toFixed(2));
 
             const loadStyle = beerStyles.find(style => style.name === recipe.style);
-    
+        
             if (loadStyle) {
                 setSelectedStyle(loadStyle);
             }
@@ -731,83 +734,91 @@ export default function NewRecipe() {
                         <button onClick={fetchOpenAIResponse} className="modalAddButtonFermentable">Mystical Brew Wisdom</button>
                     </div>
                     <div className="bottom-container">
-                        <div className="bottom-left">
-                            <ul>
+                    <div className="bottom-left">
+                        <table>
+                            <tbody>
                                 {recipe.recipeFermentables?.map((fermentable) => (
-                                    <li key={fermentable.id}>
-                                        <div className="quantity-div">
-                                            <object className="malt-object" type="image/svg+xml" data="/malt.svg"></object> {fermentable.quantity/1000}kg
-                                        </div>
-                                        <div>
-                                            <strong>{fermentable.name}</strong>
-                                        </div>
-                                        <div className="ingredients-list-button-group">
+                                    <tr key={fermentable.id}>
+                                        <td>
+                                            <object className="malt-object" type="image/svg+xml" data="/malt.svg"></object>
+                                            {fermentable.quantity / 1000} kg
+                                        </td>
+                                        <td><strong>{fermentable.name}</strong></td>
+                                        <td>{fermentable.type}</td>
+                                        <td>{fermentable.percentage}%</td>
+                                        <td className="ingredients-list-button-group">
                                             <button onClick={() => handleUpdateFermentable(fermentable)} type="button">
-                                              <FiEdit size={20} color="#744410" />
+                                                <FiEdit size={20} color="#744410" />
                                             </button>
                                             <button onClick={() => handleDeleteFermentable(fermentable.id)} type="button">
-                                              <FiTrash2 size={20} color="#744410" />
+                                                <FiTrash2 size={20} color="#744410" />
                                             </button>
-                                        </div>
-                                    </li>
+                                        </td>
+                                    </tr>
                                 ))}
+
                                 {recipe.recipeHops?.map((hop) => (
-                                    <li key={hop.id}>
-                                        <div className="quantity-div">
-                                            <object className="hop-object" type="image/svg+xml" data="/hop.svg"></object> {hop.quantity}g
-                                        </div>
-                                        <div>
-                                            <strong>{hop.name}</strong> (IBU: {hop.ibu})
-                                        </div>
-                                        <div className="ingredients-list-button-group">
+                                    <tr key={hop.id}>
+                                        <td>
+                                            <object className="hop-object" type="image/svg+xml" data="/hop.svg"></object>
+                                            {hop.quantity} g
+                                        </td>
+                                        <td><strong>{hop.name}</strong></td>
+                                        <td>{hop.useType}</td>
+                                        <td>{hop.ibu} IBUs</td>
+                                        <td className="ingredients-list-button-group">
                                             <button onClick={() => handleUpdateHop(hop)} type="button">
-                                              <FiEdit size={20} color="#744410" />
+                                                <FiEdit size={20} color="#744410" />
                                             </button>
                                             <button onClick={() => handleDeleteHop(hop.id)} type="button">
-                                              <FiTrash2 size={20} color="#744410" />
+                                                <FiTrash2 size={20} color="#744410" />
                                             </button>
-                                        </div>
-                                    </li>
+                                        </td>
+                                    </tr>
                                 ))}
+
                                 {recipe.recipeMisc?.map((misc) => (
-                                    <li key={misc.id}>
-                                        <div className="quantity-div">
-                                            <object className="misc-object" type="image/svg+xml" data="/misc.svg"></object> {misc.quantity}g
-                                        </div>
-                                        <div>
-                                        <strong>{misc.name}</strong>
-                                        </div>
-                                        <div className="ingredients-list-button-group">
+                                    <tr key={misc.id}>
+                                        <td>
+                                            <object className="misc-object" type="image/svg+xml" data="/misc.svg"></object>
+                                            {misc.quantity} g
+                                        </td>
+                                        <td><strong>{misc.name}</strong></td>
+                                        <td>{misc.type}</td>
+                                        <td></td>
+                                        <td className="ingredients-list-button-group">
                                             <button onClick={() => handleUpdateMisc(misc)} type="button">
-                                              <FiEdit size={20} color="#744410" />
+                                                <FiEdit size={20} color="#744410" />
                                             </button>
                                             <button onClick={() => handleDeleteMisc(misc.id)} type="button">
-                                              <FiTrash2 size={20} color="#744410" />
+                                                <FiTrash2 size={20} color="#744410" />
                                             </button>
-                                        </div>
-                                    </li>
+                                        </td>
+                                    </tr>
                                 ))}
+
                                 {recipe.recipeYeasts?.map((yeast) => (
-                                    <li key={yeast.id}>
-                                        <div className="quantity-div">
-                                            <object className="yeast-object" type="image/svg+xml" data="/yeast.svg"></object> {yeast.quantity}g
-                                        </div>
-                                        <div>
-                                            <strong>{yeast.name}</strong>
-                                        </div>
-                                        <div className="ingredients-list-button-group">
+                                    <tr key={yeast.id}>
+                                        <td>
+                                            <object className="yeast-object" type="image/svg+xml" data="/yeast.svg"></object>
+                                            {yeast.quantity} g
+                                        </td>
+                                        <td><strong>{yeast.name}</strong></td>
+                                        <td>{yeast.type}</td>
+                                        <td></td>
+                                        <td className="ingredients-list-button-group">
                                             <button onClick={() => handleUpdateYeast(yeast)} type="button">
-                                              <FiEdit size={20} color="#744410" />
+                                                <FiEdit size={20} color="#744410" />
                                             </button>
                                             <button onClick={() => handleDeleteYeast(yeast.id)} type="button">
-                                              <FiTrash2 size={20} color="#744410" />
+                                                <FiTrash2 size={20} color="#744410" />
                                             </button>
-                                        </div>
-                                    </li>
+                                        </td>
+                                    </tr>
                                 ))}
-                            </ul>
-                        </div>
-
+                            </tbody>
+                        </table>
+                    </div>
                         <div className="bottom-right">
                             <div className="parameters-container">
                                 <strong>OG:</strong> {OG} 

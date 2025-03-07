@@ -170,3 +170,18 @@ form textarea{
     height: 50px; /* Ajuste a altura conforme necessário */
     width: 350px;
 }
+
+table, th {
+    border: 1px solid #904c15;
+    border-collapse: collapse;
+    padding: 8px;
+    border-left: none;
+    border-right: none;
+    border-bottom: none;
+    border-top: none;
+}
+  
+td {
+    border-spacing: 0px;
+    padding: 5px 10px; /* Ajuste os valores conforme necessário */
+}
