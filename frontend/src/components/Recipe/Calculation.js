@@ -135,3 +135,44 @@ export const getPreBoilVolume = (recipe) => {
 
     return preBoilCalc.toFixed(3);
 };
+
+
+export const getIngredientsPorcentage = (recipe, setRecipe) => {
+    let hasChanges = false;
+
+    const totalQuantity = recipe.recipeFermentables.reduce((total, item) => total + (item.quantity || 0), 0);
+
+    const updatedFermentables = recipe.recipeFermentables.map((fermentable) => {
+        const { quantity, percentage: previousPercentage } = fermentable;
+
+        if (!quantity || totalQuantity === 0) {
+            console.error("Informações de fermentável inválidas.");
+            return fermentable;
+        }
+
+
+
+        const percentageFixed = ((quantity / totalQuantity) * 100).toFixed(2);
+
+        console.log("oie");
+
+        console.log(previousPercentage);
+        console.log(percentageFixed);
+
+        // Se `previousPercentage` estiver undefined, compara com `fermentable.percentage`
+        if (previousPercentage !== percentageFixed) {
+            hasChanges = true;
+            return { ...fermentable, percentage: percentageFixed };
+        }
+
+        return fermentable;
+    });
+
+    if (hasChanges) {
+        setRecipe(prevRecipe => ({
+            ...prevRecipe,
+            recipeFermentables: updatedFermentables
+        }));
+    }
+};
+

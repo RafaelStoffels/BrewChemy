@@ -78,7 +78,7 @@ export default function NewAccount() {
 
                     <div className='inputs-row'>
                         <div className='input-field'>
-                            <label htmlFor="name">Full Name</label>
+                            <label htmlFor="name">Full Name / Nickname *</label>
                             <input
                                 value={name}
                                 onChange={e => setName(e.target.value)}
@@ -89,7 +89,7 @@ export default function NewAccount() {
 
                     <div className='inputs-row'>
                         <div className='input-field'>
-                            <label htmlFor="email">Email Address</label>
+                            <label htmlFor="email">Email Address *</label>
                             <input
                                 type="email"
                                 value={email}
@@ -101,7 +101,7 @@ export default function NewAccount() {
 
                     <div className='inputs-row'>
                         <div className='input-field'>
-                            <label htmlFor="brewery">Brewery *</label>
+                            <label htmlFor="brewery">Brewery</label>
                             <input
                                 value={brewery}
                                 onChange={e => setBrewery(e.target.value)}
@@ -111,7 +111,7 @@ export default function NewAccount() {
 
                     <div className='inputs-row'>
                         <div className='input-field'>
-                            <label htmlFor="password">Password</label>
+                            <label htmlFor="password">Password *</label>
                             <input
                                 type='password'
                                 value={password}
@@ -124,7 +124,7 @@ export default function NewAccount() {
 
                     <div className='inputs-row'>
                         <div className='input-field'>
-                            <label htmlFor="confirmPassword">Confirm Password</label>
+                            <label htmlFor="confirmPassword">Confirm Password *</label>
                             <input
                                 type='password'
                                 value={confirmPassword}

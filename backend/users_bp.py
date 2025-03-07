@@ -135,7 +135,7 @@ def create_users_bp():
         if user and user.check_password(password_hash):
             token = jwt.encode(
                 {'user_id': user.user_id, 'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=8)},
-                current_app.secret_key,
+                SECRET_KEY,
                 algorithm='HS256'
             )
             return jsonify({'token': token}), 200
@@ -192,8 +192,6 @@ def create_users_bp():
                     brewery=None
                 )
 
-                print("not user")
-
                 db.session.add(user)
                 db.session.commit()
             else:
@@ -213,7 +211,7 @@ def create_users_bp():
                 'iat': datetime.datetime.utcnow(),
                 'nbf': datetime.datetime.utcnow()
             },
-            current_app.secret_key,
+            SECRET_KEY,
             algorithm='HS256'
         )
     
