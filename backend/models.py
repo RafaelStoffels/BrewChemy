@@ -371,10 +371,12 @@ class User(db.Model):
     is_active = db.Column(db.Boolean, default=True)
     brewery = db.Column(db.String(60), nullable=True)
     google_id = db.Column(db.String(100), unique=True, nullable=True)
+    status = db.Column(db.String(15), nullable=True)
 
     def to_dict(self):
         return {
             "user_id": self.user_id,
+            "password": self.password_hash,
             "google_id": self.google_id,
             "name": self.name,
             "email": self.email,
@@ -382,6 +384,7 @@ class User(db.Model):
             "last_login": self.last_login,
             "is_active": self.is_active,
             "brewery": self.brewery,
+            "status": self.status,
         }
 
     def check_password(self, password):

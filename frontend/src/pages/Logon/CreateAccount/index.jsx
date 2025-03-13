@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import api from '../../../services/api';
 import '../../../styles/crud.css';
-import { showErrorToast } from "../../../utils/notifications";
+import { addUser } from '../../../services/Users';
+import { showSuccessToast, showErrorToast, showInfoToast } from "../../../utils/notifications";
 
 export default function NewAccount() {
     const navigate = useNavigate();
@@ -16,19 +16,17 @@ export default function NewAccount() {
     const [passwordError, setPasswordError] = useState('');
     const [confirmPasswordError, setConfirmPasswordError] = useState('');
 
-    // Função para validar a senha (mínimo de 8 caracteres, um número, uma letra maiúscula e minúscula)
+
     const validatePassword = (password) => {
         const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d@$!%*?&]{8,}$/;
         return regex.test(password);
     };
 
-    // Função para validar o formato do e-mail
     const validateEmail = (email) => {
         const regex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
         return regex.test(email);
     };
 
-    // Função para lidar com o envio do formulário
     async function handleSubmit(e) {
         e.preventDefault();
 
@@ -49,8 +47,6 @@ export default function NewAccount() {
         if (!validateEmail(email)) {
             showErrorToast('Please enter a valid email address.');
             return;
-        } else {
-            setErrorMessage('');
         }
 
         const data = {
@@ -61,12 +57,13 @@ export default function NewAccount() {
         };
 
         try {
-            // Aqui você faria a chamada à API para criar a conta (exemplo de uso fictício)
-            await api.post('/create-account', data);
-            navigate('/success'); // Redireciona para uma página de sucesso
-        } catch (error) {
-            setErrorMessage('Error creating account. Please try again.');
+            await addUser(data);
+        } catch (err) {
+            showErrorToast("Error creating user: " + err);
         }
+        showSuccessToast("User created.");
+        showInfoToast("An email with an activation code has been sent. Please check your inbox and activate your account.");
+        navigate('/');
     }
 
     return (
