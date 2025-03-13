@@ -5,14 +5,11 @@ import os
 import random
 import string
 from db import db
-from flask_mail import Mail, Message
+from flask_mail import Message
 from models import User
 from requests_oauthlib import OAuth2Session
-import uuid
-from sqlalchemy.dialects.postgresql import UUID
 from werkzeug.security import generate_password_hash
 
-mail = Mail()
 
 SECRET_KEY = os.getenv('SECRET_KEY', 'default-secret-key')
 CLIENT_ID = os.getenv('GOOGLE_CLIENT_ID')
@@ -20,9 +17,11 @@ CLIENT_SECRET = os.getenv('GOOGLE_CLIENT_SECRET')
 
 
 if os.getenv('ENVIRONMENT') == 'production':
+    BACKEND_URL  = os.getenv('BACKEND_URL_PROD')
     FRONTEND_URL = os.getenv('FRONTEND_URL_PROD')
     REDIRECT_URI = os.getenv('BACKEND_URL_PROD') + "/api/callback"
 else:
+    BACKEND_URL  = os.getenv('BACKEND_URL')
     FRONTEND_URL = os.getenv('FRONTEND_URL')
     REDIRECT_URI = os.getenv('BACKEND_URL') + "/api/callback"
 
@@ -44,15 +43,54 @@ def generate_temp_password():
 def create_users_bp():
     users_bp = Blueprint("users", __name__)
 
-    @users_bp.route("/send_email", methods=["POST"])
-    def send_email():
-        msg = Message(
-            "Confirmação de Cadastro",
-            recipients=["destinatario@example.com"],
-        )
-        msg.body = "Click here to confirm."
-        mail.send(msg)
-        return jsonify({"message": "Confirmation email sent!"}), 200
+
+    def send_confirmation_email(user):
+        try:
+            print("Enviando e-mail para:", user.email)
+
+            msg = Message(
+                subject="Confirmação de Cadastro",
+                sender=current_app.config['MAIL_DEFAULT_SENDER'],  # Acessa a configuração correta
+                recipients=[user.email]
+            )
+            msg.body = (
+                f"Olá {user.name},\n\n"
+                "Clique no link abaixo para confirmar seu cadastro:\n"
+                f"{BACKEND_URL}/api/confirm?email={user.email}\n\n"
+                "Se você não solicitou este cadastro, ignore este e-mail.\n\n"
+                "Atenciosamente,\nEquipe Brewchemy"
+            )
+
+            mail = current_app.extensions["mail"]
+            mail.send(msg)
+
+            print("E-mail enviado com sucesso!")
+            return True
+        except Exception as e:
+            print(f"Erro ao enviar e-mail: {e}")
+            return False
+
+
+    @users_bp.route("/confirm", methods=["GET"])
+    def confirm_user():
+        email = request.args.get("email")
+
+        if not email:
+            return jsonify({"error": "Email é obrigatório"}), 400
+
+        user = User.query.filter_by(email=email).first()
+
+        if not user:
+            return jsonify({"error": "Usuário não encontrado"}), 404
+
+        if user.status == "active":
+            return jsonify({"message": "Usuário já está ativo"}), 400
+
+        # Atualiza o status para "active"
+        user.status = "active"
+        db.session.commit()
+
+        return redirect(f"{FRONTEND_URL}")  # Redireciona para o frontend
 
 
     @users_bp.route("/users", methods=["GET"])
@@ -74,15 +112,26 @@ def create_users_bp():
     @users_bp.route("/users", methods=["POST"])
     def add_user():
         data = request.json
+
+        print("criando usuario")
+
         new_user = User(
-            user_id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, unique=True, nullable=False),
+            user_id=random.randint(1, 1000000),
             name=data.get("name"),
             email=data.get("email"),
-            password_hash=data.get("password"),
+            password_hash=generate_password_hash(data.get("password")),
             brewery=data.get("brewery"),
+            status="pending"
         )
         db.session.add(new_user)
         db.session.commit()
+
+        # Envia o e-mail de confirmação resartori92@gmail.com
+        email_sent = send_confirmation_email(new_user)
+
+        if not email_sent:
+            return jsonify({"message": "Usuário criado, mas falha ao enviar e-mail."}), 500
+
         return jsonify(new_user.to_dict()), 201
 
 
@@ -126,21 +175,32 @@ def create_users_bp():
 
     @users_bp.route("/login", methods=["POST"])
     def login():
-        data = request.json
-        email = data.get('email')
-        password_hash = data.get('password')
+        try:
+            data = request.json
+            email = data.get('email')
+            password_hash = data.get('password')
+    
+            if not email or not password_hash:
+                return jsonify({'message': 'Email and password are required'}), 400
+    
+            user = User.query.filter_by(email=email).first()
+    
+            if user and user.status == "active":
+                if user.check_password(password_hash):
 
-        user = User.query.filter_by(email=email).first()
-
-        if user and user.check_password(password_hash):
-            token = jwt.encode(
-                {'user_id': user.user_id, 'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=8)},
-                SECRET_KEY,
-                algorithm='HS256'
-            )
-            return jsonify({'token': token}), 200
-
-        return jsonify({'message': 'Invalid password or user account'}), 401
+                    token = jwt.encode(
+                        {'user_id': user.user_id, 'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=8)},
+                        SECRET_KEY,
+                        algorithm='HS256'
+                    )
+                    return jsonify({'token': token}), 200
+                else:
+                    return jsonify({'message': 'Invalid password'}), 401
+            else:
+                return jsonify({'message': 'User account is not active or does not exist'}), 401
+    
+        except Exception as e:
+            return jsonify({'message': f'An error occurred: {str(e)}'}), 500
 
     
     @users_bp.route("/google-login")
@@ -216,5 +276,31 @@ def create_users_bp():
         )
     
         return redirect(f"{FRONTEND_URL}/?token={token}")
+
+
+    @users_bp.route("/resend_confirmation", methods=["POST"])
+    def resend_confirmation():
+        data = request.get_json()
+        email = data.get("email")
+    
+        if not email:
+            return jsonify({"error": "Email é obrigatório"}), 400
+    
+        user = User.query.filter_by(email=email).first()
+    
+        if not user:
+            return jsonify({"error": "Usuário não encontrado"}), 404
+    
+        if user.status == "active":
+            return jsonify({"message": "Usuário já confirmado"}), 400
+    
+        # Reenvia o e-mail
+        email_sent = send_confirmation_email(user)
+    
+        if not email_sent:
+            return jsonify({"error": "Erro ao reenviar e-mail"}), 500
+    
+        return jsonify({"message": "E-mail de confirmação reenviado!"}), 200
+
 
     return users_bp

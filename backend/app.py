@@ -1,5 +1,5 @@
 import os
-from flask import Flask, jsonify, request, redirect
+from flask import Flask, jsonify, request
 from flask_cors import CORS
 from db import db, configure_db
 from openai_bp import openai_route
@@ -15,19 +15,27 @@ from copy_recipe_bp import create_copy_recipe_bp
 from users_bp import create_users_bp
 
 
+mail = Mail()
+
 def create_app():
     app = Flask(__name__)
+
+    app.config['MAIL_SERVER'] = os.getenv('MAIL_SERVER')
+    app.config['MAIL_PORT'] = os.getenv('MAIL_PORT')
+    app.config['MAIL_USE_TLS'] = False
+    app.config['MAIL_USE_SSL'] = True
+    app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD')
+    app.config['MAIL_USERNAME'] = os.getenv('MAIL_USERNAME')
+    app.config['MAIL_DEFAULT_SENDER'] = os.getenv('MAIL_USERNAME')
+
+    mail.init_app(app)
 
     # Definindo a chave secreta para gerenciar sessões
     app.secret_key = os.getenv('FLASK_SECRET_KEY', os.urandom(24))  # Garante que a chave seja única e segura
 
     configure_db(app)
-
-    # Inicialização do Mail com a instância do app
-    app.config.from_object('config.Config')
-    mail = Mail(app)
-
-    # Permite o uso de CORS
+    
+    # Permite o uso de CORS 
     #CORS(app, resources={r"/api/*": {"origins": "*"}})
     #CORS(app, resources={r"/api/*": {"origins": "http://localhost:5000"}})
 
