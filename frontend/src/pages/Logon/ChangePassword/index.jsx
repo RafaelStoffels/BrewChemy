@@ -1,29 +1,33 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import '../../../styles/crud.css';
-import { addUser } from '../../../services/Users';
 import { showSuccessToast, showErrorToast, showInfoToast } from "../../../utils/notifications";
+import { changePassword } from '../../../services/Users';
 
 export default function NewAccount() {
     const navigate = useNavigate();
+    const location = useLocation(); // Usado para acessar a URL
 
-    const [name, setName] = useState('');
-    const [email, setEmail] = useState('');
+    const [token, setToken] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
-    const [brewery, setBrewery] = useState('');
     const [passwordError, setPasswordError] = useState('');
     const [confirmPasswordError, setConfirmPasswordError] = useState('');
 
 
+    useEffect(() => {
+        const urlParams = new URLSearchParams(location.search);
+        const tokenFromUrl = urlParams.get('token');
+        if (tokenFromUrl) {
+            setToken(tokenFromUrl);
+        } else {
+            showErrorToast('Token is required');
+        }
+    }, [location.search]);
+
     const validatePassword = (password) => {
         const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d@$!%*?&]{8,}$/;
         return regex.test(password);
-    };
-
-    const validateEmail = (email) => {
-        const regex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-        return regex.test(email);
     };
 
     async function handleSubmit(e) {
@@ -43,70 +47,29 @@ export default function NewAccount() {
             setPasswordError('');
         }
 
-        if (!validateEmail(email)) {
-            showErrorToast('Please enter a valid email address.');
-            return;
-        }
-
         const data = {
-            name,
-            email,
-            brewery,
-            password,
+            token,
+            password
         };
 
         try {
-            await addUser(data);
+            await changePassword(data);
+            showSuccessToast("Password updated successfully.");
+            navigate('/');
         } catch (err) {
-            showErrorToast("Error creating user. " + err);
+            showErrorToast("Error creating user. " + err + " try again later.");
         }
-        showSuccessToast("User created.");
-        showInfoToast("An email with an activation code has been sent. Please check your inbox and activate your account.");
-        navigate('/');
     }
 
     return (
         <div className='crud-container'>
-            <h1>Create Account</h1>
+            <h1>Change Password</h1>
             <div className='content'>
                 <form onSubmit={handleSubmit}>
 
                     <div className='inputs-row'>
                         <div className='input-field'>
-                            <label htmlFor="name">Full Name / Nickname *</label>
-                            <input
-                                value={name}
-                                onChange={e => setName(e.target.value)}
-                                required
-                            />
-                        </div>
-                    </div>
-
-                    <div className='inputs-row'>
-                        <div className='input-field'>
-                            <label htmlFor="email">Email Address *</label>
-                            <input
-                                type="email"
-                                value={email}
-                                onChange={e => setEmail(e.target.value)}
-                                required
-                            />
-                        </div>
-                    </div>
-
-                    <div className='inputs-row'>
-                        <div className='input-field'>
-                            <label htmlFor="brewery">Brewery</label>
-                            <input
-                                value={brewery}
-                                onChange={e => setBrewery(e.target.value)}
-                            />
-                        </div>
-                    </div>
-
-                    <div className='inputs-row'>
-                        <div className='input-field'>
-                            <label htmlFor="password">Password *</label>
+                            <label htmlFor="password">New Password</label>
                             <input
                                 type='password'
                                 value={password}
@@ -119,7 +82,7 @@ export default function NewAccount() {
 
                     <div className='inputs-row'>
                         <div className='input-field'>
-                            <label htmlFor="confirmPassword">Confirm Password *</label>
+                            <label htmlFor="confirmPassword">Confirm Password</label>
                             <input
                                 type='password'
                                 value={confirmPassword}
@@ -131,7 +94,7 @@ export default function NewAccount() {
                     </div>
 
                     <button type="submit" className='crud-save-button'>
-                        Create
+                        Change Password
                     </button>
                 </form>
             </div>

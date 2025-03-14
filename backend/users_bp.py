@@ -15,7 +15,6 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'default-secret-key')
 CLIENT_ID = os.getenv('GOOGLE_CLIENT_ID')
 CLIENT_SECRET = os.getenv('GOOGLE_CLIENT_SECRET')
 
-
 if os.getenv('ENVIRONMENT') == 'production':
     BACKEND_URL  = os.getenv('BACKEND_URL_PROD')
     FRONTEND_URL = os.getenv('FRONTEND_URL_PROD')
@@ -36,7 +35,7 @@ def generate_state():
     return ''.join(random.choices(string.ascii_letters + string.digits, k=32))
 
 def generate_temp_password():
-    length = 12  # Tamanho da senha temporária
+    length = 12
     characters = string.ascii_letters + string.digits
     return ''.join(random.choice(characters) for i in range(length))
 
@@ -50,7 +49,7 @@ def create_users_bp():
 
             msg = Message(
                 subject="Confirmação de Cadastro",
-                sender=current_app.config['MAIL_DEFAULT_SENDER'],  # Acessa a configuração correta
+                sender=current_app.config['MAIL_DEFAULT_SENDER'],
                 recipients=[user.email]
             )
             msg.body = (
@@ -86,11 +85,83 @@ def create_users_bp():
         if user.status == "active":
             return jsonify({"message": "Usuário já está ativo"}), 400
 
-        # Atualiza o status para "active"
         user.status = "active"
         db.session.commit()
 
-        return redirect(f"{FRONTEND_URL}")  # Redireciona para o frontend
+        return redirect(f"{FRONTEND_URL}")
+    
+
+    @users_bp.route("/sendPasswordResetEmail", methods=["POST"])
+    def sendPasswordResetEmail():
+        data = request.get_json()
+        email = data.get("email")
+
+        if not email:
+            return jsonify({"error": "Email is required"}), 400
+
+        # Suponha que você tenha um modelo User com um método para buscar pelo email
+        user = User.query.filter_by(email=email).first()
+        if not user:
+            return jsonify({"error": "User not found"}), 404
+
+        try:
+            token = jwt.encode(
+                {"email": email, "exp": datetime.datetime.utcnow() + datetime.timedelta(hours=1)},
+                current_app.config["SECRET_KEY"],
+                algorithm="HS256"
+            )
+
+            reset_link = f"{FRONTEND_URL}/ChangePassword?token={token}"
+
+            msg = Message(
+                subject="Change Password",
+                sender=current_app.config["MAIL_DEFAULT_SENDER"],
+                recipients=[email]
+            )
+            msg.body = (
+                "Clique no link abaixo para redefinir sua senha:\n"
+                f"{reset_link}\n\n"
+                "Se você não fez esta solicitação, ignore este e-mail.\n\n"
+                "Atenciosamente,\nEquipe Brewchemy"
+            )
+
+            mail = current_app.extensions["mail"]
+            mail.send(msg)
+
+            return jsonify({"message": "Email sent successfully"}), 200
+
+        except Exception as e:
+            return jsonify({"error": "Failed to send email", "details": str(e)}), 500
+
+
+    @users_bp.route("/changePassword", methods=["POST"])
+    def changePassword():
+        data = request.get_json()
+        token = data.get("token")
+        password = data.get("password")
+
+        if not token:
+            return jsonify({"error": "Token is required"}), 400
+        if not password:
+            return jsonify({"error": "Field 'password' is mandatory"}), 400
+
+        try:
+            decoded_token = jwt.decode(token, current_app.config["SECRET_KEY"], algorithms=["HS256"])
+            email = decoded_token.get("email")
+
+            user = User.query.filter_by(email=email).first()
+            if not user:
+                return jsonify({"error": "User not found"}), 404
+
+            user.password_hash = generate_password_hash(password)
+            db.session.commit()
+
+            return jsonify({"message": "Password changed successfully"}), 200
+
+        except jwt.ExpiredSignatureError:
+            return jsonify({"error": "Token has expired"}), 400
+        except jwt.InvalidTokenError:
+            return jsonify({"error": "Invalid token"}), 400
 
 
     @users_bp.route("/users", methods=["GET"])
@@ -126,7 +197,6 @@ def create_users_bp():
         db.session.add(new_user)
         db.session.commit()
 
-        # Envia o e-mail de confirmação resartori92@gmail.com
         email_sent = send_confirmation_email(new_user)
 
         if not email_sent:
@@ -263,7 +333,6 @@ def create_users_bp():
             db.session.rollback() 
             print(f"Error while trying to create/update user data: {e}")
 
-        # Cria um token JWT para o usuário
         token = jwt.encode(
             {
                 'user_id': user.user_id,
@@ -294,7 +363,6 @@ def create_users_bp():
         if user.status == "active":
             return jsonify({"message": "Usuário já confirmado"}), 400
     
-        # Reenvia o e-mail
         email_sent = send_confirmation_email(user)
     
         if not email_sent:
