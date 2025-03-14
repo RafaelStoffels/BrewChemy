@@ -98,7 +98,7 @@ export default function Logon() {
             />
           </button>
 
-          <Link to="/passwordRecover">Forgot password?</Link>
+          <Link to="/ForgotPassword">Forgot password?</Link>
           <Link to="/CreateAccount">Create account</Link>
         </form>
       </section>
