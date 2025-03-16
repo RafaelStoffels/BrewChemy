@@ -2,8 +2,7 @@
     margin-left: 250px;
     width: 100%;
     max-width: 1180px;
-    padding: 0 30px;
-    margin: 30px auto;
+    margin: auto;
 }
 
 .list-container h1 {
@@ -13,14 +12,15 @@
 
 .list-container ul {
     display: grid;
+    flex-wrap: wrap;
     grid-template-columns: repeat(2, 1fr);
-    grid-gap: 24px;
+    grid-gap: 22px;
     list-style: none;
 }
 
 .list-container ul li {
     background: #aa8e69;
-    padding: 24px;
+    padding: 15px;
     border-radius: 8px;
     position: relative;
 }
@@ -36,29 +36,31 @@
 }
 
 .list-container ul li p {
-    color: #737380;
+    color: #4b4949;
     line-height: 21px;
-    font-size: 16px;
+    font-size: 14px;
 }
 
 .list-container ul li .button-group {
     position: absolute;
-    top: 10px;
-    right: 10px;
+    top: 13px;
+    right: 13px;
     display: flex;
     gap: 8px;
 }
 
-.list-container ul li .button-group button {
-    border: 0;
-    background: transparent;
-    cursor: pointer;
-}
-
-.list-container ul li .button-group button:hover {
-    opacity: 0.8;
-}
-
 .div-addButton {
     text-align: right;
+}
+
+.item-title {
+    font-size: 20px;
+    font-weight: bold;
+    margin-bottom: 12px; /* Dá mais espaço entre o título e os detalhes */
+}
+
+.item-details p {
+    margin-bottom: 1px; /* Reduz o espaçamento entre os <p> */
+    font-size: 14px;
+    color: #444242;
 }

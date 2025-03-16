@@ -81,17 +81,26 @@ export default function FermentableList() {
             <ul>
               {itemList.map((item) => (
                 <li key={item.id}>
-                  <h2>{item.name}</h2>
-                  <p>Description: {item.description}</p>
+                  <h2 className="item-title">{item.name}</h2> 
+                  <div className="item-details">
+                    <p>Supplier: {item.supplier}</p>
+                    <p>Type: {item.type}</p>
+                    <p>EBC: {item.ebc}</p>
+                    <p>
+                      Description: {item.description.length > 140 
+                        ? item.description.substring(0, 140) + "..." 
+                        : item.description}
+                    </p>
+                  </div>
                   <div className="button-group">
-                    <button onClick={() => handleDetails(item.id)} type="button">
-                      <FiBookOpen size={20} color="#a8a8b3" />
+                    <button onClick={() => handleDetails(item.id)} type="button" className="icon-button">
+                      <FiBookOpen size={20}  />
                     </button>
-                    <button onClick={() => handleUpdate(item.id)} type="button">
-                      <FiEdit size={20} color="#a8a8b3" />
+                    <button onClick={() => handleUpdate(item.id)} type="button" className="icon-button">
+                      <FiEdit size={20}  />
                     </button>
-                    <button onClick={() => handleDelete(item.id)} type="button">
-                      <FiTrash2 size={20} color="#a8a8b3" />
+                    <button onClick={() => handleDelete(item.id)} type="button" className="icon-button">
+                      <FiTrash2 size={20}  />
                     </button>
                   </div>
                 </li>

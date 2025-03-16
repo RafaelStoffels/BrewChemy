@@ -34,27 +34,14 @@
 
 .bottom-left {
     background-color: #aa8e69; 
-    position: relative;
     box-shadow: 0 5px 10px rgba(0, 0, 0, 0.4);
     width: 600px;
-    padding: 10px;
-}
+    padding: 9px;
 
-.bottom-left li {
+    position: relative;
+    flex-direction: column;
     display: flex;
-    align-items: center;
-    gap: 10px; /* Espaçamento entre os botões */
-    line-height: 1.8;
-}
-
-.bottom-left ul li button {
-    border: 0;
-    background: transparent;
-    cursor: pointer;
-}
-
-.bottom-left ul li button:hover {
-    opacity: 1;
+    gap: 1px;
 }
 
 .bottom-right {
@@ -67,6 +54,7 @@
     width: 300px;
     padding: 10px;
 
+    position: relative;
     flex-direction: column; /* Coloca cada elemento em uma nova linha */
     display: flex;
     gap: 3px; /* Adiciona um pequeno espaço entre os itens */
@@ -96,6 +84,7 @@
     width: 200px;
 }
 
+/*svgs*/
 .malt-object, .yeast-object, .hop-object, .misc-object{
     width: 20px;
     height: 20px;
@@ -122,36 +111,10 @@
     filter: brightness(90%);
 }
 
-.bottom-left ul li .ingredients-list-button-group {
-    position: absolute;
-    left: 435px;
-    display: flex;
-    gap: 8px;
-}
-
-.bottom-left ul li ingredients-list-button-group button {
-    border: 0;
-    background: transparent;
-    cursor: pointer;
-}
-
-.bottom-left ul li .ingredients-list-button-group button:hover {
-    opacity: 0.8;
-}
-
 .bar-container {
     margin-bottom: 15px; /* Ajuste conforme necessário */
 }
 
 .ingredients-list-button-group button {
-    background-color: transparent; /* Fundo transparente */
-    border: none; /* Remove a borda */
-    color: #744410; /* Cor do texto */
-    cursor: pointer; /* Cursor de ponteiro ao passar o mouse */
     padding: 0px 5px; /* Ajuste o padding conforme necessário */
-    transition: background-color 0.3s ease; /* Transição suave ao passar o mouse */
-}
-
-.ingredients-list-button-group button:hover {
-    background-color: rgba(0, 0, 0, 0.1); /* Fundo suave ao passar o mouse */
 }
