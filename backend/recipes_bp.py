@@ -8,6 +8,22 @@ def create_recipes_bp():
     recipes_bp = Blueprint("recipes", __name__)
 
 
+    @recipes_bp.route("/recipes/search", methods=["GET"])
+    @token_required
+    def search_recipes(current_user_id):
+        search_term = request.args.get("searchTerm", "").strip()
+
+        if not search_term:
+            return jsonify({"error": "O parâmetro 'searchTerm' é obrigatório."}), 400
+
+        recipes = Recipe.query.filter(
+            (Recipe.user_id == current_user_id),
+            Recipe.name.ilike(f"%{search_term}%")
+        ).all()
+
+        return jsonify([Recipe.to_dict() for Recipe in recipes])
+
+
     @recipes_bp.route("/recipes", methods=["GET"])
     @token_required
     def get_recipes(current_user_id):

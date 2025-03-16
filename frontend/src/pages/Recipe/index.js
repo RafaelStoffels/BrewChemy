@@ -747,11 +747,11 @@ export default function NewRecipe() {
                                         <td>{fermentable.type}</td>
                                         <td>{fermentable.percentage}%</td>
                                         <td className="ingredients-list-button-group">
-                                            <button onClick={() => handleUpdateFermentable(fermentable)} type="button">
-                                                <FiEdit size={20} color="#744410" />
+                                            <button onClick={() => handleUpdateFermentable(fermentable)} type="button" className="icon-button">
+                                                <FiEdit size={20} />
                                             </button>
-                                            <button onClick={() => handleDeleteFermentable(fermentable.id)} type="button">
-                                                <FiTrash2 size={20} color="#744410" />
+                                            <button onClick={() => handleDeleteFermentable(fermentable.id)} type="button" className="icon-button">
+                                                <FiTrash2 size={20} />
                                             </button>
                                         </td>
                                     </tr>
@@ -767,11 +767,11 @@ export default function NewRecipe() {
                                         <td>{hop.useType}</td>
                                         <td>{hop.ibu} IBUs</td>
                                         <td className="ingredients-list-button-group">
-                                            <button onClick={() => handleUpdateHop(hop)} type="button">
-                                                <FiEdit size={20} color="#744410" />
+                                            <button onClick={() => handleUpdateHop(hop)} type="button" className="icon-button">
+                                                <FiEdit size={20} />
                                             </button>
-                                            <button onClick={() => handleDeleteHop(hop.id)} type="button">
-                                                <FiTrash2 size={20} color="#744410" />
+                                            <button onClick={() => handleDeleteHop(hop.id)} type="button" className="icon-button">
+                                                <FiTrash2 size={20} />
                                             </button>
                                         </td>
                                     </tr>
@@ -787,11 +787,11 @@ export default function NewRecipe() {
                                         <td>{misc.type}</td>
                                         <td></td>
                                         <td className="ingredients-list-button-group">
-                                            <button onClick={() => handleUpdateMisc(misc)} type="button">
-                                                <FiEdit size={20} color="#744410" />
+                                            <button onClick={() => handleUpdateMisc(misc)} type="button" className="icon-button">
+                                                <FiEdit size={20} />
                                             </button>
-                                            <button onClick={() => handleDeleteMisc(misc.id)} type="button">
-                                                <FiTrash2 size={20} color="#744410" />
+                                            <button onClick={() => handleDeleteMisc(misc.id)} type="button" className="icon-button">
+                                                <FiTrash2 size={20} />
                                             </button>
                                         </td>
                                     </tr>
@@ -807,11 +807,11 @@ export default function NewRecipe() {
                                         <td>{yeast.type}</td>
                                         <td></td>
                                         <td className="ingredients-list-button-group">
-                                            <button onClick={() => handleUpdateYeast(yeast)} type="button">
-                                                <FiEdit size={20} color="#744410" />
+                                            <button onClick={() => handleUpdateYeast(yeast)} type="button" className="icon-button">
+                                                <FiEdit size={20} />
                                             </button>
-                                            <button onClick={() => handleDeleteYeast(yeast.id)} type="button">
-                                                <FiTrash2 size={20} color="#744410" />
+                                            <button onClick={() => handleDeleteYeast(yeast.id)} type="button" className="icon-button">
+                                                <FiTrash2 size={20} />
                                             </button>
                                         </td>
                                     </tr>

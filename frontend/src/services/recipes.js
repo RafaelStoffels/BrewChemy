@@ -45,3 +45,18 @@ export async function deleteRecipe(itemId, token) {
         throw new Error('Error deleting recipe');
     }
 }
+
+export async function searchRecipes(api, userToken, term) {
+    try {
+        const response = await api.get('/api/recipes/search', {
+            headers: { Authorization: `Bearer ${userToken}` },
+            params: { searchTerm: term }
+        });
+        return response.data;
+    } catch (err) {
+        if (err.response && err.response.status === 401) {
+            throw new Error('Your session has expired. Please log in again.');
+        }
+        throw new Error('Error loading yeasts');
+    }
+}
