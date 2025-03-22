@@ -27,9 +27,55 @@ export async function fetchMisc(api, userToken) {
     }
 }
 
-export async function fetchMiscById(api, userToken, miscID) {
+export async function fetchMiscById(api, userToken, recordUserId, id) {
     try {
-        const response = await api.get(`/api/misc/${miscID}`, {
+        const response = await api.get(`/api/misc/${recordUserId}/${id}`, {
+            headers: { Authorization: `Bearer ${userToken}` },
+        });
+        return response.data;
+    } catch (err) {
+
+        if (err.response) {
+            const { status, data } = err.response;
+
+            if (status === 401) {
+                throw new Error('Your session has expired. Please log in again.');
+            }
+
+            if (data && data.message) {
+                throw new Error(`Error loading equipment: ${data.message}`);
+            }
+        }
+
+        throw new Error('An unexpected error occurred while loading equipment.');
+    }
+}
+
+export async function deleteMisc(api, userToken, recordUserId, id) {
+    try {
+        const response = await api.delete(`api/miscs/${recordUserId}/${id}`, {
+            headers: { Authorization: `Bearer ${userToken}` }
+        });
+        return response.data;
+    } catch (err) {
+        if (err.response) {
+            const { status, data } = err.response;
+
+            if (status === 401) {
+                throw new Error('Your session has expired. Please log in again.');
+            }
+
+            if (data && data.message) {
+                throw new Error(`${data.message}`);
+            }
+        }
+        throw new Error('Error deleting misc');
+    }
+}
+
+export async function addMisc(api, userToken, dataInput) {
+    try {
+        const response = await api.post('/api/misc', dataInput, {
             headers: { Authorization: `Bearer ${userToken}` },
         });
         return response.data;
@@ -37,20 +83,20 @@ export async function fetchMiscById(api, userToken, miscID) {
         if (err.response && err.response.status === 401) {
             throw new Error('Your session has expired. Please log in again.');
         }
-        throw new Error('Error loading misc');
+        throw new Error('Error adding misc');
     }
 }
 
-export async function deleteMisc(api, userToken, miscID) {
+export async function updateMisc(api, userToken, recordUserId, id, dataInput) {
     try {
-        const response = await api.delete(`api/misc/${miscID}`, {
-            headers: { Authorization: `Bearer ${userToken}` }
+        const response = await api.put(`/api/misc/${recordUserId}/${id}`, dataInput, {
+            headers: { Authorization: `Bearer ${userToken}` },
         });
         return response.data;
     } catch (err) {
         if (err.response && err.response.status === 401) {
             throw new Error('Your session has expired. Please log in again.');
         }
-        throw new Error('Error deleting misc');
+        throw new Error('Error updating misc');
     }
 }

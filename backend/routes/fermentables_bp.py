@@ -26,35 +26,37 @@ def create_fermentables_bp():
     @fermentables_bp.route("/fermentables", methods=["GET"])
     @token_required
     def get_fermentables(current_user_id):
+        # filtra todos os registro com official id do usuario corrente
+        subquery = db.session.query(Fermentable.official_id).filter(
+            Fermentable.user_id == current_user_id,
+            Fermentable.official_id.isnot(None)  # Evita incluir valores NULL
+        ).distinct()
+        
+        # Exibir os resultados da subquery para debug
+        subquery_list = [id for (id,) in subquery.all()]
+        print("Subquery list (sem NULL):", subquery_list)
+        
+        # Buscar os fermentáveis considerando a lógica correta
+        items = Fermentable.query.filter(
+            (Fermentable.user_id == current_user_id) |  # Pega os fermentáveis do usuário atual
+            (
+                (Fermentable.user_id == 1) &  # Apenas fermentáveis oficiais
+                (~Fermentable.id.in_(subquery_list))  # Exclui aqueles que já foram personalizados
+            )
+        ).limit(12).all()
+        
+        # Retorna os dados formatados como JSON
+        return jsonify([item.to_dict() for item in items])
 
-        all_fermentables = Fermentable.query.filter(
-            (Fermentable.user_id == current_user_id) | (Fermentable.user_id == 1)
-        ).all()
-        return jsonify([fermentable.to_dict() for fermentable in all_fermentables])
 
+    @fermentables_bp.route("/fermentables/<int:recordUserId>/<int:id>", methods=["GET"])
+    def get_fermentable(recordUserId, id):
+        item = Fermentable.query.filter_by(id=id, user_id=recordUserId).first()
+        
+        if item is None:
+            return jsonify({"message": "fermentable not found"}), 404
 
-    @fermentables_bp.route("/fermentables/<int:id>", methods=["GET"])
-    @token_required
-    def get_fermentable(current_user_id, id):
-
-        source = request.args.get("source", "custom")
-
-        if source == "custom":
-
-            fermentable = Fermentable.query.filter_by(id=id, user_id=current_user_id).first()
-            if fermentable is None:
-                return jsonify({"message": "Fermentable not found in custom data"}), 404
-            return jsonify(fermentable.to_dict())
-
-        elif source == "official":
-
-            fermentable = Fermentable.query.filter_by(id=id, user_id=0).first()
-            if fermentable is None:
-                return jsonify({"message": "Fermentable not found in official data"}), 404
-            return jsonify(fermentable.to_dict())
-
-        else:
-            return jsonify({"error": "Invalid 'source' parameter. Use 'custom' or 'official'."}), 400
+        return jsonify(item.to_dict())
 
 
     @fermentables_bp.route("/fermentables", methods=["POST"])
@@ -73,38 +75,80 @@ def create_fermentables_bp():
             type=data.get("type"),
             supplier=data.get("supplier"),
             user_id=current_user_id,
-            official_fermentable_id=data.get("officialFermentableId")
+            official_id=data.get("officialId")
         )
         db.session.add(new_fermentable)
         db.session.commit()
         return jsonify(new_fermentable.to_dict()), 201
 
 
-    @fermentables_bp.route("/fermentables/<int:id>", methods=["PUT"])
+    @fermentables_bp.route("/fermentables/<int:recordUserId>/<int:id>", methods=["PUT"])
     @token_required
-    def update_fermentable(current_user_id, id):
-        fermentable = Fermentable.query.filter_by(id=id, user_id=current_user_id).first()
-        
-        if fermentable is None:
-            return jsonify({"message": "Fermentable not found"}), 404
+    def update_equipment(current_user_id, recordUserId, id):
 
-        data = request.json
+        # Caso o current_user_id seja diferente do recordUserId, cria-se um novo registro
+        if recordUserId != current_user_id:
+            # Encontrar o equipamento oficial (user_id = 1)
+            official_item = Fermentable.query.filter_by(id=id, user_id=1).first()
 
-        fermentable.name = data.get("name", fermentable.name)
-        fermentable.description = data.get("description", fermentable.description)
-        fermentable.ebc = data.get("ebc", fermentable.ebc)
-        fermentable.potential_extract = data.get("potentialExtract", fermentable.potential_extract)
-        fermentable.type = data.get("type", fermentable.type)
-        fermentable.supplier = data.get("supplier", fermentable.supplier)
+            if official_item is None:
+                return jsonify({"message": "Official fermentable not found"}), 404
 
-        db.session.commit()
+            # Criar um novo registro para o current_user_id baseado no equipamento oficial
+            new_item = Fermentable(
+                user_id=current_user_id,
+                official_id=id,  # Associar ao ID oficial
+                name=official_item.name,
+                description=official_item.description,
+                ebc=official_item.ebc,
+                potential_extract=official_item.potential_extract,
+                type=official_item.type,
+                supplier=official_item.supplier
+            )
 
-        return jsonify(fermentable.to_dict()), 200
+            # Atualizar os dados do novo equipamento com os valores fornecidos, se existirem
+            data = request.json
+            new_item.name = data.get("name", new_item.name)
+            new_item.description = data.get("description", new_item.description)
+            new_item.ebc = data.get("ebc", new_item.ebc)
+            new_item.potential_extract = data.get("potentialExtract", new_item.potential_extract)
+            new_item.type = data.get("type", new_item.type)
+            new_item.supplier = data.get("supplier", new_item.supplier)
+
+            # Adicionar o novo equipamento e confirmar a transação
+            db.session.add(new_item)
+            db.session.commit()
+
+            return jsonify(new_item.to_dict()), 201  # Retornar o novo registro criado
+
+        else:
+            # Caso current_user_id e recordUserId sejam iguais, apenas atualiza o registro
+            item = Fermentable.query.filter_by(id=id, user_id=current_user_id).first()
+
+            if item is None:
+                return jsonify({"message": "Fermentable not found"}), 404
+
+            data = request.json
+
+            item.name = data.get("name", item.name)
+            item.description = data.get("description", item.description)
+            item.ebc = data.get("ebc", item.ebc)
+            item.potential_extract = data.get("potentialExtract", item.potential_extract)
+            item.type = data.get("type", item.type)
+            item.supplier = data.get("supplier", item.supplier)
+
+            db.session.commit()
+
+            return jsonify(item.to_dict()), 200  # Retornar o registro atualizado
 
 
-    @fermentables_bp.route("/fermentables/<int:id>", methods=["DELETE"])
+
+    @fermentables_bp.route("/fermentables/<int:recordUserId>/<int:id>", methods=["DELETE"])
     @token_required
-    def delete_fermentable(current_user_id, id):
+    def delete_fermentable(current_user_id, recordUserId, id):
+        if recordUserId != current_user_id:
+            return jsonify({"message": "Cannot delete official record"}), 404
+
         fermentable = Fermentable.query.filter_by(id=id, user_id=current_user_id).first()
         
         if fermentable is None:

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FiTrash2, FiEdit, FiBookOpen } from 'react-icons/fi';
 import { searchEquipments, fetchEquipments, deleteEquipment } from '../../services/Equipments';
-import { showInfoToast, showErrorToast } from "../../utils/notifications";
+import { showInfoToast, showErrorToast, showSuccessToast } from "../../utils/notifications";
 
 import api from '../../services/api';
 import AuthContext from '../../context/AuthContext';
@@ -43,24 +43,25 @@ export default function EquipmentList() {
         setItemList(recipeResponse);
       }
     } catch (err) {
-      showErrorToast("Error: " + err);
+      showErrorToast("" + err);
     }
   };
 
-  async function handleDetails(itemListId) {
-    navigate(`/Equipments/${itemListId}/details`);
+  async function handleDetails(recordUserId, itemListId) {
+    navigate(`/Equipments/${recordUserId}/${itemListId}/details`);
   }
 
-  async function handleUpdate(itemListId) {
-    navigate(`/Equipments/${itemListId}/edit`);
+  async function handleUpdate(recordUserId, itemListId) {
+    navigate(`/Equipments/${recordUserId}/${itemListId}/edit`);
   }
 
-  async function handleDelete(itemListId) {
+  async function handleDelete(recordUserId, itemListId) {
     try {
-      await deleteEquipment(api, user.token, itemListId);
+      await deleteEquipment(api, user.token, recordUserId, itemListId);
       setItemList(itemList.filter(item => item.id !== itemListId));
+      showSuccessToast("Equipment deleted.");
     } catch (err) {
-      showErrorToast("Error deleting data." + err);
+      showErrorToast("" + err);
     }
   }
 
@@ -78,22 +79,25 @@ export default function EquipmentList() {
               <ul>
                 {itemList.map((item) => (
                   <li key={item.id}>
-                    <h2 className="item-title">{item.name}</h2>
-                    <div className="item-details">
-                      <p>
-                        Description: {item.description.length > 140 
-                          ? item.description.substring(0, 140) + "..." 
-                          : item.description}
-                      </p>
+                      <h2 className="item-title">
+                        {item.name}{" "}
+                        {item.officialId && <span className="custom-label">[custom]</span>}
+                      </h2>
+                      <div className="item-details">
+                        <p>
+                          Description: {item.description.length > 140 
+                            ? item.description.substring(0, 140) + "..." 
+                            : item.description}
+                        </p>
                       </div>
                     <div className="button-group">
-                      <button onClick={() => handleDetails(item.id)} type="button" className="icon-button">
+                      <button onClick={() => handleDetails(item.userId, item.id)} type="button" className="icon-button">
                         <FiBookOpen size={20} />
                       </button>
-                      <button onClick={() => handleUpdate(item.id)} type="button" className="icon-button">
+                      <button onClick={() => handleUpdate(item.userId, item.id)} type="button" className="icon-button">
                         <FiEdit size={20} />
                       </button>
-                      <button onClick={() => handleDelete(item.id)} type="button" className="icon-button">
+                      <button onClick={() => handleDelete(item.userId, item.id)} type="button" className="icon-button">
                         <FiTrash2 size={20} />
                       </button>
                     </div>

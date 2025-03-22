@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate, useParams  } from 'react-router-dom';
-import { fetchYeastById } from '../../services/Yeasts';
-import { showErrorToast } from "../../utils/notifications";
+import { fetchYeastById, updateYeast, addYeast } from '../../services/Yeasts';
+import { showErrorToast, showSuccessToast } from "../../utils/notifications";
 
 import api from '../../services/api';
 import AuthContext from '../../context/AuthContext';
@@ -10,6 +10,7 @@ import '../../styles/crud.css';
 
 export default function NewYeast() {
     const { user } = useContext(AuthContext);
+    const { recordUserId } = useParams();
     const { id } = useParams();
     const navigate = useNavigate();
 
@@ -39,14 +40,14 @@ export default function NewYeast() {
                     setIsView(false); 
                     setIsEditing(true); 
                 }
-                fetchYeast(id); 
+                fetchYeast(recordUserId, id); 
             }
         }
     }, [id, user, navigate]); 
 
-    async function fetchYeast(itemID) {
+    async function fetchYeast(recordUserId, itemID) {
         try {
-            const yeast = await fetchYeastById(api, user.token, itemID);
+            const yeast = await fetchYeastById(api, user.token, recordUserId, itemID);
             setName(yeast.name);
             setDescription(yeast.description);
             setManufacturer(yeast.manufacturer);
@@ -84,21 +85,15 @@ export default function NewYeast() {
 
         try {
             if (isEditing) {
-                await api.put(`/api/yeasts/${id}`, data, {
-                    headers: {
-                        Authorization: `Bearer ${user.token}`,
-                    },
-                });
+                await updateYeast(api, user.token, recordUserId, id, data);
+                showSuccessToast("Yeast has been updated.");
             } else {
-                await api.post('/api/yeasts', data, {
-                    headers: {
-                        Authorization: `Bearer ${user.token}`,
-                    },
-                });
+                await addYeast(api, user.token, data);
+                showSuccessToast("Added new yeast successfully.");
             }
             navigate('/YeastList');
         } catch (err) {
-            showErrorToast("Error loading yeast record." + err);
+            showErrorToast("" + err.message);
         }
     }
 

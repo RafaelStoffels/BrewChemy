@@ -27,9 +27,55 @@ export async function fetchFermentables(api, userToken) {
     }
 }
 
-export async function fetchFermentableById(api, userToken, fermentableId) {
+export async function fetchFermentableById(api, userToken, recordUserId, id) {
     try {
-        const response = await api.get(`/api/fermentables/${fermentableId}`, {
+        const response = await api.get(`/api/fermentables/${recordUserId}/${id}`, {
+            headers: { Authorization: `Bearer ${userToken}` },
+        });
+        return response.data;
+    } catch (err) {
+
+        if (err.response) {
+            const { status, data } = err.response;
+
+            if (status === 401) {
+                throw new Error('Your session has expired. Please log in again.');
+            }
+
+            if (data && data.message) {
+                throw new Error(`Error loading equipment: ${data.message}`);
+            }
+        }
+
+        throw new Error('An unexpected error occurred while loading equipment.');
+    }
+}
+
+export async function deleteFermentable(api, userToken, recordUserId, id) {
+    try {
+        const response = await api.delete(`api/fermentables/${recordUserId}/${id}`, {
+            headers: { Authorization: `Bearer ${userToken}` }
+        });
+        return response.data;
+    } catch (err) {
+        if (err.response) {
+            const { status, data } = err.response;
+
+            if (status === 401) {
+                throw new Error('Your session has expired. Please log in again.');
+            }
+
+            if (data && data.message) {
+                throw new Error(`${data.message}`);
+            }
+        }
+        throw new Error('Error deleting fermentable');
+    }
+}
+
+export async function addFermentable(api, userToken, dataInput) {
+    try {
+        const response = await api.post('/api/fermentables', dataInput, {
             headers: { Authorization: `Bearer ${userToken}` },
         });
         return response.data;
@@ -37,20 +83,20 @@ export async function fetchFermentableById(api, userToken, fermentableId) {
         if (err.response && err.response.status === 401) {
             throw new Error('Your session has expired. Please log in again.');
         }
-        throw new Error('Error loading fermentable');
+        throw new Error('Error adding fermentable');
     }
 }
 
-export async function deleteFermentable(api, userToken, fermentableId) {
+export async function updateFermentable(api, userToken, recordUserId, id, dataInput) {
     try {
-        const response = await api.delete(`api/fermentables/${fermentableId}`, {
-            headers: { Authorization: `Bearer ${userToken}` }
+        const response = await api.put(`/api/fermentables/${recordUserId}/${id}`, dataInput, {
+            headers: { Authorization: `Bearer ${userToken}` },
         });
         return response.data;
     } catch (err) {
         if (err.response && err.response.status === 401) {
             throw new Error('Your session has expired. Please log in again.');
         }
-        throw new Error('Error deleting fermentable');
+        throw new Error('Error updating fermentable');
     }
 }

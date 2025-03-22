@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate, useParams  } from 'react-router-dom';
-import { fetchHopById } from '../../services/Hops';
-import { showErrorToast } from "../../utils/notifications";
+import { fetchHopById, updateHop, addHop } from '../../services/Hops';
+import { showErrorToast, showSuccessToast } from "../../utils/notifications";
 
 import api from '../../services/api';
 import AuthContext from '../../context/AuthContext';
@@ -10,6 +10,7 @@ import '../../styles/crud.css';
 
 export default function NewHop() {
     const { user } = useContext(AuthContext);
+    const { recordUserId } = useParams();
     const { id } = useParams();
     const navigate = useNavigate();
 
@@ -37,14 +38,14 @@ export default function NewHop() {
                     setIsView(false); 
                     setIsEditing(true); 
                 }
-                fetchHop(id); 
+                fetchHop(recordUserId, id); 
             }
         }
     }, [id, user, navigate]); 
 
-    async function fetchHop(itemID) {
+    async function fetchHop(recordUserId, itemID) {
         try {
-            const hop = await fetchHopById(api, user.token, itemID);
+            const hop = await fetchHopById(api, user.token, recordUserId, itemID);
             setName(hop.name);
             setDescription(hop.description);
             setSupplier(hop.supplier);
@@ -78,21 +79,15 @@ export default function NewHop() {
 
         try {
             if (isEditing) {
-                await api.put(`/api/hops/${id}`, data, {
-                    headers: {
-                        Authorization: `Bearer ${user.token}`,
-                    },
-                });
+                await updateHop(api, user.token, recordUserId, id, data);
+                showSuccessToast("Hop has been updated.");
             } else {
-                await api.post('/api/hops', data, {
-                    headers: {
-                        Authorization: `Bearer ${user.token}`,
-                    },
-                });
+                await addHop(api, user.token, data);
+                showSuccessToast("Added new hop successfully.");
             }
             navigate('/HopList');
         } catch (err) {
-            showErrorToast("Error saving record. Please try again." + err);
+            showErrorToast("" + err.message);
         }
     }
 
@@ -174,6 +169,7 @@ export default function NewHop() {
                             <div className='input-field'>
                                 <label htmlFor="name">Alpha Acid</label>
                                 <input 
+                                    type="number"
                                     value={alphaAcidContent}
                                     onChange={e => setAlphaAcidContent(e.target.value)}
                                     disabled={isView}
@@ -182,6 +178,7 @@ export default function NewHop() {
                             <div className='input-field'>
                                 <label htmlFor="name">Beta Acid</label>
                                 <input 
+                                    type="number"
                                     value={betaAcidContent}
                                     onChange={e => setBetaAcidContent(e.target.value)}
                                     disabled={isView}

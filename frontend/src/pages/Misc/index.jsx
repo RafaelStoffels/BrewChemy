@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate, useParams  } from 'react-router-dom';
-import { fetchMiscById } from '../../services/Misc';
-import { showErrorToast } from "../../utils/notifications";
+import { fetchMiscById, updateMisc, addMisc } from '../../services/Misc';
+import { showErrorToast, showSuccessToast } from "../../utils/notifications";
 
 import api from '../../services/api';
 import AuthContext from '../../context/AuthContext';
@@ -10,6 +10,7 @@ import '../../styles/crud.css';
 
 export default function NewMisc() {
     const { user } = useContext(AuthContext);
+    const { recordUserId } = useParams();
     const { id } = useParams();
     const navigate = useNavigate();
 
@@ -32,14 +33,14 @@ export default function NewMisc() {
                     setIsView(false); 
                     setIsEditing(true); 
                 }
-                fetchMisc(id); 
+                fetchMisc(recordUserId, id); 
             }
         }
     }, [id, user, navigate]); 
 
-    async function fetchMisc(itemID) {
+    async function fetchMisc(recordUserId, itemID) {
         try {
-            const misc = await fetchMiscById(api, user.token, itemID);
+            const misc = await fetchMiscById(api, user.token, recordUserId, itemID);
             setName(misc.name);
             setDescription(misc.description);
             setType(misc.type);
@@ -63,21 +64,15 @@ export default function NewMisc() {
 
         try {
             if (isEditing) {
-                await api.put(`/api/misc/${id}`, data, {
-                    headers: {
-                        Authorization: `Bearer ${user.token}`,
-                    },
-                });
+                await updateMisc(api, user.token, recordUserId, id, data);
+                showSuccessToast("Misc has been updated.");
             } else {
-                await api.post('/api/misc', data, {
-                    headers: {
-                        Authorization: `Bearer ${user.token}`,
-                    },
-                });
+                await addMisc(api, user.token, data);
+                showSuccessToast("Added new misc successfully.");
             }
             navigate('/MiscList');
         } catch (err) {
-            showErrorToast("Error loading misc record." + err);
+            showErrorToast("" + err.message);
         }
     }
 

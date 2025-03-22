@@ -8,6 +8,7 @@ class Equipment(db.Model):
 
     # Table Definition
     id = db.Column(db.Integer, primary_key=True)
+    official_id = db.Column(db.Integer, nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'), nullable=False)
     name = db.Column(db.String(50), nullable=False)
     description = db.Column(db.Text)
@@ -27,6 +28,7 @@ class Equipment(db.Model):
     def to_dict(self):
         return {
             "id": self.id,
+            "officialId": self.official_id,
             "userId": self.user_id,
             "name": self.name,
             "description": self.description,
@@ -46,6 +48,7 @@ class Fermentable(db.Model):
 
     # Table Definition
     id = db.Column(db.Integer, primary_key=True)
+    official_id = db.Column(db.Integer, nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'), nullable=False)
     name = db.Column(db.String(40), nullable=False)
     description = db.Column(db.Text)
@@ -55,12 +58,12 @@ class Fermentable(db.Model):
     stock_quantity = db.Column(db.Integer, nullable=False)
     supplier = db.Column(db.String(40), nullable=False)
     unit_price = db.Column(db.Numeric(10, 2))
-    official_fermentable_id = db.Column(db.Integer, nullable=False)
 
     # Converte snake_case para camelCase no JSON
     def to_dict(self):
         return {
             "id": self.id,
+            "officialId": self.official_id,
             "userId": self.user_id,
             "name": self.name,
             "description": self.description,
@@ -68,13 +71,13 @@ class Fermentable(db.Model):
             "potentialExtract": float(self.potential_extract),
             "type": self.type,
             "supplier": self.supplier,
-            "officialFermentableId": self.official_fermentable_id
         }
 
 class Hop(db.Model):
     __tablename__ = 'hops'
 
     id = db.Column(db.Integer, primary_key=True)
+    official_id = db.Column(db.Integer, nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'), nullable=False)
     name = db.Column(db.String(40), nullable=False)
     supplier = db.Column(db.String(40))
@@ -88,6 +91,7 @@ class Hop(db.Model):
     def to_dict(self):
         return {
             "id": self.id,
+            "officialId": self.official_id,
             "userId": self.user_id,
             "name": self.name,
             "supplier": self.supplier,
@@ -104,6 +108,7 @@ class Misc(db.Model):
 
     # Table Definition
     id = db.Column(db.Integer, primary_key=True)
+    official_id = db.Column(db.Integer, nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'), nullable=False)
     name = db.Column(db.String(40), nullable=False)
     description = db.Column(db.Text)
@@ -113,7 +118,8 @@ class Misc(db.Model):
     def to_dict(self):
         return {
             "id": self.id,
-            "user_id": self.user_id,
+            "officialId": self.official_id,
+            "userId": self.user_id,
             "name": self.name,
             "description": self.description,
             "type": self.type,
@@ -124,6 +130,7 @@ class Yeast(db.Model):
 
     # Table Definition
     id = db.Column(db.Integer, primary_key=True)
+    official_id = db.Column(db.Integer, nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'), nullable=False)
     name = db.Column(db.String(40), nullable=False)
     manufacturer = db.Column(db.String(60))
@@ -140,6 +147,7 @@ class Yeast(db.Model):
     def to_dict(self):
         return {
             "id": self.id,
+            "officialId": self.official_id,
             "userId": self.user_id,
             "name": self.name,
             "manufacturer": self.manufacturer,
