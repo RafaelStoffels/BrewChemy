@@ -45,28 +45,28 @@ const App = () => {
             <Route element={<Layout />}>
               <Route path="/Main" element={<Main />} />
               <Route path="/EquipmentList" element={<EquipmentList />} />
-              <Route path="/Equipments/:id/details" element={<Equipment />} />
-              <Route path="/Equipments/:id/edit" element={<Equipment />} />
+              <Route path="/Equipments/:recordUserId/:id/details" element={<Equipment />} />
+              <Route path="/Equipments/:recordUserId/:id/edit" element={<Equipment />} />
               <Route path="/Equipments/new" element={<Equipment />} />
               <Route path="/FermentableList" element={<FermentableList />} />
-              <Route path="/Fermentables/:id/details" element={<Fermentable />} />
-              <Route path="/Fermentables/:id/edit" element={<Fermentable />} />
+              <Route path="/Fermentables/:recordUserId/:id/details" element={<Fermentable />} />
+              <Route path="/Fermentables/:recordUserId/:id/edit" element={<Fermentable />} />
               <Route path="/Fermentables/new" element={<Fermentable />} />
               <Route path="/HopList" element={<HopList />} />
-              <Route path="/Hops/:id/details" element={<Hop />} />
-              <Route path="/Hops/:id/edit" element={<Hop />} />
+              <Route path="/Hops/:recordUserId/:id/details" element={<Hop />} />
+              <Route path="/Hops/:recordUserId/:id/edit" element={<Hop />} />
               <Route path="/Hops/new" element={<Hop />} />
               <Route path="/MiscList" element={<MiscList />} />
-              <Route path="/Misc/:id/details" element={<Misc />} />
-              <Route path="/Misc/:id/edit" element={<Misc />} />
+              <Route path="/Misc/:recordUserId/:id/details" element={<Misc />} />
+              <Route path="/Misc/:recordUserId/:id/edit" element={<Misc />} />
               <Route path="/Misc/new" element={<Misc />} />
               <Route path="/RecipeList" element={<RecipeList />} />
               <Route path="/Recipes/:id/details" element={<Recipe />} />
               <Route path="/Recipes/:id/edit" element={<Recipe />} />
               <Route path="/Recipes/new" element={<Recipe />} />
               <Route path="/YeastList" element={<YeastList />} />
-              <Route path="/Yeasts/:id/details" element={<Yeast />} />
-              <Route path="/Yeasts/:id/edit" element={<Yeast />} />
+              <Route path="/Yeasts/:recordUserId/:id/details" element={<Yeast />} />
+              <Route path="/Yeasts/:recordUserId/:id/edit" element={<Yeast />} />
               <Route path="/Yeasts/new" element={<Yeast />} />
             </Route>
 

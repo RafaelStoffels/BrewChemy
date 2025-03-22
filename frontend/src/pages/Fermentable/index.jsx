@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate, useParams  } from 'react-router-dom';
-import { fetchFermentableById } from '../../services/Fermentables';
-import { showErrorToast } from "../../utils/notifications";
+import { fetchFermentableById, updateFermentable, addFermentable } from '../../services/Fermentables';
+import { showErrorToast, showSuccessToast } from "../../utils/notifications";
 
 import api from '../../services/api';
 import AuthContext from '../../context/AuthContext';
@@ -10,6 +10,7 @@ import '../../styles/crud.css';
 
 export default function NewFermentable() {
     const { user } = useContext(AuthContext);
+    const { recordUserId } = useParams();
     const { id } = useParams();
     const navigate = useNavigate();
 
@@ -36,14 +37,14 @@ export default function NewFermentable() {
                     setIsView(false); 
                     setIsEditing(true); 
                 }
-                fetchFermentable(id); 
+                fetchFermentable(recordUserId, id); 
             }
         }
     }, [id, user, navigate]); 
 
-    async function fetchFermentable(itemID) {
+    async function fetchFermentable(recordUserId, itemID) {
         try {
-            const fermentable = await fetchFermentableById(api, user.token, itemID);
+            const fermentable = await fetchFermentableById(api, user.token, recordUserId, itemID);
             setName(fermentable.name);
             setDescription(fermentable.description);
             setType(fermentable.type);
@@ -76,21 +77,15 @@ export default function NewFermentable() {
 
         try {
             if (isEditing) {
-                await api.put(`/api/fermentables/${id}`, data, {
-                    headers: {
-                        Authorization: `Bearer ${user.token}`,
-                    },
-                });
+                await updateFermentable(api, user.token, recordUserId, id, data);
+                showSuccessToast("Fermentable has been updated.");
             } else {
-                await api.post('/api/fermentables', data, {
-                    headers: {
-                        Authorization: `Bearer ${user.token}`,
-                    },
-                });
+                await addFermentable(api, user.token, data);
+                showSuccessToast("Added new fermentable successfully.");
             }
             navigate('/FermentableList');
         } catch (err) {
-            showErrorToast("Error saving record. Please try again." + err);
+            showErrorToast("" + err.message);
         }
     }
 

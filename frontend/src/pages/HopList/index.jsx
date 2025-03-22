@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FiTrash2, FiEdit, FiBookOpen } from 'react-icons/fi';
 import { searchHops, fetchHops, deleteHop } from '../../services/Hops';
-import { showInfoToast, showErrorToast } from "../../utils/notifications";
+import { showInfoToast, showErrorToast, showSuccessToast} from "../../utils/notifications";
 import SearchInput from '../../components/SearchInput';
 
 import api from '../../services/api';
@@ -48,20 +48,21 @@ export default function HopList() {
   };
   
 
-  async function handleDetails(itemListId) {
-    navigate(`/Hops/${itemListId}/details`);
+  async function handleDetails(recordUserId, itemListId) {
+    navigate(`/Hops/${recordUserId}/${itemListId}/details`);
   }
 
-  async function handleUpdate(itemListId) {
-    navigate(`/Hops/${itemListId}/edit`);
+  async function handleUpdate(recordUserId, itemListId) {
+    navigate(`/Hops/${recordUserId}/${itemListId}/edit`);
   }
 
-  async function handleDelete(itemListId) {
+  async function handleDelete(recordUserId, itemListId) {
     try {
-      await deleteHop(api, user.token, itemListId);
+      await deleteHop(api, user.token, recordUserId, itemListId);
       setItemList(itemList.filter(item => item.id !== itemListId));
+      showSuccessToast("Hop deleted.");
     } catch (err) {
-      showErrorToast("Error deleting data." + err);
+      showErrorToast("" + err);
     }
   }
 
@@ -90,13 +91,13 @@ export default function HopList() {
                     </p>
                   </div>
                   <div className="button-group">
-                    <button onClick={() => handleDetails(item.id)} type="button" className="icon-button">
+                    <button onClick={() => handleDetails(item.userId, item.id)} type="button" className="icon-button">
                       <FiBookOpen size={20}  />
                     </button>
-                    <button onClick={() => handleUpdate(item.id)} type="button" className="icon-button">
+                    <button onClick={() => handleUpdate(item.userId, item.id)} type="button" className="icon-button">
                       <FiEdit size={20}  />
                     </button>
-                    <button onClick={() => handleDelete(item.id)} type="button" className="icon-button">
+                    <button onClick={() => handleDelete(item.userId, item.id)} type="button" className="icon-button">
                       <FiTrash2 size={20}  />
                     </button>
                   </div>

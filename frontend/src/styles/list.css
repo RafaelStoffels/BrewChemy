@@ -64,3 +64,9 @@
     font-size: 14px;
     color: #444242;
 }
+
+.custom-label {
+    font-size: 0.8em; /* Reduz o tamanho da fonte */
+    color: rgb(101, 94, 89); /* Opcional: deixa o texto mais discreto */
+    margin-left: 5px; /* Dá um espaço entre o nome e [custom] */
+  }

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate, useParams  } from 'react-router-dom';
-import { fetchEquipmentById } from '../../services/Equipments';
-import { showErrorToast } from "../../utils/notifications";
+import { fetchEquipmentById, updateEquipment, addEquipment } from '../../services/Equipments';
+import { showErrorToast, showSuccessToast } from "../../utils/notifications";
 
 import api from '../../services/api';
 import AuthContext from '../../context/AuthContext';
@@ -10,6 +10,7 @@ import '../../styles/crud.css';
 
 export default function NewEquipment() {
     const { user } = useContext(AuthContext);
+    const { recordUserId } = useParams();
     const { id } = useParams();
     const navigate = useNavigate();
 
@@ -39,14 +40,14 @@ export default function NewEquipment() {
                     setIsView(false); 
                     setIsEditing(true); 
                 }
-                fetchEquipment(id); 
+                fetchEquipment(recordUserId, id); 
             }
         }
     }, [id, user, navigate]); 
 
-    async function fetchEquipment(itemID) {
+    async function fetchEquipment(recordUserId, itemID) {
         try {
-            const equipment = await fetchEquipmentById(api, user.token, itemID);
+            const equipment = await fetchEquipmentById(api, user.token, recordUserId, itemID);
             setName(equipment.name);
             setDescription(equipment.description);
             setEfficiency(equipment.efficiency);
@@ -81,23 +82,18 @@ export default function NewEquipment() {
 
         console.log(data);
 
+
         try {
             if (isEditing) {
-                await api.put(`/api/equipments/${id}`, data, {
-                    headers: {
-                        Authorization: `Bearer ${user.token}`,
-                    },
-                });
+                await updateEquipment(api, user.token, recordUserId, id, data);
+                showSuccessToast("Equipment has been updated.");
             } else {
-                await api.post('/api/equipments', data, {
-                    headers: {
-                        Authorization: `Bearer ${user.token}`,
-                    },
-                });
+                await addEquipment(api, user.token, data);
+                showSuccessToast("Added new equipment successfully.");
             }
             navigate('/EquipmentList');
         } catch (err) {
-            showErrorToast("Error loading equipment record." + err);
+            showErrorToast("Error saving equipment record: " + err.message);
         }
     }
 
