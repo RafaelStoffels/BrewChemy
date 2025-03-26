@@ -862,7 +862,7 @@ export default function NewRecipe() {
                             <object className="beer-object" type="image/svg+xml" data="/beer.svg"></object>
                         </div>
                     </div>
-                    <div className="top">
+                    <div className="IA">
                         <textarea
                             name="IA"
                             placeholder="Mystical Wisdom"

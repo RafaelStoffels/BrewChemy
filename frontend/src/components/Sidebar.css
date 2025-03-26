@@ -28,13 +28,13 @@
 .sidebar .menu ul li a {
   text-decoration: none;
   color: #b77d00;
-  font-size: 15px;
+  font-size: 14px;
   display: block;
   transition: all 0.3s ease-in-out;
 }
 
 .sidebar .menu ul li:hover {
-  background-color: rgba(203, 139, 0, 0.2);
+  background-color: rgba(152, 104, 0, 0.2);
 }
 
 .sidebar .menu ul li.active {

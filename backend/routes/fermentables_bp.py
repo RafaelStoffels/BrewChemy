@@ -11,16 +11,33 @@ def create_fermentables_bp():
     @token_required
     def search_fermentables(current_user_id):
         search_term = request.args.get("searchTerm", "").strip()
-
+        
         if not search_term:
-            return jsonify({"error": "O parâmetro 'searchTerm' é obrigatório."}), 400
+            return jsonify({"error": "Search term is required"}), 400
+        
+        # Subquery para encontrar fermentáveis do usuário atual
+        subquery = db.session.query(Fermentable.official_id).filter(
+            Fermentable.user_id == current_user_id,
+            Fermentable.official_id.isnot(None)  # Evita incluir valores NULL
+        ).distinct()
+        
+        subquery_list = [id for (id,) in subquery.all()]
+        print("Subquery list (sem NULL):", subquery_list)
+        
+        # Busca fermentáveis que correspondam ao termo de pesquisa
+        items = Fermentable.query.filter(
+            (
+                (Fermentable.user_id == current_user_id) |  # Pega fermentáveis do usuário
+                (
+                    (Fermentable.user_id == 1) &  # Apenas fermentáveis oficiais
+                    (~Fermentable.id.in_(subquery_list))  # Exclui os personalizados
+                )
+            ) &
+            (Fermentable.name.ilike(f"%{search_term}%"))  # Filtra pelo nome
+        ).limit(12).all()
+        
+        return jsonify([item.to_dict() for item in items])
 
-        user_fermentables = Fermentable.query.filter(
-            (Fermentable.user_id == current_user_id) | (Fermentable.user_id == 1),
-            Fermentable.name.ilike(f"%{search_term}%")
-        ).all()
-
-        return jsonify([fermentable.to_dict() for fermentable in user_fermentables])
 
 
     @fermentables_bp.route("/fermentables", methods=["GET"])

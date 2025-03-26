@@ -82,7 +82,10 @@ export default function FermentableList() {
             <ul>
               {itemList.map((item) => (
                 <li key={item.id}>
-                  <h2 className="item-title">{item.name}</h2> 
+                  <h2 className="item-title">
+                    {item.name}{" "}
+                    {item.officialId && <span className="custom-label">[custom]</span>}
+                  </h2>
                   <div className="item-details">
                     <p>Supplier: {item.supplier}</p>
                     <p>Type: {item.type}</p>
