@@ -25,14 +25,12 @@ export function AddFermentableModal({ isOpen, closeModal, handleAddFermentableRe
     };
 
     const handleSelectFermentable = (fermentable) => {
-        setSelectedFermentable(fermentable.id);
-        setSearchTerm(fermentable.name);
-        setFermentableList([]);
+        setSelectedFermentable(fermentable); // Armazena o fermentável selecionado
     };
-
+    
     const handleSaveButton = () => {
         if (selectedFermentable && quantity) {
-            handleAddFermentableRecipe(selectedFermentable, quantity);
+            handleAddFermentableRecipe(selectedFermentable.id, quantity); // Agora enviamos o objeto inteiro
             closeModal();
         } else {
             showErrorToast("Please fill in all fields.");
@@ -50,21 +48,25 @@ export function AddFermentableModal({ isOpen, closeModal, handleAddFermentableRe
             <h2>Select a fermentable</h2>
             <form onSubmit={handleAddFermentableRecipe}>
                 <div className="modal">
-                <SearchInput searchTerm={searchTerm} setSearchTerm={setSearchTerm} onSearch={searchItemsFunction} />
+                    <SearchInput searchTerm={searchTerm} setSearchTerm={setSearchTerm} onSearch={searchItemsFunction} />
 
-                    {fermentableList.length > 0 && (
-                        <ul style={{ border: '1px solid #ccc', padding: '5px', maxHeight: '150px', overflowY: 'auto' }}>
-                            {fermentableList.map((fermentable) => (
-                                <li 
-                                    key={fermentable.id} 
-                                    style={{ cursor: 'pointer', padding: '5px' }}
-                                    onMouseDown={() => handleSelectFermentable(fermentable)}
-                                >
-                                    {fermentable.name}
-                                </li>
-                            ))}
-                        </ul>
-                    )}
+                    <div className="modal-search-container">
+                        {fermentableList.length > 0 ? (
+                            <ul className="modal-search-results">
+                                {fermentableList.map((fermentable) => (
+                                    <li 
+                                        key={fermentable.id} 
+                                        className={`modal-search-item ${selectedFermentable?.id === fermentable.id ? 'selected' : ''}`} 
+                                        onMouseDown={() => handleSelectFermentable(fermentable)}
+                                    >
+                                        {fermentable.name}
+                                    </li>
+                                ))}
+                            </ul>
+                        ) : (
+                            <p className="modal-placeholder">No results found</p>
+                        )}
+                    </div>
 
                     <div className="inputs-row">
                         <div className="input-field">
@@ -103,14 +105,12 @@ export function AddHopModal({ isOpen, closeModal, handleAddHopRecipe }) {
     };
 
     const handleSelectHop = (hop) => {
-        setSelectedHop(hop.id);
-        setSearchTerm(hop.name);
-        setHopList([]);
+        setSelectedHop(hop);
     };
 
     const handleSaveButton = () => {
         if (selectedHop && quantity && boilTime) {
-            handleAddHopRecipe(selectedHop, quantity, boilTime, alphaAcid, useType);
+            handleAddHopRecipe(selectedHop.id, quantity, boilTime, alphaAcid, useType);
             closeModal();
         } else {
             showErrorToast("Please fill in all fields.");
@@ -130,19 +130,21 @@ export function AddHopModal({ isOpen, closeModal, handleAddHopRecipe }) {
                 <div className="modal">
                     <SearchInput searchTerm={searchTerm} setSearchTerm={setSearchTerm} onSearch={searchItemsFunction} />
 
-                    {hopList.length > 0 && (
-                        <ul style={{ border: '1px solid #ccc', padding: '5px', maxHeight: '150px', overflowY: 'auto' }}>
-                            {hopList.map((hop) => (
-                                <li 
-                                    key={hop.id} 
-                                    style={{ cursor: 'pointer', padding: '5px' }}
-                                    onMouseDown={() => handleSelectHop(hop)}
-                                >
-                                    {hop.name}
-                                </li>
-                            ))}
-                        </ul>
-                    )}
+                    <div className="modal-search-container">
+                        {hopList.length > 0 && (
+                            <ul className="modal-search-results">
+                                {hopList.map((hop) => (
+                                    <li 
+                                        key={hop.id} 
+                                        className={`modal-search-item ${selectedHop?.id === hop.id ? 'selected' : ''}`} 
+                                        onMouseDown={() => handleSelectHop(hop)}
+                                    >
+                                        {hop.name}
+                                    </li>
+                                ))}
+                            </ul>
+                        )}
+                    </div>
                     <div className="inputs-row">
                         <div className="input-field">
                             <label htmlFor="name">Use Type</label>
@@ -212,7 +214,7 @@ export function AddMiscModal({ isOpen, closeModal, handleAddMiscRecipe }) {
 
     const handleSaveButton = () => {
         if (selectedMisc && quantity) {
-            handleAddMiscRecipe(selectedMisc, quantity);
+            handleAddMiscRecipe(selectedMisc.id, quantity);
             closeModal();
         } else {
             showErrorToast("Please fill in all fields.");
@@ -231,9 +233,7 @@ export function AddMiscModal({ isOpen, closeModal, handleAddMiscRecipe }) {
     };
 
     const handleSelectMisc = (misc) => {
-        setSelectedMisc(misc.id);
-        setSearchTerm(misc.name); 
-        setFilteredMiscList([]); 
+        setSelectedMisc(misc);
     };
 
     return (
@@ -249,20 +249,21 @@ export function AddMiscModal({ isOpen, closeModal, handleAddMiscRecipe }) {
                 <div className="modal">
                     <SearchInput searchTerm={searchTerm} setSearchTerm={setSearchTerm} onSearch={searchItemsFunction} />    
 
-                    {filteredMiscList.length > 0 && (
-                        <ul style={{ border: '1px solid #ccc', padding: '5px', maxHeight: '150px', overflowY: 'auto' }}>
-                            {filteredMiscList.map((misc) => (
-                                <li
-                                    key={misc.id}
-                                    style={{ cursor: 'pointer', padding: '5px' }}
-                                    onClick={() => handleSelectMisc(misc)}
-                                >
-                                    {misc.name}
-                                </li>
-                            ))}
-                        </ul>
-                    )}
-
+                    <div className="modal-search-container">
+                        {filteredMiscList.length > 0 && (
+                            <ul className="modal-search-results">
+                                {filteredMiscList.map((misc) => (
+                                    <li 
+                                        key={misc.id} 
+                                        className={`modal-search-item ${selectedMisc?.id === misc.id ? 'selected' : ''}`} 
+                                        onMouseDown={() => handleSelectMisc(misc)}
+                                    >
+                                        {misc.name}
+                                    </li>
+                                ))}
+                            </ul>
+                        )}
+                    </div>
                     <div className="inputs-row">
                         <div className="input-field">
                             <label htmlFor="name">Quantity</label>
@@ -301,14 +302,12 @@ export function AddYeastModal({ isOpen, closeModal, handleAddYeastRecipe }) {
     };
 
     const handleSelectYeast = (yeast) => {
-        setSelectedYeast(yeast.id);
-        setSearchTerm(yeast.name);
-        setFilteredYeastList([]); 
+        setSelectedYeast(yeast);
     };
 
     const handleSaveButton = () => {
         if (selectedYeast && quantity) {
-            handleAddYeastRecipe(selectedYeast, quantity);
+            handleAddYeastRecipe(selectedYeast.id, quantity);
             closeModal();
         } else {
             showErrorToast("Please fill in all fields.");
@@ -328,19 +327,21 @@ export function AddYeastModal({ isOpen, closeModal, handleAddYeastRecipe }) {
                 <div className="modal">
                     <SearchInput searchTerm={searchTerm} setSearchTerm={setSearchTerm} onSearch={searchItemsFunction} />   
 
-                    {filteredYeastList.length > 0 && (
-                        <ul style={{ border: '1px solid #ccc', padding: '5px', maxHeight: '150px', overflowY: 'auto' }}>
-                            {filteredYeastList.map((yeast) => (
-                                <li 
-                                    key={yeast.id} 
-                                    style={{ cursor: 'pointer', padding: '5px' }}
-                                    onMouseDown={() => handleSelectYeast(yeast)}
-                                >
-                                    {yeast.name}
-                                </li>
-                            ))}
-                        </ul>
-                    )}
+                    <div className="modal-search-container">
+                        {filteredYeastList.length > 0 && (
+                            <ul className="modal-search-results">
+                                {filteredYeastList.map((yeast) => (
+                                    <li 
+                                        key={yeast.id} 
+                                        className={`modal-search-item ${selectedYeast?.id === yeast.id ? 'selected' : ''}`} 
+                                        onMouseDown={() => handleSelectYeast(yeast)}
+                                    >
+                                        {yeast.name}
+                                    </li>
+                                ))}
+                            </ul>
+                        )}
+                    </div>
 
                     <div className="inputs-row">
                         <div className="input-field">

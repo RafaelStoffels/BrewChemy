@@ -11,16 +11,32 @@ def create_hops_bp():
     @token_required
     def search_hops(current_user_id):
         search_term = request.args.get("searchTerm", "").strip()
-
+        
         if not search_term:
-            return jsonify({"error": "O parâmetro 'searchTerm' é obrigatório."}), 400
-
-        user_hops = Hop.query.filter(
-            (Hop.user_id == current_user_id) | (Hop.user_id == 1),
-            Hop.name.ilike(f"%{search_term}%")
-        ).all()
-
-        return jsonify([hop.to_dict() for hop in user_hops])
+            return jsonify({"error": "Search term is required"}), 400
+        
+        # Subquery para encontrar fermentáveis do usuário atual
+        subquery = db.session.query(Hop.official_id).filter(
+            Hop.user_id == current_user_id,
+            Hop.official_id.isnot(None)  # Evita incluir valores NULL
+        ).distinct()
+        
+        subquery_list = [id for (id,) in subquery.all()]
+        print("Subquery list (sem NULL):", subquery_list)
+        
+        # Busca fermentáveis que correspondam ao termo de pesquisa
+        items = Hop.query.filter(
+            (
+                (Hop.user_id == current_user_id) |  # Pega fermentáveis do usuário
+                (
+                    (Hop.user_id == 1) &  # Apenas fermentáveis oficiais
+                    (~Hop.id.in_(subquery_list))  # Exclui os personalizados
+                )
+            ) &
+            (Hop.name.ilike(f"%{search_term}%"))  # Filtra pelo nome
+        ).limit(12).all()
+        
+        return jsonify([item.to_dict() for item in items])
 
 
     @hops_bp.route("/hops", methods=["GET"])
@@ -86,6 +102,7 @@ def create_hops_bp():
     @hops_bp.route("/hops/<int:recordUserId>/<int:id>", methods=["PUT"])
     @token_required
     def update_hop(current_user_id, recordUserId, id):
+        data = request.json
 
         # Caso o current_user_id seja diferente do recordUserId, cria-se um novo registro
         if recordUserId != current_user_id:
@@ -99,22 +116,15 @@ def create_hops_bp():
             new_item = Hop(
                 user_id=current_user_id,
                 official_id=id,  # Associar ao ID oficial
-                name=official_item.name,
-                description=official_item.description,
-                ebc=official_item.ebc,
-                potential_extract=official_item.potential_extract,
-                type=official_item.type,
-                supplier=official_item.supplier
+                name=data.get("name", official_item.name),
+                alpha_acid_content=data.get("alphaAcidContent", official_item.alpha_acid_content),
+                beta_acid_content=data.get("betaAcidContent", official_item.beta_acid_content),
+                type=data.get("type", official_item.type),
+                use_type=data.get("useType", official_item.use_type),
+                country_of_origin=data.get("countryOfOrigin", official_item.country_of_origin),
+                description=data.get("description", official_item.description),
+                supplier=data.get("supplier", official_item.supplier)
             )
-
-            # Atualizar os dados do novo equipamento com os valores fornecidos, se existirem
-            data = request.json
-            new_item.name = data.get("name", new_item.name)
-            new_item.description = data.get("description", new_item.description)
-            new_item.ebc = data.get("ebc", new_item.ebc)
-            new_item.potential_extract = data.get("potentialExtract", new_item.potential_extract)
-            new_item.type = data.get("type", new_item.type)
-            new_item.supplier = data.get("supplier", new_item.supplier)
 
             # Adicionar o novo equipamento e confirmar a transação
             db.session.add(new_item)
@@ -129,13 +139,13 @@ def create_hops_bp():
             if item is None:
                 return jsonify({"message": "Hop not found"}), 404
 
-            data = request.json
-
             item.name = data.get("name", item.name)
-            item.description = data.get("description", item.description)
-            item.ebc = data.get("ebc", item.ebc)
-            item.potential_extract = data.get("potentialExtract", item.potential_extract)
+            item.alpha_acid_content = data.get("alphaAcidContent", item.alpha_acid_content)
+            item.beta_acid_content = data.get("betaAcidContent", item.beta_acid_content)
             item.type = data.get("type", item.type)
+            item.use_type = data.get("useType", item.use_type)
+            item.country_of_origin = data.get("countryOfOrigin", item.country_of_origin)
+            item.description = data.get("description", item.description)
             item.supplier = data.get("supplier", item.supplier)
 
             db.session.commit()
