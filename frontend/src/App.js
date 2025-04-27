@@ -21,7 +21,7 @@ import Hop from "./pages/Hop";
 import MiscList from "./pages/MiscList";
 import Misc from "./pages/Misc";
 import RecipeList from "./pages/RecipeList";
-import Recipe from "./pages/Recipe";
+import Recipe from "./pages/Recipes";
 import YeastList from "./pages/YeastList";
 import Yeast from "./pages/Yeast";
 

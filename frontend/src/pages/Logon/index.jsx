@@ -28,10 +28,10 @@ export default function Logon() {
 
       setIsRedirecting(true);
 
-      navigate('/Main');
+      navigate('/RecipeList');
     } else if (isAuthenticated && !isRedirecting) {
       setIsRedirecting(true);
-      navigate('/Main');
+      navigate('/RecipeList');
     }
   }, [searchParams, login, navigate, setSearchParams, isAuthenticated, isRedirecting]);
 
@@ -45,7 +45,7 @@ export default function Logon() {
       const { token } = response.data;
       
       login({ token });
-      navigate('/Main');
+      navigate('/RecipeList');
     } catch (error) {
       if (error.response) {
         if (error.response.status === 404) {

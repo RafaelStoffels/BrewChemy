@@ -93,6 +93,7 @@ export default function NewHop() {
 
     return (
         <div>
+            <div className='crud-container'>
             <section>
                 <h1>
                   {isEditing ? 'Update Hop' :
@@ -100,7 +101,6 @@ export default function NewHop() {
                    'Add New Hop'}
                 </h1>
             </section>
-            <div className='crud-container'>
                 <div className='content'>
                     <form onSubmit={handleSubmit}>
                         <div className='inputs-row'>

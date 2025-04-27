@@ -3,34 +3,48 @@ import Modal from 'react-modal';
 import AuthContext from '../../context/AuthContext';
 import api from '../../services/api';
 import { showErrorToast } from "../../utils/notifications";
-import { searchEquipments } from '../../services/Equipments';
-import { searchFermentables } from '../../services/Fermentables';
-import { searchHops } from '../../services/Hops';
-import { searchMiscs } from '../../services/Misc';
-import { searchYeasts } from '../../services/Yeasts';
+import { searchEquipments, fetchEquipments } from '../../services/Equipments';
+import { searchFermentables, fetchFermentables } from '../../services/Fermentables';
+import { searchHops, fetchHops } from '../../services/Hops';
+import { searchMiscs, fetchMisc } from '../../services/Misc';
+import { searchYeasts, fetchYeasts } from '../../services/Yeasts';
 
 import SearchInput from '../../components/SearchInput';
 
 export function AddFermentableModal({ isOpen, closeModal, handleAddFermentableRecipe }) {
-    const [selectedFermentable, setSelectedFermentable] = useState(null);
+    const [selectedItem, setSelectedItem] = useState(null);
     const [quantity, setQuantity] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
-    const [fermentableList, setFermentableList] = useState([]);
+    const [itemList, setItemList] = useState([]);
 
     const { user } = useContext(AuthContext);
 
+    useEffect(() => {
+        if (isOpen) {
+            const loadItems = async () => {
+                try {
+                  const items = await fetchFermentables(api, user.token);
+                  setItemList(items);
+                } catch (err) {
+                  showErrorToast('Error loading equipments');
+                }
+              };
+            loadItems();
+        }
+    }, [isOpen]);
+
     const searchItemsFunction = async (term) => {
         const recipeResponse = await searchFermentables(api, user.token, term);
-        setFermentableList(recipeResponse);
+        setItemList(recipeResponse);
     };
 
-    const handleSelectFermentable = (fermentable) => {
-        setSelectedFermentable(fermentable); // Armazena o fermentável selecionado
+    const handleSelectItem = (fermentable) => {
+        setSelectedItem(fermentable); // Armazena o fermentável selecionado
     };
     
     const handleSaveButton = () => {
-        if (selectedFermentable && quantity) {
-            handleAddFermentableRecipe(selectedFermentable.id, quantity); // Agora enviamos o objeto inteiro
+        if (selectedItem && quantity) {
+            handleAddFermentableRecipe(selectedItem.id, quantity); // Agora enviamos o objeto inteiro
             closeModal();
         } else {
             showErrorToast("Please fill in all fields.");
@@ -51,15 +65,15 @@ export function AddFermentableModal({ isOpen, closeModal, handleAddFermentableRe
                     <SearchInput searchTerm={searchTerm} setSearchTerm={setSearchTerm} onSearch={searchItemsFunction} />
 
                     <div className="modal-search-container">
-                        {fermentableList.length > 0 ? (
+                        {itemList.length > 0 ? (
                             <ul className="modal-search-results">
-                                {fermentableList.map((fermentable) => (
+                                {itemList.map((item) => (
                                     <li 
-                                        key={fermentable.id} 
-                                        className={`modal-search-item ${selectedFermentable?.id === fermentable.id ? 'selected' : ''}`} 
-                                        onMouseDown={() => handleSelectFermentable(fermentable)}
+                                        key={item.id} 
+                                        className={`modal-search-item ${selectedItem?.id === item.id ? 'selected' : ''}`} 
+                                        onMouseDown={() => handleSelectItem(item)}
                                     >
-                                        {fermentable.name}
+                                        {item.name}
                                     </li>
                                 ))}
                             </ul>
@@ -69,18 +83,18 @@ export function AddFermentableModal({ isOpen, closeModal, handleAddFermentableRe
                     </div>
 
                     <div className="inputs-row">
-                        <div className="input-field">
-                            <label htmlFor="name">Quantity</label>
+                        <div className="input-field" style={{ marginTop: '10px' }}>
+                            <label htmlFor="name">Quantity (Grams)</label>
                             <input
                                 type="number"
-                                placeholder="Quantity"
                                 value={quantity}
                                 onChange={(e) => setQuantity(e.target.value)}
+                                style={{ width: '150px'}}
                             />
                         </div>
                     </div>
                 </div>
-                <button type="button" onClick={handleSaveButton} className="crud-save-button">
+                <button type="button" onClick={handleSaveButton} className="crud-save-button" style={{ marginTop: '70px' }}>
                     Add Fermentable
                 </button>
             </form>
@@ -95,13 +109,27 @@ export function AddHopModal({ isOpen, closeModal, handleAddHopRecipe }) {
     const [boilTime, setBoilTime] = useState('');
     const [useType, setUseType] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
-    const [hopList, setHopList] = useState([]);
+    const [itemList, setItemList] = useState([]);
 
     const { user } = useContext(AuthContext);
 
+    useEffect(() => {
+        if (isOpen) {
+            const loadItems = async () => {
+                try {
+                  const items = await fetchHops(api, user.token);
+                  setItemList(items);
+                } catch (err) {
+                  showErrorToast('Error loading equipments');
+                }
+              };
+            loadItems();
+        }
+    }, [isOpen]);
+    
     const searchItemsFunction = async (term) => {
         const response = await searchHops(api, user.token, term);
-        setHopList(response);
+        setItemList(response);
     };
 
     const handleSelectHop = (hop) => {
@@ -131,9 +159,9 @@ export function AddHopModal({ isOpen, closeModal, handleAddHopRecipe }) {
                     <SearchInput searchTerm={searchTerm} setSearchTerm={setSearchTerm} onSearch={searchItemsFunction} />
 
                     <div className="modal-search-container">
-                        {hopList.length > 0 && (
+                        {itemList.length > 0 && (
                             <ul className="modal-search-results">
-                                {hopList.map((hop) => (
+                                {itemList.map((hop) => (
                                     <li 
                                         key={hop.id} 
                                         className={`modal-search-item ${selectedHop?.id === hop.id ? 'selected' : ''}`} 
@@ -146,7 +174,7 @@ export function AddHopModal({ isOpen, closeModal, handleAddHopRecipe }) {
                         )}
                     </div>
                     <div className="inputs-row">
-                        <div className="input-field">
+                        <div className="input-field" style={{ marginTop: '10px' }}>
                             <label htmlFor="name">Use Type</label>
                             <select
                                 value={useType}
@@ -159,7 +187,7 @@ export function AddHopModal({ isOpen, closeModal, handleAddHopRecipe }) {
                                 <option value="First Wort">First Wort</option>
                             </select>
                         </div>
-                        <div className="input-field">
+                        <div className="input-field" style={{ marginTop: '10px' }}>
                             <label htmlFor="name">Boil Time</label>
                             <input
                                 type="number"
@@ -167,7 +195,7 @@ export function AddHopModal({ isOpen, closeModal, handleAddHopRecipe }) {
                                 onChange={(e) => setBoilTime(e.target.value)}
                             />
                         </div>
-                        <div className="input-field">
+                        <div className="input-field" style={{ marginTop: '10px' }}>
                             <label htmlFor="name">Alpha Acid</label>
                             <input
                                 type="number"
@@ -178,12 +206,12 @@ export function AddHopModal({ isOpen, closeModal, handleAddHopRecipe }) {
                     </div>
                     <div className="inputs-row">
                         <div className="input-field">
-                            <label htmlFor="name">Quantity</label>
+                            <label htmlFor="name">Quantity (Grams)</label>
                             <input
                                 type="number"
-                                placeholder="Quantity"
                                 value={quantity}
                                 onChange={(e) => setQuantity(e.target.value)}
+                                style={{ width: '150px' }}
                             />
                         </div>
                     </div>
@@ -197,15 +225,29 @@ export function AddHopModal({ isOpen, closeModal, handleAddHopRecipe }) {
 }
 
 export function AddMiscModal({ isOpen, closeModal, handleAddMiscRecipe }) {
-    const [selectedMisc, setSelectedMisc] = useState(null);
+    const [selectedItem, setSelectedItem] = useState(null);
     const [quantity, setQuantity] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
-    const [filteredMiscList, setFilteredMiscList] = useState([]);
+    const [itemList, setItemList] = useState([]);
 
     const { user } = useContext(AuthContext); 
 
+    useEffect(() => {
+        if (isOpen) {
+            const loadItems = async () => {
+                try {
+                  const items = await fetchMisc(api, user.token);
+                  setItemList(items);
+                } catch (err) {
+                  showErrorToast('Error loading equipments');
+                }
+              };
+            loadItems();
+        }
+    }, [isOpen]);
+
     const handleChange = (miscID) => {
-        setSelectedMisc(miscID);
+        setSelectedItem(miscID);
     };
 
     const handleQuantityChange = (e) => {
@@ -213,8 +255,8 @@ export function AddMiscModal({ isOpen, closeModal, handleAddMiscRecipe }) {
     };
 
     const handleSaveButton = () => {
-        if (selectedMisc && quantity) {
-            handleAddMiscRecipe(selectedMisc.id, quantity);
+        if (selectedItem && quantity) {
+            handleAddMiscRecipe(selectedItem.id, quantity);
             closeModal();
         } else {
             showErrorToast("Please fill in all fields.");
@@ -222,18 +264,17 @@ export function AddMiscModal({ isOpen, closeModal, handleAddMiscRecipe }) {
     };
 
     const searchItemsFunction = async (term) => {
-        console.log('Searching for:', term); 
         try {
             const response = await searchMiscs(api, user.token, term);
-            setFilteredMiscList(response);
+            setItemList(response);
         } catch (error) {
             showErrorToast("Error fetching misc data: ", error);
-            setFilteredMiscList([]); 
+            setItemList([]); 
         }
     };
 
-    const handleSelectMisc = (misc) => {
-        setSelectedMisc(misc);
+    const handleSelectItem = (misc) => {
+        setSelectedItem(misc);
     };
 
     return (
@@ -249,33 +290,36 @@ export function AddMiscModal({ isOpen, closeModal, handleAddMiscRecipe }) {
                 <div className="modal">
                     <SearchInput searchTerm={searchTerm} setSearchTerm={setSearchTerm} onSearch={searchItemsFunction} />    
 
+
                     <div className="modal-search-container">
-                        {filteredMiscList.length > 0 && (
+                        {itemList.length > 0 ? (
                             <ul className="modal-search-results">
-                                {filteredMiscList.map((misc) => (
+                                {itemList.map((item) => (
                                     <li 
-                                        key={misc.id} 
-                                        className={`modal-search-item ${selectedMisc?.id === misc.id ? 'selected' : ''}`} 
-                                        onMouseDown={() => handleSelectMisc(misc)}
+                                        key={item.id} 
+                                        className={`modal-search-item ${selectedItem?.id === item.id ? 'selected' : ''}`} 
+                                        onMouseDown={() => handleSelectItem(item)}
                                     >
-                                        {misc.name}
+                                        {item.name}
                                     </li>
                                 ))}
                             </ul>
+                        ) : (
+                            <p className="modal-placeholder">No results found</p>
                         )}
                     </div>
                     <div className="inputs-row">
-                        <div className="input-field">
-                            <label htmlFor="name">Quantity</label>
+                        <div className="input-field" style={{ marginTop: '10px' }}>
+                        <label htmlFor="name">Quantity (Grams)</label>
                             <input
                                 type="number"
-                                placeholder="Quantity"
                                 value={quantity}
                                 onChange={handleQuantityChange}
+                                style={{ width: '150px' }}
                             />
                         </div>
                     </div>
-                <button type="button" onClick={handleSaveButton} className="crud-save-button">
+                    <button type="button" onClick={handleSaveButton} className="crud-save-button" style={{ marginTop: '70px' }}>
                     Add Misc
                 </button>
                 </div>
@@ -288,14 +332,28 @@ export function AddYeastModal({ isOpen, closeModal, handleAddYeastRecipe }) {
     const [selectedYeast, setSelectedYeast] = useState(null);
     const [quantity, setQuantity] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
-    const [filteredYeastList, setFilteredYeastList] = useState([]);
+    const [itemList, setItemList] = useState([]);
 
     const { user } = useContext(AuthContext);
+
+    useEffect(() => {
+        if (isOpen) {
+            const loadItems = async () => {
+                try {
+                  const items = await fetchYeasts(api, user.token);
+                  setItemList(items);
+                } catch (err) {
+                  showErrorToast('Error loading equipments');
+                }
+              };
+            loadItems();
+        }
+    }, [isOpen]);
 
     const searchItemsFunction = async (term) => {
         try {
             const response = await searchYeasts(api, user.token, term);
-            setFilteredYeastList(response); 
+            setItemList(response); 
         } catch (error) {
             showErrorToast("Error searching yeasts:", error);
         }
@@ -322,15 +380,15 @@ export function AddYeastModal({ isOpen, closeModal, handleAddYeastRecipe }) {
             className="modal-content"
             overlayClassName="modal-overlay"
         >
-            <h2>Select a Yeast</h2>
+            <h2>Select an Yeast</h2>
             <form onSubmit={handleSaveButton}>
                 <div className="modal">
                     <SearchInput searchTerm={searchTerm} setSearchTerm={setSearchTerm} onSearch={searchItemsFunction} />   
 
                     <div className="modal-search-container">
-                        {filteredYeastList.length > 0 && (
+                        {itemList.length > 0 && (
                             <ul className="modal-search-results">
-                                {filteredYeastList.map((yeast) => (
+                                {itemList.map((yeast) => (
                                     <li 
                                         key={yeast.id} 
                                         className={`modal-search-item ${selectedYeast?.id === yeast.id ? 'selected' : ''}`} 
@@ -344,17 +402,17 @@ export function AddYeastModal({ isOpen, closeModal, handleAddYeastRecipe }) {
                     </div>
 
                     <div className="inputs-row">
-                        <div className="input-field">
-                            <label htmlFor="name">Quantity</label>
+                        <div className="input-field" style={{ marginTop: '10px' }}>
+                            <label htmlFor="name">Quantity (Grams)</label>
                             <input
                                 type="number"
-                                placeholder="Quantity"
                                 value={quantity}
                                 onChange={(e) => setQuantity(e.target.value)}
+                                style={{ width: '150px' }}
                             />
                         </div>
                     </div>
-                    <button type="button" onClick={handleSaveButton} className="crud-save-button">
+                    <button type="button" onClick={handleSaveButton} className="crud-save-button" style={{ marginTop: '70px' }}>
                     Add Yeast
                     </button>
                 </div>
@@ -366,14 +424,28 @@ export function AddYeastModal({ isOpen, closeModal, handleAddYeastRecipe }) {
 export function ChangeEquipmentModal({ isOpen, closeModal, handleChangeEquipmentRecipe }) {
     const [selectedItem, setSelectedItem] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
-    const [filteredItemList, setFilteredItemList] = useState([]);
+    const [itemList, setItemList] = useState([]);
 
     const { user } = useContext(AuthContext);
+
+    useEffect(() => {
+        if (isOpen) {
+            const loadItems = async () => {
+                try {
+                  const items = await fetchEquipments(api, user.token);
+                  setItemList(items);
+                } catch (err) {
+                  showErrorToast('Error loading equipments');
+                }
+              };
+            loadItems();
+        }
+    }, [isOpen]);
 
     const searchItemsFunction = async (term) => {
         try {
             const response = await searchEquipments(api, user.token, term);
-            setFilteredItemList(response); 
+            setItemList(response); 
         } catch (error) {
             console.error('Error searching equipments:', error);
         }
@@ -381,8 +453,6 @@ export function ChangeEquipmentModal({ isOpen, closeModal, handleChangeEquipment
 
     const handleSelectItem = (item) => {
         setSelectedItem(item);
-        setSearchTerm(item.name);
-        setFilteredItemList([]); 
     };
 
     const handleSaveButton = () => {
@@ -406,21 +476,23 @@ export function ChangeEquipmentModal({ isOpen, closeModal, handleChangeEquipment
                 <div className="modal">
                     <SearchInput searchTerm={searchTerm} setSearchTerm={setSearchTerm} onSearch={searchItemsFunction} />   
 
-                    {filteredItemList.length > 0 && (
-                        <ul style={{ border: '1px solid #ccc', padding: '5px', maxHeight: '150px', overflowY: 'auto' }}>
-                            {filteredItemList.map((item) => (
-                                <li 
-                                    key={item.id} 
-                                    style={{ cursor: 'pointer', padding: '5px' }}
-                                    onMouseDown={() => handleSelectItem(item)}
-                                >
-                                    {item.name}
-                                </li>
-                            ))}
-                        </ul>
-                    )}
+                    <div className="modal-search-container">
+                        {itemList.length > 0 && (
+                            <ul className="modal-search-results">
+                                {itemList.map((item) => (
+                                    <li 
+                                        key={item.id} 
+                                        className={`modal-search-item ${selectedItem?.id === item.id ? 'selected' : ''}`} 
+                                        onMouseDown={() => handleSelectItem(item)}
+                                    >
+                                        {item.name}
+                                    </li>
+                                ))}
+                            </ul>
+                        )}
+                    </div>
 
-                    <button onClick={handleSaveButton} className="crud-save-button">
+                    <button onClick={handleSaveButton} className="crud-save-button" style={{ marginTop: '150px' }}>
                         Change Equipment
                     </button>
                 </div>
@@ -470,13 +542,11 @@ export function UpdateFermentableModal({ isOpen, closeModal, selectedFermentable
                         <h2>Update Fermentable</h2>
                         <label htmlFor="name">Name</label>
                         <input 
-                            placeholder="Fermentable Name"
                             value={localFermentableObject.name || ''}
                             onChange={(e) => handleChange('name', e.target.value)}
                         />
                         <label htmlFor="name">Description</label>
                         <textarea 
-                            placeholder="Fermentable Description"
                             value={localFermentableObject.description || ''}
                             onChange={(e) => handleChange('description', e.target.value)}
                         />
@@ -500,7 +570,6 @@ export function UpdateFermentableModal({ isOpen, closeModal, selectedFermentable
                             <div className="input-field">
                                 <label htmlFor="name">Supplier</label>
                                 <input 
-                                    placeholder="Supplier"
                                     value={localFermentableObject.supplier || ''}
                                     onChange={(e) => handleChange('supplier', e.target.value)}
                                 />
@@ -510,7 +579,6 @@ export function UpdateFermentableModal({ isOpen, closeModal, selectedFermentable
                             <div className="input-field">
                                 <label htmlFor="name">EBC</label>
                                 <input 
-                                    placeholder="EBC"
                                     type="number"
                                     value={localFermentableObject.ebc || ''}
                                     onChange={(e) => handleChange('ebc', e.target.value)}
@@ -520,7 +588,6 @@ export function UpdateFermentableModal({ isOpen, closeModal, selectedFermentable
                             <div className="input-field">
                                 <label htmlFor="name">Potential Extract</label>
                                 <input 
-                                    placeholder="Potential Extract"
                                     type="number"
                                     value={localFermentableObject.potentialExtract || ''}
                                     onChange={(e) => handleChange('potentialExtract', e.target.value)}
@@ -528,9 +595,8 @@ export function UpdateFermentableModal({ isOpen, closeModal, selectedFermentable
                                 />
                             </div>
                             <div className="input-field">
-                                <label htmlFor="name">Quantity</label>
+                                <label htmlFor="name">Quantity (Grams)</label>
                                 <input 
-                                    placeholder="Quantity"
                                     type="number"
                                     value={localFermentableObject.quantity || ''}
                                     onChange={(e) => handleChange('quantity', e.target.value)}
@@ -538,7 +604,7 @@ export function UpdateFermentableModal({ isOpen, closeModal, selectedFermentable
                                 />
                             </div>
                         </div>
-                        <button className="crud-save-button" type="submit">
+                        <button className="crud-save-button" type="submit" style={{ marginTop: '140px' }}>
                             Save
                         </button>
                     </div>
@@ -646,7 +712,7 @@ export function UpdateHopModal({ isOpen, closeModal, selectedHop, handleUpdateHo
                                 </select>
                             </div>
                             <div className="input-field">
-                                <label htmlFor="name">Quantity</label>
+                                <label htmlFor="name">Quantity (Grams)</label>
                                 <input 
                                     type="number"
                                     value={localHopObject.quantity || ''}
@@ -655,7 +721,7 @@ export function UpdateHopModal({ isOpen, closeModal, selectedHop, handleUpdateHo
                             </div>
                         </div>
 
-                        <button className="crud-save-button" type="submit">
+                        <button className="crud-save-button" type="submit" style={{ marginTop: '140px' }}>
                             Save
                         </button>
                     </div>
@@ -708,13 +774,11 @@ export function UpdateMiscModal({ isOpen, closeModal, selectedMisc, handleUpdate
                         <h2>Update Misc</h2>
                         <label htmlFor="name">Name</label>
                         <input 
-                            placeholder="Name"
                             value={localMiscObject.name || ''}
                             onChange={(e) => handleChange('name', e.target.value)}
                         />
                         <label htmlFor="name">Description</label>
                         <textarea 
-                            placeholder="Description"
                             value={localMiscObject.description || ''}
                             onChange={(e) => handleChange('description', e.target.value)}
                         />
@@ -723,7 +787,6 @@ export function UpdateMiscModal({ isOpen, closeModal, selectedMisc, handleUpdate
                             <div className="input-field">
                                 <label htmlFor="name">Time</label>
                                 <input 
-                                    placeholder="Time"
                                     type="number"
                                     value={localMiscObject.time || ''}
                                     onChange={(e) => handleChange('time', e.target.value)}
@@ -770,16 +833,15 @@ export function UpdateMiscModal({ isOpen, closeModal, selectedMisc, handleUpdate
                                 </select>
                             </div>
                             <div className="input-field">
-                                <label htmlFor="name">Quantity</label>
+                                <label htmlFor="name">Quantity (Grams)</label>
                                 <input 
-                                    placeholder="Quantity"
                                     type="number"
                                     value={localMiscObject.quantity || ''}
                                     onChange={(e) => handleChange('quantity', e.target.value)}
                                 />
                                 </div>
                         </div>
-                        <button className="crud-save-button" type="submit">
+                        <button className="crud-save-button" type="submit" style={{ marginTop: '210px' }}>
                             Save
                         </button>
                     </div>
@@ -834,7 +896,6 @@ export function UpdateYeastModal({ isOpen, closeModal, selectedYeast, handleUpda
                             <div className="input-field">
                                 <label htmlFor="name">Name</label>
                                 <input 
-                                    placeholder="Yeast Name"
                                     value={localYeastObject.name || ''}
                                     onChange={(e) => handleChange('name', e.target.value)}
                                 />
@@ -842,7 +903,6 @@ export function UpdateYeastModal({ isOpen, closeModal, selectedYeast, handleUpda
                             <div className="input-field">
                                 <label htmlFor="name">Manufacturer</label>
                                 <input 
-                                    placeholder="Manufacturer"
                                     value={localYeastObject.manufacturer || ''}
                                     onChange={(e) => handleChange('description', e.target.value)}
                                 />
@@ -850,7 +910,6 @@ export function UpdateYeastModal({ isOpen, closeModal, selectedYeast, handleUpda
                         </div>
                         <label htmlFor="name">Description</label>
                         <textarea 
-                            placeholder="Description"
                             value={localYeastObject.description || ''}
                             onChange={(e) => handleChange('description', e.target.value)}
                         />
@@ -914,7 +973,6 @@ export function UpdateYeastModal({ isOpen, closeModal, selectedYeast, handleUpda
                             <div className="input-field">
                                 <label htmlFor="name">Temperature Range</label>
                                 <input 
-                                    placeholder="Temperature Range"
                                     value={localYeastObject.temperatureRange || ''}
                                     onChange={(e) => handleChange('temperatureRange', e.target.value)}
                                 />
@@ -922,7 +980,6 @@ export function UpdateYeastModal({ isOpen, closeModal, selectedYeast, handleUpda
                             <div className="input-field">
                                 <label htmlFor="name">Attenuation</label>
                                 <input 
-                                    placeholder="Attenuation"
                                     value={localYeastObject.attenuation || ''}
                                     onChange={(e) => handleChange('attenuation', e.target.value)}
                                 />
@@ -930,7 +987,6 @@ export function UpdateYeastModal({ isOpen, closeModal, selectedYeast, handleUpda
                             <div className="input-field">
                                 <label htmlFor="name">Alcohol Tolerance</label>
                                 <input 
-                                    placeholder="Alcohol Tolerance"
                                     value={localYeastObject.alcoholTolerance || ''}
                                     onChange={(e) => handleChange('alcoholTolerance', e.target.value)}
                                 />
@@ -938,9 +994,8 @@ export function UpdateYeastModal({ isOpen, closeModal, selectedYeast, handleUpda
                         </div>
                         <div className="inputs-row">
                             <div className="input-field">
-                                <label htmlFor="name">Quantity</label>
+                                <label htmlFor="name">Quantity (Grams)</label>
                                 <input 
-                                    placeholder="Quantity"
                                     type="number"
                                     value={localYeastObject.quantity || ''}
                                     onChange={(e) => handleChange('quantity', e.target.value)}
@@ -949,7 +1004,7 @@ export function UpdateYeastModal({ isOpen, closeModal, selectedYeast, handleUpda
                         </div>
                     </div>
 
-                    <button className="crud-save-button" type="submit">
+                    <button className="crud-save-button" type="submit" style={{ marginTop: '70px' }}>
                         Save
                     </button>
                 </form>

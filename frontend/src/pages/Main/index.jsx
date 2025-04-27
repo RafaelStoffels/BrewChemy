@@ -20,7 +20,7 @@ export default function Main() {
       <div>
         <Sidebar />
         <div className='main-container'>
-
+            Brewchemy
         </div>
       </div>
     );

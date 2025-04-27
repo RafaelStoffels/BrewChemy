@@ -38,7 +38,7 @@ export async function getOpenAIResponse(recipe, userToken) {
 
         return response.data.response;
     } catch (err) {
-        console.error("Erro na API:", err.response ? err.response.data : err.message);
+        console.error("Error:", err.response ? err.response.data : err.message);
         throw new Error('Error openAI.');
     }
 }

@@ -71,10 +71,10 @@ form input, select{
 
 }
 
-form textarea{
+textarea{
     width: 100%;
     resize: vertical;
-    min-height: 90px;
+    height: 90px;
     color: #333;
     border: 1px solid #dcdce6;
     border-radius: 8px;
@@ -121,6 +121,8 @@ form textarea{
     filter: brightness(90%);
 }
 
+
+
 .modal-overlay {
     background-color: rgba(0, 0, 0, 0.6); /* Fundo semi-transparente */
     display: flex;
@@ -163,7 +165,6 @@ form textarea{
     align-items: center;
     overflow-y: auto;
 }
-
 
 .modal-search-results {
     width: 100%;
@@ -236,4 +237,30 @@ td {
 
 .icon-button:hover {
     transform: scale(1.1); /* Aumenta o tamanho do botão em 10% */
+}
+
+::-webkit-scrollbar {
+    width: 8px; /* Largura da barra vertical */
+    height: 8px; /* Altura da barra horizontal */
+}
+
+::-webkit-scrollbar-track {
+    background: #a87238; /* Cor do fundo da barra */
+    border-radius: 10px;
+    cursor: pointer;       /* Tipo de cursor */
+}
+
+::-webkit-scrollbar-thumb {
+    background: #744410; /* Cor principal da barra */
+    border-radius: 10px;
+    cursor: pointer;       /* Tipo de cursor */
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #895017; /* Cor ao passar o mouse */
+}
+
+::-webkit-inner-spin-button {
+    opacity: 0.5;          /* Transparência */
+    cursor: pointer;       /* Tipo de cursor */
 }

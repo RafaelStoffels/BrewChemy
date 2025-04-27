@@ -1,19 +1,16 @@
 export const calculateOG = (recipe) => {
     if (!recipe.recipeEquipment || !recipe.recipeEquipment.batchVolume || recipe.recipeEquipment.batchVolume <= 0) {
-        console.error("Volume deve ser maior que 0 para calcular a OG.");
+      /*  console.error("Volume deve ser maior que 0 para calcular a OG."); */
     }
 
     if (!recipe.recipeEquipment || !recipe.recipeEquipment.efficiency || recipe.recipeEquipment.efficiency <= 0) {
-        console.error("Eficiencia deve ser maior que 0 para calcular a OG.");
+      /*  console.error("Eficiencia deve ser maior que 0 para calcular a OG."); */
     }
 
     if (!recipe || !recipe.recipeFermentables || recipe.recipeFermentables.length === 0) {
-        console.error("recipe.recipeFermentables está vazio ou indefinido.");
+      /*  console.error("recipe.recipeFermentables está vazio ou indefinido."); */
         return "1.000";
     }
-
-    console.log("Calculate og- efficiency: " + recipe.recipeEquipment.efficiency);
-    console.log("Calculate og- batchVolume: " + recipe.recipeEquipment.batchVolume);
 
     const volumeGallons = recipe.recipeEquipment.batchVolume / 3.78541;
 
@@ -36,7 +33,7 @@ export const calculateOG = (recipe) => {
 
 export const calculateFG = (recipe, OGResult) => {
     if (!recipe || !recipe.recipeYeasts || recipe.recipeYeasts.length === 0) {
-        console.error("Receita inválida ou sem leveduras.");
+    /*    console.error("Receita inválida ou sem leveduras."); */
     }
 
     let attenuation = 100;
@@ -54,7 +51,7 @@ export const calculateFG = (recipe, OGResult) => {
 export const calculateEBC = (recipe) => {
 
     if (!recipe.recipeEquipment || !recipe.recipeEquipment.batchVolume || recipe.recipeEquipment.batchVolume <= 0) {
-        console.error("Volume deve ser maior que 0 para calcular EBC.");
+    /*    console.error("Volume deve ser maior que 0 para calcular EBC."); */
     }
 
     let totalEBC = 0;
@@ -78,12 +75,12 @@ export const calculateEBC = (recipe) => {
 
 export const calculateIBU = (recipe, OG, setRecipe) => {
     if (!recipe.recipeEquipment || !recipe.recipeEquipment.batchVolume || recipe.recipeEquipment.batchVolume <= 0) {
-        console.error("Volume deve ser maior que 0 para calcular IBU.");
+      /*  console.error("Volume deve ser maior que 0 para calcular IBU."); */
         return;
     }
 
     if (!recipe || !recipe.recipeHops || recipe.recipeHops.length === 0 || OG <= 0) {
-        console.error("Parâmetros inválidos para o cálculo do IBU.");
+      /*  console.error("Parâmetros inválidos para o cálculo do IBU."); */
         return;
     }
 
@@ -94,7 +91,7 @@ export const calculateIBU = (recipe, OG, setRecipe) => {
         const { quantity, alphaAcidContent, boilTime, ibu: previousIbu } = hop;
 
         if (!quantity || !alphaAcidContent) {
-            console.error("Informações de lúpulo inválidas.");
+        /*    console.error("Informações de lúpulo inválidas.");  */
             return hop;
         }
 
@@ -122,7 +119,6 @@ export const calculateIBU = (recipe, OG, setRecipe) => {
         }));
     }
 
-    console.log(`IBU total da receita: ${totalIBU.toFixed(2)}`);
     return totalIBU.toFixed(2);
 };
 
@@ -146,18 +142,11 @@ export const getIngredientsPorcentage = (recipe, setRecipe) => {
         const { quantity, percentage: previousPercentage } = fermentable;
 
         if (!quantity || totalQuantity === 0) {
-            console.error("Informações de fermentável inválidas.");
+         /*   console.error("Informações de fermentável inválidas."); */
             return fermentable;
         }
 
-
-
         const percentageFixed = ((quantity / totalQuantity) * 100).toFixed(2);
-
-        console.log("oie");
-
-        console.log(previousPercentage);
-        console.log(percentageFixed);
 
         // Se `previousPercentage` estiver undefined, compara com `fermentable.percentage`
         if (previousPercentage !== percentageFixed) {

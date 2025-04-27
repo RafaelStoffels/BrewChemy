@@ -99,6 +99,7 @@ export default function NewYeast() {
 
     return (
         <div>
+            <div className='crud-container'>
             <section>
                 <h1>
                   {isEditing ? 'Update Yeast' :
@@ -106,7 +107,6 @@ export default function NewYeast() {
                    'Add New Yeast'}
                 </h1>
             </section>
-            <div className='crud-container'>
                 <div className='content'>
                     <form onSubmit={handleSubmit}>
                         <div className='inputs-row'>

@@ -91,14 +91,14 @@ export default function NewFermentable() {
 
     return (
         <div>
-            <section>
-                <h1>
-                  {isEditing ? 'Update Fermentable' :
-                   isView ? 'Fermentable Details' : 
-                   'Add New Fermentable'}
-                </h1>
-            </section>
             <div className='crud-container'>
+                <section>
+                    <h1>
+                      {isEditing ? 'Update Fermentable' :
+                       isView ? 'Fermentable Details' : 
+                       'Add New Fermentable'}
+                    </h1>
+                </section>
                 <div className='content'>
                     <form onSubmit={handleSubmit}>
                         <div className='inputs-row'>
