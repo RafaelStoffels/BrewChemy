@@ -85,17 +85,19 @@
 }
 
 .IA {
+    display: flex;
     margin-top: 10px;
     width: 1115px;
     background-color: #aa8e69; 
     padding: 15px;
     box-shadow: 0 5px 10px rgba(0, 0, 0, 0.4);
+    gap: 50px;
 }
 
 /*svgs*/
 .malt-object, .yeast-object, .hop-object, .misc-object{
     width: 20px;
-    height: 20px;
+    height: 16px;
 }
 
 .modalAddButtonFermentable, .modalAddButtonHop, .modalAddButtonYeast, .modalAddButtonMisc {
@@ -117,6 +119,37 @@
 
 .modalAddButtonFermentable:hover, .modalAddButtonHop:hover, .modalAddButtonYeast:hover, .modalAddButtonMisc:hover {
     filter: brightness(90%);
+}
+
+@keyframes thunderGlow {
+    0% {
+        box-shadow: 0 0 10px rgba(255, 255, 255, 0.6), 0 0 20px rgba(255, 255, 255, 0.3);
+    }
+    30% {
+        box-shadow: 0 0 20px rgba(255, 255, 255, 0.8), 0 0 50px rgba(255, 255, 255, 0.4), 0 0 80px rgba(255, 215, 0, 0.8);
+    }
+    50% {
+        box-shadow: 0 0 40px rgba(255, 255, 255, 1), 0 0 100px rgba(255, 255, 255, 0.6), 0 0 120px rgba(255, 255, 0, 1);
+    }
+    100% {
+        box-shadow: 0 0 10px rgba(255, 255, 255, 0.6), 0 0 20px rgba(255, 255, 255, 0.3);
+    }
+}
+
+.modalAddButtonMystical {
+    margin-left: 19px;
+    width: 79px;
+    height: 79px;
+    background: #744410;
+    border: 0;
+    border-radius: 8px;
+    color: #FFF;
+    transition: filter 0.2s;
+    cursor: pointer;
+}
+
+.modalAddButtonMystical:hover {
+    animation: thunderGlow 1s ease-out forwards; /* Efeito de raios */
 }
 
 .bar-container {

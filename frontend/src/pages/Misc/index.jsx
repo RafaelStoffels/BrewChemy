@@ -78,6 +78,7 @@ export default function NewMisc() {
 
     return (
         <div>
+            <div className='crud-container'>
             <section>
                 <h1>
                   {isEditing ? 'Update Misc' :
@@ -85,7 +86,6 @@ export default function NewMisc() {
                    'Add New Misc'}
                 </h1>
             </section>
-            <div className='crud-container'>
                 <div className='content'>
                     <form onSubmit={handleSubmit}>
                         <div className='inputs-row'>

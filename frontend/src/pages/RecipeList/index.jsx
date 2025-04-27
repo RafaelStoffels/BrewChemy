@@ -70,7 +70,7 @@ export default function MaltList() {
       <Sidebar />
       <div className='list-container'>
         <div className="div-addButton">
-           <Link className="Addbutton" to="/Recipe/new">Add new Recipe</Link>
+           <Link className="Addbutton" to="/Recipes/new">Add new Recipe</Link>
         </div>
 
         <SearchInput onSearch={searchItemsFunction} />

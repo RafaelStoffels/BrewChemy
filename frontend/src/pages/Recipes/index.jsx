@@ -1,7 +1,6 @@
-import React, { useState, useEffect, useContext, useRef } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { FiTrash2, FiEdit, FiRepeat  } from 'react-icons/fi';
-import { v4 as uuidv4 } from 'uuid';
 import { showSuccessToast, showErrorToast } from "../../utils/notifications";
 
 import api from '../../services/api';
@@ -14,10 +13,9 @@ import { fetchHops } from '../../services/Hops';
 import { fetchMisc } from '../../services/Misc';
 import { fetchYeasts } from '../../services/Yeasts';
 import { fetchRecipeById } from '../../services/recipes';
-import { fetchEquipmentById } from '../../services/Equipments';
 
 import './styles.css';
-import '../Recipe/styles.css';
+import '../Recipes/styles.css';
 import Sidebar from '../../components/Sidebar';
 import { calculateOG, calculateFG, calculateIBU, calculateEBC, getPreBoilVolume, getIngredientsPorcentage } from '../../components/Recipe/Calculation';
 import { getBeerColor } from '../../components/Recipe/GetBeerColor';
@@ -80,11 +78,7 @@ export default function NewRecipe() {
 
     /* Components */
     const [selectedStyle, setSelectedStyle] = useState('');
-    const [selectedType, setSelectedType] = useState('');
     const [EBCColor, setEBCColor] = useState("");
-
-    /* Barra */
-
     
     const [recipe, setRecipe] = useState({
         name: '',
@@ -125,8 +119,6 @@ export default function NewRecipe() {
     useEffect(() => {
         
         if (recipe) {
-            console.log("useEffect Recipe");
-
             getIngredientsPorcentage(recipe, setRecipe);
 
             const preBoilCalc = getPreBoilVolume(recipe);
@@ -149,16 +141,46 @@ export default function NewRecipe() {
             setEBC(EBCResult);
         
             const IBUresult = calculateIBU(recipe, OGResult, setRecipe);
-            setIBU(IBUresult);
+
+            if (IBUresult > 0){
+                setIBU(IBUresult);
+            }
+            else {
+                console.log("caiu aqui");
+                setIBU(0);
+            }
         
             const GU = (OGResult -1) * 1000;
 
-            setBUGU((IBU / GU).toFixed(2));
+            console.log("IBU: ", IBU);
 
-            const loadStyle = beerStyles.find(style => style.name === recipe.style);
+            if (IBU){
+                setBUGU((IBU / GU).toFixed(2));
+            }
+
+            if (recipe.style) {
+                const loadStyle = beerStyles.find(style => style.name === recipe.style);
         
-            if (loadStyle) {
-                setSelectedStyle(loadStyle);
+                if (loadStyle) {
+                    setSelectedStyle(loadStyle);
+                }
+            }
+            else {
+                setSelectedStyle((prev) => ({
+                    ...prev,
+                    initialOG: 1,
+                    finalOG: 1,
+                    initialFG: 1,
+                    finalFG: 1,
+                    initialABV: 0,
+                    finalABV: 0,
+                    initialEBC: 0,
+                    finalEBC: 0,
+                    initialIBU: 0,
+                    finalIBU: 0,
+                    initialBuGu: 0,
+                    finalBuGu: 0,
+                }));
             }
         }
     }, [recipe]);
@@ -197,11 +219,13 @@ export default function NewRecipe() {
     }, [EBCColor]);
 
     useEffect(() => {
-        setRecipe((prevRecipe) => ({
-            ...prevRecipe,
-            style: selectedStyle.name
-        }));
-    }, [selectedStyle, setRecipe]); // Esse useEffect será acionado toda vez que selectedStyle mudar
+        setRecipe((prevRecipe) => {
+            if (prevRecipe.style !== selectedStyle.name) {
+                return { ...prevRecipe, style: selectedStyle.name };
+            }
+            return prevRecipe;
+        });
+    }, [selectedStyle]);
 
 
     const fetchRecipe = async (recipeID) => {
@@ -388,11 +412,26 @@ export default function NewRecipe() {
 
     const handleChangeEquipmentRecipe = (selectedItem) => {
         if (selectedItem) {
-            const confirmChange = window.confirm(
-                "Deseja mesmo trocar o equipamento? A troca irá atualizar a receita."
-            );
-    
-            if (confirmChange) {
+            if (recipe.recipeEquipment?.name != undefined){
+                const confirmChange = window.confirm(
+                    "Deseja mesmo trocar o equipamento? A troca irá atualizar a receita."
+                );
+            
+                if (confirmChange) {
+                    setEquipment(selectedItem.name);
+
+                    setRecipe((prevRecipe) => ({
+                        ...prevRecipe,
+                        recipeEquipment: {
+                            ...selectedItem,  // Substitui recipeEquipment com o objeto do equipamento selecionado
+                        },
+                    }));
+                    closeChangeEquipmentModal();
+                }
+            }
+            else{
+                setEquipment(selectedItem.name);
+
                 setRecipe((prevRecipe) => ({
                     ...prevRecipe,
                     recipeEquipment: {
@@ -517,7 +556,29 @@ export default function NewRecipe() {
     async function handleSubmit(e) {
         e.preventDefault();
 
-        console.log(recipe.recipeMisc);
+        if (!recipe.name) {
+            showErrorToast("Recipe name is required.");
+        }
+
+        if (recipe.style) {
+            showErrorToast("Beer Style is required.");
+        }
+
+        if (recipe.recipeEquipment) {
+            showErrorToast("Equipment is required.");
+        }
+
+        if (recipe.volumeLiters) {
+            showErrorToast("Batch Volume is required.");
+        }
+
+        if (recipe.batchTime) {
+            showErrorToast("Batch Time is required.");
+        }
+
+        if (recipe.recipeEquipment.boilTime) {
+            showErrorToast("Boil Time is required.");
+        }
 
         const data = {
             name: recipe.name,
@@ -724,6 +785,7 @@ export default function NewRecipe() {
                                         style={{ width: '90px' }}/>
                                 </div>
                             </div>
+                            
                         </form>
                     </div>
                     <div className="buttons-container">
@@ -731,7 +793,6 @@ export default function NewRecipe() {
                         <button onClick={openHopModal} className="modalAddButtonHop">Add Hop</button>
                         <button onClick={openMiscModal} className="modalAddButtonMisc">Add Misc</button>
                         <button onClick={openYeastModal} className="modalAddButtonYeast">Add Yeast</button>
-                        <button onClick={fetchOpenAIResponse} className="modalAddButtonFermentable">Mystical Brew Wisdom</button>
                     </div>
                     <div className="bottom-container">
                     <div className="bottom-left">
@@ -830,7 +891,7 @@ export default function NewRecipe() {
                                 <strong>FG:</strong> {FG}
                             </div>
                             <div className="bar-container">
-                                <OGBar valorInicial={0} valorFinal={25} margemInicial={selectedStyle.initialFG} margemFinal={selectedStyle.finalFG} OGAtual={FG} />
+                                <OGBar valorInicial={1.000} valorFinal={1.025} margemInicial={selectedStyle.initialFG} margemFinal={selectedStyle.finalFG} OGAtual={FG} />
                             </div>
                             <div className="parameters-container">
                                 <strong>ABV:</strong> {ABV}
@@ -868,7 +929,14 @@ export default function NewRecipe() {
                             placeholder="Mystical Wisdom"
                             value={openAI}
                             disabled={true}
-                            style={{ width: '1070px' }}/>
+                            style={{ 
+                                width: '880px', 
+                                height: '85px', 
+                                overflow: 'hidden'
+                            }}></textarea>
+                            
+                            <button type="button" onClick={fetchOpenAIResponse} className="modalAddButtonMystical">Mystical Brew Wisdom</button>
+
                     </div>
                     {!isView && (
                         <button onClick={handleSubmit} className='crud-save-button' type="submit">

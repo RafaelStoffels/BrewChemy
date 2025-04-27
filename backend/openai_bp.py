@@ -9,18 +9,16 @@ class ChatGPT:
 
     def get_response(self, message: str) -> str:
         try:
-            # Chamada à API do ChatGPT
             response = openai.ChatCompletion.create(
-                model="gpt-3.5-turbo",  # Usando o modelo adequado
-                messages=[  # Dados enviados para a API, incluindo a mensagem do usuário
-                    {"role": "system", "content": "Você irá criticar a receita de forma objetiva em três linhas."},
+                model="gpt-3.5-turbo",
+                messages=[
+                    {"role": "system", "content": "You will objectively critique the recipe in three lines."},
                     {"role": "user", "content": message}
                 ]
             )
-            # Retorna o conteúdo da resposta do ChatGPT
             return response["choices"][0]["message"]["content"]
         except Exception as e:
-            return f"Erro ao se comunicar com ChatGPT: {str(e)}"
+            return f"Error communicating with ChatGPT: {str(e)}"
 
 # Criação da rota POST que recebe dados da API do front-end
 def openai_route():
@@ -33,7 +31,7 @@ def openai_route():
         recipe = request.json.get("message")
         
         if not recipe:
-            return jsonify({"error": "receita não fornecida"}), 400
+            return jsonify({"error": "No recipe provided"}), 400
 
         try:
             api_key = os.getenv('OPENAI_API_KEY')
