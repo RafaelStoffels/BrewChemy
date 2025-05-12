@@ -560,23 +560,23 @@ export default function NewRecipe() {
             showErrorToast("Recipe name is required.");
         }
 
-        if (recipe.style) {
+        if (!recipe.style) {
             showErrorToast("Beer Style is required.");
         }
 
-        if (recipe.recipeEquipment) {
+        if (!recipe.recipeEquipment) {
             showErrorToast("Equipment is required.");
         }
 
-        if (recipe.volumeLiters) {
+        if (!recipe.volumeLiters) {
             showErrorToast("Batch Volume is required.");
         }
 
-        if (recipe.batchTime) {
+        if (!recipe.batchTime) {
             showErrorToast("Batch Time is required.");
         }
 
-        if (recipe.recipeEquipment.boilTime) {
+        if (!recipe.recipeEquipment.boilTime) {
             showErrorToast("Boil Time is required.");
         }
 
