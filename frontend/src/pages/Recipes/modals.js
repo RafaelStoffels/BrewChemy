@@ -73,7 +73,7 @@ export function AddFermentableModal({ isOpen, closeModal, handleAddFermentableRe
                                         className={`modal-search-item ${selectedItem?.id === item.id ? 'selected' : ''}`} 
                                         onMouseDown={() => handleSelectItem(item)}
                                     >
-                                        {item.name}
+                                        {item.name} ({item.supplier})
                                     </li>
                                 ))}
                             </ul>
@@ -106,7 +106,7 @@ export function AddHopModal({ isOpen, closeModal, handleAddHopRecipe }) {
     const [selectedHop, setSelectedHop] = useState(null);
     const [quantity, setQuantity] = useState('');
     const [alphaAcid, setAlphaAcid] = useState('');
-    const [boilTime, setBoilTime] = useState('');
+    const [boilTime, setBoilTime] = useState(60);
     const [useType, setUseType] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
     const [itemList, setItemList] = useState([]);
@@ -132,8 +132,11 @@ export function AddHopModal({ isOpen, closeModal, handleAddHopRecipe }) {
         setItemList(response);
     };
 
-    const handleSelectHop = (hop) => {
-        setSelectedHop(hop);
+    const handleSelectHop = (item) => {
+        setSelectedHop(item);
+        if (item.alphaAcidContent != null) {
+            setAlphaAcid(item.alphaAcidContent);
+        }
     };
 
     const handleSaveButton = () => {
@@ -161,13 +164,13 @@ export function AddHopModal({ isOpen, closeModal, handleAddHopRecipe }) {
                     <div className="modal-search-container">
                         {itemList.length > 0 && (
                             <ul className="modal-search-results">
-                                {itemList.map((hop) => (
+                                {itemList.map((item) => (
                                     <li 
-                                        key={hop.id} 
-                                        className={`modal-search-item ${selectedHop?.id === hop.id ? 'selected' : ''}`} 
-                                        onMouseDown={() => handleSelectHop(hop)}
+                                        key={item.id} 
+                                        className={`modal-search-item ${selectedHop?.id === item.id ? 'selected' : ''}`} 
+                                        onMouseDown={() => handleSelectHop(item)}
                                     >
-                                        {hop.name}
+                                        {item.name} ({item.supplier})
                                     </li>
                                 ))}
                             </ul>
@@ -359,8 +362,8 @@ export function AddYeastModal({ isOpen, closeModal, handleAddYeastRecipe }) {
         }
     };
 
-    const handleSelectYeast = (yeast) => {
-        setSelectedYeast(yeast);
+    const handleSelectYeast = (item) => {
+        setSelectedYeast(item);
     };
 
     const handleSaveButton = () => {
@@ -388,13 +391,13 @@ export function AddYeastModal({ isOpen, closeModal, handleAddYeastRecipe }) {
                     <div className="modal-search-container">
                         {itemList.length > 0 && (
                             <ul className="modal-search-results">
-                                {itemList.map((yeast) => (
+                                {itemList.map((item) => (
                                     <li 
-                                        key={yeast.id} 
-                                        className={`modal-search-item ${selectedYeast?.id === yeast.id ? 'selected' : ''}`} 
-                                        onMouseDown={() => handleSelectYeast(yeast)}
+                                        key={item.id} 
+                                        className={`modal-search-item ${selectedYeast?.id === item.id ? 'selected' : ''}`} 
+                                        onMouseDown={() => handleSelectYeast(item)}
                                     >
-                                        {yeast.name}
+                                        {item.name} ({item.manufacturer})
                                     </li>
                                 ))}
                             </ul>
