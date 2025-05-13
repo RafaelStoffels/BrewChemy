@@ -41,20 +41,25 @@ git clone https://github.com/RafaelStoffels/BrewChemy.git
 
 ### 🧰 Backend Setup (Flask)
 
+```bash
 cd backend
 python -m venv venv
 venv\Scripts\activate
 pip install -r requirements.txt
 python app.py
+```
 
 ### Frontend:
 
+```bash
 cd ../frontend
 npm install
 npm start
+```
 
 ## 📁 Project Structure
 
+```bash
 project-name/
 ├── backend/
 │   ├── app.py
@@ -69,6 +74,7 @@ project-name/
 │   │   ├── utils/
 │   └── public/
 └── README.md
+```
 
 ## 🤝 Contributing
 
