@@ -15,14 +15,9 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'default-secret-key')
 CLIENT_ID = os.getenv('GOOGLE_CLIENT_ID')
 CLIENT_SECRET = os.getenv('GOOGLE_CLIENT_SECRET')
 
-if os.getenv('ENVIRONMENT') == 'production':
-    BACKEND_URL = os.getenv('BACKEND_URL_PROD')
-    FRONTEND_URL = os.getenv('FRONTEND_URL_PROD')
-    REDIRECT_URI = os.getenv('BACKEND_URL_PROD') + "/api/callback"
-else:
-    BACKEND_URL = os.getenv('BACKEND_URL')
-    FRONTEND_URL = os.getenv('FRONTEND_URL')
-    REDIRECT_URI = os.getenv('BACKEND_URL') + "/api/callback"
+BACKEND_URL = os.getenv('BACKEND_URL')
+FRONTEND_URL = os.getenv('FRONTEND_URL')
+REDIRECT_URI = os.getenv('BACKEND_URL') + "/api/callback"
 
 # URLs do Google OAuth
 SCOPE = ["openid", "profile", "email"]
