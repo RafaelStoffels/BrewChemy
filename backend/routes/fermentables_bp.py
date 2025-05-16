@@ -11,70 +11,60 @@ def create_fermentables_bp():
     @token_required
     def search_fermentables(current_user_id):
         search_term = request.args.get("searchTerm", "").strip()
-        
+
         if not search_term:
             return jsonify({"error": "Search term is required"}), 400
-        
-        # Subquery para encontrar fermentáveis do usuário atual
+
         subquery = db.session.query(Fermentable.official_id).filter(
             Fermentable.user_id == current_user_id,
-            Fermentable.official_id.isnot(None)  # Evita incluir valores NULL
+            Fermentable.official_id.isnot(None)
         ).distinct()
-        
+
         subquery_list = [id for (id,) in subquery.all()]
-        print("Subquery list (sem NULL):", subquery_list)
-        
-        # Busca fermentáveis que correspondam ao termo de pesquisa
+
         items = Fermentable.query.filter(
             (
-                (Fermentable.user_id == current_user_id) |  # Pega fermentáveis do usuário
+                (Fermentable.user_id == current_user_id) |
                 (
-                    (Fermentable.user_id == 1) &  # Apenas fermentáveis oficiais
-                    (~Fermentable.id.in_(subquery_list))  # Exclui os personalizados
+                    (Fermentable.user_id == 1) &
+                    (~Fermentable.id.in_(subquery_list))
                 )
             ) &
-            (Fermentable.name.ilike(f"%{search_term}%"))  # Filtra pelo nome
+            (Fermentable.name.ilike(f"%{search_term}%"))
         ).limit(12).all()
-        
+
         return jsonify([item.to_dict() for item in items])
-
-
 
     @fermentables_bp.route("/fermentables", methods=["GET"])
     @token_required
     def get_fermentables(current_user_id):
-        # filtra todos os registro com official id do usuario corrente
+
         subquery = db.session.query(Fermentable.official_id).filter(
             Fermentable.user_id == current_user_id,
-            Fermentable.official_id.isnot(None)  # Evita incluir valores NULL
+            Fermentable.official_id.isnot(None)
         ).distinct()
-        
-        # Exibir os resultados da subquery para debug
+
         subquery_list = [id for (id,) in subquery.all()]
         print("Subquery list (sem NULL):", subquery_list)
-        
-        # Buscar os fermentáveis considerando a lógica correta
+
         items = Fermentable.query.filter(
-            (Fermentable.user_id == current_user_id) |  # Pega os fermentáveis do usuário atual
+            (Fermentable.user_id == current_user_id) |
             (
-                (Fermentable.user_id == 1) &  # Apenas fermentáveis oficiais
-                (~Fermentable.id.in_(subquery_list))  # Exclui aqueles que já foram personalizados
+                (Fermentable.user_id == 1) &
+                (~Fermentable.id.in_(subquery_list))
             )
         ).limit(12).all()
-        
-        # Retorna os dados formatados como JSON
-        return jsonify([item.to_dict() for item in items])
 
+        return jsonify([item.to_dict() for item in items])
 
     @fermentables_bp.route("/fermentables/<int:recordUserId>/<int:id>", methods=["GET"])
     def get_fermentable(recordUserId, id):
         item = Fermentable.query.filter_by(id=id, user_id=recordUserId).first()
-        
+
         if item is None:
             return jsonify({"message": "fermentable not found"}), 404
 
         return jsonify(item.to_dict())
-
 
     @fermentables_bp.route("/fermentables", methods=["POST"])
     @token_required
@@ -98,23 +88,19 @@ def create_fermentables_bp():
         db.session.commit()
         return jsonify(new_fermentable.to_dict()), 201
 
-
     @fermentables_bp.route("/fermentables/<int:recordUserId>/<int:id>", methods=["PUT"])
     @token_required
     def update_equipment(current_user_id, recordUserId, id):
 
-        # Caso o current_user_id seja diferente do recordUserId, cria-se um novo registro
         if recordUserId != current_user_id:
-            # Encontrar o equipamento oficial (user_id = 1)
             official_item = Fermentable.query.filter_by(id=id, user_id=1).first()
 
             if official_item is None:
                 return jsonify({"message": "Official fermentable not found"}), 404
 
-            # Criar um novo registro para o current_user_id baseado no equipamento oficial
             new_item = Fermentable(
                 user_id=current_user_id,
-                official_id=id,  # Associar ao ID oficial
+                official_id=id,
                 name=official_item.name,
                 description=official_item.description,
                 ebc=official_item.ebc,
@@ -123,7 +109,6 @@ def create_fermentables_bp():
                 supplier=official_item.supplier
             )
 
-            # Atualizar os dados do novo equipamento com os valores fornecidos, se existirem
             data = request.json
             new_item.name = data.get("name", new_item.name)
             new_item.description = data.get("description", new_item.description)
@@ -132,14 +117,12 @@ def create_fermentables_bp():
             new_item.type = data.get("type", new_item.type)
             new_item.supplier = data.get("supplier", new_item.supplier)
 
-            # Adicionar o novo equipamento e confirmar a transação
             db.session.add(new_item)
             db.session.commit()
 
-            return jsonify(new_item.to_dict()), 201  # Retornar o novo registro criado
+            return jsonify(new_item.to_dict()), 201
 
         else:
-            # Caso current_user_id e recordUserId sejam iguais, apenas atualiza o registro
             item = Fermentable.query.filter_by(id=id, user_id=current_user_id).first()
 
             if item is None:
@@ -156,9 +139,7 @@ def create_fermentables_bp():
 
             db.session.commit()
 
-            return jsonify(item.to_dict()), 200  # Retornar o registro atualizado
-
-
+            return jsonify(item.to_dict()), 200
 
     @fermentables_bp.route("/fermentables/<int:recordUserId>/<int:id>", methods=["DELETE"])
     @token_required
@@ -167,7 +148,7 @@ def create_fermentables_bp():
             return jsonify({"message": "Cannot delete official record"}), 404
 
         fermentable = Fermentable.query.filter_by(id=id, user_id=current_user_id).first()
-        
+
         if fermentable is None:
             return jsonify({"message": "Fermentable not found"}), 404
 

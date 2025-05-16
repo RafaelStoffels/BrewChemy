@@ -3,6 +3,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from db import db
 from datetime import datetime
 
+
 class Equipment(db.Model):
     __tablename__ = 'equipments'
 
@@ -21,10 +22,8 @@ class Equipment(db.Model):
     trub_loss = db.Column(db.Numeric(5, 2), nullable=False)
     dead_space = db.Column(db.Numeric(5, 2), nullable=False)
 
-
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
-    # Convert snake_case to camelCase in JSON
     def to_dict(self):
         return {
             "id": self.id,
@@ -43,6 +42,7 @@ class Equipment(db.Model):
             "createdAt": self.created_at.isoformat()
         }
 
+
 class Fermentable(db.Model):
     __tablename__ = 'fermentables'
 
@@ -59,7 +59,6 @@ class Fermentable(db.Model):
     supplier = db.Column(db.String(40), nullable=False)
     unit_price = db.Column(db.Numeric(10, 2))
 
-    # Converte snake_case para camelCase no JSON
     def to_dict(self):
         return {
             "id": self.id,
@@ -72,6 +71,7 @@ class Fermentable(db.Model):
             "type": self.type,
             "supplier": self.supplier,
         }
+
 
 class Hop(db.Model):
     __tablename__ = 'hops'
@@ -101,7 +101,8 @@ class Hop(db.Model):
             "useType": self.use_type,
             "countryOfOrigin": self.country_of_origin,
             "description": self.description,
-        } 
+        }
+
 
 class Misc(db.Model):
     __tablename__ = 'misc'
@@ -114,7 +115,6 @@ class Misc(db.Model):
     description = db.Column(db.Text)
     type = db.Column(db.String(15))
 
-    # Convert snake_case to camelCase in JSON
     def to_dict(self):
         return {
             "id": self.id,
@@ -124,7 +124,8 @@ class Misc(db.Model):
             "description": self.description,
             "type": self.type,
         }
-    
+
+
 class Yeast(db.Model):
     __tablename__ = 'yeasts'
 
@@ -143,7 +144,6 @@ class Yeast(db.Model):
     flocculation = db.Column(db.String(15))
     description = db.Column(db.Text)
 
-    # Convert snake_case to camelCase in JSON
     def to_dict(self):
         return {
             "id": self.id,
@@ -160,7 +160,8 @@ class Yeast(db.Model):
             "flocculation": self.flocculation,
             "description": self.description,
         }
-    
+
+
 class Recipe(db.Model):
     __tablename__ = 'recipes'
 
@@ -177,14 +178,37 @@ class Recipe(db.Model):
     author = db.Column(db.String(40), nullable=False)
     type = db.Column(db.String(20), nullable=False)
 
-    recipe_equipment = db.relationship('RecipeEquipment', backref='recipe')
-    recipe_fermentables = db.relationship('RecipeFermentable', backref='recipe', lazy=True, cascade="all, delete-orphan")
-    recipe_hops = db.relationship('RecipeHop', backref='recipe', lazy=True, cascade="all, delete-orphan")
-    recipe_misc = db.relationship('RecipeMisc', backref='recipe', lazy=True, cascade="all, delete-orphan")
-    recipe_yeasts = db.relationship('RecipeYeast', backref='recipe', lazy=True, cascade="all, delete-orphan")
+    recipe_equipment = db.relationship(
+        'RecipeEquipment',
+        backref='recipe'
+    )
+    recipe_fermentables = db.relationship(
+        'RecipeFermentable',
+        backref='recipe',
+        lazy=True,
+        cascade="all, delete-orphan"
+    )
+    recipe_hops = db.relationship(
+        'RecipeHop',
+        backref='recipe',
+        lazy=True,
+        cascade="all, delete-orphan"
+    )
+    recipe_misc = db.relationship(
+        'RecipeMisc',
+        backref='recipe',
+        lazy=True,
+        cascade="all, delete-orphan"
+    )
+    recipe_yeasts = db.relationship(
+        'RecipeYeast',
+        backref='recipe',
+        lazy=True,
+        cascade="all, delete-orphan"
+    )
 
     def to_dict(self):
-        # Verifica se existe algum equipamento associado à receita
+        # Checks if there is any equipment associated with the recipe
         recipe_equipment = self.recipe_equipment[0] if self.recipe_equipment else None
 
         return {
@@ -199,11 +223,14 @@ class Recipe(db.Model):
             "author": self.author,
             "type": self.type,
             "recipeEquipment": recipe_equipment.to_dict() if recipe_equipment else None,
-            "recipeFermentables": [fermentable.to_dict() for fermentable in self.recipe_fermentables],
+            "recipeFermentables": [
+                fermentable.to_dict() for fermentable in self.recipe_fermentables
+            ],
             "recipeHops": [hop.to_dict() for hop in self.recipe_hops],
             "recipeMisc": [misc.to_dict() for misc in self.recipe_misc],
             "recipeYeasts": [yeast.to_dict() for yeast in self.recipe_yeasts]
         }
+
 
 class RecipeEquipment(db.Model):
     __tablename__ = 'recipe_equipment'
@@ -240,6 +267,7 @@ class RecipeEquipment(db.Model):
             "trubLoss": float(self.trub_loss) if self.trub_loss else None,
         }
 
+
 class RecipeFermentable(db.Model):
     __tablename__ = 'recipe_fermentables'
 
@@ -271,7 +299,8 @@ class RecipeFermentable(db.Model):
             "unitPrice": float(self.unit_price) if self.unit_price else None,
             "quantity": float(self.quantity) if self.quantity else None
         }
-    
+
+
 class RecipeHop(db.Model):
     __tablename__ = 'recipe_hops'
 
@@ -302,7 +331,8 @@ class RecipeHop(db.Model):
             "quantity": float(self.quantity) if self.quantity else None,
             "boilTime": self.boil_time
         }
-    
+
+
 class RecipeMisc(db.Model):
     __tablename__ = 'recipe_misc'
 
@@ -330,6 +360,7 @@ class RecipeMisc(db.Model):
             "time": self.time
         }
 
+
 class RecipeYeast(db.Model):
     __tablename__ = 'recipe_yeasts'
 
@@ -344,7 +375,7 @@ class RecipeYeast(db.Model):
     attenuation = db.Column(db.String(20), nullable=False)
     temperature_range = db.Column(db.String(15), nullable=False)
     alcohol_tolerance = db.Column(db.String(15), nullable=False)
-    flavor_profile = db.Column(db.Text) 
+    flavor_profile = db.Column(db.Text)
     flocculation = db.Column(db.String(15), nullable=False)
     description = db.Column(db.Text)
     quantity = db.Column(db.Numeric)
@@ -366,7 +397,8 @@ class RecipeYeast(db.Model):
             "description": self.description,
             "quantity": float(self.quantity) if self.quantity else None
         }
-    
+
+
 class User(db.Model):
     __tablename__ = 'users'
 

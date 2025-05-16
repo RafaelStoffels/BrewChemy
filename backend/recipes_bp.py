@@ -7,7 +7,6 @@ from AuthTokenVerifier import token_required
 def create_recipes_bp():
     recipes_bp = Blueprint("recipes", __name__)
 
-
     @recipes_bp.route("/recipes/search", methods=["GET"])
     @token_required
     def search_recipes(current_user_id):
@@ -23,13 +22,11 @@ def create_recipes_bp():
 
         return jsonify([Recipe.to_dict() for Recipe in recipes])
 
-
     @recipes_bp.route("/recipes", methods=["GET"])
     @token_required
     def get_recipes(current_user_id):
         recipes = Recipe.query.filter_by(user_id=current_user_id).all()
         return jsonify([recipe.to_dict() for recipe in recipes])
-
 
     @recipes_bp.route("/recipes/<int:id>", methods=["GET"])
     @token_required
@@ -38,7 +35,6 @@ def create_recipes_bp():
         if recipe is None:
             return jsonify({"message": "Recipe not found"}), 404
         return jsonify(recipe.to_dict())
-
 
     @recipes_bp.route("/recipes", methods=["POST"])
     @token_required
@@ -126,7 +122,6 @@ def create_recipes_bp():
         db.session.commit()
         return jsonify(new_recipe.to_dict()), 201
 
-
     @recipes_bp.route("/recipes/<int:id>", methods=["PUT"])
     @token_required
     def update_recipe(current_user_id, id):
@@ -135,11 +130,6 @@ def create_recipes_bp():
             return jsonify({"message": "Recipe not found"}), 404
 
         data = request.json
-
-        print(data);
-
-        def sanitize(value):
-            return value if value != "" else None
 
         recipe.name = data.get("name", recipe.name)
         recipe.style = data.get("style", recipe.style)
@@ -151,7 +141,10 @@ def create_recipes_bp():
         recipe.type = data.get("type", recipe.type)
 
         fermentables_data = data.get("recipeFermentables", [])
-        existing_fermentables = {fermentable.id: fermentable for fermentable in recipe.recipe_fermentables}
+        existing_fermentables = {
+            fermentable.id: fermentable
+            for fermentable in recipe.recipe_fermentables
+        }
 
         equipment_data = data.get("recipeEquipment", {})
         if equipment_data:
@@ -191,9 +184,13 @@ def create_recipes_bp():
             if fermentable_id and fermentable_id in existing_fermentables:
                 fermentable = existing_fermentables[fermentable_id]
                 fermentable.name = fermentable_data.get("name", fermentable.name)
-                fermentable.description = fermentable_data.get("description", fermentable.description)
+                fermentable.description = fermentable_data.get(
+                    "description", fermentable.description
+                )
                 fermentable.ebc = fermentable_data.get("ebc", fermentable.ebc)
-                fermentable.potential_extract = fermentable_data.get("potentialExtract", fermentable.potential_extract)
+                fermentable.potential_extract = fermentable_data.get(
+                    "potentialExtract", fermentable.potential_extract
+                )
                 fermentable.type = fermentable_data.get("type", fermentable.type)
                 fermentable.supplier = fermentable_data.get("supplier", fermentable.supplier)
                 fermentable.unit_price = fermentable_data.get("unitPrice", fermentable.unit_price)
@@ -212,7 +209,6 @@ def create_recipes_bp():
                     quantity=fermentable_data["quantity"]
                 )
                 db.session.add(new_fermentable)
-
 
         hops_data = data.get("recipeHops", [])
         existing_hops = {hop.id: hop for hop in recipe.recipe_hops}
@@ -243,10 +239,9 @@ def create_recipes_bp():
                 )
                 db.session.add(new_hop)
 
-
         miscs_data = data.get("recipeMisc", [])
         existing_misc = {misc.id: misc for misc in recipe.recipe_misc}
-        
+
         for misc_item in miscs_data:
             misc_id = misc_item.get("id")
             if misc_id and misc_id in existing_misc:
@@ -268,7 +263,6 @@ def create_recipes_bp():
                     time=misc_item.get("time")
                 )
                 db.session.add(new_misc)
-
 
         yeast_data = data.get("recipeYeasts", [])
         existing_yeasts = {yeast.id: yeast for yeast in recipe.recipe_yeasts}
@@ -306,8 +300,11 @@ def create_recipes_bp():
                 )
                 db.session.add(new_yeast)
 
-
-        sent_fermentable_ids = {fermentable_data.get("id") for fermentable_data in fermentables_data if fermentable_data.get("id")}
+        sent_fermentable_ids = {
+            fermentable_data.get("id")
+            for fermentable_data in fermentables_data
+            if fermentable_data.get("id")
+        }
         for fermentable_id, fermentable in existing_fermentables.items():
             if fermentable_id not in sent_fermentable_ids:
                 db.session.delete(fermentable)
@@ -329,7 +326,6 @@ def create_recipes_bp():
 
         db.session.commit()
         return jsonify(recipe.to_dict()), 200
-
 
     @recipes_bp.route("/recipes/<int:id>", methods=["DELETE"])
     @token_required

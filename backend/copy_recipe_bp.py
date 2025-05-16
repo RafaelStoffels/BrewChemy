@@ -3,6 +3,7 @@ from db import db
 from AuthTokenVerifier import token_required
 from models import Recipe, RecipeEquipment, RecipeFermentable, RecipeHop, RecipeMisc, RecipeYeast
 
+
 def create_copy_recipe_bp():
     copy_recipe_bp = Blueprint("copy_recipe", __name__)
 
@@ -11,41 +12,42 @@ def create_copy_recipe_bp():
     def copy_recipe(current_user_id):
         data = request.get_json()
 
-        id_receita = data.get("idReceita")
-        id_usuario_destino = data.get("idUsuarioDestino")
+        recipe_id = data.get("recipe_id")
+        copy_target_user_id = data.get("copy_target_user_id")
 
-        if not id_receita or not id_usuario_destino:
-            return jsonify({"error": "Os campos 'idReceita' e 'idUsuarioDestino' são obrigatórios."}), 400
+        if not recipe_id or not copy_target_user_id:
+            return jsonify({
+                "error": ("The fields 'recipe_id' and 'copy_target_user_id' are required.")
+            }), 400
 
-        print(current_user_id)
+        original_recipe = Recipe.query.filter_by(id=recipe_id, user_id=current_user_id).first()
 
-        # Busca a receita original
-        receita_original = Recipe.query.filter_by(id=id_receita, user_id=current_user_id).first()
+        if not original_recipe:
+            return jsonify({
+                "error": ("Recipe not found or does not belong to the authenticated user.")
+                }), 404
 
-        if not receita_original:
-            return jsonify({"error": "Receita não encontrada ou não pertence ao usuário autenticado."}), 404
-
-        # Cria uma nova receita
-        nova_receita = Recipe(
-            user_id=id_usuario_destino,
-            name=f"{receita_original.name} (Cópia)",
-            style=receita_original.style,
-            description=receita_original.description,
-            volume_liters=receita_original.volume_liters,
-            notes=receita_original.notes,
-            author=receita_original.author,
-            type=receita_original.type,
-            equipment_id=receita_original.equipment_id
+        new_recipe = Recipe(
+            user_id=copy_target_user_id,
+            name=f"{original_recipe.name} (Cópia)",
+            style=original_recipe.style,
+            description=original_recipe.description,
+            volume_liters=original_recipe.volume_liters,
+            notes=original_recipe.notes,
+            author=original_recipe.author,
+            type=original_recipe.type,
+            equipment_id=original_recipe.equipment_id
         )
 
-        db.session.add(nova_receita)
-        db.session.flush()  # Garante que o ID da nova receita é gerado antes de copiar os ingredientes
+        db.session.add(new_recipe)
 
-        # Copia os fermentáveis
-        for fermentable in receita_original.recipe_fermentables:
+        #  Ensures that the ID of the new recipe is generated before copying the ingredients.
+        db.session.flush()
+
+        for fermentable in original_recipe.recipe_fermentables:
             novo_fermentable = RecipeFermentable(
-                user_id=id_usuario_destino,
-                recipe_id=nova_receita.id,
+                user_id=copy_target_user_id,
+                recipe_id=new_recipe.id,
                 name=fermentable.name,
                 description=fermentable.description,
                 ebc=fermentable.ebc,
@@ -58,11 +60,10 @@ def create_copy_recipe_bp():
             )
             db.session.add(novo_fermentable)
 
-        # Copia os lúpulos
-        for hop in receita_original.recipe_hops:
+        for hop in original_recipe.recipe_hops:
             novo_hop = RecipeHop(
-                user_id=id_usuario_destino,
-                recipe_id=nova_receita.id,
+                user_id=copy_target_user_id,
+                recipe_id=new_recipe.id,
                 name=hop.name,
                 alpha_acid_content=hop.alpha_acid_content,
                 beta_acid_content=hop.beta_acid_content,
@@ -74,11 +75,10 @@ def create_copy_recipe_bp():
             )
             db.session.add(novo_hop)
 
-        # Copia os adjuntos
-        for misc in receita_original.recipe_misc:
+        for misc in original_recipe.recipe_misc:
             novo_misc = RecipeMisc(
-                user_id=id_usuario_destino,
-                recipe_id=nova_receita.id,
+                user_id=copy_target_user_id,
+                recipe_id=new_recipe.id,
                 name=misc.name,
                 description=misc.description,
                 type=misc.type,
@@ -88,11 +88,10 @@ def create_copy_recipe_bp():
             )
             db.session.add(novo_misc)
 
-        # Copia as leveduras
-        for yeast in receita_original.recipe_yeasts:
+        for yeast in original_recipe.recipe_yeasts:
             novo_yeast = RecipeYeast(
-                user_id=id_usuario_destino,
-                recipe_id=nova_receita.id,
+                user_id=copy_target_user_id,
+                recipe_id=new_recipe.id,
                 name=yeast.name,
                 manufacturer=yeast.manufacturer,
                 type=yeast.type,
@@ -107,27 +106,28 @@ def create_copy_recipe_bp():
             )
             db.session.add(novo_yeast)
 
-        # Copia o equipamento, se existir
-        if receita_original.recipe_equipment:
-            equipamento_original = receita_original.recipe_equipment[0]  # Assumindo que há no máximo um equipamento
-            novo_equipamento = RecipeEquipment(
-                user_id=id_usuario_destino,
-                recipe_id=nova_receita.id,
-                name=equipamento_original.name,
-                description=equipamento_original.description,
-                efficiency=equipamento_original.efficiency,
-                batch_volume=equipamento_original.batch_volume,
-                boil_time=equipamento_original.boil_time,
-                boil_temperature=equipamento_original.boil_temperature,
-                batch_time=equipamento_original.batch_time,
-                boil_off=equipamento_original.boil_off,
-                dead_space=equipamento_original.dead_space,
-                trub_loss=equipamento_original.trub_loss
+        if original_recipe.recipe_equipment:
+            original_equipment = original_recipe.recipe_equipment[0]
+            new_equipment = RecipeEquipment(
+                user_id=copy_target_user_id,
+                recipe_id=new_recipe.id,
+                name=original_equipment.name,
+                description=original_equipment.description,
+                efficiency=original_equipment.efficiency,
+                batch_volume=original_equipment.batch_volume,
+                boil_time=original_equipment.boil_time,
+                boil_temperature=original_equipment.boil_temperature,
+                batch_time=original_equipment.batch_time,
+                boil_off=original_equipment.boil_off,
+                dead_space=original_equipment.dead_space,
+                trub_loss=original_equipment.trub_loss
             )
-            db.session.add(novo_equipamento)
+            db.session.add(new_equipment)
 
         db.session.commit()
 
-        return jsonify({"message": "Receita copiada com sucesso!", "novaReceitaId": nova_receita.id}), 201
+        return jsonify({
+            "message": "Recipe copied successfully!", "novaReceitaId": new_recipe.id
+            }), 201
 
     return copy_recipe_bp

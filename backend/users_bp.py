@@ -16,11 +16,11 @@ CLIENT_ID = os.getenv('GOOGLE_CLIENT_ID')
 CLIENT_SECRET = os.getenv('GOOGLE_CLIENT_SECRET')
 
 if os.getenv('ENVIRONMENT') == 'production':
-    BACKEND_URL  = os.getenv('BACKEND_URL_PROD')
+    BACKEND_URL = os.getenv('BACKEND_URL_PROD')
     FRONTEND_URL = os.getenv('FRONTEND_URL_PROD')
     REDIRECT_URI = os.getenv('BACKEND_URL_PROD') + "/api/callback"
 else:
-    BACKEND_URL  = os.getenv('BACKEND_URL')
+    BACKEND_URL = os.getenv('BACKEND_URL')
     FRONTEND_URL = os.getenv('FRONTEND_URL')
     REDIRECT_URI = os.getenv('BACKEND_URL') + "/api/callback"
 
@@ -31,65 +31,60 @@ TOKEN_URL = "https://accounts.google.com/o/oauth2/token"
 
 
 def generate_state():
-    """Função para gerar um valor aleatório para o state"""
+    """Function to generate a random value for the state"""
     return ''.join(random.choices(string.ascii_letters + string.digits, k=32))
+
 
 def generate_temp_password():
     length = 12
     characters = string.ascii_letters + string.digits
     return ''.join(random.choice(characters) for i in range(length))
 
+
 def create_users_bp():
     users_bp = Blueprint("users", __name__)
 
-
     def send_confirmation_email(user):
         try:
-            print("Enviando e-mail para:", user.email)
-
             msg = Message(
-                subject="Confirmação de Cadastro",
+                subject="Registration Confirmation",
                 sender=current_app.config['MAIL_DEFAULT_SENDER'],
                 recipients=[user.email]
             )
             msg.body = (
-                f"Olá {user.name},\n\n"
-                "Clique no link abaixo para confirmar seu cadastro:\n"
+                f"Hello {user.name},\n\n"
+                "Click the link below to confirm your registration:\n"
                 f"{BACKEND_URL}/api/confirm?email={user.email}\n\n"
-                "Se você não solicitou este cadastro, ignore este e-mail.\n\n"
-                "Atenciosamente,\nEquipe Brewchemy"
+                "If you did not request this registration, please ignore this email.\n\n"
+                "Best regards,\nThe Brewchemy Team"
             )
 
             mail = current_app.extensions["mail"]
             mail.send(msg)
 
-            print("E-mail enviado com sucesso!")
             return True
         except Exception as e:
-            print(f"Erro ao enviar e-mail: {e}")
             return False
-
 
     @users_bp.route("/confirm", methods=["GET"])
     def confirm_user():
         email = request.args.get("email")
 
         if not email:
-            return jsonify({"error": "Email é obrigatório"}), 400
+            return jsonify({"error": "Email is required"}), 400
 
         user = User.query.filter_by(email=email).first()
 
         if not user:
-            return jsonify({"error": "Usuário não encontrado"}), 404
+            return jsonify({"error": "User not found"}), 404
 
         if user.status == "active":
-            return jsonify({"message": "Usuário já está ativo"}), 400
+            return jsonify({"message": "User is already active"}), 400
 
         user.status = "active"
         db.session.commit()
 
         return redirect(f"{FRONTEND_URL}")
-    
 
     @users_bp.route("/sendPasswordResetEmail", methods=["POST"])
     def sendPasswordResetEmail():
@@ -99,7 +94,6 @@ def create_users_bp():
         if not email:
             return jsonify({"error": "Email is required"}), 400
 
-        # Suponha que você tenha um modelo User com um método para buscar pelo email
         user = User.query.filter_by(email=email).first()
         if not user:
             return jsonify({"error": "User not found"}), 404
@@ -119,10 +113,10 @@ def create_users_bp():
                 recipients=[email]
             )
             msg.body = (
-                "Clique no link abaixo para redefinir sua senha:\n"
+                "Click the link below to reset your password:\n"
                 f"{reset_link}\n\n"
-                "Se você não fez esta solicitação, ignore este e-mail.\n\n"
-                "Atenciosamente,\nEquipe Brewchemy"
+                "If you did not request this, please ignore this email.\n\n"
+                "Best regards,\nThe Brewchemy Team"
             )
 
             mail = current_app.extensions["mail"]
@@ -132,7 +126,6 @@ def create_users_bp():
 
         except Exception as e:
             return jsonify({"error": "Failed to send email", "details": str(e)}), 500
-
 
     @users_bp.route("/changePassword", methods=["POST"])
     def changePassword():
@@ -146,7 +139,9 @@ def create_users_bp():
             return jsonify({"error": "Field 'password' is mandatory"}), 400
 
         try:
-            decoded_token = jwt.decode(token, current_app.config["SECRET_KEY"], algorithms=["HS256"])
+            decoded_token = jwt.decode(
+                token, current_app.config["SECRET_KEY"], algorithms=["HS256"]
+            )
             email = decoded_token.get("email")
 
             user = User.query.filter_by(email=email).first()
@@ -163,12 +158,10 @@ def create_users_bp():
         except jwt.InvalidTokenError:
             return jsonify({"error": "Invalid token"}), 400
 
-
     @users_bp.route("/users", methods=["GET"])
     def get_users():
         users = User.query.all()
         return jsonify([user.to_dict() for user in users])
-
 
     @users_bp.route("/users/<int:user_id>", methods=["GET"])
     def get_user(user_id):
@@ -179,12 +172,9 @@ def create_users_bp():
 
         return jsonify(user.to_dict())
 
-
     @users_bp.route("/users", methods=["POST"])
     def add_user():
         data = request.json
-
-        print("criando usuario")
 
         new_user = User(
             user_id=random.randint(1, 1000000),
@@ -200,10 +190,9 @@ def create_users_bp():
         email_sent = send_confirmation_email(new_user)
 
         if not email_sent:
-            return jsonify({"message": "Usuário criado, mas falha ao enviar e-mail."}), 500
+            return jsonify({"message": "User created, but failed to send email."}), 500
 
         return jsonify(new_user.to_dict()), 201
-
 
     @users_bp.route("/users/<int:user_id>", methods=["PUT"])
     def update_user(user_id):
@@ -219,8 +208,6 @@ def create_users_bp():
 
         new_password = data.get("password")
 
-        print(new_password)
-
         if new_password:
             user.set_password(new_password)
 
@@ -229,7 +216,6 @@ def create_users_bp():
 
         db.session.commit()
         return jsonify(user.to_dict()), 200
-
 
     @users_bp.route("/users/<int:user_id>", methods=["DELETE"])
     def delete_user(user_id):
@@ -242,24 +228,26 @@ def create_users_bp():
         db.session.commit()
         return jsonify({"message": f"User {user_id} deleted successfully"}), 200
 
-
     @users_bp.route("/login", methods=["POST"])
     def login():
         try:
             data = request.json
             email = data.get('email')
             password_hash = data.get('password')
-    
+
             if not email or not password_hash:
                 return jsonify({'message': 'Email and password are required'}), 400
-    
+
             user = User.query.filter_by(email=email).first()
-    
+
             if user and user.status == "active":
                 if user.check_password(password_hash):
 
                     token = jwt.encode(
-                        {'user_id': user.user_id, 'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=8)},
+                        {
+                            'user_id': user.user_id,
+                            'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=8)
+                        },
                         SECRET_KEY,
                         algorithm='HS256'
                     )
@@ -268,47 +256,55 @@ def create_users_bp():
                     return jsonify({'message': 'Invalid password'}), 401
             else:
                 return jsonify({'message': 'User account is not active or does not exist'}), 401
-    
+
         except Exception as e:
             return jsonify({'message': f'An error occurred: {str(e)}'}), 500
 
-    
     @users_bp.route("/google-login")
     def google_login():
-        google = OAuth2Session(CLIENT_ID, redirect_uri=REDIRECT_URI, scope=["openid", "email", "profile"])
-        authorization_url, state = google.authorization_url(AUTHORIZATION_BASE_URL, access_type="offline", prompt="select_account")
+        google = OAuth2Session(
+            CLIENT_ID,
+            redirect_uri=REDIRECT_URI,
+            scope=["openid", "email", "profile"]
+        )
+        authorization_url, state = google.authorization_url(
+            AUTHORIZATION_BASE_URL,
+            access_type="offline",
+            prompt="select_account"
+        )
 
         session['oauth_state'] = state  # ⚠️ keep state in session
 
-        print("authorization_url: ", authorization_url)
-
         return redirect(authorization_url)  # redirect to google
-    
 
     @users_bp.route("/callback", methods=["GET"])
     def callback():
         # state returned by google - def google_login
         state = request.args.get('state')
-        
+
         if state != session.get('oauth_state'):
-            return jsonify({"error": "State invalido"}), 400
-    
+            return jsonify({"error": "Invalid state"}), 400
+
         # Creating OAuth2 using token
         google = OAuth2Session(CLIENT_ID, redirect_uri=REDIRECT_URI, state=session['oauth_state'])
-        
-        token = google.fetch_token(TOKEN_URL, client_secret=CLIENT_SECRET, authorization_response=request.url)
-    
+
+        token = google.fetch_token(
+            TOKEN_URL,
+            client_secret=CLIENT_SECRET,
+            authorization_response=request.url
+        )
+
         session['oauth_token'] = token
-    
+
         # user infos
         user_info = google.get("https://www.googleapis.com/oauth2/v3/userinfo").json()
         google_id = user_info.get("sub")  # "sub" contais googleId
-    
+
         # user exists?
         user = User.query.filter(
             (User.email == user_info.get("email")) | (User.google_id == google_id)
         ).first()
-    
+
         try:
             if not user:
                 temp_password = generate_temp_password()
@@ -330,8 +326,7 @@ def create_users_bp():
                     db.session.commit()
 
         except Exception as e:
-            db.session.rollback() 
-            print(f"Error while trying to create/update user data: {e}")
+            db.session.rollback()
 
         token = jwt.encode(
             {
@@ -343,32 +338,30 @@ def create_users_bp():
             SECRET_KEY,
             algorithm='HS256'
         )
-    
-        return redirect(f"{FRONTEND_URL}/?token={token}")
 
+        return redirect(f"{FRONTEND_URL}/?token={token}")
 
     @users_bp.route("/resend_confirmation", methods=["POST"])
     def resend_confirmation():
         data = request.get_json()
         email = data.get("email")
-    
-        if not email:
-            return jsonify({"error": "Email é obrigatório"}), 400
-    
-        user = User.query.filter_by(email=email).first()
-    
-        if not user:
-            return jsonify({"error": "Usuário não encontrado"}), 404
-    
-        if user.status == "active":
-            return jsonify({"message": "Usuário já confirmado"}), 400
-    
-        email_sent = send_confirmation_email(user)
-    
-        if not email_sent:
-            return jsonify({"error": "Erro ao reenviar e-mail"}), 500
-    
-        return jsonify({"message": "E-mail de confirmação reenviado!"}), 200
 
+        if not email:
+            return jsonify({"error": "Email is required"}), 400
+
+        user = User.query.filter_by(email=email).first()
+
+        if not user:
+            return jsonify({"error": "User not found"}), 404
+
+        if user.status == "active":
+            return jsonify({"message": "User already active"}), 400
+
+        email_sent = send_confirmation_email(user)
+
+        if not email_sent:
+            return jsonify({"error": "Error resending email"}), 500
+
+        return jsonify({"message": "Confirmation email resent"}), 200
 
     return users_bp

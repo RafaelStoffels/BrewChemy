@@ -2,7 +2,6 @@ from flask import Blueprint, jsonify, request
 from db import db
 from models import Equipment
 from AuthTokenVerifier import token_required
-from datetime import datetime
 
 
 def create_equipments_bp():
@@ -12,78 +11,66 @@ def create_equipments_bp():
     @token_required
     def search_equipments(current_user_id):
         search_term = request.args.get("searchTerm", "").strip()
-        
+
         if not search_term:
             return jsonify({"error": "Search term is required"}), 400
-        
-        # Subquery para encontrar fermentáveis do usuário atual
+
+        # Subquery to find fermentables of the current user
         subquery = db.session.query(Equipment.official_id).filter(
             Equipment.user_id == current_user_id,
-            Equipment.official_id.isnot(None)  # Evita incluir valores NULL
+            Equipment.official_id.isnot(None)  # Avoids including NULL values
         ).distinct()
-        
+
         subquery_list = [id for (id,) in subquery.all()]
-        print("Subquery list (sem NULL):", subquery_list)
-        
-        # Busca fermentáveis que correspondam ao termo de pesquisa
+
         items = Equipment.query.filter(
             (
-                (Equipment.user_id == current_user_id) |  # Pega fermentáveis do usuário
+                (Equipment.user_id == current_user_id) |
                 (
-                    (Equipment.user_id == 1) &  # Apenas fermentáveis oficiais
-                    (~Equipment.id.in_(subquery_list))  # Exclui os personalizados
+                    (Equipment.user_id == 1) &
+                    (~Equipment.id.in_(subquery_list))
                 )
             ) &
-            (Equipment.name.ilike(f"%{search_term}%"))  # Filtra pelo nome
+            (Equipment.name.ilike(f"%{search_term}%"))
         ).limit(12).all()
-        
-        return jsonify([item.to_dict() for item in items])
 
+        return jsonify([item.to_dict() for item in items])
 
     @equipments_bp.route("/equipments", methods=["GET"])
     @token_required
     def get_equipments(current_user_id):
-        # filtra todos os registro com official id do usuario corrente
+        # Filters all records with the current user's official ID
         subquery = db.session.query(Equipment.official_id).filter(
             Equipment.user_id == current_user_id,
-            Equipment.official_id.isnot(None)  # Evita incluir valores NULL
+            Equipment.official_id.isnot(None)
         ).distinct()
-        
-        # Exibir os resultados da subquery para debug
+
         subquery_list = [id for (id,) in subquery.all()]
-        print("Subquery list (sem NULL):", subquery_list)
-        
-        # Buscar os fermentáveis considerando a lógica correta
+
         items = Equipment.query.filter(
-            (Equipment.user_id == current_user_id) |  # Pega os fermentáveis do usuário atual
+            (Equipment.user_id == current_user_id) |
             (
-                (Equipment.user_id == 1) &  # Apenas fermentáveis oficiais
-                (~Equipment.id.in_(subquery_list))  # Exclui aqueles que já foram personalizados
+                (Equipment.user_id == 1) &
+                (~Equipment.id.in_(subquery_list))  # Excludes customized
             )
         ).limit(12).all()
-        
-        # Retorna os dados formatados como JSON
+
         return jsonify([item.to_dict() for item in items])
 
-    
-    # By ID
     @equipments_bp.route("/equipments/<int:recordUserId>/<int:id>", methods=["GET"])
     def get_equipment(recordUserId, id):
         item = Equipment.query.filter_by(id=id, user_id=recordUserId).first()
-        
+
         if item is None:
             return jsonify({"message": "equipment not found"}), 404
 
         return jsonify(item.to_dict())
 
-    # Add record
     @equipments_bp.route("/equipments", methods=["POST"])
     @token_required
     def add_equipment(current_user_id):
 
         data = request.json
-
-        print(data.get("boilOff"));
 
         new_equipment = Equipment(
             user_id=current_user_id,
@@ -102,23 +89,20 @@ def create_equipments_bp():
         db.session.commit()
         return jsonify(new_equipment.to_dict()), 201
 
-    # Update record
     @equipments_bp.route("/equipments/<int:recordUserId>/<int:id>", methods=["PUT"])
     @token_required
     def update_equipment(current_user_id, recordUserId, id):
 
-        # Caso o current_user_id seja diferente do recordUserId, cria-se um novo registro
         if recordUserId != current_user_id:
-            # Encontrar o equipamento oficial (user_id = 1)
+            # Find the official equipment (user_id = 1)
             official_item = Equipment.query.filter_by(id=id, user_id=1).first()
 
             if official_item is None:
                 return jsonify({"message": "Official equipment not found"}), 404
 
-            # Criar um novo registro para o current_user_id baseado no equipamento oficial
             new_item = Equipment(
                 user_id=current_user_id,
-                official_id=id,  # Associar ao ID oficial
+                official_id=id,
                 name=official_item.name,
                 description=official_item.description,
                 efficiency=official_item.efficiency,
@@ -131,7 +115,7 @@ def create_equipments_bp():
                 dead_space=official_item.dead_space
             )
 
-            # Atualizar os dados do novo equipamento com os valores fornecidos, se existirem
+            # Update the new equipment's data with the provided values, if they exist
             data = request.json
             new_item.name = data.get("name", new_item.name)
             new_item.description = data.get("description", new_item.description)
@@ -144,14 +128,12 @@ def create_equipments_bp():
             new_item.trub_loss = data.get("trubLoss", new_item.trub_loss)
             new_item.dead_space = data.get("deadSpace", new_item.dead_space)
 
-            # Adicionar o novo equipamento e confirmar a transação
             db.session.add(new_item)
             db.session.commit()
 
-            return jsonify(new_item.to_dict()), 201  # Retornar o novo registro criado
+            return jsonify(new_item.to_dict()), 201
 
         else:
-            # Caso current_user_id e recordUserId sejam iguais, apenas atualiza o registro
             item = Equipment.query.filter_by(id=id, user_id=current_user_id).first()
 
             if item is None:
@@ -172,10 +154,8 @@ def create_equipments_bp():
 
             db.session.commit()
 
-            return jsonify(item.to_dict()), 200  # Retornar o registro atualizado
+            return jsonify(item.to_dict()), 200
 
-
-    # Delete record
     @equipments_bp.route("/equipments/<int:recordUserId>/<int:id>", methods=["DELETE"])
     @token_required
     def delete_equipment(current_user_id, recordUserId, id):
