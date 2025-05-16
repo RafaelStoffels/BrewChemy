@@ -568,14 +568,6 @@ export default function NewRecipe() {
             showErrorToast("Equipment is required.");
         }
 
-        if (!recipe.volumeLiters) {
-            showErrorToast("Batch Volume is required.");
-        }
-
-        if (!recipe.batchTime) {
-            showErrorToast("Batch Time is required.");
-        }
-
         if (!recipe.recipeEquipment.boilTime) {
             showErrorToast("Boil Time is required.");
         }
@@ -583,8 +575,6 @@ export default function NewRecipe() {
         const data = {
             name: recipe.name,
             style: recipe.style,
-            volumeLiters: recipe.volumeLiters,
-            batchTime: recipe.batchTime,
             author: recipe.author,
             type: recipe.type,
             description: recipe.description,

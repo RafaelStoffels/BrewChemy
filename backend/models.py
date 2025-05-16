@@ -171,8 +171,6 @@ class Recipe(db.Model):
     style = db.Column(db.String(30))
     description = db.Column(db.Text)
     creation_date = db.Column(db.Date, default=db.func.current_date())
-    volume_liters = db.Column(db.Numeric(5, 2))
-    equipment_id = db.Column(db.Integer)
     notes = db.Column(db.Text)
     author = db.Column(db.String(40), nullable=False)
     type = db.Column(db.String(20), nullable=False)
@@ -194,7 +192,6 @@ class Recipe(db.Model):
             "style": self.style,
             "description": self.description,
             "creationDate": self.creation_date.isoformat() if self.creation_date else None,
-            "volumeLiters": float(self.volume_liters) if self.volume_liters else None,
             "notes": self.notes,
             "author": self.author,
             "type": self.type,

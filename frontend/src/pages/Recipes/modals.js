@@ -120,7 +120,7 @@ export function AddHopModal({ isOpen, closeModal, handleAddHopRecipe }) {
                   const items = await fetchHops(api, user.token);
                   setItemList(items);
                 } catch (err) {
-                  showErrorToast('Error loading equipments');
+                  showErrorToast('Error loading hops');
                 }
               };
             loadItems();

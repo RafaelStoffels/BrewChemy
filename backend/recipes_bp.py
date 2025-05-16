@@ -52,9 +52,7 @@ def create_recipes_bp():
             name=data.get("name"),
             style=data.get("style"),
             description=data.get("description"),
-            volume_liters=sanitize(data.get("volumeLiters")),
             notes=data.get("notes"),
-            equipment_id=data.get("equipmentID"),
             author=data.get("author"),
             type=data.get("type"),
             user_id=current_user_id
@@ -144,8 +142,6 @@ def create_recipes_bp():
         recipe.name = data.get("name", recipe.name)
         recipe.style = data.get("style", recipe.style)
         recipe.description = data.get("description", recipe.description)
-        recipe.volume_liters = data.get("volumeLiters", recipe.volume_liters)
-        recipe.equipment_id = data.get("equipmentID", recipe.equipment_id)
         recipe.notes = data.get("notes", recipe.notes)
         recipe.author = data.get("author", recipe.author)
         recipe.type = data.get("type", recipe.type)
