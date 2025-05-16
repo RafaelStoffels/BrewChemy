@@ -11,69 +11,59 @@ def create_hops_bp():
     @token_required
     def search_hops(current_user_id):
         search_term = request.args.get("searchTerm", "").strip()
-        
+
         if not search_term:
             return jsonify({"error": "Search term is required"}), 400
-        
-        # Subquery para encontrar fermentáveis do usuário atual
+
         subquery = db.session.query(Hop.official_id).filter(
             Hop.user_id == current_user_id,
-            Hop.official_id.isnot(None)  # Evita incluir valores NULL
+            Hop.official_id.isnot(None)
         ).distinct()
-        
+
         subquery_list = [id for (id,) in subquery.all()]
-        print("Subquery list (sem NULL):", subquery_list)
-        
-        # Busca fermentáveis que correspondam ao termo de pesquisa
+
         items = Hop.query.filter(
             (
-                (Hop.user_id == current_user_id) |  # Pega fermentáveis do usuário
+                (Hop.user_id == current_user_id) |
                 (
-                    (Hop.user_id == 1) &  # Apenas fermentáveis oficiais
-                    (~Hop.id.in_(subquery_list))  # Exclui os personalizados
+                    (Hop.user_id == 1) &
+                    (~Hop.id.in_(subquery_list))
                 )
             ) &
-            (Hop.name.ilike(f"%{search_term}%"))  # Filtra pelo nome
+            (Hop.name.ilike(f"%{search_term}%"))
         ).limit(12).all()
-        
-        return jsonify([item.to_dict() for item in items])
 
+        return jsonify([item.to_dict() for item in items])
 
     @hops_bp.route("/hops", methods=["GET"])
     @token_required
     def get_hops(current_user_id):
-        # filtra todos os registro com official id do usuario corrente
         subquery = db.session.query(Hop.official_id).filter(
             Hop.user_id == current_user_id,
-            Hop.official_id.isnot(None)  # Evita incluir valores NULL
+            Hop.official_id.isnot(None)
         ).distinct()
-        
-        # Exibir os resultados da subquery para debug
+
         subquery_list = [id for (id,) in subquery.all()]
         print("Subquery list (sem NULL):", subquery_list)
-        
-        # Buscar os fermentáveis considerando a lógica correta
+
         items = Hop.query.filter(
-            (Hop.user_id == current_user_id) |  # Pega os fermentáveis do usuário atual
+            (Hop.user_id == current_user_id) |
             (
-                (Hop.user_id == 1) &  # Apenas fermentáveis oficiais
-                (~Hop.id.in_(subquery_list))  # Exclui aqueles que já foram personalizados
+                (Hop.user_id == 1) &
+                (~Hop.id.in_(subquery_list))
             )
         ).limit(12).all()
-        
-        # Retorna os dados formatados como JSON
-        return jsonify([item.to_dict() for item in items])
 
+        return jsonify([item.to_dict() for item in items])
 
     @hops_bp.route("/hops/<int:recordUserId>/<int:id>", methods=["GET"])
     def get_hop(recordUserId, id):
         item = Hop.query.filter_by(id=id, user_id=recordUserId).first()
-        
+
         if item is None:
             return jsonify({"message": "hop not found"}), 404
 
         return jsonify(item.to_dict())
-
 
     @hops_bp.route("/hops", methods=["POST"])
     @token_required
@@ -96,26 +86,23 @@ def create_hops_bp():
         )
         db.session.add(new_hop)
         db.session.commit()
-        return jsonify(new_hop.to_dict()), 201
 
+        return jsonify(new_hop.to_dict()), 201
 
     @hops_bp.route("/hops/<int:recordUserId>/<int:id>", methods=["PUT"])
     @token_required
     def update_hop(current_user_id, recordUserId, id):
         data = request.json
 
-        # Caso o current_user_id seja diferente do recordUserId, cria-se um novo registro
         if recordUserId != current_user_id:
-            # Encontrar o equipamento oficial (user_id = 1)
             official_item = Hop.query.filter_by(id=id, user_id=1).first()
 
             if official_item is None:
                 return jsonify({"message": "Official hop not found"}), 404
 
-            # Criar um novo registro para o current_user_id baseado no equipamento oficial
             new_item = Hop(
                 user_id=current_user_id,
-                official_id=id,  # Associar ao ID oficial
+                official_id=id,
                 name=data.get("name", official_item.name),
                 alpha_acid_content=data.get("alphaAcidContent", official_item.alpha_acid_content),
                 beta_acid_content=data.get("betaAcidContent", official_item.beta_acid_content),
@@ -126,14 +113,11 @@ def create_hops_bp():
                 supplier=data.get("supplier", official_item.supplier)
             )
 
-            # Adicionar o novo equipamento e confirmar a transação
             db.session.add(new_item)
             db.session.commit()
 
-            return jsonify(new_item.to_dict()), 201  # Retornar o novo registro criado
-
+            return jsonify(new_item.to_dict()), 201
         else:
-            # Caso current_user_id e recordUserId sejam iguais, apenas atualiza o registro
             item = Hop.query.filter_by(id=id, user_id=current_user_id).first()
 
             if item is None:
@@ -150,16 +134,14 @@ def create_hops_bp():
 
             db.session.commit()
 
-            return jsonify(item.to_dict()), 200  # Retornar o registro atualizado
-
-
+            return jsonify(item.to_dict()), 200
 
     @hops_bp.route("/hops/<int:recordUserId>/<int:id>", methods=["DELETE"])
     @token_required
     def delete_hop(current_user_id, recordUserId, id):
         if recordUserId != current_user_id:
             return jsonify({"message": "Cannot delete official record"}), 404
-        
+
         hop = Hop.query.filter_by(id=id).first()
 
         if hop is None:

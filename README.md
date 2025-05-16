@@ -80,3 +80,20 @@ git commit -m "Add your feature"
 - Push your branch
 git push origin feature/your-feature
 - Open a Pull Request on GitHub
+
+## Code Style
+
+This project follows [PEP 8](https://peps.python.org/pep-0008/) with the following adjustments:
+
+- Line length limit increased to **100 characters**.
+
+Recommended tools:
+
+- `flake8` with `max-line-length = 100`
+- `black` (optional, using default settings)
+
+Example configuration for `.flake8`:
+
+```ini
+[flake8]
+max-line-length = 90

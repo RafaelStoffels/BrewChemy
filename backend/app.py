@@ -17,6 +17,7 @@ from users_bp import create_users_bp
 
 mail = Mail()
 
+
 def create_app():
     app = Flask(__name__)
 
@@ -30,14 +31,14 @@ def create_app():
 
     mail.init_app(app)
 
-    # Definindo a chave secreta para gerenciar sessões
-    app.secret_key = os.getenv('FLASK_SECRET_KEY', os.urandom(24))  # Garante que a chave seja única e segura
+    # Handle Sessions - secure and unique
+    app.secret_key = os.getenv('FLASK_SECRET_KEY', os.urandom(24))
 
     configure_db(app)
-    
-    # Permite o uso de CORS 
-    #CORS(app, resources={r"/api/*": {"origins": "*"}})
-    #CORS(app, resources={r"/api/*": {"origins": "http://localhost:5000"}})
+
+    # CORS ALLOWED
+    # CORS(app, resources={r"/api/*": {"origins": "*"}})
+    # CORS(app, resources={r"/api/*": {"origins": "http://localhost:5000"}})
 
     CORS(app)
 
@@ -65,15 +66,15 @@ def create_app():
 
     return app
 
+
 if __name__ == "__main__":
     app = create_app()
 
-    # Caminho absoluto para os certificados SSL
+    # Absolute path to the SSL certificates
     ssl_cert_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'ssl', 'cert.pem')
     ssl_key_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'ssl', 'private.key')
 
-    # Garantir que o db seja inicializado antes de rodar o app
     with app.app_context():
-        db.create_all()  # Cria as tabelas no banco de dados
+        db.create_all()  # Creates the tables in the database
 
     app.run(ssl_context=(ssl_cert_path, ssl_key_path), debug=True)

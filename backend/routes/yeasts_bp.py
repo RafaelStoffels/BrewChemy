@@ -11,76 +11,64 @@ def create_yeasts_bp():
     @token_required
     def search_yeasts(current_user_id):
         search_term = request.args.get("searchTerm", "").strip()
-        
+
         if not search_term:
             return jsonify({"error": "Search term is required"}), 400
-        
-        # Subquery para encontrar fermentáveis do usuário atual
+
         subquery = db.session.query(Yeast.official_id).filter(
             Yeast.user_id == current_user_id,
-            Yeast.official_id.isnot(None)  # Evita incluir valores NULL
+            Yeast.official_id.isnot(None)
         ).distinct()
-        
+
         subquery_list = [id for (id,) in subquery.all()]
-        print("Subquery list (sem NULL):", subquery_list)
-        
-        # Busca fermentáveis que correspondam ao termo de pesquisa
+
         items = Yeast.query.filter(
             (
-                (Yeast.user_id == current_user_id) |  # Pega fermentáveis do usuário
+                (Yeast.user_id == current_user_id) |
                 (
-                    (Yeast.user_id == 1) &  # Apenas fermentáveis oficiais
-                    (~Yeast.id.in_(subquery_list))  # Exclui os personalizados
+                    (Yeast.user_id == 1) &
+                    (~Yeast.id.in_(subquery_list))
                 )
             ) &
-            (Yeast.name.ilike(f"%{search_term}%"))  # Filtra pelo nome
+            (Yeast.name.ilike(f"%{search_term}%"))
         ).limit(12).all()
-        
+
         return jsonify([item.to_dict() for item in items])
 
-    # Return all yeasts
     @yeasts_bp.route("/yeasts", methods=["GET"])
     @token_required
     def get_yeasts(current_user_id):
-        # filtra todos os registro com official id do usuario corrente
         subquery = db.session.query(Yeast.official_id).filter(
             Yeast.user_id == current_user_id,
-            Yeast.official_id.isnot(None)  # Evita incluir valores NULL
+            Yeast.official_id.isnot(None)
         ).distinct()
-        
-        # Exibir os resultados da subquery para debug
+
         subquery_list = [id for (id,) in subquery.all()]
-        print("Subquery list (sem NULL):", subquery_list)
-        
-        # Buscar os fermentáveis considerando a lógica correta
+
         items = Yeast.query.filter(
-            (Yeast.user_id == current_user_id) |  # Pega os fermentáveis do usuário atual
+            (Yeast.user_id == current_user_id) |
             (
-                (Yeast.user_id == 1) &  # Apenas fermentáveis oficiais
-                (~Yeast.id.in_(subquery_list))  # Exclui aqueles que já foram personalizados
+                (Yeast.user_id == 1) &
+                (~Yeast.id.in_(subquery_list))
             )
         ).limit(12).all()
-        
-        # Retorna os dados formatados como JSON
+
         return jsonify([item.to_dict() for item in items])
 
-    # Return a specific yeast
     @yeasts_bp.route("/yeasts/<int:recordUserId>/<int:id>", methods=["GET"])
     def get_yeast(recordUserId, id):
         item = Yeast.query.filter_by(id=id, user_id=recordUserId).first()
-        
+
         if item is None:
             return jsonify({"message": "yeast not found"}), 404
 
         return jsonify(item.to_dict())
 
-    # Add a new yeast
     @yeasts_bp.route("/yeasts", methods=["POST"])
     @token_required
     def add_yeast(current_user_id):
         data = request.json
 
-        # Adjustment to handle empty values
         def sanitize(value):
             return value if value != "" else None
 
@@ -101,22 +89,18 @@ def create_yeasts_bp():
         db.session.commit()
         return jsonify(new_yeast.to_dict()), 201
 
-    # Update a yeast
     @yeasts_bp.route("/yeasts/<int:recordUserId>/<int:id>", methods=["PUT"])
     @token_required
     def update_yeast(current_user_id, recordUserId, id):
-        # Caso o current_user_id seja diferente do recordUserId, cria-se um novo registro
         if recordUserId != current_user_id:
-            # Encontrar a levedura oficial (user_id = 1)
             official_item = Yeast.query.filter_by(id=id, user_id=1).first()
 
             if official_item is None:
                 return jsonify({"message": "Official yeast not found"}), 404
 
-            # Criar um novo registro para o current_user_id baseado na levedura oficial
             new_item = Yeast(
                 user_id=current_user_id,
-                official_id=id,  # Associar ao ID oficial
+                official_id=id,
                 name=official_item.name,
                 manufacturer=official_item.manufacturer,
                 type=official_item.type,
@@ -129,7 +113,6 @@ def create_yeasts_bp():
                 description=official_item.description
             )
 
-            # Atualizar os dados do novo item com os valores fornecidos, se existirem
             data = request.json
             new_item.name = data.get("name", new_item.name)
             new_item.manufacturer = data.get("manufacturer", new_item.manufacturer)
@@ -142,14 +125,11 @@ def create_yeasts_bp():
             new_item.flocculation = data.get("flocculation", new_item.flocculation)
             new_item.description = data.get("description", new_item.description)
 
-            # Adicionar o novo item e confirmar a transação
             db.session.add(new_item)
             db.session.commit()
 
-            return jsonify(new_item.to_dict()), 201  # Retornar o novo registro criado
-
+            return jsonify(new_item.to_dict()), 201
         else:
-            # Caso current_user_id e recordUserId sejam iguais, apenas atualiza o registro
             item = Yeast.query.filter_by(id=id, user_id=current_user_id).first()
 
             if item is None:
@@ -170,9 +150,8 @@ def create_yeasts_bp():
 
             db.session.commit()
 
-            return jsonify(item.to_dict()), 200  # Retornar o registro atualizado
+            return jsonify(item.to_dict()), 200
 
-    # Delete a yeast
     @yeasts_bp.route("/yeasts/<int:recordUserId>/<int:id>", methods=["DELETE"])
     @token_required
     def delete_yeast(current_user_id, recordUserId, id):
