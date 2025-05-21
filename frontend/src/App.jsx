@@ -4,28 +4,28 @@ import { ToastContainer } from 'react-toastify';
 import { AuthProvider } from './context/AuthContext';
 import { SidebarProvider } from './context/SidebarContext';
 
-import CreateAccount from './pages/Logon/CreateAccount';
-import ChangePassword from './pages/Logon/ChangePassword';
-import ForgotPassword from './pages/Logon/ForgotPassword';
-import Logon from './pages/Logon';
-import Main from './pages/Main';
-import EquipmentList from './pages/EquipmentList';
-import Equipment from './pages/Equipment';
-import FermentableList from './pages/FermentableList';
-import Fermentable from './pages/Fermentable';
-import HopList from './pages/HopList';
-import Hop from './pages/Hop';
-import MiscList from './pages/MiscList';
-import Misc from './pages/Misc';
-import RecipeList from './pages/RecipeList';
-import Recipe from './pages/Recipes';
-import YeastList from './pages/YeastList';
-import Yeast from './pages/Yeast';
+import CreateAccount from './Pages/Logon/CreateAccount';
+import ChangePassword from './Pages/Logon/ChangePassword';
+import ForgotPassword from './Pages/Logon/ForgotPassword';
+import Logon from './Pages/Logon';
+import Main from './Pages/Main';
+import EquipmentList from './Pages/Equipments/List';
+import Equipment from './Pages/Equipments/Form';
+import FermentableList from './Pages/Fermentables/List';
+import Fermentable from './Pages/Fermentables';
+import HopList from './Pages/Hops/List';
+import Hop from './Pages/Hops/Form';
+import MiscList from './Pages/Miscs/List';
+import Misc from './Pages/Miscs/Form';
+import RecipeList from './Pages/Recipes/List';
+import Recipe from './Pages/Recipes/Form';
+import YeastList from './Pages/Yeasts/List';
+import Yeast from './Pages/Yeasts/Form';
 
-import Layout from './components/Layout';
+import Layout from './Components/Layout';
 
 import 'react-toastify/dist/ReactToastify.css';
-import './styles/global.css';
+import './Styles/global.css';
 
 function App() {
   return (
@@ -57,9 +57,9 @@ function App() {
               <Route path="/Hops/:recordUserId/:id/edit" element={<Hop />} />
               <Route path="/Hops/new" element={<Hop />} />
               <Route path="/MiscList" element={<MiscList />} />
-              <Route path="/Misc/:recordUserId/:id/details" element={<Misc />} />
-              <Route path="/Misc/:recordUserId/:id/edit" element={<Misc />} />
-              <Route path="/Misc/new" element={<Misc />} />
+              <Route path="/Miscs/:recordUserId/:id/details" element={<Misc />} />
+              <Route path="/Miscs/:recordUserId/:id/edit" element={<Misc />} />
+              <Route path="/Miscs/new" element={<Misc />} />
               <Route path="/RecipeList" element={<RecipeList />} />
               <Route path="/Recipes/:id/details" element={<Recipe />} />
               <Route path="/Recipes/:id/edit" element={<Recipe />} />

@@ -19,16 +19,16 @@ export function SidebarProvider({ children }) {
     setLoading(false);
   }, []);
 
-  const resetSidebarState = () => {
-    setIsInventoryOpen(false);
-    localStorage.removeItem('isInventoryOpen');
-  };
-
   useEffect(() => {
     if (!loading) {
       sessionStorage.setItem('isInventoryOpen', JSON.stringify(isInventoryOpen));
     }
   }, [isInventoryOpen, loading]);
+
+  const resetSidebarState = () => {
+    setIsInventoryOpen(false);
+    localStorage.removeItem('isInventoryOpen');
+  };
 
   const contextValue = useMemo(() => ({
     isInventoryOpen,
