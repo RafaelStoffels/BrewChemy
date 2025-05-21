@@ -1,11 +1,11 @@
 import React, { useContext, useMemo } from 'react';
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation } from 'react-router-dom';
+import { ChevronDown, ChevronRight } from 'lucide-react';
 import { useSidebar } from '../context/SidebarContext';
-import { ChevronDown, ChevronRight } from "lucide-react";
-import AuthContext from "../context/AuthContext";
+import AuthContext from '../context/AuthContext';
 import './Sidebar.css';
 
-const Sidebar = () => {
+function Sidebar() {
   const { logout } = useContext(AuthContext);
   const { isInventoryOpen, setIsInventoryOpen, resetSidebarState } = useSidebar();
   const location = useLocation();
@@ -15,40 +15,60 @@ const Sidebar = () => {
     resetSidebarState();
   };
 
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      setIsInventoryOpen(!isInventoryOpen);
+    }
+  };
+
   const menuItems = useMemo(() => (
     <ul>
-      <li className={location.pathname.startsWith("/EquipmentList") ? "active" : ""}>
+      <li className={location.pathname.startsWith('/EquipmentList') ? 'active' : ''}>
         <Link to="/EquipmentList">Equipments</Link>
       </li>
 
-      <li className="dropdown" onClick={() => setIsInventoryOpen(!isInventoryOpen)}>
-        <span className="dropdown-header">
-          Inventory {isInventoryOpen ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+      <li className="dropdown">
+        <span
+          className="dropdown-header"
+          onClick={() => setIsInventoryOpen(!isInventoryOpen)}
+          role="button"
+          tabIndex={0}
+          onKeyDown={handleKeyDown}
+        >
+          Inventory
+          {' '}
+          {isInventoryOpen ? (
+            <ChevronDown size={16} />
+          ) : (
+            <ChevronRight size={16} />
+          )}
         </span>
       </li>
 
       {/* Submenu */}
-      <ul className={`submenu ${isInventoryOpen ? "open" : ""}`}>
-        <li className={location.pathname === "/FermentableList" ? "active" : ""}>
+      <ul className={`submenu ${isInventoryOpen ? 'open' : ''}`}>
+        <li className={location.pathname === '/FermentableList' ? 'active' : ''}>
           <Link to="/FermentableList">Fermentables</Link>
         </li>
-        <li className={location.pathname === "/HopList" ? "active" : ""}>
+        <li className={location.pathname === '/HopList' ? 'active' : ''}>
           <Link to="/HopList">Hops</Link>
         </li>
-        <li className={location.pathname === "/MiscList" ? "active" : ""}>
+        <li className={location.pathname === '/MiscList' ? 'active' : ''}>
           <Link to="/MiscList">Misc</Link>
         </li>
-        <li className={location.pathname === "/YeastList" ? "active" : ""}>
+        <li className={location.pathname === '/YeastList' ? 'active' : ''}>
           <Link to="/YeastList">Yeasts</Link>
         </li>
       </ul>
 
-      <li className={location.pathname === "/RecipeList" ? "active" : ""}>
+      <li className={location.pathname === '/RecipeList' ? 'active' : ''}>
         <Link to="/RecipeList">Recipes</Link>
       </li>
 
       <li>
-        <Link to="#" onClick={handleLogout}>Logout</Link>
+        <button type="button" onClick={handleLogout} className="logout-button">
+          Logout
+        </button>
       </li>
     </ul>
   ), [location.pathname, isInventoryOpen, setIsInventoryOpen]);
@@ -61,6 +81,6 @@ const Sidebar = () => {
       </nav>
     </div>
   );
-};
+}
 
 export default Sidebar;

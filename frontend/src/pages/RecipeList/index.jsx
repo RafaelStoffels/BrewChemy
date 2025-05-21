@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { FiTrash2, FiEdit, FiBookOpen  } from 'react-icons/fi';
-import { showErrorToast, showInfoToast } from "../../utils/notifications";
+import { FiTrash2, FiEdit, FiBookOpen } from 'react-icons/fi';
+import { showErrorToast, showInfoToast } from '../../utils/notifications';
 
 import AuthContext from '../../context/AuthContext';
 import { fetchRecipes, deleteRecipe, searchRecipes } from '../../services/recipes';
@@ -12,7 +12,7 @@ import api from '../../services/api';
 
 export default function MaltList() {
   const { user } = useContext(AuthContext);
-  const [itemList, setItemList] = useState([]); 
+  const [itemList, setItemList] = useState([]);
 
   const navigate = useNavigate();
 
@@ -29,22 +29,22 @@ export default function MaltList() {
         }
       }
     };
-  
+
     fetchData();
   }, [user, navigate]);
 
   const searchItemsFunction = async (term) => {
     try {
-      showInfoToast("Searching data...");
+      showInfoToast('Searching data...');
       const response = await searchRecipes(api, user.token, term);
-  
+
       if (Array.isArray(response) && response.length === 0) {
-        showInfoToast("Data not found");
+        showInfoToast('Data not found');
       } else {
         setItemList(response);
       }
     } catch (err) {
-      showErrorToast("Error: " + err);
+      showErrorToast(`Error: ${err}`);
     }
   };
 
@@ -59,50 +59,58 @@ export default function MaltList() {
   async function handleDelete(itemListId) {
     try {
       await deleteRecipe(itemListId, user.token);
-      setItemList(itemList.filter(itemList => itemList.id !== itemListId));
+      setItemList(itemList.filter((item) => item.id !== itemListId));
     } catch (err) {
-      showErrorToast("Error deleting data." + err);
+      showErrorToast(`Error deleting data.${err}`);
     }
   }
 
   return (
-    <div>        
+    <div>
       <Sidebar />
-      <div className='list-container'>
+      <div className="list-container">
         <div className="div-addButton">
-           <Link className="Addbutton" to="/Recipes/new">Add new Recipe</Link>
+          <Link className="Addbutton" to="/Recipes/new">Add new Recipe</Link>
         </div>
 
         <SearchInput onSearch={searchItemsFunction} />
 
-          <h1>Recipes</h1>
-              <ul>
-                {itemList.map((item) => (
-                  <li key={item.id}>
-                    <h2 className="item-title">{item.name}</h2> 
-                    <div className="item-details">
-                    <p>Author: {item.author}</p>
-                    <p>Style: {item.style}</p>  
-                    <p>
-                      Description: {item.description.length > 140 
-                        ? item.description.substring(0, 140) + "..." 
-                        : item.description}
-                    </p>
-                    </div>  
-                    <div className="button-group">
-                      <button onClick={() => handleDetails(item.id)} type="button" className="icon-button">
-                      <FiBookOpen  size={20} />
-                      </button>
-                      <button onClick={() => handleUpdate(item.id)} type="button" className="icon-button">
-                        <FiEdit size={20} />
-                      </button>
-                      <button onClick={() => handleDelete(item.id)} type="button" className="icon-button">
-                        <FiTrash2 size={20} />
-                      </button>
-                    </div>
-                  </li>
-                ))}
-              </ul>
+        <h1>Recipes</h1>
+        <ul>
+          {itemList.map((item) => (
+            <li key={item.id}>
+              <h2 className="item-title">{item.name}</h2>
+              <div className="item-details">
+                <p>
+                  Author:
+                  {item.author}
+                </p>
+                <p>
+                  Style:
+                  {item.style}
+                </p>
+                <p>
+                  Description:
+                  {' '}
+                  {item.description.length > 140
+                    ? `${item.description.substring(0, 140)}...`
+                    : item.description}
+                </p>
+              </div>
+              <div className="button-group">
+                <button onClick={() => handleDetails(item.id)} type="button" className="icon-button">
+                  <FiBookOpen size={20} />
+                </button>
+                <button onClick={() => handleUpdate(item.id)} type="button" className="icon-button">
+                  <FiEdit size={20} />
+                </button>
+                <button onClick={() => handleDelete(item.id)} type="button" className="icon-button">
+                  <FiTrash2 size={20} />
+                </button>
+              </div>
+            </li>
+          ))}
+        </ul>
       </div>
     </div>
   );

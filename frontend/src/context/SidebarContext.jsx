@@ -1,15 +1,15 @@
-import React, { createContext, useState, useContext, useEffect } from 'react';
+import React, {
+  createContext, useState, useContext, useEffect, useMemo,
+} from 'react';
+import PropTypes from 'prop-types';
 
-// Criando o contexto
 const SidebarContext = createContext();
 
-// Hook para acessar o contexto
 export const useSidebar = () => useContext(SidebarContext);
 
-// Provedor do contexto
-export const SidebarProvider = ({ children }) => {
+export function SidebarProvider({ children }) {
   const [isInventoryOpen, setIsInventoryOpen] = useState(false);
-  const [loading, setLoading] = useState(true); // Estado de carregamento
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const storedState = sessionStorage.getItem('isInventoryOpen');
@@ -20,8 +20,8 @@ export const SidebarProvider = ({ children }) => {
   }, []);
 
   const resetSidebarState = () => {
-    setIsInventoryOpen(false); // Resetando o estado do submenu
-    localStorage.removeItem('isInventoryOpen'); // Limpando o localStorage, se necessário
+    setIsInventoryOpen(false);
+    localStorage.removeItem('isInventoryOpen');
   };
 
   useEffect(() => {
@@ -30,11 +30,21 @@ export const SidebarProvider = ({ children }) => {
     }
   }, [isInventoryOpen, loading]);
 
-  if (loading) return null; // Evita renderizar qualquer coisa antes do carregamento
+  const contextValue = useMemo(() => ({
+    isInventoryOpen,
+    setIsInventoryOpen,
+    resetSidebarState,
+  }), [isInventoryOpen]);
+
+  if (loading) return null;
 
   return (
-    <SidebarContext.Provider value={{ isInventoryOpen, setIsInventoryOpen, resetSidebarState }}>
+    <SidebarContext.Provider value={contextValue}>
       {children}
     </SidebarContext.Provider>
   );
+}
+
+SidebarProvider.propTypes = {
+  children: PropTypes.node.isRequired,
 };

@@ -123,7 +123,9 @@ git commit -m "Add your feature"
 git push origin feature/your-feature
 - Open a Pull Request on GitHub
 
-## Code Style
+## 🔧 Code Style
+
+### Backend
 
 This project follows [PEP 8](https://peps.python.org/pep-0008/) with the following adjustments:
 
@@ -139,3 +141,8 @@ Example configuration for `.flake8`:
 ```ini
 [flake8]
 max-line-length = 90
+```
+
+### Frontend
+
+This project follows the [Airbnb JavaScript Style Guide](https://github.com/airbnb/javascript) using ESLint to enforce consistent code quality and best practices.

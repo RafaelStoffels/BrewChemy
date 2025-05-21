@@ -2,64 +2,64 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../../../styles/crud.css';
 import { sendPasswordResetEmail } from '../../../services/Users';
-import { showSuccessToast, showErrorToast, showInfoToast } from "../../../utils/notifications";
+import { showSuccessToast, showErrorToast, showInfoToast } from '../../../utils/notifications';
 
 export default function NewAccount() {
-    const navigate = useNavigate();
+  const navigate = useNavigate();
 
-    const [email, setEmail] = useState('');
+  const [email, setEmail] = useState('');
 
-    const validateEmail = (email) => {
-        const regex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-        return regex.test(email);
-    };
+  const validateEmail = (emailPar) => {
+    const regex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    return regex.test(emailPar);
+  };
 
-    async function handleSubmit(e) {
-        e.preventDefault();
+  async function handleSubmit(e) {
+    e.preventDefault();
 
-        if (!validateEmail(email)) {
-            showErrorToast('Please enter a valid email address.');
-            return;
-        }
-
-        const data = {
-            email
-        };
-
-        try {
-            await sendPasswordResetEmail(data);
-        } catch (err) {
-            showErrorToast("Error sending email: " + err);
-        }
-  
-        showSuccessToast("User created.");
-        showInfoToast("An email has been sent to reset your password. Please check your inbox.");
-        navigate('/');
+    if (!validateEmail(email)) {
+      showErrorToast('Please enter a valid email address.');
+      return;
     }
 
-    return (
-        <div className='crud-container'>
-            <h1>Reset Password</h1>
-            <div className='content'>
-                <form onSubmit={handleSubmit}>
+    const data = {
+      email,
+    };
 
-                    <div className='inputs-row'>
-                        <div className='input-field'>
-                            <label htmlFor="email">Please insert your e-mail address</label>
-                            <input
-                                type="email"
-                                value={email}
-                                onChange={e => setEmail(e.target.value)}
-                                required
-                            />
-                        </div>
-                    </div>
+    try {
+      await sendPasswordResetEmail(data);
+    } catch (err) {
+      showErrorToast(`Error sending email: ${err}`);
+    }
 
-                    <button type="submit" className='crud-save-button'>
-                        Send link
-                    </button>
-                </form>
+    showSuccessToast('User created.');
+    showInfoToast('An email has been sent to reset your password. Please check your inbox.');
+    navigate('/');
+  }
+
+  return (
+    <div className="crud-container">
+      <h1>Reset Password</h1>
+      <div className="content">
+        <form onSubmit={handleSubmit}>
+          <div className="inputs-row">
+            <div className="input-field">
+              <label htmlFor="email">
+                Please insert your e-mail address
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
+              </label>
             </div>
-        </div>
-    );
+          </div>
+          <button type="submit" className="crud-save-button">
+            Send link
+          </button>
+        </form>
+      </div>
+    </div>
+  );
 }

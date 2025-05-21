@@ -159,3 +159,21 @@
 .ingredients-list-button-group button {
     padding: 0px 5px; /* Ajuste o padding conforme necessário */
 }
+
+.modal-search-button {
+  all: unset; /* remove estilos padrões do botão */
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
+.modal-search-button:hover,
+.modal-search-button:focus {
+  background-color: #f0f0f0;
+}
+
+.modal-search-button.selected {
+  background-color: #d0eaff;
+}

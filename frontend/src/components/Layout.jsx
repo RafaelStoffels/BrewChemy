@@ -1,16 +1,18 @@
 import React from 'react';
 import { Outlet } from 'react-router-dom';
-import Sidebar from '../components/Sidebar';
+import Sidebar from './Sidebar';
 
-const Layout = () => {
+function Layout() {
   return (
     <div>
       <Sidebar />
       <div className="main-container">
-        <Outlet /> {/* Aqui é onde as páginas serão renderizadas */}
+        <Outlet />
+        {' '}
+        {/* Render pages */}
       </div>
     </div>
   );
-};
+}
 
 export default Layout;

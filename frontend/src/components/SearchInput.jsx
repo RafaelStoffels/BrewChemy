@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
+import PropTypes from 'prop-types';
 
-const SearchInput = ({ searchTerm, setSearchTerm, onSearch }) => {
+function SearchInput({ searchTerm, setSearchTerm, onSearch }) {
   const [internalSearchTerm, setInternalSearchTerm] = useState('');
   const [hasSearched, setHasSearched] = useState(false);
   const debounceTimeout = useRef(null);
 
-  // Define se vai usar o estado interno ou externo
   const currentSearchTerm = searchTerm !== undefined ? searchTerm : internalSearchTerm;
   const updateSearchTerm = setSearchTerm || setInternalSearchTerm;
 
@@ -16,9 +16,7 @@ const SearchInput = ({ searchTerm, setSearchTerm, onSearch }) => {
 
   useEffect(() => {
     if (currentSearchTerm.length >= 1) {
-      if (debounceTimeout.current) {
-        clearTimeout(debounceTimeout.current);
-      }
+      if (debounceTimeout.current) clearTimeout(debounceTimeout.current);
 
       debounceTimeout.current = setTimeout(() => {
         if (!hasSearched) {
@@ -29,9 +27,7 @@ const SearchInput = ({ searchTerm, setSearchTerm, onSearch }) => {
     }
 
     return () => {
-      if (debounceTimeout.current) {
-        clearTimeout(debounceTimeout.current);
-      }
+      if (debounceTimeout.current) clearTimeout(debounceTimeout.current);
     };
   }, [currentSearchTerm, onSearch, hasSearched]);
 
@@ -39,11 +35,22 @@ const SearchInput = ({ searchTerm, setSearchTerm, onSearch }) => {
     <input
       type="text"
       placeholder="Search..."
-      value={currentSearchTerm}  // Usa o termo de busca correto
+      value={currentSearchTerm}
       onChange={handleChange}
       style={{ marginBottom: '15px', padding: '5px' }}
     />
   );
+}
+
+SearchInput.propTypes = {
+  searchTerm: PropTypes.string,
+  setSearchTerm: PropTypes.func,
+  onSearch: PropTypes.func.isRequired,
+};
+
+SearchInput.defaultProps = {
+  searchTerm: undefined,
+  setSearchTerm: undefined,
 };
 
 export default SearchInput;

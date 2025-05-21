@@ -2,17 +2,16 @@ import React, { useState, useEffect, useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FiTrash2, FiEdit, FiBookOpen } from 'react-icons/fi';
 import { searchHops, fetchHops, deleteHop } from '../../services/Hops';
-import { showInfoToast, showErrorToast, showSuccessToast} from "../../utils/notifications";
+import { showInfoToast, showErrorToast, showSuccessToast } from '../../utils/notifications';
 import SearchInput from '../../components/SearchInput';
 
-import api from '../../services/api';
 import AuthContext from '../../context/AuthContext';
 import Sidebar from '../../components/Sidebar';
 import '../../styles/list.css';
 
 export default function HopList() {
   const { user } = useContext(AuthContext);
-  const [itemList, setItemList] = useState([]); 
+  const [itemList, setItemList] = useState([]);
 
   const navigate = useNavigate();
 
@@ -22,7 +21,7 @@ export default function HopList() {
     } else {
       const loadHops = async () => {
         try {
-          const hops = await fetchHops(api, user.token);
+          const hops = await fetchHops(user.token);
           setItemList(hops);
         } catch (err) {
           showErrorToast('Error loading hops');
@@ -34,19 +33,18 @@ export default function HopList() {
 
   const searchItemsFunction = async (term) => {
     try {
-      showInfoToast("Searching data...");
-      const recipeResponse = await searchHops(api, user.token, term);
-  
+      showInfoToast('Searching data...');
+      const recipeResponse = await searchHops(user.token, term);
+
       if (Array.isArray(recipeResponse) && recipeResponse.length === 0) {
-        showInfoToast("Data not found");
+        showInfoToast('Data not found');
       } else {
         setItemList(recipeResponse);
       }
     } catch (err) {
-      showErrorToast("Error: " + err);
+      showErrorToast(`Error: ${err}`);
     }
   };
-  
 
   async function handleDetails(recordUserId, itemListId) {
     navigate(`/Hops/${recordUserId}/${itemListId}/details`);
@@ -58,19 +56,19 @@ export default function HopList() {
 
   async function handleDelete(recordUserId, itemListId) {
     try {
-      await deleteHop(api, user.token, recordUserId, itemListId);
-      setItemList(itemList.filter(item => item.id !== itemListId));
-      showSuccessToast("Hop deleted.");
+      await deleteHop(user.token, recordUserId, itemListId);
+      setItemList(itemList.filter((item) => item.id !== itemListId));
+      showSuccessToast('Hop deleted.');
     } catch (err) {
-      showErrorToast("" + err);
+      showErrorToast(`${err}`);
     }
   }
 
   return (
     <div>
       <Sidebar />
-      
-      <div className='list-container'>
+
+      <div className="list-container">
         <div className="div-addButton">
           <Link className="Addbutton" to="/Hops/new">Add new hops</Link>
         </div>
@@ -78,35 +76,41 @@ export default function HopList() {
         <SearchInput onSearch={searchItemsFunction} />
 
         <h1>Hops</h1>
-            <ul>
-              {itemList.map((item) => (
-                <li key={item.id}>
-                  <h2 className="item-title">
-                    {item.name}{" "}
-                    {item.officialId && <span className="custom-label">[custom]</span>}
-                  </h2>
-                  <div className="item-details">
-                    <p>Supplier: {item.supplier}</p>
-                    <p>
-                      Description: {item.description.length > 140 
-                        ? item.description.substring(0, 140) + "..." 
-                        : item.description}
-                    </p>
-                  </div>
-                  <div className="button-group">
-                    <button onClick={() => handleDetails(item.userId, item.id)} type="button" className="icon-button">
-                      <FiBookOpen size={20}  />
-                    </button>
-                    <button onClick={() => handleUpdate(item.userId, item.id)} type="button" className="icon-button">
-                      <FiEdit size={20}  />
-                    </button>
-                    <button onClick={() => handleDelete(item.userId, item.id)} type="button" className="icon-button">
-                      <FiTrash2 size={20}  />
-                    </button>
-                  </div>
-                </li>
-              ))}
-            </ul>
+        <ul>
+          {itemList.map((item) => (
+            <li key={item.id}>
+              <h2 className="item-title">
+                {item.name}
+                {' '}
+                {item.officialId && <span className="custom-label">[custom]</span>}
+              </h2>
+              <div className="item-details">
+                <p>
+                  Supplier:
+                  {item.supplier}
+                </p>
+                <p>
+                  Description:
+                  {' '}
+                  {item.description.length > 140
+                    ? `${item.description.substring(0, 140)}...`
+                    : item.description}
+                </p>
+              </div>
+              <div className="button-group">
+                <button onClick={() => handleDetails(item.userId, item.id)} type="button" className="icon-button">
+                  <FiBookOpen size={20} />
+                </button>
+                <button onClick={() => handleUpdate(item.userId, item.id)} type="button" className="icon-button">
+                  <FiEdit size={20} />
+                </button>
+                <button onClick={() => handleDelete(item.userId, item.id)} type="button" className="icon-button">
+                  <FiTrash2 size={20} />
+                </button>
+              </div>
+            </li>
+          ))}
+        </ul>
       </div>
     </div>
   );

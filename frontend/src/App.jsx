@@ -1,47 +1,47 @@
-import React from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import { AuthProvider } from './context/AuthContext';  // Importa o AuthProvider
-import { SidebarProvider } from './context/SidebarContext'; // Importando o SidebarProvider
-import { ToastContainer } from "react-toastify"; // Importa o ToastContainer
-import "react-toastify/dist/ReactToastify.css"; // Importa os estilos do Toastify
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { ToastContainer } from 'react-toastify';
+import { AuthProvider } from './context/AuthContext';
+import { SidebarProvider } from './context/SidebarContext';
 
+import CreateAccount from './pages/Logon/CreateAccount';
+import ChangePassword from './pages/Logon/ChangePassword';
+import ForgotPassword from './pages/Logon/ForgotPassword';
+import Logon from './pages/Logon';
+import Main from './pages/Main';
+import EquipmentList from './pages/EquipmentList';
+import Equipment from './pages/Equipment';
+import FermentableList from './pages/FermentableList';
+import Fermentable from './pages/Fermentable';
+import HopList from './pages/HopList';
+import Hop from './pages/Hop';
+import MiscList from './pages/MiscList';
+import Misc from './pages/Misc';
+import RecipeList from './pages/RecipeList';
+import Recipe from './pages/Recipes';
+import YeastList from './pages/YeastList';
+import Yeast from './pages/Yeast';
+
+import Layout from './components/Layout';
+
+import 'react-toastify/dist/ReactToastify.css';
 import './styles/global.css';
 
-import CreateAccount from "./pages/Logon/CreateAccount";
-import ChangePassword from "./pages/Logon/ChangePassword";
-import ForgotPassword from "./pages/Logon/ForgotPassword";
-import Logon from "./pages/Logon";
-import Main from "./pages/Main";
-import EquipmentList from "./pages/EquipmentList";
-import Equipment from "./pages/Equipment";
-import FermentableList from "./pages/FermentableList";
-import Fermentable from "./pages/Fermentable";
-import HopList from "./pages/HopList";
-import Hop from "./pages/Hop";
-import MiscList from "./pages/MiscList";
-import Misc from "./pages/Misc";
-import RecipeList from "./pages/RecipeList";
-import Recipe from "./pages/Recipes";
-import YeastList from "./pages/YeastList";
-import Yeast from "./pages/Yeast";
-
-import Layout from './components/Layout'; // Importando o Layout
-
-const App = () => {
+function App() {
   return (
-    <AuthProvider>  {/* Envolvendo a aplicação com o AuthProvider */}
+    <AuthProvider>
       <SidebarProvider>
         <Router>
-          <ToastContainer autoClose={3000} position="top-right" /> {/* Adicionando o ToastContainer */}
+          <ToastContainer autoClose={3000} position="top-right" />
           <Routes>
 
-            {/* Página de Logon não precisa de layout */}
+            {/* no need layout */}
             <Route path="/" element={<Logon />} />
             <Route path="/CreateAccount" element={<CreateAccount />} />
             <Route path="/ForgotPassword" element={<ForgotPassword />} />
             <Route path="/ChangePassword" element={<ChangePassword />} />
 
-            {/* Aqui estamos utilizando o Layout para envolver as páginas que precisam do Sidebar */}
+            {/* layout - sidebar */}
             <Route element={<Layout />}>
               <Route path="/Main" element={<Main />} />
               <Route path="/EquipmentList" element={<EquipmentList />} />
@@ -75,6 +75,6 @@ const App = () => {
       </SidebarProvider>
     </AuthProvider>
   );
-};
+}
 
 export default App;
