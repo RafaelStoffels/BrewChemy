@@ -24,17 +24,6 @@ export default function NewFermentable() {
   const [isEditing, setIsEditing] = useState(false);
   const [isView, setIsView] = useState(false);
 
-  useEffect(() => {
-    if (!user) {
-      navigate('/');
-    } else if (id) {
-      const isDetailsPage = window.location.pathname.includes('/details');
-      setIsView(isDetailsPage);
-      setIsEditing(!isDetailsPage);
-      fetchFermentable(id);
-    }
-  }, [id, user, navigate]);
-
   async function fetchFermentable(itemID) {
     try {
       const fermentable = await fetchFermentableById(user.token, recordUserId, itemID);
@@ -85,6 +74,17 @@ export default function NewFermentable() {
     if (isView) return 'Fermentable Details';
     return 'Add New Fermentable';
   }
+
+  useEffect(() => {
+    if (!user) {
+      navigate('/');
+    } else if (id) {
+      const isDetailsPage = window.location.pathname.includes('/details');
+      setIsView(isDetailsPage);
+      setIsEditing(!isDetailsPage);
+      fetchFermentable(id);
+    }
+  }, [id, user, navigate]);
 
   return (
     <div>

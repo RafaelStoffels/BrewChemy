@@ -18,22 +18,6 @@ export default function EquipmentList() {
 
   const navigate = useNavigate();
 
-  useEffect(() => {
-    if (!user) {
-      navigate('/');
-    } else {
-      const loadEquipments = async () => {
-        try {
-          const equipments = await fetchEquipments(user.token);
-          setItemList(equipments);
-        } catch (err) {
-          showErrorToast('Error loading equipments');
-        }
-      };
-      loadEquipments();
-    }
-  }, [user, navigate]);
-
   const searchItemsFunction = async (term) => {
     try {
       showInfoToast('Searching data...');
@@ -66,6 +50,22 @@ export default function EquipmentList() {
       showErrorToast(`${err}`);
     }
   }
+
+  useEffect(() => {
+    if (!user) {
+      navigate('/');
+    } else {
+      const loadEquipments = async () => {
+        try {
+          const equipments = await fetchEquipments(user.token);
+          setItemList(equipments);
+        } catch (err) {
+          showErrorToast('Error loading equipments');
+        }
+      };
+      loadEquipments();
+    }
+  }, [user, navigate]);
 
   return (
     <div>

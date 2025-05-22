@@ -18,20 +18,6 @@ export default function Logon() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [isRedirecting, setIsRedirecting] = useState(false);
 
-  useEffect(() => {
-    const token = searchParams.get('token');
-
-    if (token && !isRedirecting) {
-      login({ token });
-      setSearchParams({}, { replace: true });
-      setIsRedirecting(true);
-      navigate('/RecipeList');
-    } else if (isAuthenticated && !isRedirecting) {
-      setIsRedirecting(true);
-      navigate('/RecipeList');
-    }
-  }, [searchParams, login, navigate, setSearchParams, isAuthenticated, isRedirecting]);
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setErrorMessage('');
@@ -60,6 +46,20 @@ export default function Logon() {
   const handleGoogleLoginRedirect = () => {
     window.location.href = process.env.REACT_APP_GOOGLE_LOGIN_URL;
   };
+
+  useEffect(() => {
+    const token = searchParams.get('token');
+
+    if (token && !isRedirecting) {
+      login({ token });
+      setSearchParams({}, { replace: true });
+      setIsRedirecting(true);
+      navigate('/RecipeList');
+    } else if (isAuthenticated && !isRedirecting) {
+      setIsRedirecting(true);
+      navigate('/RecipeList');
+    }
+  }, [searchParams, login, navigate, setSearchParams, isAuthenticated, isRedirecting]);
 
   return (
     <div className="logon-container">

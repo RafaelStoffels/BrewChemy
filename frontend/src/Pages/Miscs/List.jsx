@@ -18,22 +18,6 @@ export default function MiscList() {
 
   const navigate = useNavigate();
 
-  useEffect(() => {
-    if (!user) {
-      navigate('/');
-    } else {
-      const loadMisc = async () => {
-        try {
-          const misc = await fetchMisc(user.token);
-          setItemList(misc);
-        } catch (err) {
-          showErrorToast('Error loading misc');
-        }
-      };
-      loadMisc();
-    }
-  }, [user, navigate]);
-
   const searchItemsFunction = async (term) => {
     try {
       showInfoToast('Searching data...');
@@ -66,6 +50,22 @@ export default function MiscList() {
       showErrorToast(`${err}`);
     }
   }
+
+  useEffect(() => {
+    if (!user) {
+      navigate('/');
+    } else {
+      const loadMisc = async () => {
+        try {
+          const misc = await fetchMisc(user.token);
+          setItemList(misc);
+        } catch (err) {
+          showErrorToast('Error loading misc');
+        }
+      };
+      loadMisc();
+    }
+  }, [user, navigate]);
 
   return (
     <div>

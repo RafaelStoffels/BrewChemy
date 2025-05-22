@@ -18,22 +18,6 @@ export default function FermentableList() {
 
   const navigate = useNavigate();
 
-  useEffect(() => {
-    if (!user) {
-      navigate('/');
-    } else {
-      const loaditems = async () => {
-        try {
-          const items = await fetchFermentables(user.token);
-          setItemList(items);
-        } catch (err) {
-          showErrorToast('Error loading fermentables');
-        }
-      };
-      loaditems();
-    }
-  }, [user, navigate]);
-
   const searchItemsFunction = async (term) => {
     try {
       showInfoToast('Searching data...');
@@ -66,6 +50,22 @@ export default function FermentableList() {
       showErrorToast(`${err}`);
     }
   }
+
+  useEffect(() => {
+    if (!user) {
+      navigate('/');
+    } else {
+      const loaditems = async () => {
+        try {
+          const items = await fetchFermentables(user.token);
+          setItemList(items);
+        } catch (err) {
+          showErrorToast('Error loading fermentables');
+        }
+      };
+      loaditems();
+    }
+  }, [user, navigate]);
 
   return (
     <div>

@@ -18,22 +18,6 @@ export default function HopList() {
 
   const navigate = useNavigate();
 
-  useEffect(() => {
-    if (!user) {
-      navigate('/');
-    } else {
-      const loadHops = async () => {
-        try {
-          const hops = await fetchHops(user.token);
-          setItemList(hops);
-        } catch (err) {
-          showErrorToast('Error loading hops');
-        }
-      };
-      loadHops();
-    }
-  }, [user, navigate]);
-
   const searchItemsFunction = async (term) => {
     try {
       showInfoToast('Searching data...');
@@ -66,6 +50,22 @@ export default function HopList() {
       showErrorToast(`${err}`);
     }
   }
+
+  useEffect(() => {
+    if (!user) {
+      navigate('/');
+    } else {
+      const loadHops = async () => {
+        try {
+          const hops = await fetchHops(user.token);
+          setItemList(hops);
+        } catch (err) {
+          showErrorToast('Error loading hops');
+        }
+      };
+      loadHops();
+    }
+  }, [user, navigate]);
 
   return (
     <div>

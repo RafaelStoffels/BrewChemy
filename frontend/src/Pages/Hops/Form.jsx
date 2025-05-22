@@ -26,21 +26,6 @@ export default function NewHop() {
   const [isEditing, setIsEditing] = useState(false);
   const [isView, setIsView] = useState(false);
 
-  useEffect(() => {
-    if (!user) {
-      navigate('/');
-    } else if (id) {
-      if (window.location.pathname.includes('/details')) {
-        setIsView(true);
-        setIsEditing(false);
-      } else {
-        setIsView(false);
-        setIsEditing(true);
-      }
-      fetchHop(recordUserId, id);
-    }
-  }, [id, user, navigate]);
-
   async function fetchHop(userId, itemID) {
     try {
       const hop = await fetchHopById(user.token, userId, itemID);
@@ -91,6 +76,21 @@ export default function NewHop() {
     if (isView) return 'Fermentable Details';
     return 'Add New Fermentable';
   }
+
+  useEffect(() => {
+    if (!user) {
+      navigate('/');
+    } else if (id) {
+      if (window.location.pathname.includes('/details')) {
+        setIsView(true);
+        setIsEditing(false);
+      } else {
+        setIsView(false);
+        setIsEditing(true);
+      }
+      fetchHop(recordUserId, id);
+    }
+  }, [id, user, navigate]);
 
   return (
     <div>

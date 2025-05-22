@@ -29,17 +29,6 @@ export default function NewEquipment() {
   const [isEditing, setIsEditing] = useState(false);
   const [isView, setIsView] = useState(false);
 
-  useEffect(() => {
-    if (!user) {
-      navigate('/');
-    } else if (id) {
-      const isDetail = window.location.pathname.includes('/details');
-      setIsView(isDetail);
-      setIsEditing(!isDetail);
-      fetchEquipment(recordUserId, id);
-    }
-  }, [id, user, navigate, recordUserId]);
-
   async function fetchEquipment(userId, itemID) {
     try {
       const equipment = await fetchEquipmentById(api, user.token, userId, itemID);
@@ -94,6 +83,17 @@ export default function NewEquipment() {
     if (isView) return 'Equipment Details';
     return 'Add New Equipment';
   };
+
+  useEffect(() => {
+    if (!user) {
+      navigate('/');
+    } else if (id) {
+      const isDetail = window.location.pathname.includes('/details');
+      setIsView(isDetail);
+      setIsEditing(!isDetail);
+      fetchEquipment(recordUserId, id);
+    }
+  }, [id, user, navigate, recordUserId]);
 
   return (
     <div>

@@ -22,20 +22,6 @@ export function AddFermentableModal({ isOpen, closeModal, handleAddFermentableRe
 
   const { user } = useContext(AuthContext);
 
-  useEffect(() => {
-    if (isOpen) {
-      const loadItems = async () => {
-        try {
-          const items = await fetchFermentables(user.token);
-          setItemList(items);
-        } catch (err) {
-          showErrorToast('Error loading fermentables');
-        }
-      };
-      loadItems();
-    }
-  }, [isOpen, user.token]);
-
   const searchItemsFunction = async (term) => {
     const recipeResponse = await searchFermentables(user.token, term);
     setItemList(recipeResponse);
@@ -53,6 +39,20 @@ export function AddFermentableModal({ isOpen, closeModal, handleAddFermentableRe
       showErrorToast('Please fill in all fields.');
     }
   };
+
+  useEffect(() => {
+    if (isOpen) {
+      const loadItems = async () => {
+        try {
+          const items = await fetchFermentables(user.token);
+          setItemList(items);
+        } catch (err) {
+          showErrorToast('Error loading fermentables');
+        }
+      };
+      loadItems();
+    }
+  }, [isOpen, user.token]);
 
   return (
     <Modal
@@ -136,20 +136,6 @@ export function AddHopModal({ isOpen, closeModal, handleAddHopRecipe }) {
 
   const { user } = useContext(AuthContext);
 
-  useEffect(() => {
-    if (isOpen) {
-      const loadItems = async () => {
-        try {
-          const items = await fetchHops(user.token);
-          setItemList(items);
-        } catch (err) {
-          showErrorToast('Error loading hops');
-        }
-      };
-      loadItems();
-    }
-  }, [isOpen, user.token]);
-
   const searchItemsFunction = async (term) => {
     const response = await searchHops(user.token, term);
     setItemList(response);
@@ -170,6 +156,20 @@ export function AddHopModal({ isOpen, closeModal, handleAddHopRecipe }) {
       showErrorToast('Please fill in all fields.');
     }
   };
+
+  useEffect(() => {
+    if (isOpen) {
+      const loadItems = async () => {
+        try {
+          const items = await fetchHops(user.token);
+          setItemList(items);
+        } catch (err) {
+          showErrorToast('Error loading hops');
+        }
+      };
+      loadItems();
+    }
+  }, [isOpen, user.token]);
 
   return (
     <Modal
@@ -282,20 +282,6 @@ export function AddMiscModal({ isOpen, closeModal, handleAddMiscRecipe }) {
 
   const { user } = useContext(AuthContext);
 
-  useEffect(() => {
-    if (isOpen) {
-      const loadItems = async () => {
-        try {
-          const items = await fetchMisc(user.token);
-          setItemList(items);
-        } catch (err) {
-          showErrorToast('Error loading misc');
-        }
-      };
-      loadItems();
-    }
-  }, [isOpen, user.token]);
-
   const handleQuantityChange = (e) => {
     setQuantity(e.target.value);
   };
@@ -322,6 +308,20 @@ export function AddMiscModal({ isOpen, closeModal, handleAddMiscRecipe }) {
   const handleSelectItem = (misc) => {
     setSelectedItem(misc);
   };
+
+  useEffect(() => {
+    if (isOpen) {
+      const loadItems = async () => {
+        try {
+          const items = await fetchMisc(user.token);
+          setItemList(items);
+        } catch (err) {
+          showErrorToast('Error loading misc');
+        }
+      };
+      loadItems();
+    }
+  }, [isOpen, user.token]);
 
   return (
     <Modal
@@ -395,20 +395,6 @@ export function AddYeastModal({ isOpen, closeModal, handleAddYeastRecipe }) {
 
   const { user } = useContext(AuthContext);
 
-  useEffect(() => {
-    if (isOpen) {
-      const loadItems = async () => {
-        try {
-          const items = await fetchYeasts(user.token);
-          setItemList(items);
-        } catch (err) {
-          showErrorToast('Error loading yeasts');
-        }
-      };
-      loadItems();
-    }
-  }, [isOpen, user.token]);
-
   const searchItemsFunction = async (term) => {
     try {
       const response = await searchYeasts(user.token, term);
@@ -430,6 +416,20 @@ export function AddYeastModal({ isOpen, closeModal, handleAddYeastRecipe }) {
       showErrorToast('Please fill in all fields.');
     }
   };
+
+  useEffect(() => {
+    if (isOpen) {
+      const loadItems = async () => {
+        try {
+          const items = await fetchYeasts(user.token);
+          setItemList(items);
+        } catch (err) {
+          showErrorToast('Error loading yeasts');
+        }
+      };
+      loadItems();
+    }
+  }, [isOpen, user.token]);
 
   return (
     <Modal
@@ -505,20 +505,6 @@ export function ChangeEquipmentModal({ isOpen, closeModal, handleChangeEquipment
 
   const { user } = useContext(AuthContext);
 
-  useEffect(() => {
-    if (isOpen) {
-      const loadItems = async () => {
-        try {
-          const items = await fetchEquipments(user.token);
-          setItemList(items);
-        } catch (err) {
-          showErrorToast('Error loading equipments');
-        }
-      };
-      loadItems();
-    }
-  }, [isOpen, user.token]);
-
   const searchItemsFunction = async (term) => {
     try {
       const response = await searchEquipments(user.token, term);
@@ -540,6 +526,20 @@ export function ChangeEquipmentModal({ isOpen, closeModal, handleChangeEquipment
       showInfoToast('Select an equipment');
     }
   };
+
+  useEffect(() => {
+    if (isOpen) {
+      const loadItems = async () => {
+        try {
+          const items = await fetchEquipments(user.token);
+          setItemList(items);
+        } catch (err) {
+          showErrorToast('Error loading equipments');
+        }
+      };
+      loadItems();
+    }
+  }, [isOpen, user.token]);
 
   return (
     <Modal
@@ -594,12 +594,6 @@ export function UpdateFermentableModal({
 }) {
   const [localFermentableObject, setLocalFermentableObject] = useState(null);
 
-  useEffect(() => {
-    if (selectedFermentable) {
-      setLocalFermentableObject(selectedFermentable);
-    }
-  }, [selectedFermentable]);
-
   const handleChange = (key, value) => {
     setLocalFermentableObject((prev) => ({
       ...prev,
@@ -617,6 +611,12 @@ export function UpdateFermentableModal({
     }
     closeModal();
   };
+
+  useEffect(() => {
+    if (selectedFermentable) {
+      setLocalFermentableObject(selectedFermentable);
+    }
+  }, [selectedFermentable]);
 
   return (
     <Modal
@@ -730,12 +730,6 @@ export function UpdateHopModal({
 }) {
   const [localHopObject, setLocalHopObject] = useState(null);
 
-  useEffect(() => {
-    if (selectedHop) {
-      setLocalHopObject(selectedHop);
-    }
-  }, [selectedHop]);
-
   const handleChange = (key, value) => {
     setLocalHopObject((prev) => ({
       ...prev,
@@ -753,6 +747,12 @@ export function UpdateHopModal({
     }
     closeModal();
   };
+
+  useEffect(() => {
+    if (selectedHop) {
+      setLocalHopObject(selectedHop);
+    }
+  }, [selectedHop]);
 
   return (
     <Modal
@@ -868,12 +868,6 @@ export function UpdateMiscModal({
 }) {
   const [localMiscObject, setLocalMiscObject] = useState(null);
 
-  useEffect(() => {
-    if (selectedMisc) {
-      setLocalMiscObject(selectedMisc);
-    }
-  }, [selectedMisc]);
-
   const handleChange = (key, value) => {
     setLocalMiscObject((prev) => ({
       ...prev,
@@ -891,6 +885,12 @@ export function UpdateMiscModal({
     }
     closeModal();
   };
+
+  useEffect(() => {
+    if (selectedMisc) {
+      setLocalMiscObject(selectedMisc);
+    }
+  }, [selectedMisc]);
 
   return (
     <Modal
@@ -1005,12 +1005,6 @@ export function UpdateYeastModal({
 }) {
   const [localYeastObject, setLocalYeastObject] = useState(null);
 
-  useEffect(() => {
-    if (selectedYeast) {
-      setLocalYeastObject(selectedYeast);
-    }
-  }, [selectedYeast]);
-
   const handleChange = (key, value) => {
     setLocalYeastObject((prev) => ({
       ...prev,
@@ -1028,6 +1022,12 @@ export function UpdateYeastModal({
     }
     closeModal();
   };
+
+  useEffect(() => {
+    if (selectedYeast) {
+      setLocalYeastObject(selectedYeast);
+    }
+  }, [selectedYeast]);
 
   return (
     <Modal

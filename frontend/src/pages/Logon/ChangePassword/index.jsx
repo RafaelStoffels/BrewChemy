@@ -16,16 +16,6 @@ export default function NewAccount() {
   const [passwordError, setPasswordError] = useState('');
   const [confirmPasswordError, setConfirmPasswordError] = useState('');
 
-  useEffect(() => {
-    const urlParams = new URLSearchParams(location.search);
-    const tokenFromUrl = urlParams.get('token');
-    if (tokenFromUrl) {
-      setToken(tokenFromUrl);
-    } else {
-      showErrorToast('Token is required');
-    }
-  }, [location.search]);
-
   const validatePassword = (passwordPar) => {
     const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d@$!%*?&]{8,}$/;
     return regex.test(passwordPar);
@@ -59,6 +49,16 @@ export default function NewAccount() {
       showErrorToast(`Error creating user. ${err} try again later.`);
     }
   }
+
+  useEffect(() => {
+    const urlParams = new URLSearchParams(location.search);
+    const tokenFromUrl = urlParams.get('token');
+    if (tokenFromUrl) {
+      setToken(tokenFromUrl);
+    } else {
+      showErrorToast('Token is required');
+    }
+  }, [location.search]);
 
   return (
     <div className="crud-container">

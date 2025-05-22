@@ -15,22 +15,6 @@ export default function YeastList() {
 
   const navigate = useNavigate();
 
-  useEffect(() => {
-    if (!user) {
-      navigate('/');
-    } else {
-      const loadYeasts = async () => {
-        try {
-          const yeasts = await fetchYeasts(user.token);
-          setItemList(yeasts);
-        } catch (err) {
-          showErrorToast('Error loading yeast');
-        }
-      };
-      loadYeasts();
-    }
-  }, [user, navigate]);
-
   const searchItemsFunction = async (term) => {
     try {
       showInfoToast('Searching data...');
@@ -63,6 +47,22 @@ export default function YeastList() {
       showErrorToast(`${err}`);
     }
   }
+
+  useEffect(() => {
+    if (!user) {
+      navigate('/');
+    } else {
+      const loadYeasts = async () => {
+        try {
+          const yeasts = await fetchYeasts(user.token);
+          setItemList(yeasts);
+        } catch (err) {
+          showErrorToast('Error loading yeast');
+        }
+      };
+      loadYeasts();
+    }
+  }, [user, navigate]);
 
   return (
     <div>

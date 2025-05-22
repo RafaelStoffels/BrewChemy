@@ -20,23 +20,6 @@ export default function MaltList() {
 
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const fetchData = async () => {
-      if (!user) {
-        navigate('/');
-      } else {
-        try {
-          const data = await fetchRecipes(user.token);
-          setItemList(data);
-        } catch (err) {
-          showErrorToast('Error loading recipes');
-        }
-      }
-    };
-
-    fetchData();
-  }, [user, navigate]);
-
   const searchItemsFunction = async (term) => {
     try {
       showInfoToast('Searching data...');
@@ -68,6 +51,23 @@ export default function MaltList() {
       showErrorToast(`Error deleting data.${err}`);
     }
   }
+
+  useEffect(() => {
+    const fetchData = async () => {
+      if (!user) {
+        navigate('/');
+      } else {
+        try {
+          const data = await fetchRecipes(user.token);
+          setItemList(data);
+        } catch (err) {
+          showErrorToast('Error loading recipes');
+        }
+      }
+    };
+
+    fetchData();
+  }, [user, navigate]);
 
   return (
     <div>

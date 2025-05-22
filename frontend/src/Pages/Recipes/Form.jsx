@@ -26,11 +26,11 @@ import {
 
 import {
   calculateOG, calculateFG, calculateIBU, calculateEBC, getPreBoilVolume, getIngredientsPorcentage,
-} from '../../Components/Recipe/calculation';
+} from './utils/calculation';
 
-import getBeerColor from '../../Components/Recipe/getBeerColor';
-import beerStyles from '../../Components/Recipe/getBeerStyles';
-import OGBar from '../../Components/Recipe/Indicators';
+import getBeerColor from './utils/getBeerColor';
+import beerStyles from './utils/getBeerStyles';
+import OGBar from './Components/Indicators';
 
 import './Form.css';
 
@@ -105,142 +105,6 @@ export default function NewRecipe() {
     recipeYeasts: [],
     recipeEquipment: {},
   });
-
-  useEffect(() => {
-    if (!user) {
-      navigate('/');
-    } else if (id) {
-      setIsView(window.location.pathname.includes('/details'));
-      setIsEditing(!window.location.pathname.includes('/details'));
-      fetchRecipe(id);
-    }
-  }, [id, user]);
-
-  useEffect(() => {
-    if (EBC) {
-      const color = getBeerColor(EBC);
-      setEBCColor(color);
-    }
-  }, [EBC]);
-
-  useEffect(() => {
-    if (recipe) {
-      // getIngredientsPorcentage
-      getIngredientsPorcentage(recipe, setRecipe);
-
-      // getPreBoilVolume
-      const preBoilCalc = getPreBoilVolume(recipe);
-
-      if (preBoilCalc > 0) {
-        setpreBoilVolume(preBoilCalc);
-      }
-
-      // calculateOG
-      const OGResult = calculateOG(recipe);
-      setOG(OGResult);
-
-      // calculateFG
-      const FGResult = calculateFG(recipe, OGResult);
-
-      setFG(FGResult);
-
-      if (recipe.recipeFermentables.length === 0) {
-        setABV(0);
-      }
-
-      // calculateEBC
-      const EBCResult = calculateEBC(recipe);
-
-      setEBC(EBCResult);
-
-      // calculateIBU
-      const IBUresult = calculateIBU(recipe, OGResult);
-
-      if (IBUresult && IBUresult.totalIBU) {
-        setIBU(parseFloat(IBUresult.totalIBU));
-
-        if (IBUresult.hasChanges) {
-          setRecipe((prev) => ({
-            ...prev,
-            recipeHops: IBUresult.updatedHops,
-          }));
-        }
-      } else {
-        setIBU(0);
-      }
-
-      // calculateGU
-      const GU = (OGResult - 1) * 1000;
-
-      if (IBU) {
-        setBUGU((IBU / GU).toFixed(2));
-      }
-
-      if (recipe.style) {
-        const loadStyle = beerStyles.find((style) => style.name === recipe.style);
-
-        if (loadStyle) {
-          setSelectedStyle(loadStyle);
-        }
-      } else {
-        setSelectedStyle((prev) => ({
-          ...prev,
-          initialOG: 1,
-          finalOG: 1,
-          initialFG: 1,
-          finalFG: 1,
-          initialABV: 0,
-          finalABV: 0,
-          initialEBC: 0,
-          finalEBC: 0,
-          initialIBU: 0,
-          finalIBU: 0,
-          initialBuGu: 0,
-          finalBuGu: 0,
-        }));
-      }
-    }
-  }, [recipe]);
-
-  useEffect(() => {
-    if (EBC) {
-      const color = getBeerColor(EBC);
-      setEBCColor(color);
-    }
-  }, [EBC]);
-
-  useEffect(() => {
-    if (OG && FG) {
-      const abvValue = ((OG - FG) * 131.25).toFixed(2);
-      setABV(abvValue > 0 ? abvValue : 0);
-    }
-  }, [OG, FG]);
-
-  useEffect(() => {
-    const svgObject = document.querySelector('.beer-object');
-
-    if (svgObject && svgObject.contentDocument) {
-      const svgDoc = svgObject.contentDocument;
-      const gradients = svgDoc.querySelectorAll('linearGradient, radialGradient');
-
-      gradients.forEach((gradient) => {
-        const stops = gradient.querySelectorAll('stop');
-
-        stops.forEach((stop) => {
-          stop.setAttribute('stop-color', EBCColor);
-        });
-      });
-    }
-  }, [EBCColor]);
-
-  useEffect(() => {
-    setRecipe((prevRecipe) => {
-      if (prevRecipe.style !== selectedStyle.name) {
-        return { ...prevRecipe, style: selectedStyle.name };
-      }
-      return prevRecipe;
-    });
-  }, [selectedStyle]);
 
   const fetchRecipe = async (recipeID) => {
     const recipeResponse = await fetchRecipeById(recipeID, user.token);
@@ -619,6 +483,142 @@ export default function NewRecipe() {
       showErrorToast('Error saving recipe. Please, try again.');
     }
   }
+
+  useEffect(() => {
+    if (!user) {
+      navigate('/');
+    } else if (id) {
+      setIsView(window.location.pathname.includes('/details'));
+      setIsEditing(!window.location.pathname.includes('/details'));
+      fetchRecipe(id);
+    }
+  }, [id, user]);
+
+  useEffect(() => {
+    if (EBC) {
+      const color = getBeerColor(EBC);
+      setEBCColor(color);
+    }
+  }, [EBC]);
+
+  useEffect(() => {
+    if (recipe) {
+      // getIngredientsPorcentage
+      getIngredientsPorcentage(recipe, setRecipe);
+
+      // getPreBoilVolume
+      const preBoilCalc = getPreBoilVolume(recipe);
+
+      if (preBoilCalc > 0) {
+        setpreBoilVolume(preBoilCalc);
+      }
+
+      // calculateOG
+      const OGResult = calculateOG(recipe);
+      setOG(OGResult);
+
+      // calculateFG
+      const FGResult = calculateFG(recipe, OGResult);
+
+      setFG(FGResult);
+
+      if (recipe.recipeFermentables.length === 0) {
+        setABV(0);
+      }
+
+      // calculateEBC
+      const EBCResult = calculateEBC(recipe);
+
+      setEBC(EBCResult);
+
+      // calculateIBU
+      const IBUresult = calculateIBU(recipe, OGResult);
+
+      if (IBUresult && IBUresult.totalIBU) {
+        setIBU(parseFloat(IBUresult.totalIBU));
+
+        if (IBUresult.hasChanges) {
+          setRecipe((prev) => ({
+            ...prev,
+            recipeHops: IBUresult.updatedHops,
+          }));
+        }
+      } else {
+        setIBU(0);
+      }
+
+      // calculateGU
+      const GU = (OGResult - 1) * 1000;
+
+      if (IBU) {
+        setBUGU((IBU / GU).toFixed(2));
+      }
+
+      if (recipe.style) {
+        const loadStyle = beerStyles.find((style) => style.name === recipe.style);
+
+        if (loadStyle) {
+          setSelectedStyle(loadStyle);
+        }
+      } else {
+        setSelectedStyle((prev) => ({
+          ...prev,
+          initialOG: 1,
+          finalOG: 1,
+          initialFG: 1,
+          finalFG: 1,
+          initialABV: 0,
+          finalABV: 0,
+          initialEBC: 0,
+          finalEBC: 0,
+          initialIBU: 0,
+          finalIBU: 0,
+          initialBuGu: 0,
+          finalBuGu: 0,
+        }));
+      }
+    }
+  }, [recipe]);
+
+  useEffect(() => {
+    if (EBC) {
+      const color = getBeerColor(EBC);
+      setEBCColor(color);
+    }
+  }, [EBC]);
+
+  useEffect(() => {
+    if (OG && FG) {
+      const abvValue = ((OG - FG) * 131.25).toFixed(2);
+      setABV(abvValue > 0 ? abvValue : 0);
+    }
+  }, [OG, FG]);
+
+  useEffect(() => {
+    const svgObject = document.querySelector('.beer-object');
+
+    if (svgObject && svgObject.contentDocument) {
+      const svgDoc = svgObject.contentDocument;
+      const gradients = svgDoc.querySelectorAll('linearGradient, radialGradient');
+
+      gradients.forEach((gradient) => {
+        const stops = gradient.querySelectorAll('stop');
+
+        stops.forEach((stop) => {
+          stop.setAttribute('stop-color', EBCColor);
+        });
+      });
+    }
+  }, [EBCColor]);
+
+  useEffect(() => {
+    setRecipe((prevRecipe) => {
+      if (prevRecipe.style !== selectedStyle.name) {
+        return { ...prevRecipe, style: selectedStyle.name };
+      }
+      return prevRecipe;
+    });
+  }, [selectedStyle]);
 
   return (
     <div>

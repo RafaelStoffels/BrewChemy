@@ -29,21 +29,6 @@ export default function NewYeast() {
   const [isEditing, setIsEditing] = useState(false);
   const [isView, setIsView] = useState(false);
 
-  useEffect(() => {
-    if (!user) {
-      navigate('/');
-    } else if (id) {
-      if (window.location.pathname.includes('/details')) {
-        setIsView(true);
-        setIsEditing(false);
-      } else {
-        setIsView(false);
-        setIsEditing(true);
-      }
-      fetchYeast(recordUserId, id);
-    }
-  }, [id, user, navigate]);
-
   async function fetchYeast(userId, itemID) {
     try {
       const yeast = await fetchYeastById(api, user.token, userId, itemID);
@@ -98,6 +83,21 @@ export default function NewYeast() {
     if (isView) return 'Fermentable Details';
     return 'Add New Fermentable';
   }
+
+  useEffect(() => {
+    if (!user) {
+      navigate('/');
+    } else if (id) {
+      if (window.location.pathname.includes('/details')) {
+        setIsView(true);
+        setIsEditing(false);
+      } else {
+        setIsView(false);
+        setIsEditing(true);
+      }
+      fetchYeast(recordUserId, id);
+    }
+  }, [id, user, navigate]);
 
   return (
     <div>
