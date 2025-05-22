@@ -2,17 +2,17 @@ import React, { useState, useEffect, useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FiTrash2, FiEdit, FiBookOpen } from 'react-icons/fi';
 
-import { searchFermentables, fetchFermentables, deleteFermentable } from '../../services/fermentables';
-import { showInfoToast, showErrorToast, showSuccessToast } from '../../utils/notifications';
+import { searchHops, fetchHops, deleteHop } from '../../../services/hops';
+import { showInfoToast, showErrorToast, showSuccessToast } from '../../../utils/notifications';
 
-import AuthContext from '../../context/AuthContext';
+import AuthContext from '../../../context/AuthContext';
 
-import Sidebar from '../../Components/Sidebar';
-import SearchInput from '../../Components/SearchInput';
+import Sidebar from '../../../Components/Sidebar';
+import SearchInput from '../../../Components/SearchInput';
 
-import '../../Styles/list.css';
+import '../../../Styles/list.css';
 
-export default function FermentableList() {
+export default function HopList() {
   const { user } = useContext(AuthContext);
   const [itemList, setItemList] = useState([]);
 
@@ -21,7 +21,7 @@ export default function FermentableList() {
   const searchItemsFunction = async (term) => {
     try {
       showInfoToast('Searching data...');
-      const recipeResponse = await searchFermentables(user.token, term);
+      const recipeResponse = await searchHops(user.token, term);
 
       if (Array.isArray(recipeResponse) && recipeResponse.length === 0) {
         showInfoToast('Data not found');
@@ -29,23 +29,23 @@ export default function FermentableList() {
         setItemList(recipeResponse);
       }
     } catch (err) {
-      showErrorToast(`${err}`);
+      showErrorToast(`Error: ${err}`);
     }
   };
 
   async function handleDetails(recordUserId, itemListId) {
-    navigate(`/Fermentables/${recordUserId}/${itemListId}/details`);
+    navigate(`/Hops/${recordUserId}/${itemListId}/details`);
   }
 
   async function handleUpdate(recordUserId, itemListId) {
-    navigate(`/Fermentables/${recordUserId}/${itemListId}/edit`);
+    navigate(`/Hops/${recordUserId}/${itemListId}/edit`);
   }
 
   async function handleDelete(recordUserId, itemListId) {
     try {
-      await deleteFermentable(user.token, recordUserId, itemListId);
+      await deleteHop(user.token, recordUserId, itemListId);
       setItemList(itemList.filter((item) => item.id !== itemListId));
-      showSuccessToast('Fermentable deleted.');
+      showSuccessToast('Hop deleted.');
     } catch (err) {
       showErrorToast(`${err}`);
     }
@@ -55,15 +55,15 @@ export default function FermentableList() {
     if (!user) {
       navigate('/');
     } else {
-      const loaditems = async () => {
+      const loadHops = async () => {
         try {
-          const items = await fetchFermentables(user.token);
-          setItemList(items);
+          const hops = await fetchHops(user.token);
+          setItemList(hops);
         } catch (err) {
-          showErrorToast('Error loading fermentables');
+          showErrorToast('Error loading hops');
         }
       };
-      loaditems();
+      loadHops();
     }
   }, [user, navigate]);
 
@@ -73,12 +73,12 @@ export default function FermentableList() {
 
       <div className="list-container">
         <div className="div-addButton">
-          <Link className="Addbutton" to="/Fermentables/new">Add new fermentable</Link>
+          <Link className="Addbutton" to="/Hops/new">Add new hops</Link>
         </div>
 
         <SearchInput onSearch={searchItemsFunction} />
 
-        <h1>Fermentables</h1>
+        <h1>Hops</h1>
         <ul>
           {itemList.map((item) => (
             <li key={item.id}>
@@ -91,14 +91,6 @@ export default function FermentableList() {
                 <p>
                   Supplier:
                   {item.supplier}
-                </p>
-                <p>
-                  Type:
-                  {item.type}
-                </p>
-                <p>
-                  EBC:
-                  {item.ebc}
                 </p>
                 <p>
                   Description:

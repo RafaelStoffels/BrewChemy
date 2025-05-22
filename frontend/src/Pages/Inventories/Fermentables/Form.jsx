@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
-import { fetchFermentableById, updateFermentable, addFermentable } from '../../services/fermentables';
-import { showErrorToast, showSuccessToast } from '../../utils/notifications';
+import { fetchFermentableById, updateFermentable, addFermentable } from '../../../services/fermentables';
+import { showErrorToast, showSuccessToast } from '../../../utils/notifications';
 
-import AuthContext from '../../context/AuthContext';
+import AuthContext from '../../../context/AuthContext';
 
-import '../../Styles/crud.css';
+import '../../../Styles/crud.css';
 
 export default function NewFermentable() {
   const { user } = useContext(AuthContext);

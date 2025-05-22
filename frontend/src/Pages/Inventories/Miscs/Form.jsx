@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
-import { fetchMiscById, updateMisc, addMisc } from '../../services/misc';
-import { showErrorToast, showSuccessToast } from '../../utils/notifications';
+import { fetchMiscById, updateMisc, addMisc } from '../../../services/misc';
+import { showErrorToast, showSuccessToast } from '../../../utils/notifications';
 
-import AuthContext from '../../context/AuthContext';
+import AuthContext from '../../../context/AuthContext';
 
-import '../../Styles/crud.css';
+import '../../../Styles/crud.css';
 
 export default function NewMisc() {
   const { user } = useContext(AuthContext);

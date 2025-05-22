@@ -11,16 +11,16 @@ import Logon from './Pages/Logon';
 import Main from './Pages/Main';
 import EquipmentList from './Pages/Equipments/List';
 import Equipment from './Pages/Equipments/Form';
-import FermentableList from './Pages/Fermentables/List';
-import Fermentable from './Pages/Fermentables';
-import HopList from './Pages/Hops/List';
-import Hop from './Pages/Hops/Form';
-import MiscList from './Pages/Miscs/List';
-import Misc from './Pages/Miscs/Form';
+import FermentableList from './Pages/Inventories/Fermentables/List';
+import Fermentable from './Pages/Inventories/Fermentables/Form';
+import HopList from './Pages/Inventories/Hops/List';
+import Hop from './Pages/Inventories/Hops/Form';
+import MiscList from './Pages/Inventories/Miscs/List';
+import Misc from './Pages/Inventories/Miscs/Form';
 import RecipeList from './Pages/Recipes/List';
 import Recipe from './Pages/Recipes/Form';
-import YeastList from './Pages/Yeasts/List';
-import Yeast from './Pages/Yeasts/Form';
+import YeastList from './Pages/Inventories/Yeasts/List';
+import Yeast from './Pages/Inventories/Yeasts/Form';
 
 import Layout from './Components/Layout';
 

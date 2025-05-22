@@ -2,17 +2,17 @@ import React, { useState, useEffect, useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FiTrash2, FiEdit, FiBookOpen } from 'react-icons/fi';
 
-import { searchHops, fetchHops, deleteHop } from '../../services/hops';
-import { showInfoToast, showErrorToast, showSuccessToast } from '../../utils/notifications';
+import { searchFermentables, fetchFermentables, deleteFermentable } from '../../../services/fermentables';
+import { showInfoToast, showErrorToast, showSuccessToast } from '../../../utils/notifications';
 
-import AuthContext from '../../context/AuthContext';
+import AuthContext from '../../../context/AuthContext';
 
-import Sidebar from '../../Components/Sidebar';
-import SearchInput from '../../Components/SearchInput';
+import Sidebar from '../../../Components/Sidebar';
+import SearchInput from '../../../Components/SearchInput';
 
-import '../../Styles/list.css';
+import '../../../Styles/list.css';
 
-export default function HopList() {
+export default function FermentableList() {
   const { user } = useContext(AuthContext);
   const [itemList, setItemList] = useState([]);
 
@@ -21,7 +21,7 @@ export default function HopList() {
   const searchItemsFunction = async (term) => {
     try {
       showInfoToast('Searching data...');
-      const recipeResponse = await searchHops(user.token, term);
+      const recipeResponse = await searchFermentables(user.token, term);
 
       if (Array.isArray(recipeResponse) && recipeResponse.length === 0) {
         showInfoToast('Data not found');
@@ -29,23 +29,23 @@ export default function HopList() {
         setItemList(recipeResponse);
       }
     } catch (err) {
-      showErrorToast(`Error: ${err}`);
+      showErrorToast(`${err}`);
     }
   };
 
   async function handleDetails(recordUserId, itemListId) {
-    navigate(`/Hops/${recordUserId}/${itemListId}/details`);
+    navigate(`/Fermentables/${recordUserId}/${itemListId}/details`);
   }
 
   async function handleUpdate(recordUserId, itemListId) {
-    navigate(`/Hops/${recordUserId}/${itemListId}/edit`);
+    navigate(`/Fermentables/${recordUserId}/${itemListId}/edit`);
   }
 
   async function handleDelete(recordUserId, itemListId) {
     try {
-      await deleteHop(user.token, recordUserId, itemListId);
+      await deleteFermentable(user.token, recordUserId, itemListId);
       setItemList(itemList.filter((item) => item.id !== itemListId));
-      showSuccessToast('Hop deleted.');
+      showSuccessToast('Fermentable deleted.');
     } catch (err) {
       showErrorToast(`${err}`);
     }
@@ -55,15 +55,15 @@ export default function HopList() {
     if (!user) {
       navigate('/');
     } else {
-      const loadHops = async () => {
+      const loaditems = async () => {
         try {
-          const hops = await fetchHops(user.token);
-          setItemList(hops);
+          const items = await fetchFermentables(user.token);
+          setItemList(items);
         } catch (err) {
-          showErrorToast('Error loading hops');
+          showErrorToast('Error loading fermentables');
         }
       };
-      loadHops();
+      loaditems();
     }
   }, [user, navigate]);
 
@@ -73,12 +73,12 @@ export default function HopList() {
 
       <div className="list-container">
         <div className="div-addButton">
-          <Link className="Addbutton" to="/Hops/new">Add new hops</Link>
+          <Link className="Addbutton" to="/Fermentables/new">Add new fermentable</Link>
         </div>
 
         <SearchInput onSearch={searchItemsFunction} />
 
-        <h1>Hops</h1>
+        <h1>Fermentables</h1>
         <ul>
           {itemList.map((item) => (
             <li key={item.id}>
@@ -91,6 +91,14 @@ export default function HopList() {
                 <p>
                   Supplier:
                   {item.supplier}
+                </p>
+                <p>
+                  Type:
+                  {item.type}
+                </p>
+                <p>
+                  EBC:
+                  {item.ebc}
                 </p>
                 <p>
                   Description:

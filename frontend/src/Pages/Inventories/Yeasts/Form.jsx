@@ -1,14 +1,15 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
-import { fetchHopById, updateHop, addHop } from '../../services/hops';
-import { showErrorToast, showSuccessToast } from '../../utils/notifications';
+import { fetchYeastById, updateYeast, addYeast } from '../../../services/yeasts';
+import { showErrorToast, showSuccessToast } from '../../../utils/notifications';
 
-import AuthContext from '../../context/AuthContext';
+import api from '../../../services/api';
+import AuthContext from '../../../context/AuthContext';
 
-import '../../Styles/crud.css';
+import '../../../Styles/crud.css';
 
-export default function NewHop() {
+export default function NewYeast() {
   const { user } = useContext(AuthContext);
   const { recordUserId } = useParams();
   const { id } = useParams();
@@ -16,30 +17,34 @@ export default function NewHop() {
 
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
-  const [supplier, setSupplier] = useState('');
-  const [useType, setUseType] = useState('Boil');
-  const [type, setType] = useState('Pellet');
-  const [countryOfOrigin, setCountryOfOrigin] = useState('');
-  const [alphaAcidContent, setAlphaAcidContent] = useState('');
-  const [betaAcidContent, setBetaAcidContent] = useState('');
+  const [manufacturer, setManufacturer] = useState('');
+  const [type, setType] = useState('Ale');
+  const [form, setForm] = useState('Dry');
+  const [temperatureRange, setTemperatureRange] = useState('');
+  const [attenuation, setAttenuation] = useState('');
+  const [alcoholTolerance, setAlcoholTolerance] = useState('');
+  const [flavorProfile, setFlavorProfile] = useState('');
+  const [flocculation, setFlocculation] = useState('');
 
   const [isEditing, setIsEditing] = useState(false);
   const [isView, setIsView] = useState(false);
 
-  async function fetchHop(userId, itemID) {
+  async function fetchYeast(userId, itemID) {
     try {
-      const hop = await fetchHopById(user.token, userId, itemID);
-      setName(hop.name);
-      setDescription(hop.description);
-      setSupplier(hop.supplier);
-      setCountryOfOrigin(hop.countryOfOrigin);
-      setUseType(hop.useType);
-      setType(hop.type);
-      setAlphaAcidContent(hop.alphaAcidContent);
-      setBetaAcidContent(hop.betaAcidContent);
+      const yeast = await fetchYeastById(api, user.token, userId, itemID);
+      setName(yeast.name);
+      setDescription(yeast.description);
+      setManufacturer(yeast.manufacturer);
+      setType(yeast.type);
+      setForm(yeast.form);
+      setTemperatureRange(yeast.temperatureRange);
+      setAttenuation(yeast.attenuation);
+      setAlcoholTolerance(yeast.alcoholTolerance);
+      setFlavorProfile(yeast.flavorProfile);
+      setFlocculation(yeast.flocculation);
     } catch (err) {
-      showErrorToast(`Error loading hop record.${err}`);
-      navigate('/HopList');
+      showErrorToast(`Error loading yeast record.${err}`);
+      navigate('/YeastList');
     }
   }
 
@@ -49,23 +54,25 @@ export default function NewHop() {
     const data = {
       name,
       description,
-      supplier,
-      useType,
+      manufacturer,
       type,
-      countryOfOrigin,
-      alphaAcidContent,
-      betaAcidContent,
+      form,
+      temperatureRange,
+      attenuation,
+      alcoholTolerance,
+      flavorProfile,
+      flocculation,
     };
 
     try {
       if (isEditing) {
-        await updateHop(user.token, recordUserId, id, data);
-        showSuccessToast('Hop has been updated.');
+        await updateYeast(api, user.token, recordUserId, id, data);
+        showSuccessToast('Yeast has been updated.');
       } else {
-        await addHop(user.token, data);
-        showSuccessToast('Added new hop successfully.');
+        await addYeast(api, user.token, data);
+        showSuccessToast('Added new yeast successfully.');
       }
-      navigate('/HopList');
+      navigate('/YeastList');
     } catch (err) {
       showErrorToast(`${err.message}`);
     }
@@ -88,7 +95,7 @@ export default function NewHop() {
         setIsView(false);
         setIsEditing(true);
       }
-      fetchHop(recordUserId, id);
+      fetchYeast(recordUserId, id);
     }
   }, [id, user, navigate]);
 
@@ -114,10 +121,10 @@ export default function NewHop() {
               </div>
               <div className="input-field">
                 <label htmlFor="name">
-                  Supplier
+                  Manufacturer
                   <input
-                    value={supplier}
-                    onChange={(e) => setSupplier(e.target.value)}
+                    value={manufacturer}
+                    onChange={(e) => setManufacturer(e.target.value)}
                     disabled={isView}
                   />
                 </label>
@@ -139,14 +146,16 @@ export default function NewHop() {
             <div className="inputs-row">
               <div className="input-field">
                 <label htmlFor="name">
-                  Country of Origin
+                  Flavor Profile
                   <input
-                    value={countryOfOrigin}
-                    onChange={(e) => setCountryOfOrigin(e.target.value)}
+                    value={flavorProfile}
+                    onChange={(e) => setFlavorProfile(e.target.value)}
                     disabled={isView}
                   />
                 </label>
               </div>
+            </div>
+            <div className="inputs-row">
               <div className="input-field">
                 <label htmlFor="name">
                   Type
@@ -154,46 +163,70 @@ export default function NewHop() {
                     value={type}
                     onChange={(e) => setType(e.target.value)}
                   >
-                    <option value="Pellet">Pellet</option>
-                    <option value="Whole">Whole</option>
-                    <option value="Cryo">Cryo</option>
-                    <option value="CO2 Extract">CO2 Extract</option>
+                    <option value="Ale">Ale</option>
+                    <option value="Lager">Lager</option>
+                    <option value="Hybrid">Hybrid</option>
+                    <option value="Champagne">Champagne</option>
+                    <option value="Wheat">Wheat</option>
+                    <option value="Wine">Wine</option>
+                    <option value="Other">Other</option>
                   </select>
                 </label>
               </div>
               <div className="input-field">
                 <label htmlFor="name">
-                  Use Type
+                  Form
                   <select
-                    value={useType}
-                    onChange={(e) => setUseType(e.target.value)}
+                    value={form}
+                    onChange={(e) => setForm(e.target.value)}
                   >
-                    <option value="Boil">Boil</option>
-                    <option value="Dry Hop">Dry Hop</option>
-                    <option value="Aroma">Aroma</option>
-                    <option value="Mash">Mash</option>
-                    <option value="First Wort">First Wort</option>
+                    <option value="Ale">Dry</option>
+                    <option value="Lager">Liquid</option>
+                    <option value="Hybrid">Culture</option>
+                    <option value="Champagne">Slurry</option>
                   </select>
                 </label>
               </div>
               <div className="input-field">
                 <label htmlFor="name">
-                  Alpha Acid
+                  Attenuation %
                   <input
                     type="number"
-                    value={alphaAcidContent}
-                    onChange={(e) => setAlphaAcidContent(e.target.value)}
+                    value={attenuation}
+                    onChange={(e) => setAttenuation(e.target.value)}
                     disabled={isView}
                   />
                 </label>
               </div>
               <div className="input-field">
                 <label htmlFor="name">
-                  Beta Acid
+                  Temperature Range
+                  <input
+                    value={temperatureRange}
+                    onChange={(e) => setTemperatureRange(e.target.value)}
+                    disabled={isView}
+                  />
+                </label>
+              </div>
+            </div>
+            <div className="inputs-row">
+              <div className="input-field">
+                <label htmlFor="name">
+                  Alcohol Tolerance
                   <input
                     type="number"
-                    value={betaAcidContent}
-                    onChange={(e) => setBetaAcidContent(e.target.value)}
+                    value={alcoholTolerance}
+                    onChange={(e) => setAlcoholTolerance(e.target.value)}
+                    disabled={isView}
+                  />
+                </label>
+              </div>
+              <div className="input-field">
+                <label htmlFor="name">
+                  Flocculation
+                  <input
+                    value={flocculation}
+                    onChange={(e) => setFlocculation(e.target.value)}
                     disabled={isView}
                   />
                 </label>

@@ -1,18 +1,15 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FiTrash2, FiEdit, FiBookOpen } from 'react-icons/fi';
+import { searchYeasts, fetchYeasts, deleteYeast } from '../../../services/yeasts';
+import { showInfoToast, showErrorToast, showSuccessToast } from '../../../utils/notifications';
+import SearchInput from '../../../Components/SearchInput';
 
-import { searchMiscs, fetchMisc, deleteMisc } from '../../services/misc';
-import { showInfoToast, showErrorToast, showSuccessToast } from '../../utils/notifications';
+import AuthContext from '../../../context/AuthContext';
+import Sidebar from '../../../Components/Sidebar';
+import '../../../Styles/list.css';
 
-import SearchInput from '../../Components/SearchInput';
-import Sidebar from '../../Components/Sidebar';
-
-import AuthContext from '../../context/AuthContext';
-
-import '../../Styles/list.css';
-
-export default function MiscList() {
+export default function YeastList() {
   const { user } = useContext(AuthContext);
   const [itemList, setItemList] = useState([]);
 
@@ -21,7 +18,7 @@ export default function MiscList() {
   const searchItemsFunction = async (term) => {
     try {
       showInfoToast('Searching data...');
-      const response = await searchMiscs(user.token, term);
+      const response = await searchYeasts(user.token, term);
 
       if (Array.isArray(response) && response.length === 0) {
         showInfoToast('Data not found');
@@ -34,18 +31,18 @@ export default function MiscList() {
   };
 
   async function handleDetails(recordUserId, itemListId) {
-    navigate(`/Misc/${recordUserId}/${itemListId}/details`);
+    navigate(`/Yeasts/${recordUserId}/${itemListId}/details`);
   }
 
   async function handleUpdate(recordUserId, itemListId) {
-    navigate(`/Misc/${recordUserId}/${itemListId}/edit`);
+    navigate(`/Yeasts/${recordUserId}/${itemListId}/edit`);
   }
 
   async function handleDelete(recordUserId, itemListId) {
     try {
-      await deleteMisc(user.token, recordUserId, itemListId);
+      await deleteYeast(user.token, recordUserId, itemListId);
       setItemList(itemList.filter((item) => item.id !== itemListId));
-      showSuccessToast('Misc deleted.');
+      showSuccessToast('Yeast deleted.');
     } catch (err) {
       showErrorToast(`${err}`);
     }
@@ -55,30 +52,29 @@ export default function MiscList() {
     if (!user) {
       navigate('/');
     } else {
-      const loadMisc = async () => {
+      const loadYeasts = async () => {
         try {
-          const misc = await fetchMisc(user.token);
-          setItemList(misc);
+          const yeasts = await fetchYeasts(user.token);
+          setItemList(yeasts);
         } catch (err) {
-          showErrorToast('Error loading misc');
+          showErrorToast('Error loading yeast');
         }
       };
-      loadMisc();
+      loadYeasts();
     }
   }, [user, navigate]);
 
   return (
     <div>
       <Sidebar />
-
       <div className="list-container">
         <div className="div-addButton">
-          <Link className="Addbutton" to="/Misc/new">Add new misc</Link>
+          <Link className="Addbutton" to="/Yeasts/new">Add new yeasts</Link>
         </div>
 
         <SearchInput onSearch={searchItemsFunction} />
 
-        <h1>Misc</h1>
+        <h1>Yeasts</h1>
         <ul>
           {itemList.map((item) => (
             <li key={item.id}>
@@ -89,8 +85,20 @@ export default function MiscList() {
               </h2>
               <div className="item-details">
                 <p>
+                  Manufacturer:
+                  {item.manufacturer}
+                </p>
+                <p>
                   Type:
                   {item.type}
+                </p>
+                <p>
+                  Flavor Profile:
+                  {item.flavor_profile}
+                </p>
+                <p>
+                  Attenuation:
+                  {item.attenuation}
                 </p>
                 <p>
                   Description:
