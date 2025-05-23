@@ -6,7 +6,6 @@ import { showSuccessToast, showErrorToast, showInfoToast } from '../../../utils/
 
 import '../../../Styles/crud.css';
 
-
 export default function NewAccount() {
   const navigate = useNavigate();
 

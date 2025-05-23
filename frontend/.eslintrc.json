@@ -18,6 +18,7 @@
         "react"
     ],
     "rules": {
-        "linebreak-style": ["error", "unix"]
+        "linebreak-style": ["error", "unix"],
+        "no-multiple-empty-lines": "warn"
     }
 }
