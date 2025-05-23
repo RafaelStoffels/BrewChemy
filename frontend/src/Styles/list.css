@@ -1,0 +1,72 @@
+.list-container {
+    margin-left: 250px;
+    width: 100%;
+    max-width: 1180px;
+    margin: auto;
+}
+
+.list-container h1 {
+    margin-top: 30px;
+    margin-bottom: 15px;
+}
+
+.list-container ul {
+    display: grid;
+    flex-wrap: wrap;
+    grid-template-columns: repeat(2, 1fr);
+    grid-gap: 22px;
+    list-style: none;
+}
+
+.list-container ul li {
+    background: #aa8e69;
+    padding: 15px;
+    border-radius: 8px;
+    position: relative;
+}
+
+.list-container ul li strong {
+    display: block;
+    margin-bottom: 16px;
+    color: #41414d;
+}
+
+.list-container ul li p + strong {
+    margin-top: 32px;
+}
+
+.list-container ul li p {
+    color: #4b4949;
+    line-height: 21px;
+    font-size: 14px;
+}
+
+.list-container ul li .button-group {
+    position: absolute;
+    top: 13px;
+    right: 13px;
+    display: flex;
+    gap: 8px;
+}
+
+.div-addButton {
+    text-align: right;
+}
+
+.item-title {
+    font-size: 20px;
+    font-weight: bold;
+    margin-bottom: 12px; /* Dá mais espaço entre o título e os detalhes */
+}
+
+.item-details p {
+    margin-bottom: 1px; /* Reduz o espaçamento entre os <p> */
+    font-size: 14px;
+    color: #444242;
+}
+
+.custom-label {
+    font-size: 0.8em; /* Reduz o tamanho da fonte */
+    color: rgb(101, 94, 89); /* Opcional: deixa o texto mais discreto */
+    margin-left: 5px; /* Dá um espaço entre o nome e [custom] */
+  }

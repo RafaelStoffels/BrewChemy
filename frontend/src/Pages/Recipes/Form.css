@@ -1,0 +1,179 @@
+.recipe-container {
+    width: 1200px;
+    max-width: 1180px;
+    padding: 0 30px;
+    margin: 25px auto;
+}
+
+.recipe-container .content form input, select{
+    height: 30px;
+}
+
+.recipe-container .content textarea {
+    border: 1px solid #663d00bd;
+    height: 90px;
+}
+
+.top {
+    width: 1115px;
+    background-color: #aa8e69; 
+    padding: 15px;
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.4);
+}
+
+.bottom-container {
+    margin-top: 8px;
+    display: flex;
+    width: 100%;
+    flex: 1; 
+    gap: 15px;
+}
+
+.bottom-left, .bottom-right {
+    min-width: 0; 
+}
+
+.bottom-left {
+    background-color: #aa8e69; 
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.4);
+    width: 600px;
+    padding: 9px;
+
+    position: relative;
+    flex-direction: column;
+    display: flex;
+    gap: 1px;
+}
+
+.bottom-right {
+    align-items: center; /* Centraliza os itens horizontalmente */
+    margin-left: 5px;
+    padding-left: 5px;
+    padding-top: 25px;
+    background-color: #aa8e69; 
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.4);
+    width: 270px;
+
+    position: relative;
+    flex-direction: column; /* Coloca cada elemento em uma nova linha */
+    display: flex;
+    gap: 5px; /* Adiciona um pequeno espaço entre os itens */
+}
+
+.bar-container {
+    display: flex; /* Organiza OG e OGBar na horizontal */
+    align-items: center; /* Alinha verticalmente no centro */
+    gap: 8px; /* Espaço entre o OG e a barra */
+}
+
+.bottom-right-beer {
+    margin-left: 5px;
+    padding-left: 5px;
+    padding-top: 60px;
+    background-color: #aa8e69; 
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.4);
+}
+
+.buttons-container {
+    display: flex;
+    gap: 12px;
+    margin-top: 10px;
+}
+
+.beer-object {
+    width: 200px;
+}
+
+.IA {
+    display: flex;
+    margin-top: 10px;
+    width: 1115px;
+    background-color: #aa8e69; 
+    padding: 15px;
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.4);
+    gap: 50px;
+}
+
+/*svgs*/
+.malt-object, .yeast-object, .hop-object, .misc-object{
+    width: 20px;
+    height: 16px;
+}
+
+.modalAddButtonFermentable, .modalAddButtonHop, .modalAddButtonYeast, .modalAddButtonMisc {
+    width: 160px;
+    height: 33px;
+    background: #744410;
+    border: 0;
+    border-radius: 8px;
+    color: #FFF;
+    font-weight: 500;
+    margin-top: 5px;
+    display: inline-block;
+    text-align: center;
+    text-decoration: none;
+    font-size: 14px;
+    transition: filter 0.2s;
+    cursor: pointer;
+}
+
+.modalAddButtonFermentable:hover, .modalAddButtonHop:hover, .modalAddButtonYeast:hover, .modalAddButtonMisc:hover {
+    filter: brightness(90%);
+}
+
+@keyframes thunderGlow {
+    0% {
+        box-shadow: 0 0 10px rgba(255, 255, 255, 0.6), 0 0 20px rgba(255, 255, 255, 0.3);
+    }
+    30% {
+        box-shadow: 0 0 20px rgba(255, 255, 255, 0.8), 0 0 50px rgba(255, 255, 255, 0.4), 0 0 80px rgba(255, 215, 0, 0.8);
+    }
+    50% {
+        box-shadow: 0 0 40px rgba(255, 255, 255, 1), 0 0 100px rgba(255, 255, 255, 0.6), 0 0 120px rgba(255, 255, 0, 1);
+    }
+    100% {
+        box-shadow: 0 0 10px rgba(255, 255, 255, 0.6), 0 0 20px rgba(255, 255, 255, 0.3);
+    }
+}
+
+.modalAddButtonMystical {
+    margin-left: 19px;
+    width: 79px;
+    height: 79px;
+    background: #744410;
+    border: 0;
+    border-radius: 8px;
+    color: #FFF;
+    transition: filter 0.2s;
+    cursor: pointer;
+}
+
+.modalAddButtonMystical:hover {
+    animation: thunderGlow 1s ease-out forwards; /* Efeito de raios */
+}
+
+.bar-container {
+    margin-bottom: 15px; /* Ajuste conforme necessário */
+}
+
+.ingredients-list-button-group button {
+    padding: 0px 5px; /* Ajuste o padding conforme necessário */
+}
+
+.modal-search-button {
+  all: unset; /* remove estilos padrões do botão */
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
+.modal-search-button:hover,
+.modal-search-button:focus {
+  background-color: #f0f0f0;
+}
+
+.modal-search-button.selected {
+  background-color: #d0eaff;
+}
