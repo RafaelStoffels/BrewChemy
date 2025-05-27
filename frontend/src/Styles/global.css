@@ -19,7 +19,7 @@ input, button, textarea, select {
 
 input, textarea, select {
     background-color: #d1a877;
-    border: 1px solid #663d00bd;
+    border: 1px solid #663d00bd; /* Cor de borda */
 }
 
 input, select {
@@ -27,21 +27,21 @@ input, select {
 }
 
 input:focus, textarea:focus, select:focus {
-    background-color: #efd7a9;
-    outline: none;
+    background-color: #efd7a9; /* Cor de fundo ao focar */
+    outline: none; /* Remove a borda azul padrão */
 }
 
 .inputs-row {
     display: flex;
-    flex-direction: row;
-    gap: 20px;
+    flex-direction: row; /* Alinha os campos em linha */
+    gap: 20px;  /* Espaçamento entre os campos na mesma linha */
 }
 
 .input-field {
     display: flex;
-    flex-direction: column;
-    gap: 5px;
-    margin-bottom: 8px;
+    flex-direction: column; /* Garante que o label fique acima do incolorput */
+    gap: 5px; /* Espaçamento entre o label e o input */
+    margin-bottom: 8px; /* Adiciona um pouco de espaçamento entre os campos */
 }
 
 /* used in recipe page to change equipment */
@@ -52,7 +52,7 @@ input:focus, textarea:focus, select:focus {
 }
 
 .inputs-row .input-field {
-    flex: 1;
+    flex: 1; /* Faz os campos ocuparem espaço igual, se necessário */
 }
 
 .transparent-button {
@@ -80,7 +80,7 @@ textarea{
     border-radius: 8px;
     padding: 10px 10px;
     line-height: 18px;
-    border: 1px solid #663d00bd;
+    border: 1px solid #663d00bd; /* Cor de borda */
 }
 
 .crud-save-button{
@@ -121,30 +121,32 @@ textarea{
     filter: brightness(90%);
 }
 
+
+
 .modal-overlay {
-    background-color: rgba(0, 0, 0, 0.6);
+    background-color: rgba(0, 0, 0, 0.6); /* Fundo semi-transparente */
     display: flex;
     justify-content: center;
     align-items: center;
-    position: fixed;
+    position: fixed; /* Garantir que o overlay ocupe a tela inteira */
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    z-index: 999;
+    z-index: 999; /* Garantir que o overlay fique por cima do conteúdo */
 }
   
 .modal-content {
-    position: absolute;
+    position: absolute; /* Usar absolute para centralizar */
     top: 50%;
     left: 50%;
-    transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%); /* Garantir centralização perfeita */
     height: 600px;
     width: 600px;
     padding: 30px;
     background-color: #9e7241bb;
     border-radius: 8px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); /* Sombra para destacar o modal */
     display: flex;
     flex-direction: column;
     gap: 15px;
@@ -152,13 +154,13 @@ textarea{
 
 .modal-search-container {
     width: 100%;
-    height: 250px;
+    height: 250px; /* Mantém a altura fixa */
     border: 1px solid #673d0d;
-    background-color: rgba(255, 255, 255, 0.05);
+    background-color: rgba(255, 255, 255, 0.05); /* Fundo levemente escuro */
     padding: 5px;
     flex-direction: column;
-    align-items: flex-start;
-    justify-content: flex-start;
+    align-items: flex-start; /* Alinha os itens à esquerda */
+    justify-content: flex-start; /* Alinha os itens no topo */
     justify-content: center;
     align-items: center;
     overflow-y: auto;
@@ -181,7 +183,7 @@ textarea{
 }
 
 .modal-search-item.selected {
-    background-color: #654113;
+    background-color: #654113; /* Azul claro para destacar */
     font-weight: bold;
 }
 
@@ -192,21 +194,21 @@ textarea{
 
 .modal-content input,
 .modal-content textarea {
-  margin-bottom: 5px;
+  margin-bottom: 5px; /* Isso adiciona 15px de espaço abaixo de cada input/textarea */
 }
 
 .modal h2 {
-    text-align: center;
-    margin-bottom: 20px;
+    text-align: center;  /* Centraliza o texto */
+    margin-bottom: 20px;  /* Adiciona um espaçamento abaixo do título */
 }
 
 .buttonLogin {
-    margin-bottom: 20px;
+    margin-bottom: 20px; /* Espaçamento entre o botão de login e o botão do Google */
 }
 
 .buttonGoogleLogIn img {
     width: auto;
-    height: 50px;
+    height: 50px; /* Ajuste a altura conforme necessário */
     width: 350px;
 }
 
@@ -222,7 +224,7 @@ table, th {
   
 td {
     border-spacing: 0px;
-    padding: 3px 10px;
+    padding: 3px 10px; /* Ajuste os valores conforme necessário */
 }
 
 .icon-button {
@@ -234,31 +236,31 @@ td {
 }
 
 .icon-button:hover {
-    transform: scale(1.1);
+    transform: scale(1.1); /* Aumenta o tamanho do botão em 10% */
 }
 
 ::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
+    width: 8px; /* Largura da barra vertical */
+    height: 8px; /* Altura da barra horizontal */
 }
 
 ::-webkit-scrollbar-track {
-    background: #a87238;
+    background: #a87238; /* Cor do fundo da barra */
     border-radius: 10px;
-    cursor: pointer;
+    cursor: pointer;       /* Tipo de cursor */
 }
 
 ::-webkit-scrollbar-thumb {
-    background: #744410;
+    background: #744410; /* Cor principal da barra */
     border-radius: 10px;
-    cursor: pointer;
+    cursor: pointer;       /* Tipo de cursor */
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: #895017;
+    background: #895017; /* Cor ao passar o mouse */
 }
 
 ::-webkit-inner-spin-button {
-    opacity: 0.5;
-    cursor: pointer;
+    opacity: 0.5;          /* Transparência */
+    cursor: pointer;       /* Tipo de cursor */
 }
