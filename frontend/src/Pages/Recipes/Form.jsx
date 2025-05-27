@@ -936,6 +936,7 @@ export default function NewRecipe() {
                       </td>
                       <td><strong>{misc.name}</strong></td>
                       <td>{misc.type}</td>
+                      <td />
                       <td className="ingredients-list-button-group">
                         <button onClick={() => handleUpdateMisc(misc)} type="button" className="icon-button">
                           <FiEdit size={20} />
@@ -962,6 +963,7 @@ export default function NewRecipe() {
                       </td>
                       <td><strong>{yeast.name}</strong></td>
                       <td>{yeast.type}</td>
+                      <td />
                       <td className="ingredients-list-button-group">
                         <button onClick={() => handleUpdateYeast(yeast)} type="button" className="icon-button">
                           <FiEdit size={20} />
@@ -983,11 +985,11 @@ export default function NewRecipe() {
               </div>
               <div className="bar-container">
                 <OGBar
-                  valorInicial={1.000}
-                  valorFinal={1.100}
-                  margemInicial={selectedStyle.initialOG}
-                  margemFinal={selectedStyle.finalOG}
-                  OGAtual={OG}
+                  initialValue={1.000}
+                  finalValue={1.100}
+                  initialMargin={selectedStyle.initialOG}
+                  finalMargin={selectedStyle.finalOG}
+                  currentOG={OG}
                 />
               </div>
               <div>
@@ -997,11 +999,11 @@ export default function NewRecipe() {
               </div>
               <div className="bar-container">
                 <OGBar
-                  valorInicial={1.000}
-                  valorFinal={1.025}
-                  margemInicial={selectedStyle.initialFG}
-                  margemFinal={selectedStyle.finalFG}
-                  OGAtual={FG}
+                  initialValue={1.000}
+                  finalValue={1.025}
+                  initialMargin={selectedStyle.initialFG}
+                  finalMargin={selectedStyle.finalFG}
+                  currentOG={FG}
                 />
               </div>
               <div className="parameters-container">
@@ -1011,11 +1013,11 @@ export default function NewRecipe() {
               </div>
               <div className="bar-container">
                 <OGBar
-                  valorInicial={0}
-                  valorFinal={20}
-                  margemInicial={selectedStyle.initialABV}
-                  margemFinal={selectedStyle.finalABV}
-                  OGAtual={ABV}
+                  initialValue={0}
+                  finalValue={20}
+                  initialMargin={selectedStyle.initialABV}
+                  finalMargin={selectedStyle.finalABV}
+                  currentOG={ABV}
                 />
               </div>
               <div className="parameters-container">
@@ -1025,11 +1027,11 @@ export default function NewRecipe() {
               </div>
               <div className="bar-container">
                 <OGBar
-                  valorInicial={0}
-                  valorFinal={120}
-                  margemInicial={selectedStyle.initialEBC}
-                  margemFinal={selectedStyle.finalEBC}
-                  OGAtual={EBC}
+                  initialValue={0}
+                  finalValue={120}
+                  initialMargin={selectedStyle.initialEBC}
+                  finalMargin={selectedStyle.finalEBC}
+                  currentOG={EBC}
                 />
               </div>
               <div className="parameters-container">
@@ -1039,11 +1041,11 @@ export default function NewRecipe() {
               </div>
               <div className="bar-container">
                 <OGBar
-                  valorInicial={0}
-                  valorFinal={80}
-                  margemInicial={selectedStyle.initialIBU}
-                  margemFinal={selectedStyle.finalIBU}
-                  OGAtual={IBU}
+                  initialValue={0}
+                  finalValue={80}
+                  initialMargin={selectedStyle.initialIBU}
+                  finalMargin={selectedStyle.finalIBU}
+                  currentOG={IBU}
                 />
               </div>
               <div className="parameters-container">
@@ -1053,11 +1055,11 @@ export default function NewRecipe() {
               </div>
               <div className="bar-container">
                 <OGBar
-                  valorInicial={0}
-                  valorFinal={3}
-                  margemInicial={selectedStyle.initialBuGu}
-                  margemFinal={selectedStyle.finalBuGu}
-                  OGAtual={BUGU}
+                  initialValue={0}
+                  finalValue={3}
+                  initialMargin={selectedStyle.initialBuGu}
+                  finalMargin={selectedStyle.finalBuGu}
+                  currentOG={BUGU}
                 />
               </div>
             </div>
@@ -1083,7 +1085,7 @@ export default function NewRecipe() {
               }}
             />
 
-            <button type="button" onClick={fetchOpenAIResponse} className="modalAddButtonMystical">Mystical Brew Wisdom</button>
+            <button type="button" onClick={fetchOpenAIResponse} className="ButtonMystical">Mystical Brew Wisdom</button>
 
           </div>
           {!isView && (

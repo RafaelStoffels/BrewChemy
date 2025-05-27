@@ -94,20 +94,17 @@ export function AddFermentableModal({ isOpen, closeModal, handleAddFermentableRe
               <p className="modal-placeholder">No results found</p>
             )}
           </div>
-
           <div className="inputs-row">
             <div className="input-field" style={{ marginTop: '10px' }}>
               <label htmlFor="quantity">
                 Quantity (Grams)
-                {' '}
+                <input
+                  type="number"
+                  value={quantity}
+                  onChange={(e) => setQuantity(e.target.value)}
+                  style={{ width: '120px', display: 'block' }}
+                />
               </label>
-              <input
-                type="number"
-                value={quantity}
-                onChange={(e) => setQuantity(e.target.value)}
-                style={{ width: '150px' }}
-              />
-
             </div>
           </div>
         </div>
@@ -247,14 +244,14 @@ export function AddHopModal({ isOpen, closeModal, handleAddHopRecipe }) {
             </div>
           </div>
           <div className="inputs-row">
-            <div className="input-field">
-              <label htmlFor="name">
+            <div className="input-field" style={{ marginTop: '10px' }}>
+              <label htmlFor="quantity">
                 Quantity (Grams)
                 <input
                   type="number"
                   value={quantity}
                   onChange={(e) => setQuantity(e.target.value)}
-                  style={{ width: '150px' }}
+                  style={{ width: '120px', display: 'block' }}
                 />
               </label>
             </div>
@@ -367,7 +364,7 @@ export function AddMiscModal({ isOpen, closeModal, handleAddMiscRecipe }) {
                   type="number"
                   value={quantity}
                   onChange={handleQuantityChange}
-                  style={{ width: '150px' }}
+                  style={{ width: '120px', display: 'block' }}
                 />
               </label>
             </div>
@@ -478,7 +475,7 @@ export function AddYeastModal({ isOpen, closeModal, handleAddYeastRecipe }) {
                   type="number"
                   value={quantity}
                   onChange={(e) => setQuantity(e.target.value)}
-                  style={{ width: '150px' }}
+                  style={{ width: '120px', display: 'block' }}
                 />
               </label>
             </div>
@@ -679,7 +676,6 @@ export function UpdateFermentableModal({
                     type="number"
                     value={localFermentableObject.ebc || ''}
                     onChange={(e) => handleChange('ebc', e.target.value)}
-                    style={{ width: '100px' }}
                   />
                 </label>
               </div>
@@ -690,7 +686,6 @@ export function UpdateFermentableModal({
                     type="number"
                     value={localFermentableObject.potentialExtract || ''}
                     onChange={(e) => handleChange('potentialExtract', e.target.value)}
-                    style={{ width: '100px' }}
                   />
                 </label>
               </div>
@@ -701,7 +696,6 @@ export function UpdateFermentableModal({
                     type="number"
                     value={localFermentableObject.quantity || ''}
                     onChange={(e) => handleChange('quantity', e.target.value)}
-                    style={{ width: '100px' }}
                   />
                 </label>
               </div>

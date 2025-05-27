@@ -102,11 +102,11 @@ BrewChemy/
 │   └── routes/
 ├── frontend/
 │   ├── src/
-│   │   ├── components/
+│   │   ├── Components/
 │   │   ├── context/
-│   │   ├── pages/
+│   │   ├── Pages/
 │   │   ├── services/
-│   │   ├── styles/
+│   │   ├── Styles/
 │   │   ├── utils/
 │   └── public/
 └── README.md

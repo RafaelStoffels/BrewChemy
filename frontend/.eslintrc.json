@@ -19,6 +19,8 @@
     ],
     "rules": {
         "linebreak-style": ["error", "unix"],
-        "no-multiple-empty-lines": "warn"
+        "jsx-a11y/label-has-associated-control": "warn",
+        "jsx-a11y/control-has-associated-label": "warn",
+        "import/no-unresolved": "warn"
     }
 }
