@@ -2,7 +2,8 @@ from flask import Blueprint, jsonify, request
 from db import db
 from models import Fermentable
 from AuthTokenVerifier import token_required
-
+from marshmallow import ValidationError
+from schemas.fermentables_schema import FermentablesSchema
 
 def create_fermentables_bp():
     fermentables_bp = Blueprint("fermentables", __name__)
@@ -57,9 +58,9 @@ def create_fermentables_bp():
 
         return jsonify([item.to_dict() for item in items])
 
-    @fermentables_bp.route("/fermentables/<int:recordUserId>/<int:id>", methods=["GET"])
-    def get_fermentable(recordUserId, id):
-        item = Fermentable.query.filter_by(id=id, user_id=recordUserId).first()
+    @fermentables_bp.route("/fermentables/<int:itemUserId>/<int:id>", methods=["GET"])
+    def get_fermentable(itemUserId, id):
+        item = Fermentable.query.filter_by(id=id, user_id=itemUserId).first()
 
         if item is None:
             return jsonify({"message": "fermentable not found"}), 404
@@ -69,7 +70,12 @@ def create_fermentables_bp():
     @fermentables_bp.route("/fermentables", methods=["POST"])
     @token_required
     def add_fermentable(current_user_id):
-        data = request.json
+        schema = FermentablesSchema()
+
+        try:
+            data = schema.load(request.json)
+        except ValidationError as err:
+            return jsonify({"errors": err.messages}), 400
 
         def sanitize(value):
             return value if value != "" else None
@@ -88,11 +94,20 @@ def create_fermentables_bp():
         db.session.commit()
         return jsonify(new_fermentable.to_dict()), 201
 
-    @fermentables_bp.route("/fermentables/<int:recordUserId>/<int:id>", methods=["PUT"])
+    @fermentables_bp.route("/fermentables/<int:id>", methods=["PUT"])
     @token_required
-    def update_equipment(current_user_id, recordUserId, id):
+    def update_equipment(current_user_id, id):
+        schema = FermentablesSchema()
 
-        if recordUserId != current_user_id:
+        try:
+            data = schema.load(request.json)
+        except ValidationError as err:
+            print("fermentable ", err.messages)
+            return jsonify({"errors": err.messages}), 400
+
+        itemUserId = data.get("itemUserId")
+
+        if itemUserId != current_user_id:
             official_item = Fermentable.query.filter_by(id=id, user_id=1).first()
 
             if official_item is None:
@@ -108,8 +123,7 @@ def create_fermentables_bp():
                 type=official_item.type,
                 supplier=official_item.supplier
             )
-
-            data = request.json
+            
             new_item.name = data.get("name", new_item.name)
             new_item.description = data.get("description", new_item.description)
             new_item.ebc = data.get("ebc", new_item.ebc)
@@ -128,8 +142,6 @@ def create_fermentables_bp():
             if item is None:
                 return jsonify({"message": "Fermentable not found"}), 404
 
-            data = request.json
-
             item.name = data.get("name", item.name)
             item.description = data.get("description", item.description)
             item.ebc = data.get("ebc", item.ebc)
@@ -141,10 +153,10 @@ def create_fermentables_bp():
 
             return jsonify(item.to_dict()), 200
 
-    @fermentables_bp.route("/fermentables/<int:recordUserId>/<int:id>", methods=["DELETE"])
+    @fermentables_bp.route("/fermentables/<int:itemUserId>/<int:id>", methods=["DELETE"])
     @token_required
-    def delete_fermentable(current_user_id, recordUserId, id):
-        if recordUserId != current_user_id:
+    def delete_fermentable(current_user_id, itemUserId, id):
+        if itemUserId != current_user_id:
             return jsonify({"message": "Cannot delete official record"}), 404
 
         fermentable = Fermentable.query.filter_by(id=id, user_id=current_user_id).first()

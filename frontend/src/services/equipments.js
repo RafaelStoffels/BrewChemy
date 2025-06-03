@@ -88,9 +88,9 @@ export async function addEquipment(userToken, dataInput) {
   }
 }
 
-export async function updateEquipment(userToken, recordUserId, id, dataInput) {
+export async function updateEquipment(userToken, id, dataInput) {
   try {
-    const response = await api.put(`/api/equipments/${recordUserId}/${id}`, dataInput, {
+    const response = await api.put(`/api/equipments/${id}`, dataInput, {
       headers: { Authorization: `Bearer ${userToken}` },
     });
     return response.data;

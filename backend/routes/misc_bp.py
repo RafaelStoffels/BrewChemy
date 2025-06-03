@@ -2,7 +2,8 @@ from flask import Blueprint, jsonify, request
 from db import db
 from models import Misc
 from AuthTokenVerifier import token_required
-
+from marshmallow import ValidationError
+from schemas.miscs_schema import MiscsSchema
 
 def create_misc_bp():
     misc_bp = Blueprint("misc", __name__)
@@ -36,7 +37,7 @@ def create_misc_bp():
 
         return jsonify([item.to_dict() for item in items])
 
-    @misc_bp.route("/misc", methods=["GET"])
+    @misc_bp.route("/miscs", methods=["GET"])
     @token_required
     def get_miscs(current_user_id):
         subquery = db.session.query(Misc.official_id).filter(
@@ -56,22 +57,24 @@ def create_misc_bp():
 
         return jsonify([item.to_dict() for item in items])
 
-    @misc_bp.route("/misc/<int:recordUserId>/<int:id>", methods=["GET"])
-    def get_misc(recordUserId, id):
-        item = Misc.query.filter_by(id=id, user_id=recordUserId).first()
+    @misc_bp.route("/miscs/<int:itemUserId>/<int:id>", methods=["GET"])
+    def get_misc(itemUserId, id):
+        item = Misc.query.filter_by(id=id, user_id=itemUserId).first()
 
         if item is None:
             return jsonify({"message": "misc not found"}), 404
 
         return jsonify(item.to_dict())
 
-    @misc_bp.route("/misc", methods=["POST"])
+    @misc_bp.route("/miscs", methods=["POST"])
     @token_required
     def add_misc_item(current_user_id):
-        data = request.json
+        schema = MiscsSchema()
 
-        def sanitize(value):
-            return value if value != "" else None
+        try:
+            data = schema.load(request.json)
+        except ValidationError as err:
+            return jsonify({"errors": err.messages}), 400
 
         new_misc = Misc(
             user_id=current_user_id,
@@ -83,11 +86,19 @@ def create_misc_bp():
         db.session.commit()
         return jsonify(new_misc.to_dict()), 201
 
-    @misc_bp.route("/misc/<int:recordUserId>/<int:id>", methods=["PUT"])
+    @misc_bp.route("/miscs/<int:id>", methods=["PUT"])
     @token_required
-    def update_misc(current_user_id, recordUserId, id):
+    def update_misc(current_user_id, id):
+        schema = MiscsSchema()
 
-        if recordUserId != current_user_id:
+        try:
+            data = schema.load(request.json)
+        except ValidationError as err:
+            return jsonify({"errors": err.messages}), 400
+
+        itemUserId = data.get("itemUserId")
+
+        if itemUserId != current_user_id:
             official_item = Misc.query.filter_by(id=id, user_id=1).first()
 
             if official_item is None:
@@ -100,8 +111,7 @@ def create_misc_bp():
                 description=official_item.description,
                 type=official_item.type
             )
-
-            data = request.json
+            
             new_item.name = data.get("name", new_item.name)
             new_item.description = data.get("description", new_item.description)
             new_item.type = data.get("type", new_item.type)
@@ -116,8 +126,6 @@ def create_misc_bp():
             if item is None:
                 return jsonify({"message": "Misc item not found"}), 404
 
-            data = request.json
-
             item.name = data.get("name", item.name)
             item.description = data.get("description", item.description)
             item.type = data.get("type", item.type)
@@ -126,10 +134,12 @@ def create_misc_bp():
 
             return jsonify(item.to_dict()), 200
 
-    @misc_bp.route("/misc/<int:recordUserId>/<int:id>", methods=["DELETE"])
+    @misc_bp.route("/miscs/<int:itemUserId>/<int:id>", methods=["DELETE"])
     @token_required
-    def delete_misc_item(current_user_id, recordUserId, id):
-        if recordUserId != current_user_id:
+    def delete_misc_item(current_user_id, itemUserId, id):
+        print("chegou aqui")
+
+        if itemUserId != current_user_id:
             return jsonify({"message": "Cannot delete official record"}), 404
 
         misc_item = Misc.query.filter_by(id=id).first()

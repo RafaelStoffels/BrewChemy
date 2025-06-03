@@ -34,11 +34,11 @@ export default function MiscList() {
   };
 
   async function handleDetails(recordUserId, itemListId) {
-    navigate(`/Misc/${recordUserId}/${itemListId}/details`);
+    navigate(`/Miscs/${recordUserId}/${itemListId}/details`);
   }
 
   async function handleUpdate(recordUserId, itemListId) {
-    navigate(`/Misc/${recordUserId}/${itemListId}/edit`);
+    navigate(`/Miscs/${recordUserId}/${itemListId}/edit`);
   }
 
   async function handleDelete(recordUserId, itemListId) {
@@ -73,7 +73,7 @@ export default function MiscList() {
 
       <div className="list-container">
         <div className="div-addButton">
-          <Link className="Addbutton" to="/Misc/new">Add new misc</Link>
+          <Link className="Addbutton" to="/Miscs/new">Add new misc</Link>
         </div>
 
         <SearchInput onSearch={searchItemsFunction} />

@@ -88,9 +88,9 @@ export async function addYeast(userToken, dataInput) {
   }
 }
 
-export async function updateYeast(userToken, recordUserId, id, dataInput) {
+export async function updateYeast(userToken, id, dataInput) {
   try {
-    const response = await api.put(`/api/yeasts/${recordUserId}/${id}`, dataInput, {
+    const response = await api.put(`/api/yeasts/${id}`, dataInput, {
       headers: { Authorization: `Bearer ${userToken}` },
     });
     return response.data;

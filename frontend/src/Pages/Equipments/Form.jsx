@@ -2,7 +2,6 @@ import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
 import { fetchEquipmentById, updateEquipment, addEquipment } from '../../services/equipments';
-import api from '../../services/api';
 
 import { showErrorToast, showSuccessToast } from '../../utils/notifications';
 
@@ -15,6 +14,7 @@ export default function NewEquipment() {
   const { recordUserId, id } = useParams();
   const navigate = useNavigate();
 
+  const [itemUserId, setItemUserId] = useState('');
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [efficiency, setEfficiency] = useState('');
@@ -31,7 +31,8 @@ export default function NewEquipment() {
 
   async function fetchEquipment(userId, itemID) {
     try {
-      const equipment = await fetchEquipmentById(api, user.token, userId, itemID);
+      const equipment = await fetchEquipmentById(user.token, userId, itemID);
+      setItemUserId(recordUserId);
       setName(equipment.name);
       setDescription(equipment.description);
       setEfficiency(equipment.efficiency);
@@ -52,6 +53,7 @@ export default function NewEquipment() {
     e.preventDefault();
 
     const data = {
+      itemUserId,
       name,
       description,
       efficiency,
@@ -66,10 +68,10 @@ export default function NewEquipment() {
 
     try {
       if (isEditing) {
-        await updateEquipment(api, user.token, recordUserId, id, data);
+        await updateEquipment(user.token, id, data);
         showSuccessToast('Equipment has been updated.');
       } else {
-        await addEquipment(api, user.token, data);
+        await addEquipment(user.token, data);
         showSuccessToast('Added new equipment successfully.');
       }
       navigate('/EquipmentList');

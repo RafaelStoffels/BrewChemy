@@ -14,6 +14,7 @@ export default function NewMisc() {
   const { id } = useParams();
   const navigate = useNavigate();
 
+  const [itemUserId, setItemUserId] = useState('');
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [type, setType] = useState('Spice');
@@ -24,6 +25,7 @@ export default function NewMisc() {
   async function fetchMisc(userId, itemID) {
     try {
       const misc = await fetchMiscById(user.token, userId, itemID);
+      setItemUserId(recordUserId);
       setName(misc.name);
       setDescription(misc.description);
       setType(misc.type);
@@ -37,6 +39,7 @@ export default function NewMisc() {
     e.preventDefault();
 
     const data = {
+      itemUserId,
       name,
       description,
       type,
@@ -44,7 +47,7 @@ export default function NewMisc() {
 
     try {
       if (isEditing) {
-        await updateMisc(user.token, recordUserId, id, data);
+        await updateMisc(user.token, id, data);
         showSuccessToast('Misc has been updated.');
       } else {
         await addMisc(user.token, data);

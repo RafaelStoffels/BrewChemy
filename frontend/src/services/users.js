@@ -1,5 +1,16 @@
 import api from './api';
 
+export async function me(userToken) {
+  try {
+    const response = await api.get('/api/users/me', {
+      headers: { Authorization: `Bearer ${userToken}` },
+    });
+    return response.data;
+  } catch (err) {
+    throw new Error(err);
+  }
+}
+
 export async function addUser(data) {
   try {
     await api.post('/api/users', data);

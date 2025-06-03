@@ -14,6 +14,7 @@ export default function NewHop() {
   const { id } = useParams();
   const navigate = useNavigate();
 
+  const [itemUserId, setItemUserId] = useState('');
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [supplier, setSupplier] = useState('');
@@ -29,6 +30,7 @@ export default function NewHop() {
   async function fetchHop(userId, itemID) {
     try {
       const hop = await fetchHopById(user.token, userId, itemID);
+      setItemUserId(recordUserId);
       setName(hop.name);
       setDescription(hop.description);
       setSupplier(hop.supplier);
@@ -47,6 +49,7 @@ export default function NewHop() {
     e.preventDefault();
 
     const data = {
+      itemUserId,
       name,
       description,
       supplier,
@@ -59,7 +62,7 @@ export default function NewHop() {
 
     try {
       if (isEditing) {
-        await updateHop(user.token, recordUserId, id, data);
+        await updateHop(user.token, id, data);
         showSuccessToast('Hop has been updated.');
       } else {
         await addHop(user.token, data);

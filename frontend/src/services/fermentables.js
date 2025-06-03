@@ -88,9 +88,9 @@ export async function addFermentable(userToken, dataInput) {
   }
 }
 
-export async function updateFermentable(userToken, recordUserId, id, dataInput) {
+export async function updateFermentable(userToken, id, dataInput) {
   try {
-    const response = await api.put(`/api/fermentables/${recordUserId}/${id}`, dataInput, {
+    const response = await api.put(`/api/fermentables/${id}`, dataInput, {
       headers: { Authorization: `Bearer ${userToken}` },
     });
     return response.data;

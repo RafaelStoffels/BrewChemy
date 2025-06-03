@@ -13,6 +13,7 @@ export default function NewFermentable() {
   const { recordUserId, id } = useParams();
   const navigate = useNavigate();
 
+  const [itemUserId, setItemUserId] = useState('');
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [type, setType] = useState('Base');
@@ -27,6 +28,7 @@ export default function NewFermentable() {
   async function fetchFermentable(itemID) {
     try {
       const fermentable = await fetchFermentableById(user.token, recordUserId, itemID);
+      setItemUserId(recordUserId);
       setName(fermentable.name);
       setDescription(fermentable.description);
       setType(fermentable.type);
@@ -45,6 +47,7 @@ export default function NewFermentable() {
     e.preventDefault();
 
     const data = {
+      itemUserId,
       name,
       description,
       type,
@@ -57,7 +60,7 @@ export default function NewFermentable() {
 
     try {
       if (isEditing) {
-        await updateFermentable(user.token, recordUserId, id, data);
+        await updateFermentable(user.token, id, data);
         showSuccessToast('Fermentable has been updated.');
       } else {
         await addFermentable(user.token, data);
