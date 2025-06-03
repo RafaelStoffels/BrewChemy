@@ -2,6 +2,8 @@ from flask import Blueprint, jsonify, request
 from db import db
 from models import Recipe, RecipeEquipment, RecipeFermentable, RecipeHop, RecipeMisc, RecipeYeast
 from AuthTokenVerifier import token_required
+from marshmallow import ValidationError
+from schemas.recipes_schema import RecipeSchema
 
 
 def create_recipes_bp():
@@ -39,10 +41,12 @@ def create_recipes_bp():
     @recipes_bp.route("/recipes", methods=["POST"])
     @token_required
     def add_recipe(current_user_id):
-        data = request.json
+        schema = RecipeSchema()
 
-        def sanitize(value):
-            return value if value != "" else None
+        try:
+            data = schema.load(request.json)
+        except ValidationError as err:
+            return jsonify({"errors": err.messages}), 400
 
         new_recipe = Recipe(
             name=data.get("name"),

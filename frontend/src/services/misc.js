@@ -17,7 +17,7 @@ export async function searchMiscs(userToken, term) {
 
 export async function fetchMisc(userToken) {
   try {
-    const response = await api.get('api/misc', {
+    const response = await api.get('api/miscs', {
       headers: { Authorization: `Bearer ${userToken}` },
     });
     return response.data;
@@ -31,7 +31,7 @@ export async function fetchMisc(userToken) {
 
 export async function fetchMiscById(userToken, recordUserId, id) {
   try {
-    const response = await api.get(`/api/misc/${recordUserId}/${id}`, {
+    const response = await api.get(`/api/miscs/${recordUserId}/${id}`, {
       headers: { Authorization: `Bearer ${userToken}` },
     });
     return response.data;
@@ -76,7 +76,7 @@ export async function deleteMisc(userToken, recordUserId, id) {
 
 export async function addMisc(userToken, dataInput) {
   try {
-    const response = await api.post('/api/misc', dataInput, {
+    const response = await api.post('/api/miscs', dataInput, {
       headers: { Authorization: `Bearer ${userToken}` },
     });
     return response.data;
@@ -88,9 +88,9 @@ export async function addMisc(userToken, dataInput) {
   }
 }
 
-export async function updateMisc(userToken, recordUserId, id, dataInput) {
+export async function updateMisc(userToken, id, dataInput) {
   try {
-    const response = await api.put(`/api/misc/${recordUserId}/${id}`, dataInput, {
+    const response = await api.put(`/api/miscs/${id}`, dataInput, {
       headers: { Authorization: `Bearer ${userToken}` },
     });
     return response.data;

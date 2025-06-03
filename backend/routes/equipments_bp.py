@@ -2,7 +2,8 @@ from flask import Blueprint, jsonify, request
 from db import db
 from models import Equipment
 from AuthTokenVerifier import token_required
-
+from marshmallow import ValidationError
+from schemas.equipments_schema import EquipmentsSchema
 
 def create_equipments_bp():
     equipments_bp = Blueprint("equipments", __name__)
@@ -57,9 +58,9 @@ def create_equipments_bp():
 
         return jsonify([item.to_dict() for item in items])
 
-    @equipments_bp.route("/equipments/<int:recordUserId>/<int:id>", methods=["GET"])
-    def get_equipment(recordUserId, id):
-        item = Equipment.query.filter_by(id=id, user_id=recordUserId).first()
+    @equipments_bp.route("/equipments/<int:itemUserId>/<int:id>", methods=["GET"])
+    def get_equipment(itemUserId, id):
+        item = Equipment.query.filter_by(id=id, user_id=itemUserId).first()
 
         if item is None:
             return jsonify({"message": "equipment not found"}), 404
@@ -69,8 +70,12 @@ def create_equipments_bp():
     @equipments_bp.route("/equipments", methods=["POST"])
     @token_required
     def add_equipment(current_user_id):
+        schema = EquipmentsSchema()
 
-        data = request.json
+        try:
+            data = schema.load(request.json)
+        except ValidationError as err:
+            return jsonify({"errors": err.messages}), 400
 
         new_equipment = Equipment(
             user_id=current_user_id,
@@ -89,11 +94,20 @@ def create_equipments_bp():
         db.session.commit()
         return jsonify(new_equipment.to_dict()), 201
 
-    @equipments_bp.route("/equipments/<int:recordUserId>/<int:id>", methods=["PUT"])
+    @equipments_bp.route("/equipments/<int:id>", methods=["PUT"])
     @token_required
-    def update_equipment(current_user_id, recordUserId, id):
+    def update_equipment(current_user_id, id):
+        schema = EquipmentsSchema()
 
-        if recordUserId != current_user_id:
+        try:
+            data = schema.load(request.json)
+        except ValidationError as err:
+            print("err.messages ", err.messages)
+            return jsonify({"errors": err.messages}), 400
+
+        itemUserId = data.get("itemUserId")
+
+        if itemUserId != current_user_id:
             # Find the official equipment (user_id = 1)
             official_item = Equipment.query.filter_by(id=id, user_id=1).first()
 
@@ -116,7 +130,6 @@ def create_equipments_bp():
             )
 
             # Update the new equipment's data with the provided values, if they exist
-            data = request.json
             new_item.name = data.get("name", new_item.name)
             new_item.description = data.get("description", new_item.description)
             new_item.efficiency = data.get("efficiency", new_item.efficiency)
@@ -139,8 +152,6 @@ def create_equipments_bp():
             if item is None:
                 return jsonify({"message": "Equipment not found"}), 404
 
-            data = request.json
-
             item.name = data.get("name", item.name)
             item.description = data.get("description", item.description)
             item.efficiency = data.get("efficiency", item.efficiency)
@@ -156,10 +167,10 @@ def create_equipments_bp():
 
             return jsonify(item.to_dict()), 200
 
-    @equipments_bp.route("/equipments/<int:recordUserId>/<int:id>", methods=["DELETE"])
+    @equipments_bp.route("/equipments/<int:itemUserId>/<int:id>", methods=["DELETE"])
     @token_required
-    def delete_equipment(current_user_id, recordUserId, id):
-        if recordUserId != current_user_id:
+    def delete_equipment(current_user_id, itemUserId, id):
+        if itemUserId != current_user_id:
             return jsonify({"message": "Cannot delete official record"}), 404
 
         equipment = Equipment.query.filter_by(id=id, user_id=current_user_id).first()

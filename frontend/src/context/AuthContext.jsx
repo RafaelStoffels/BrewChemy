@@ -2,6 +2,7 @@ import React, {
   createContext, useState, useEffect, useMemo,
 } from 'react';
 import PropTypes from 'prop-types';
+import { me } from '../services/users';
 
 const AuthContext = createContext();
 
@@ -15,9 +16,18 @@ export function AuthProvider({ children }) {
     }
   }, []);
 
-  const login = (userData) => {
-    setUser(userData);
-    localStorage.setItem('user', JSON.stringify(userData));
+  const login = async (userData) => {
+    try {
+      const userInfo = await me(userData.token);
+      const fullUser = { ...userInfo, token: userData.token };
+
+      setUser(fullUser);
+      localStorage.setItem('user', JSON.stringify(fullUser));
+      return true;
+    } catch (err) {
+      console.error('Error trying to get user info:', err);
+      return false;
+    }
   };
 
   const logout = () => {

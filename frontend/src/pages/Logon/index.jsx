@@ -10,13 +10,12 @@ import AuthContext from '../../context/AuthContext';
 import './styles.css';
 
 export default function Logon() {
-  const { login, isAuthenticated } = useContext(AuthContext);
+  const { login } = useContext(AuthContext);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const navigate = useNavigate();
-  const [searchParams, setSearchParams] = useSearchParams();
-  const [isRedirecting, setIsRedirecting] = useState(false);
+  const [searchParams] = useSearchParams();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -48,18 +47,18 @@ export default function Logon() {
   };
 
   useEffect(() => {
-    const token = searchParams.get('token');
+    const handleRedirectLogin = async () => {
+      const token = searchParams.get('token');
 
-    if (token && !isRedirecting) {
-      login({ token });
-      setSearchParams({}, { replace: true });
-      setIsRedirecting(true);
-      navigate('/RecipeList');
-    } else if (isAuthenticated && !isRedirecting) {
-      setIsRedirecting(true);
-      navigate('/RecipeList');
-    }
-  }, [searchParams, login, navigate, setSearchParams, isAuthenticated, isRedirecting]);
+      const success = await login({ token });
+
+      if (success) {
+        navigate('/RecipeList');
+      }
+    };
+
+    handleRedirectLogin();
+  }, []);
 
   return (
     <div className="logon-container">

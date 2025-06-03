@@ -9,6 +9,7 @@ from flask_mail import Message
 from models import User
 from requests_oauthlib import OAuth2Session
 from werkzeug.security import generate_password_hash
+from AuthTokenVerifier import token_required
 
 
 SECRET_KEY = os.getenv('SECRET_KEY', 'default-secret-key')
@@ -158,14 +159,20 @@ def create_users_bp():
         users = User.query.all()
         return jsonify([user.to_dict() for user in users])
 
-    @users_bp.route("/users/<int:user_id>", methods=["GET"])
+    @users_bp.route("/users/me", methods=["GET"])
+    @token_required
     def get_user(user_id):
         user = User.query.get(user_id)
 
         if user is None:
             return jsonify({"message": "User not found"}), 404
 
-        return jsonify(user.to_dict())
+        return jsonify({
+            "user_id": user.user_id,
+            "name": user.name,
+            "email": user.email
+        })
+
 
     @users_bp.route("/users", methods=["POST"])
     def add_user():

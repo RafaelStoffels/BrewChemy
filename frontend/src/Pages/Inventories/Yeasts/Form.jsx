@@ -4,7 +4,6 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { fetchYeastById, updateYeast, addYeast } from '../../../services/yeasts';
 import { showErrorToast, showSuccessToast } from '../../../utils/notifications';
 
-import api from '../../../services/api';
 import AuthContext from '../../../context/AuthContext';
 
 import '../../../Styles/crud.css';
@@ -15,6 +14,7 @@ export default function NewYeast() {
   const { id } = useParams();
   const navigate = useNavigate();
 
+  const [itemUserId, setItemUserId] = useState('');
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [manufacturer, setManufacturer] = useState('');
@@ -31,7 +31,8 @@ export default function NewYeast() {
 
   async function fetchYeast(userId, itemID) {
     try {
-      const yeast = await fetchYeastById(api, user.token, userId, itemID);
+      const yeast = await fetchYeastById(user.token, userId, itemID);
+      setItemUserId(recordUserId);
       setName(yeast.name);
       setDescription(yeast.description);
       setManufacturer(yeast.manufacturer);
@@ -52,6 +53,7 @@ export default function NewYeast() {
     e.preventDefault();
 
     const data = {
+      itemUserId,
       name,
       description,
       manufacturer,
@@ -66,10 +68,10 @@ export default function NewYeast() {
 
     try {
       if (isEditing) {
-        await updateYeast(api, user.token, recordUserId, id, data);
+        await updateYeast(user.token, id, data);
         showSuccessToast('Yeast has been updated.');
       } else {
-        await addYeast(api, user.token, data);
+        await addYeast(user.token, data);
         showSuccessToast('Added new yeast successfully.');
       }
       navigate('/YeastList');

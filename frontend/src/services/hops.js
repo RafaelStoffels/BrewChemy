@@ -88,9 +88,9 @@ export async function addHop(userToken, dataInput) {
   }
 }
 
-export async function updateHop(userToken, recordUserId, id, dataInput) {
+export async function updateHop(userToken, id, dataInput) {
   try {
-    const response = await api.put(`/api/hops/${recordUserId}/${id}`, dataInput, {
+    const response = await api.put(`/api/hops/${id}`, dataInput, {
       headers: { Authorization: `Bearer ${userToken}` },
     });
     return response.data;

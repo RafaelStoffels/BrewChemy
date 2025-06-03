@@ -2,7 +2,8 @@ from flask import Blueprint, jsonify, request
 from db import db
 from models import Hop
 from AuthTokenVerifier import token_required
-
+from marshmallow import ValidationError
+from schemas.hops_schema import HopsSchema
 
 def create_hops_bp():
     hops_bp = Blueprint("hops", __name__)
@@ -56,9 +57,9 @@ def create_hops_bp():
 
         return jsonify([item.to_dict() for item in items])
 
-    @hops_bp.route("/hops/<int:recordUserId>/<int:id>", methods=["GET"])
-    def get_hop(recordUserId, id):
-        item = Hop.query.filter_by(id=id, user_id=recordUserId).first()
+    @hops_bp.route("/hops/<int:itemUserId>/<int:id>", methods=["GET"])
+    def get_hop(itemUserId, id):
+        item = Hop.query.filter_by(id=id, user_id=itemUserId).first()
 
         if item is None:
             return jsonify({"message": "hop not found"}), 404
@@ -68,7 +69,12 @@ def create_hops_bp():
     @hops_bp.route("/hops", methods=["POST"])
     @token_required
     def add_hop(current_user_id):
-        data = request.json
+        schema = HopsSchema()
+
+        try:
+            data = schema.load(request.json)
+        except ValidationError as err:
+            return jsonify({"errors": err.messages}), 400
 
         def sanitize(value):
             return value if value != "" else None
@@ -89,12 +95,19 @@ def create_hops_bp():
 
         return jsonify(new_hop.to_dict()), 201
 
-    @hops_bp.route("/hops/<int:recordUserId>/<int:id>", methods=["PUT"])
+    @hops_bp.route("/hops/<int:id>", methods=["PUT"])
     @token_required
-    def update_hop(current_user_id, recordUserId, id):
-        data = request.json
+    def update_hop(current_user_id, id):
+        schema = HopsSchema()
 
-        if recordUserId != current_user_id:
+        try:
+            data = schema.load(request.json)
+        except ValidationError as err:
+            return jsonify({"errors": err.messages}), 400
+
+        itemUserId = data.get("itemUserId")
+
+        if itemUserId != current_user_id:
             official_item = Hop.query.filter_by(id=id, user_id=1).first()
 
             if official_item is None:
@@ -136,10 +149,10 @@ def create_hops_bp():
 
             return jsonify(item.to_dict()), 200
 
-    @hops_bp.route("/hops/<int:recordUserId>/<int:id>", methods=["DELETE"])
+    @hops_bp.route("/hops/<int:itemUserId>/<int:id>", methods=["DELETE"])
     @token_required
-    def delete_hop(current_user_id, recordUserId, id):
-        if recordUserId != current_user_id:
+    def delete_hop(current_user_id, itemUserId, id):
+        if itemUserId != current_user_id:
             return jsonify({"message": "Cannot delete official record"}), 404
 
         hop = Hop.query.filter_by(id=id).first()
