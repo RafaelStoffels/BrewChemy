@@ -75,6 +75,7 @@ def create_fermentables_bp():
         try:
             data = schema.load(request.json)
         except ValidationError as err:
+            print(err.messages)
             return jsonify({"errors": err.messages}), 400
 
         def sanitize(value):
@@ -102,7 +103,6 @@ def create_fermentables_bp():
         try:
             data = schema.load(request.json)
         except ValidationError as err:
-            print("fermentable ", err.messages)
             return jsonify({"errors": err.messages}), 400
 
         itemUserId = data.get("itemUserId")

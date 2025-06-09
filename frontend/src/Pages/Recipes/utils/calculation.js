@@ -1,5 +1,12 @@
 export const calculateOG = (recipe) => {
-  if (!recipe || !recipe.recipeFermentables || recipe.recipeFermentables.length === 0) {
+  if (
+    !recipe
+    || !Array.isArray(recipe.recipeFermentables)
+    || recipe.recipeFermentables.length === 0
+    || !recipe.recipeEquipment
+    || !recipe.recipeEquipment.batchVolume
+    || !recipe.recipeEquipment.efficiency
+  ) {
     return '1.000';
   }
 
@@ -25,7 +32,7 @@ export const calculateOG = (recipe) => {
 export const calculateFG = (recipe, OGResult) => {
   let attenuation = 100;
 
-  recipe.recipeYeasts.forEach((yeast) => {
+  (recipe.recipeYeasts || []).forEach((yeast) => {
     if (yeast.attenuation < attenuation) {
       attenuation = yeast.attenuation;
     }
@@ -36,10 +43,20 @@ export const calculateFG = (recipe, OGResult) => {
 };
 
 export const calculateEBC = (recipe) => {
+  if (
+    !recipe
+    || !Array.isArray(recipe.recipeFermentables)
+    || recipe.recipeFermentables.length === 0
+    || !recipe.recipeEquipment
+    || !recipe.recipeEquipment.batchVolume
+  ) {
+    return '0.00';
+  }
+
   let totalEBC = 0;
 
   recipe.recipeFermentables.forEach((fermentable) => {
-    const weightKg = fermentable.quantity / 1000;
+    const weightKg = fermentable.quantity ? fermentable.quantity / 1000 : 0;
     const ebc = fermentable.ebc || 0;
 
     totalEBC += (weightKg * ebc) / recipe.recipeEquipment.batchVolume;
@@ -60,17 +77,22 @@ export function calculateIBU(recipe, OG) {
   let totalIBU = 0;
   let hasChanges = false;
 
-  /*
-  if (!recipe.recipeEquipment?.batchVolume || recipe.recipeEquipment.batchVolume <= 0) return;
-
-  if (!recipe || !recipe.recipeHops || recipe.recipeHops.length === 0 || OG <= 0) {
+  // Validações iniciais para evitar erros
+  if (
+    !recipe
+    || !Array.isArray(recipe.recipeHops)
+    || recipe.recipeHops.length === 0
+    || !recipe.recipeEquipment
+    || !recipe.recipeEquipment.batchVolume
+    || recipe.recipeEquipment.batchVolume <= 0
+    || OG <= 0
+  ) {
     return {
       totalIBU: totalIBU.toFixed(2),
-      updatedHops,
+      updatedHops: [],
       hasChanges,
     };
   }
-  */
 
   const updatedHops = recipe.recipeHops.map((hop) => {
     const {
@@ -91,7 +113,6 @@ export function calculateIBU(recipe, OG) {
 
     totalIBU += ibu;
 
-    // Checks if the value has changed before updating
     if (previousIbu !== ibuFixed) {
       hasChanges = true;
       return { ...hop, ibu: ibuFixed };
@@ -99,9 +120,6 @@ export function calculateIBU(recipe, OG) {
     return hop;
   });
 
-  // Só atualiza o estado se houver mudanças nos valores do IBU
-  // ENTENDER MELHOR ISSO AQUI, PQ PARECE QUE EU NAO POSSO
-  // ATUALIZAR UM SET SE EU JA RETORNO VALOR DA FUNCAO
   return {
     totalIBU: totalIBU.toFixed(2),
     updatedHops,
@@ -110,42 +128,37 @@ export function calculateIBU(recipe, OG) {
 }
 
 export const getPreBoilVolume = (recipe) => {
-  const preBoilCalc = recipe.recipeEquipment.batchVolume
-                    + recipe.recipeEquipment.deadSpace
-                    + (recipe.recipeEquipment.boilOff * (recipe.recipeEquipment.boilTime / 60))
-                    + recipe.recipeEquipment.trubLoss;
+  const equipment = recipe.recipeEquipment || {};
+
+  const batchVolume = Number(equipment.batchVolume) || 0;
+  const deadSpace = Number(equipment.deadSpace) || 0;
+  const boilOff = Number(equipment.boilOff) || 0;
+  const boilTime = Number(equipment.boilTime) || 0;
+  const trubLoss = Number(equipment.trubLoss) || 0;
+  const preBoilCalc = batchVolume
+                    + deadSpace
+                    + (boilOff * (boilTime / 60))
+                    + trubLoss;
 
   return preBoilCalc.toFixed(3);
 };
 
-export const getIngredientsPorcentage = (recipe, setRecipe) => {
-  let hasChanges = false;
+export const getIngredientsPorcentage = (recipeFermentables) => {
+  if (!Array.isArray(recipeFermentables)) return [];
 
-  const totalQuantity = recipe.recipeFermentables
-    .reduce((total, item) => total + (item.quantity || 0), 0);
+  const totalQuantity = recipeFermentables.reduce(
+    (total, item) => total + (item.quantity || 0),
+    0,
+  );
 
-  const updatedFermentables = recipe.recipeFermentables.map((fermentable) => {
-    const { quantity, percentage: previousPercentage } = fermentable;
+  return recipeFermentables.map((fermentable) => {
+    const { quantity } = fermentable;
 
     if (!quantity || totalQuantity === 0) {
-      return fermentable;
+      return { ...fermentable, percentage: '0.00' };
     }
 
     const percentageFixed = ((quantity / totalQuantity) * 100).toFixed(2);
-
-    // if `previousPercentage` is undefined, compare with `fermentable.percentage`
-    if (previousPercentage !== percentageFixed) {
-      hasChanges = true;
-      return { ...fermentable, percentage: percentageFixed };
-    }
-
-    return fermentable;
+    return { ...fermentable, percentage: percentageFixed };
   });
-
-  if (hasChanges) {
-    setRecipe((prevRecipe) => ({
-      ...prevRecipe,
-      recipeFermentables: updatedFermentables,
-    }));
-  }
 };

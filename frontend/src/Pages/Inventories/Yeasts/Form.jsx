@@ -1,5 +1,8 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useEffect, useContext } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { useForm } from 'react-hook-form';
+import { yupResolver } from '@hookform/resolvers/yup';
+import schema from './schema'; // <-- Aqui devem estar as regras do Yup
 
 import { fetchYeastById, updateYeast, addYeast } from '../../../services/yeasts';
 import { showErrorToast, showSuccessToast } from '../../../utils/notifications';
@@ -10,96 +13,92 @@ import '../../../Styles/crud.css';
 
 export default function NewYeast() {
   const { user } = useContext(AuthContext);
-  const { recordUserId } = useParams();
-  const { id } = useParams();
+  const { recordUserId, id } = useParams();
   const navigate = useNavigate();
 
-  const [itemUserId, setItemUserId] = useState('');
-  const [name, setName] = useState('');
-  const [description, setDescription] = useState('');
-  const [manufacturer, setManufacturer] = useState('');
-  const [type, setType] = useState('Ale');
-  const [form, setForm] = useState('Dry');
-  const [temperatureRange, setTemperatureRange] = useState('');
-  const [attenuation, setAttenuation] = useState('');
-  const [alcoholTolerance, setAlcoholTolerance] = useState('');
-  const [flavorProfile, setFlavorProfile] = useState('');
-  const [flocculation, setFlocculation] = useState('');
+  const isDetail = window.location.pathname.includes('/details');
+  const isEditing = !!id && !isDetail;
+  const isView = !!id && isDetail;
 
-  const [isEditing, setIsEditing] = useState(false);
-  const [isView, setIsView] = useState(false);
-
-  async function fetchYeast(userId, itemID) {
-    try {
-      const yeast = await fetchYeastById(user.token, userId, itemID);
-      setItemUserId(recordUserId);
-      setName(yeast.name);
-      setDescription(yeast.description);
-      setManufacturer(yeast.manufacturer);
-      setType(yeast.type);
-      setForm(yeast.form);
-      setTemperatureRange(yeast.temperatureRange);
-      setAttenuation(yeast.attenuation);
-      setAlcoholTolerance(yeast.alcoholTolerance);
-      setFlavorProfile(yeast.flavorProfile);
-      setFlocculation(yeast.flocculation);
-    } catch (err) {
-      showErrorToast(`Error loading yeast record.${err}`);
-      navigate('/YeastList');
-    }
-  }
-
-  async function handleSubmit(e) {
-    e.preventDefault();
-
-    const data = {
-      itemUserId,
-      name,
-      description,
-      manufacturer,
-      type,
-      form,
-      temperatureRange,
-      attenuation,
-      alcoholTolerance,
-      flavorProfile,
-      flocculation,
-    };
-
-    try {
-      if (isEditing) {
-        await updateYeast(user.token, id, data);
-        showSuccessToast('Yeast has been updated.');
-      } else {
-        await addYeast(user.token, data);
-        showSuccessToast('Added new yeast successfully.');
-      }
-      navigate('/YeastList');
-    } catch (err) {
-      showErrorToast(`${err.message}`);
-    }
-  }
-
-  function getTitle() {
-    if (isEditing) return 'Update Fermentable';
-    if (isView) return 'Fermentable Details';
-    return 'Add New Fermentable';
-  }
+  const {
+    register,
+    handleSubmit,
+    reset,
+  } = useForm({
+    resolver: yupResolver(schema),
+    defaultValues: {
+      name: '',
+      manufacturer: '',
+      description: '',
+      flavorProfile: '',
+      type: 'Ale',
+      form: 'Dry',
+      attenuation: '',
+      temperatureRange: '',
+      flocculation: '',
+    },
+  });
 
   useEffect(() => {
     if (!user) {
       navigate('/');
-    } else if (id) {
-      if (window.location.pathname.includes('/details')) {
-        setIsView(true);
-        setIsEditing(false);
-      } else {
-        setIsView(false);
-        setIsEditing(true);
-      }
-      fetchYeast(recordUserId, id);
+      return;
     }
-  }, [id, user, navigate]);
+
+    if (id) {
+      fetchYeastById(user.token, recordUserId, id)
+        .then((yeast) => {
+          reset({
+            name: yeast.name || '',
+            manufacturer: yeast.manufacturer || '',
+            description: yeast.description || '',
+            flavorProfile: yeast.flavorProfile || '',
+            type: yeast.type || 'Ale',
+            form: yeast.form || 'Dry',
+            attenuation: yeast.attenuation || '',
+            temperatureRange: yeast.temperatureRange || '',
+            flocculation: yeast.flocculation || '',
+          });
+        })
+        .catch((err) => {
+          showErrorToast(`Error loading yeast record. ${err}`);
+          navigate('/YeastList');
+        });
+    }
+  }, [id, user, navigate, recordUserId, reset]);
+
+  const getTitle = () => {
+    if (isEditing) return 'Update Yeast';
+    if (isView) return 'Yeast Details';
+    return 'Add New Yeast';
+  };
+
+  const onValid = async (data) => {
+    const payload = {
+      ...data,
+      itemUserId: recordUserId,
+    };
+
+    try {
+      if (isEditing) {
+        await updateYeast(user.token, id, payload);
+        showSuccessToast('Yeast has been updated.');
+      } else {
+        await addYeast(user.token, payload);
+        showSuccessToast('Added new yeast successfully.');
+      }
+      navigate('/YeastList');
+    } catch (err) {
+      showErrorToast(`Error saving yeast record: ${err.message}`);
+    }
+  };
+
+  const onError = (errors) => {
+    const firstError = Object.values(errors)[0];
+    if (firstError?.message) {
+      showErrorToast(firstError.message);
+    }
+  };
 
   return (
     <div>
@@ -108,63 +107,58 @@ export default function NewYeast() {
           <h1>{getTitle()}</h1>
         </section>
         <div className="content">
-          <form onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit(onValid, onError)}>
             <div className="inputs-row">
               <div className="input-field">
-                <label htmlFor="name">
+                <label>
                   Name
                   <input
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
+                    {...register('name')}
                     disabled={isView}
                     style={{ width: '430px' }}
                   />
                 </label>
               </div>
               <div className="input-field">
-                <label htmlFor="name">
+                <label>
                   Manufacturer
                   <input
-                    value={manufacturer}
-                    onChange={(e) => setManufacturer(e.target.value)}
+                    {...register('manufacturer')}
                     disabled={isView}
                   />
                 </label>
               </div>
             </div>
+
             <div className="inputs-row">
               <div className="input-field">
-                <label htmlFor="name">
+                <label>
                   Description
                   <textarea
-                    type="Description"
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
+                    {...register('description')}
                     disabled={isView}
                   />
                 </label>
               </div>
             </div>
+
             <div className="inputs-row">
               <div className="input-field">
-                <label htmlFor="name">
+                <label>
                   Flavor Profile
                   <input
-                    value={flavorProfile}
-                    onChange={(e) => setFlavorProfile(e.target.value)}
+                    {...register('flavorProfile')}
                     disabled={isView}
                   />
                 </label>
               </div>
             </div>
+
             <div className="inputs-row">
               <div className="input-field">
-                <label htmlFor="name">
+                <label>
                   Type
-                  <select
-                    value={type}
-                    onChange={(e) => setType(e.target.value)}
-                  >
+                  <select {...register('type')} disabled={isView}>
                     <option value="Ale">Ale</option>
                     <option value="Lager">Lager</option>
                     <option value="Hybrid">Hybrid</option>
@@ -175,72 +169,61 @@ export default function NewYeast() {
                   </select>
                 </label>
               </div>
+
               <div className="input-field">
-                <label htmlFor="name">
+                <label>
                   Form
-                  <select
-                    value={form}
-                    onChange={(e) => setForm(e.target.value)}
-                  >
-                    <option value="Ale">Dry</option>
-                    <option value="Lager">Liquid</option>
-                    <option value="Hybrid">Culture</option>
-                    <option value="Champagne">Slurry</option>
+                  <select {...register('form')} disabled={isView}>
+                    <option value="Dry">Dry</option>
+                    <option value="Liquid">Liquid</option>
+                    <option value="Culture">Culture</option>
+                    <option value="Slurry">Slurry</option>
                   </select>
                 </label>
               </div>
+
               <div className="input-field">
-                <label htmlFor="name">
+                <label>
                   Attenuation %
                   <input
                     type="number"
-                    value={attenuation}
-                    onChange={(e) => setAttenuation(e.target.value)}
+                    {...register('attenuation')}
                     disabled={isView}
                   />
                 </label>
               </div>
+
               <div className="input-field">
-                <label htmlFor="name">
+                <label>
                   Temperature Range
                   <input
-                    value={temperatureRange}
-                    onChange={(e) => setTemperatureRange(e.target.value)}
+                    {...register('temperatureRange')}
                     disabled={isView}
                   />
                 </label>
               </div>
             </div>
+
             <div className="inputs-row">
               <div className="input-field">
-                <label htmlFor="name">
-                  Alcohol Tolerance
-                  <input
-                    type="number"
-                    value={alcoholTolerance}
-                    onChange={(e) => setAlcoholTolerance(e.target.value)}
-                    disabled={isView}
-                  />
-                </label>
-              </div>
-              <div className="input-field">
-                <label htmlFor="name">
+                <label>
                   Flocculation
                   <input
-                    value={flocculation}
-                    onChange={(e) => setFlocculation(e.target.value)}
+                    {...register('flocculation')}
                     disabled={isView}
                   />
                 </label>
               </div>
+              <div className="input-field" />
             </div>
+
+            {!isView && (
+              <button className="crud-save-button" type="submit">
+                Save
+              </button>
+            )}
           </form>
         </div>
-        {!isView && (
-        <button onClick={handleSubmit} className="crud-save-button" type="submit">
-          Save
-        </button>
-        )}
       </div>
     </div>
   );

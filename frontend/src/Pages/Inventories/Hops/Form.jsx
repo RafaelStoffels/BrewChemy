@@ -1,5 +1,8 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useEffect, useContext, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { useForm } from 'react-hook-form';
+import { yupResolver } from '@hookform/resolvers/yup';
+import schema from './schema';
 
 import { fetchHopById, updateHop, addHop } from '../../../services/hops';
 import { showErrorToast, showSuccessToast } from '../../../utils/notifications';
@@ -10,90 +13,93 @@ import '../../../Styles/crud.css';
 
 export default function NewHop() {
   const { user } = useContext(AuthContext);
-  const { recordUserId } = useParams();
-  const { id } = useParams();
+  const { recordUserId, id } = useParams();
   const navigate = useNavigate();
-
-  const [itemUserId, setItemUserId] = useState('');
-  const [name, setName] = useState('');
-  const [description, setDescription] = useState('');
-  const [supplier, setSupplier] = useState('');
-  const [useType, setUseType] = useState('Boil');
-  const [type, setType] = useState('Pellet');
-  const [countryOfOrigin, setCountryOfOrigin] = useState('');
-  const [alphaAcidContent, setAlphaAcidContent] = useState('');
-  const [betaAcidContent, setBetaAcidContent] = useState('');
 
   const [isEditing, setIsEditing] = useState(false);
   const [isView, setIsView] = useState(false);
 
-  async function fetchHop(userId, itemID) {
-    try {
-      const hop = await fetchHopById(user.token, userId, itemID);
-      setItemUserId(recordUserId);
-      setName(hop.name);
-      setDescription(hop.description);
-      setSupplier(hop.supplier);
-      setCountryOfOrigin(hop.countryOfOrigin);
-      setUseType(hop.useType);
-      setType(hop.type);
-      setAlphaAcidContent(hop.alphaAcidContent);
-      setBetaAcidContent(hop.betaAcidContent);
-    } catch (err) {
-      showErrorToast(`Error loading hop record.${err}`);
-      navigate('/HopList');
-    }
-  }
-
-  async function handleSubmit(e) {
-    e.preventDefault();
-
-    const data = {
-      itemUserId,
-      name,
-      description,
-      supplier,
-      useType,
-      type,
-      countryOfOrigin,
-      alphaAcidContent,
-      betaAcidContent,
-    };
-
-    try {
-      if (isEditing) {
-        await updateHop(user.token, id, data);
-        showSuccessToast('Hop has been updated.');
-      } else {
-        await addHop(user.token, data);
-        showSuccessToast('Added new hop successfully.');
-      }
-      navigate('/HopList');
-    } catch (err) {
-      showErrorToast(`${err.message}`);
-    }
-  }
-
-  function getTitle() {
-    if (isEditing) return 'Update Fermentable';
-    if (isView) return 'Fermentable Details';
-    return 'Add New Fermentable';
-  }
+  const {
+    register,
+    handleSubmit,
+    reset,
+  } = useForm({
+    resolver: yupResolver(schema),
+    defaultValues: {
+      name: '',
+      supplier: '',
+      description: '',
+      countryOfOrigin: '',
+      type: 'Pellet',
+      useType: 'Boil',
+      alphaAcidContent: '',
+      betaAcidContent: '',
+    },
+  });
 
   useEffect(() => {
     if (!user) {
       navigate('/');
-    } else if (id) {
-      if (window.location.pathname.includes('/details')) {
-        setIsView(true);
-        setIsEditing(false);
-      } else {
-        setIsView(false);
-        setIsEditing(true);
-      }
-      fetchHop(recordUserId, id);
+      return;
     }
-  }, [id, user, navigate]);
+
+    if (id) {
+      const isDetail = window.location.pathname.includes('/details');
+      setIsView(isDetail);
+      setIsEditing(!isDetail);
+
+      fetchHopById(user.token, recordUserId, id)
+        .then((hop) => {
+          reset({
+            name: hop.name || '',
+            supplier: hop.supplier || '',
+            description: hop.description || '',
+            countryOfOrigin: hop.countryOfOrigin || '',
+            type: hop.type || 'Pellet',
+            useType: hop.useType || 'Boil',
+            alphaAcidContent: hop.alphaAcidContent || '',
+            betaAcidContent: hop.betaAcidContent || '',
+          });
+        })
+        .catch((err) => {
+          showErrorToast(`Error loading hop record. ${err}`);
+          navigate('/HopList');
+        });
+    }
+  }, [id, user, navigate, recordUserId, reset]);
+
+  const getTitle = () => {
+    if (isEditing) return 'Update Hop';
+    if (isView) return 'Hop Details';
+    return 'Add New Hop';
+  };
+
+  const onValid = async (data) => {
+    const payload = {
+      ...data,
+      itemUserId: recordUserId,
+    };
+
+    try {
+      if (isEditing) {
+        await updateHop(user.token, id, payload);
+        showSuccessToast('Hop has been updated.');
+      } else {
+        await addHop(user.token, payload);
+        showSuccessToast('Added new hop successfully.');
+      }
+      navigate('/HopList');
+    } catch (err) {
+      showErrorToast(`Error saving hop record: ${err.message}`);
+    }
+  };
+
+  const onError = (errors) => {
+    const firstError = Object.values(errors)[0];
+    if (firstError?.message) {
+      showErrorToast(firstError.message);
+    }
+  };
 
   return (
     <div>
@@ -102,60 +108,58 @@ export default function NewHop() {
           <h1>{getTitle()}</h1>
         </section>
         <div className="content">
-          <form onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit(onValid, onError)}>
             <div className="inputs-row">
               <div className="input-field">
-                <label htmlFor="name">
+                <label>
                   Name
                   <input
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
+                    {...register('name')}
                     disabled={isView}
                     style={{ width: '430px' }}
                   />
                 </label>
               </div>
               <div className="input-field">
-                <label htmlFor="name">
+                <label>
                   Supplier
                   <input
-                    value={supplier}
-                    onChange={(e) => setSupplier(e.target.value)}
+                    {...register('supplier')}
                     disabled={isView}
                   />
                 </label>
               </div>
             </div>
+
             <div className="inputs-row">
-              <div className="input-field">
-                <label htmlFor="name">
+              <div className="input-field" style={{ width: '100%' }}>
+                <label>
                   Description
                   <textarea
-                    type="Description"
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
+                    {...register('description')}
                     disabled={isView}
                   />
                 </label>
               </div>
             </div>
+
             <div className="inputs-row">
               <div className="input-field">
-                <label htmlFor="name">
+                <label>
                   Country of Origin
                   <input
-                    value={countryOfOrigin}
-                    onChange={(e) => setCountryOfOrigin(e.target.value)}
+                    {...register('countryOfOrigin')}
                     disabled={isView}
                   />
                 </label>
               </div>
+
               <div className="input-field">
-                <label htmlFor="name">
+                <label>
                   Type
                   <select
-                    value={type}
-                    onChange={(e) => setType(e.target.value)}
+                    {...register('type')}
+                    disabled={isView}
                   >
                     <option value="Pellet">Pellet</option>
                     <option value="Whole">Whole</option>
@@ -164,12 +168,13 @@ export default function NewHop() {
                   </select>
                 </label>
               </div>
+
               <div className="input-field">
-                <label htmlFor="name">
+                <label>
                   Use Type
                   <select
-                    value={useType}
-                    onChange={(e) => setUseType(e.target.value)}
+                    {...register('useType')}
+                    disabled={isView}
                   >
                     <option value="Boil">Boil</option>
                     <option value="Dry Hop">Dry Hop</option>
@@ -179,36 +184,41 @@ export default function NewHop() {
                   </select>
                 </label>
               </div>
+
               <div className="input-field">
-                <label htmlFor="name">
+                <label>
                   Alpha Acid
                   <input
                     type="number"
-                    value={alphaAcidContent}
-                    onChange={(e) => setAlphaAcidContent(e.target.value)}
+                    step="any"
+                    {...register('alphaAcidContent')}
                     disabled={isView}
                   />
                 </label>
               </div>
+
               <div className="input-field">
-                <label htmlFor="name">
+                <label>
                   Beta Acid
                   <input
                     type="number"
-                    value={betaAcidContent}
-                    onChange={(e) => setBetaAcidContent(e.target.value)}
+                    step="any"
+                    {...register('betaAcidContent')}
                     disabled={isView}
                   />
                 </label>
               </div>
             </div>
+
+            {!isView && (
+              <div className="button-container">
+                <button className="crud-save-button" type="submit">
+                  Save
+                </button>
+              </div>
+            )}
           </form>
         </div>
-        {!isView && (
-        <button onClick={handleSubmit} className="crud-save-button" type="submit">
-          Save
-        </button>
-        )}
       </div>
     </div>
   );

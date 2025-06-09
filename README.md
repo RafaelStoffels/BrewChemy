@@ -32,10 +32,14 @@ Livedemo: https://brewchemy-react.onrender.com/
 - [Flask](https://flask.palletsprojects.com/)
 - [PostgreSQL](https://www.postgresql.org/)
 - [SQLAlchemy](https://www.sqlalchemy.org/)
+- [Flake8](https://flake8.pycqa.org/) – for enforcing Python code style and linting
 
 **Frontend:**
 - [React](https://reactjs.org/)
 - [Axios](https://axios-http.com/) – for communication between frontend and backend
+- [React Hook Form](https://react-hook-form.com/) – for form handling and validation
+- [Yup](https://github.com/jquense/yup) – for schema-based form validation
+- [ESLint](https://eslint.org/) – for linting and code style enforcement
 
 ## 📦 Installation
 

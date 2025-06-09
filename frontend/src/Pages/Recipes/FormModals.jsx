@@ -2,6 +2,11 @@ import React, { useState, useEffect, useContext } from 'react';
 import Modal from 'react-modal';
 import PropTypes from 'prop-types';
 
+import { addFermentableSchema, updateFermentableSchema } from './schemas/fermentablesSchema';
+import { addHopSchema, updateHopSchema } from './schemas/hopsSchema';
+import { addMiscSchema, updateMiscSchema } from './schemas/miscsSchema';
+import { addYeastSchema, updateYeastSchema } from './schemas/yeastsSchema';
+
 import SearchInput from '../../Components/SearchInput';
 
 import { showErrorToast, showInfoToast } from '../../utils/notifications';
@@ -28,15 +33,28 @@ export function AddFermentableModal({ isOpen, closeModal, handleAddFermentableRe
   };
 
   const handleSelectItem = (fermentable) => {
-    setSelectedItem(fermentable); // Armazena o fermentável selecionado
+    setSelectedItem(fermentable);
   };
 
-  const handleSaveButton = () => {
-    if (selectedItem && quantity) {
-      handleAddFermentableRecipe(selectedItem.id, quantity); // Agora enviamos o objeto inteiro
+  const inputRefs = {
+    selectedItem: React.useRef(null),
+    quantity: React.useRef(null),
+  };
+
+  const handleSaveButton = async () => {
+    try {
+      await addFermentableSchema.validate({ selectedItem, quantity }, { abortEarly: false });
+
+      handleAddFermentableRecipe(selectedItem.id, quantity);
       closeModal();
-    } else {
-      showErrorToast('Please fill in all fields.');
+    } catch (err) {
+      if (err.inner && err.inner.length > 0) {
+        err.inner.forEach((validationError) => {
+          showErrorToast(validationError.message);
+        });
+      } else {
+        showErrorToast('Validation error.');
+      }
     }
   };
 
@@ -99,6 +117,7 @@ export function AddFermentableModal({ isOpen, closeModal, handleAddFermentableRe
               <label htmlFor="quantity">
                 Quantity (Grams)
                 <input
+                  ref={inputRefs.quantity}
                   type="number"
                   value={quantity}
                   onChange={(e) => setQuantity(e.target.value)}
@@ -127,7 +146,7 @@ export function AddHopModal({ isOpen, closeModal, handleAddHopRecipe }) {
   const [quantity, setQuantity] = useState('');
   const [alphaAcid, setAlphaAcid] = useState('');
   const [boilTime, setBoilTime] = useState(60);
-  const [useType, setUseType] = useState('');
+  const [useType, setUseType] = useState('Boil');
   const [searchTerm, setSearchTerm] = useState('');
   const [itemList, setItemList] = useState([]);
 
@@ -145,12 +164,33 @@ export function AddHopModal({ isOpen, closeModal, handleAddHopRecipe }) {
     }
   };
 
-  const handleSaveButton = () => {
-    if (selectedItem && quantity && boilTime) {
+  const inputRefs = {
+    selectedItem: React.useRef(null),
+    quantity: React.useRef(null),
+    boilTime: React.useRef(null),
+    alphaAcid: React.useRef(null),
+    useType: React.useRef(null),
+  };
+
+  const handleSaveButton = async () => {
+    try {
+      await addHopSchema.validate(
+        {
+          selectedItem, quantity, boilTime, alphaAcid, useType,
+        },
+        { abortEarly: false },
+      );
+
       handleAddHopRecipe(selectedItem.id, quantity, boilTime, alphaAcid, useType);
       closeModal();
-    } else {
-      showErrorToast('Please fill in all fields.');
+    } catch (err) {
+      if (err.inner && err.inner.length > 0) {
+        err.inner.forEach((validationError) => {
+          showErrorToast(validationError.message);
+        });
+      } else {
+        showErrorToast('Validation error.');
+      }
     }
   };
 
@@ -208,9 +248,10 @@ export function AddHopModal({ isOpen, closeModal, handleAddHopRecipe }) {
           </div>
           <div className="inputs-row">
             <div className="input-field" style={{ marginTop: '10px' }}>
-              <label htmlFor="name">
+              <label htmlFor="useType">
                 Use Type
                 <select
+                  ref={inputRefs.useType}
                   value={useType}
                   onChange={(e) => setUseType(e.target.value)}
                 >
@@ -223,9 +264,10 @@ export function AddHopModal({ isOpen, closeModal, handleAddHopRecipe }) {
               </label>
             </div>
             <div className="input-field" style={{ marginTop: '10px' }}>
-              <label htmlFor="name">
+              <label htmlFor="boilTime">
                 Boil Time
                 <input
+                  ref={inputRefs.boilTime}
                   type="number"
                   value={boilTime}
                   onChange={(e) => setBoilTime(e.target.value)}
@@ -233,9 +275,10 @@ export function AddHopModal({ isOpen, closeModal, handleAddHopRecipe }) {
               </label>
             </div>
             <div className="input-field" style={{ marginTop: '10px' }}>
-              <label htmlFor="name">
+              <label htmlFor="alphaAcid">
                 Alpha Acid
                 <input
+                  ref={inputRefs.alphaAcid}
                   type="number"
                   value={alphaAcid}
                   onChange={(e) => setAlphaAcid(e.target.value)}
@@ -248,6 +291,7 @@ export function AddHopModal({ isOpen, closeModal, handleAddHopRecipe }) {
               <label htmlFor="quantity">
                 Quantity (Grams)
                 <input
+                  ref={inputRefs.quantity}
                   type="number"
                   value={quantity}
                   onChange={(e) => setQuantity(e.target.value)}
@@ -283,12 +327,25 @@ export function AddMiscModal({ isOpen, closeModal, handleAddMiscRecipe }) {
     setQuantity(e.target.value);
   };
 
-  const handleSaveButton = () => {
-    if (selectedItem && quantity) {
+  const inputRefs = {
+    selectedItem: React.useRef(null),
+    quantity: React.useRef(null),
+  };
+
+  const handleSaveButton = async () => {
+    try {
+      await addMiscSchema.validate({ selectedItem, quantity }, { abortEarly: false });
+
       handleAddMiscRecipe(selectedItem.id, quantity);
       closeModal();
-    } else {
-      showErrorToast('Please fill in all fields.');
+    } catch (err) {
+      if (err.inner && err.inner.length > 0) {
+        err.inner.forEach((validationError) => {
+          showErrorToast(validationError.message);
+        });
+      } else {
+        showErrorToast('Validation error.');
+      }
     }
   };
 
@@ -361,6 +418,7 @@ export function AddMiscModal({ isOpen, closeModal, handleAddMiscRecipe }) {
               <label htmlFor="name">
                 Quantity (Grams)
                 <input
+                  ref={inputRefs.quantity}
                   type="number"
                   value={quantity}
                   onChange={handleQuantityChange}
@@ -405,12 +463,25 @@ export function AddYeastModal({ isOpen, closeModal, handleAddYeastRecipe }) {
     setSelectedYeast(item);
   };
 
-  const handleSaveButton = () => {
-    if (selectedItem && quantity) {
+  const inputRefs = {
+    selectedItem: React.useRef(null),
+    quantity: React.useRef(null),
+  };
+
+  const handleSaveButton = async () => {
+    try {
+      await addYeastSchema.validate({ selectedItem, quantity }, { abortEarly: false });
+
       handleAddYeastRecipe(selectedItem.id, quantity);
       closeModal();
-    } else {
-      showErrorToast('Please fill in all fields.');
+    } catch (err) {
+      if (err.inner && err.inner.length > 0) {
+        err.inner.forEach((validationError) => {
+          showErrorToast(validationError.message);
+        });
+      } else {
+        showErrorToast('Validation error.');
+      }
     }
   };
 
@@ -472,6 +543,7 @@ export function AddYeastModal({ isOpen, closeModal, handleAddYeastRecipe }) {
               <label htmlFor="name">
                 Quantity (Grams)
                 <input
+                  ref={inputRefs.quantity}
                   type="number"
                   value={quantity}
                   onChange={(e) => setQuantity(e.target.value)}
@@ -601,12 +673,34 @@ export function UpdateFermentableModal({
     }));
   };
 
-  const handleSaveButton = (e) => {
+  const inputRefs = {
+    name: React.useRef(null),
+    description: React.useRef(null),
+    type: React.useRef(null),
+    supplier: React.useRef(null),
+    ebc: React.useRef(null),
+    potentialExtract: React.useRef(null),
+    quantity: React.useRef(null),
+  };
+
+  const handleSaveButton = async (e) => {
     e.preventDefault();
-    if (localFermentableObject) {
+
+    try {
+      await updateFermentableSchema.validate(localFermentableObject, { abortEarly: false });
+
       handleUpdateFermentableRecipe(localFermentableObject);
+
+      closeModal();
+    } catch (err) {
+      if (err.inner && err.inner.length > 0) {
+        err.inner.forEach((validationError) => {
+          showErrorToast(validationError.message);
+        });
+      } else {
+        showErrorToast('Validation error.');
+      }
     }
-    closeModal();
   };
 
   useEffect(() => {
@@ -630,6 +724,7 @@ export function UpdateFermentableModal({
             <label htmlFor="name">
               Name
               <input
+                ref={inputRefs.name}
                 value={localFermentableObject.name || ''}
                 onChange={(e) => handleChange('name', e.target.value)}
               />
@@ -643,9 +738,10 @@ export function UpdateFermentableModal({
             </label>
             <div className="inputs-row">
               <div className="input-field">
-                <label htmlFor="name">
+                <label htmlFor="type">
                   Fermentable Type
                   <select
+                    ref={inputRefs.type}
                     value={localFermentableObject.type}
                     onChange={(e) => setLocalFermentableObject((prev) => ({
                       ...prev,
@@ -659,9 +755,10 @@ export function UpdateFermentableModal({
                 </label>
               </div>
               <div className="input-field">
-                <label htmlFor="name">
+                <label htmlFor="supplier">
                   Supplier
                   <input
+                    ref={inputRefs.supplier}
                     value={localFermentableObject.supplier || ''}
                     onChange={(e) => handleChange('supplier', e.target.value)}
                   />
@@ -670,9 +767,10 @@ export function UpdateFermentableModal({
             </div>
             <div className="inputs-row">
               <div className="input-field">
-                <label htmlFor="name">
+                <label htmlFor="ebc">
                   EBC
                   <input
+                    ref={inputRefs.ebc}
                     type="number"
                     value={localFermentableObject.ebc || ''}
                     onChange={(e) => handleChange('ebc', e.target.value)}
@@ -680,9 +778,10 @@ export function UpdateFermentableModal({
                 </label>
               </div>
               <div className="input-field">
-                <label htmlFor="name">
+                <label htmlFor="potentialExtract">
                   Potential Extract
                   <input
+                    ref={inputRefs.potentialExtract}
                     type="number"
                     value={localFermentableObject.potentialExtract || ''}
                     onChange={(e) => handleChange('potentialExtract', e.target.value)}
@@ -690,9 +789,10 @@ export function UpdateFermentableModal({
                 </label>
               </div>
               <div className="input-field">
-                <label htmlFor="name">
+                <label htmlFor="quantity">
                   Quantity (Grams)
                   <input
+                    ref={inputRefs.quantity}
                     type="number"
                     value={localFermentableObject.quantity || ''}
                     onChange={(e) => handleChange('quantity', e.target.value)}
@@ -734,12 +834,34 @@ export function UpdateHopModal({
     }));
   };
 
-  const handleSaveButton = (e) => {
+  const inputRefs = {
+    name: React.useRef(null),
+    description: React.useRef(null),
+    alphaAcidContent: React.useRef(null),
+    betaAcidContent: React.useRef(null),
+    boilTime: React.useRef(null),
+    useType: React.useRef(null),
+    quantity: React.useRef(null),
+  };
+
+  const handleSaveButton = async (e) => {
     e.preventDefault();
-    if (localHopObject) {
+
+    try {
+      await updateHopSchema.validate(localHopObject, { abortEarly: false });
+
       handleUpdateHopRecipe(localHopObject);
+
+      closeModal();
+    } catch (err) {
+      if (err.inner && err.inner.length > 0) {
+        err.inner.forEach((validationError) => {
+          showErrorToast(validationError.message);
+        });
+      } else {
+        showErrorToast('Validation error.');
+      }
     }
-    closeModal();
   };
 
   useEffect(() => {
@@ -763,22 +885,25 @@ export function UpdateHopModal({
             <label htmlFor="name">
               Name
               <input
+                ref={inputRefs.name}
                 value={localHopObject.name || ''}
                 onChange={(e) => handleChange('name', e.target.value)}
               />
             </label>
-            <label htmlFor="name">
+            <label htmlFor="description">
               Description
               <textarea
+                ref={inputRefs.description}
                 value={localHopObject.description || ''}
                 onChange={(e) => handleChange('description', e.target.value)}
               />
             </label>
             <div className="inputs-row">
               <div className="input-field">
-                <label htmlFor="name">
+                <label htmlFor="alphaAcidContent">
                   Alpha Acid
                   <input
+                    ref={inputRefs.alphaAcidContent}
                     type="number"
                     value={localHopObject.alphaAcidContent || ''}
                     onChange={(e) => handleChange('alphaAcidContent', e.target.value)}
@@ -786,9 +911,10 @@ export function UpdateHopModal({
                 </label>
               </div>
               <div className="input-field">
-                <label htmlFor="name">
+                <label htmlFor="betaAcidContent">
                   Beta Acid
                   <input
+                    ref={inputRefs.betaAcidContent}
                     type="number"
                     value={localHopObject.betaAcidContent || ''}
                     onChange={(e) => handleChange('betaAcidContent', e.target.value)}
@@ -796,9 +922,10 @@ export function UpdateHopModal({
                 </label>
               </div>
               <div className="input-field">
-                <label htmlFor="name">
+                <label htmlFor="boilTime">
                   Boil Time
                   <input
+                    ref={inputRefs.boilTime}
                     type="number"
                     value={localHopObject.boilTime || ''}
                     onChange={(e) => handleChange('boilTime', e.target.value)}
@@ -809,9 +936,10 @@ export function UpdateHopModal({
             </div>
             <div className="inputs-row">
               <div className="input-field">
-                <label htmlFor="name">
+                <label htmlFor="useType">
                   Use Type
                   <select
+                    ref={inputRefs.useType}
                     value={localHopObject.useType}
                     onChange={(e) => setLocalHopObject((prev) => ({
                       ...prev,
@@ -827,9 +955,10 @@ export function UpdateHopModal({
                 </label>
               </div>
               <div className="input-field">
-                <label htmlFor="name">
+                <label htmlFor="quantity">
                   Quantity (Grams)
                   <input
+                    ref={inputRefs.quantity}
                     type="number"
                     value={localHopObject.quantity || ''}
                     onChange={(e) => handleChange('quantity', e.target.value)}
@@ -872,12 +1001,33 @@ export function UpdateMiscModal({
     }));
   };
 
-  const handleSaveButton = (e) => {
+  const inputRefs = {
+    name: React.useRef(null),
+    description: React.useRef(null),
+    time: React.useRef(null),
+    type: React.useRef(null),
+    use: React.useRef(null),
+    quantity: React.useRef(null),
+  };
+
+  const handleSaveButton = async (e) => {
     e.preventDefault();
-    if (localMiscObject) {
+
+    try {
+      await updateMiscSchema.validate(localMiscObject, { abortEarly: false });
+
       handleUpdateMiscRecipe(localMiscObject);
+
+      closeModal();
+    } catch (err) {
+      if (err.inner && err.inner.length > 0) {
+        err.inner.forEach((validationError) => {
+          showErrorToast(validationError.message);
+        });
+      } else {
+        showErrorToast('Validation error.');
+      }
     }
-    closeModal();
   };
 
   useEffect(() => {
@@ -901,13 +1051,15 @@ export function UpdateMiscModal({
             <label htmlFor="name">
               Name
               <input
+                ref={inputRefs.name}
                 value={localMiscObject.name || ''}
                 onChange={(e) => handleChange('name', e.target.value)}
               />
             </label>
-            <label htmlFor="name">
+            <label htmlFor="description">
               Description
               <textarea
+                ref={inputRefs.description}
                 value={localMiscObject.description || ''}
                 onChange={(e) => handleChange('description', e.target.value)}
               />
@@ -915,9 +1067,10 @@ export function UpdateMiscModal({
 
             <div className="inputs-row">
               <div className="input-field">
-                <label htmlFor="name">
+                <label htmlFor="time">
                   Time
                   <input
+                    ref={inputRefs.time}
                     type="number"
                     value={localMiscObject.time || ''}
                     onChange={(e) => handleChange('time', e.target.value)}
@@ -926,9 +1079,10 @@ export function UpdateMiscModal({
                 </label>
               </div>
               <div className="input-field">
-                <label htmlFor="name">
+                <label htmlFor="type">
                   Type
                   <select
+                    ref={inputRefs.type}
                     value={localMiscObject.type}
                     onChange={(e) => setLocalMiscObject((prev) => ({
                       ...prev,
@@ -945,9 +1099,10 @@ export function UpdateMiscModal({
                 </label>
               </div>
               <div className="input-field">
-                <label htmlFor="name">
+                <label htmlFor="use">
                   Use
                   <select
+                    ref={inputRefs.use}
                     value={localMiscObject.use}
                     onChange={(e) => setLocalMiscObject((prev) => ({
                       ...prev,
@@ -965,9 +1120,10 @@ export function UpdateMiscModal({
                 </label>
               </div>
               <div className="input-field">
-                <label htmlFor="name">
+                <label htmlFor="quantity">
                   Quantity (Grams)
                   <input
+                    ref={inputRefs.quantity}
                     type="number"
                     value={localMiscObject.quantity || ''}
                     onChange={(e) => handleChange('quantity', e.target.value)}
@@ -1009,12 +1165,47 @@ export function UpdateYeastModal({
     }));
   };
 
-  const handleSaveButton = (e) => {
+  const inputRefs = {
+    name: React.useRef(null),
+    manufacturer: React.useRef(null),
+    description: React.useRef(null),
+    type: React.useRef(null),
+    form: React.useRef(null),
+    flocculation: React.useRef(null),
+    attenuation: React.useRef(null),
+    alcoholTolerance: React.useRef(null),
+    quantity: React.useRef(null),
+  };
+
+  const handleSaveButton = async (e) => {
     e.preventDefault();
-    if (localYeastObject) {
-      handleUpdateYeastRecipe(localYeastObject);
+
+    const yeastFromRefs = {
+      name: inputRefs.name.current?.value || '',
+      manufacturer: inputRefs.manufacturer.current?.value || '',
+      description: inputRefs.description.current?.value || '',
+      type: inputRefs.type.current?.value || '',
+      form: inputRefs.form.current?.value || '',
+      flocculation: inputRefs.flocculation.current?.value || '',
+      attenuation: inputRefs.attenuation.current?.value || '',
+      quantity: parseFloat(inputRefs.quantity.current?.value) || 0,
+    };
+
+    try {
+      await updateYeastSchema.validate(yeastFromRefs, { abortEarly: false });
+
+      handleUpdateYeastRecipe(yeastFromRefs);
+
+      closeModal();
+    } catch (err) {
+      if (err.inner && err.inner.length > 0) {
+        err.inner.forEach((validationError) => {
+          showErrorToast(validationError.message);
+        });
+      } else {
+        showErrorToast('Validation error.');
+      }
     }
-    closeModal();
   };
 
   useEffect(() => {
@@ -1040,24 +1231,27 @@ export function UpdateYeastModal({
                 <label htmlFor="name">
                   Name
                   <input
+                    ref={inputRefs.name}
                     value={localYeastObject.name || ''}
                     onChange={(e) => handleChange('name', e.target.value)}
                   />
                 </label>
               </div>
               <div className="input-field">
-                <label htmlFor="name">
+                <label htmlFor="manufacturer">
                   Manufacturer
                   <input
+                    ref={inputRefs.manufacturer}
                     value={localYeastObject.manufacturer || ''}
-                    onChange={(e) => handleChange('description', e.target.value)}
+                    onChange={(e) => handleChange('manufacturer', e.target.value)}
                   />
                 </label>
               </div>
             </div>
-            <label htmlFor="name">
+            <label htmlFor="description">
               Description
               <textarea
+                ref={inputRefs.description}
                 value={localYeastObject.description || ''}
                 onChange={(e) => handleChange('description', e.target.value)}
               />
@@ -1065,9 +1259,10 @@ export function UpdateYeastModal({
 
             <div className="inputs-row">
               <div className="input-field">
-                <label htmlFor="name">
+                <label htmlFor="type">
                   Type
                   <select
+                    ref={inputRefs.type}
                     value={localYeastObject.type}
                     onChange={(e) => setLocalYeastObject((prev) => ({
                       ...prev,
@@ -1085,26 +1280,28 @@ export function UpdateYeastModal({
                 </label>
               </div>
               <div className="input-field">
-                <label htmlFor="name">
+                <label htmlFor="form">
                   Form
                   <select
+                    ref={inputRefs.form}
                     value={localYeastObject.form}
                     onChange={(e) => setLocalYeastObject((prev) => ({
                       ...prev,
                       form: e.target.value,
                     }))}
                   >
-                    <option value="Ale">Dry</option>
-                    <option value="Lager">Liquid</option>
-                    <option value="Hybrid">Culture</option>
-                    <option value="Champagne">Slurry</option>
+                    <option value="Dry">Dry</option>
+                    <option value="Liquid">Liquid</option>
+                    <option value="Culture">Culture</option>
+                    <option value="Slurry">Slurry</option>
                   </select>
                 </label>
               </div>
               <div className="input-field">
-                <label htmlFor="name">
+                <label htmlFor="flocculation">
                   Flocculation
                   <select
+                    ref={inputRefs.flocculation}
                     value={localYeastObject.flocculation}
                     onChange={(e) => setLocalYeastObject((prev) => ({
                       ...prev,
@@ -1120,48 +1317,32 @@ export function UpdateYeastModal({
             </div>
             <div className="inputs-row">
               <div className="input-field">
-                <label htmlFor="name">
-                  Temperature Range
-                  <input
-                    value={localYeastObject.temperatureRange || ''}
-                    onChange={(e) => handleChange('temperatureRange', e.target.value)}
-                  />
-                </label>
-              </div>
-              <div className="input-field">
-                <label htmlFor="name">
+                <label htmlFor="attenuation">
                   Attenuation
                   <input
+                    ref={inputRefs.attenuation}
                     value={localYeastObject.attenuation || ''}
                     onChange={(e) => handleChange('attenuation', e.target.value)}
                   />
                 </label>
               </div>
-              <div className="input-field">
-                <label htmlFor="name">
-                  Alcohol Tolerance
-                  <input
-                    value={localYeastObject.alcoholTolerance || ''}
-                    onChange={(e) => handleChange('alcoholTolerance', e.target.value)}
-                  />
-                </label>
-              </div>
-            </div>
-            <div className="inputs-row">
-              <div className="input-field">
-                <label htmlFor="name">
-                  Quantity (Grams)
-                  <input
-                    type="number"
-                    value={localYeastObject.quantity || ''}
-                    onChange={(e) => handleChange('quantity', e.target.value)}
-                  />
-                </label>
+              <div className="inputs-row">
+                <div className="input-field">
+                  <label htmlFor="quantity">
+                    Quantity (Grams)
+                    <input
+                      ref={inputRefs.quantity}
+                      type="number"
+                      value={localYeastObject.quantity || ''}
+                      onChange={(e) => handleChange('quantity', e.target.value)}
+                    />
+                  </label>
+                </div>
               </div>
             </div>
           </div>
 
-          <button className="crud-save-button" type="submit" style={{ marginTop: '70px' }}>
+          <button className="crud-save-button" type="submit" style={{ marginTop: '140px' }}>
             Save
           </button>
         </form>

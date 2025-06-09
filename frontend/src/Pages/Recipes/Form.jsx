@@ -1,7 +1,12 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { useForm } from 'react-hook-form';
+import { yupResolver } from '@hookform/resolvers/yup';
+
 import { FiTrash2, FiEdit, FiRepeat } from 'react-icons/fi';
 import Swal from 'sweetalert2';
+
+import schema from './schemas/formSchema';
 
 import { showSuccessToast, showErrorToast } from '../../utils/notifications';
 
@@ -87,32 +92,85 @@ export default function NewRecipe() {
 
   /* Components */
   const [selectedStyle, setSelectedStyle] = useState('');
-  const [EBCColor, setEBCColor] = useState('');
 
-  const [recipe, setRecipe] = useState({
-    name: '',
-    author: '',
-    type: '',
-    style: '',
-    volumeLiters: '',
-    batchTime: '',
-    description: '',
-    creationDate: '',
-    notes: '',
-    recipeFermentables: [],
-    recipeHops: [],
-    recipeMisc: [],
-    recipeYeasts: [],
-    recipeEquipment: {},
+  const {
+    register,
+    handleSubmit,
+    reset,
+    getValues,
+    setValue,
+    watch,
+  } = useForm({
+    resolver: yupResolver(schema),
+    defaultValues: {
+      name: '',
+      author: '',
+      type: '',
+      style: '',
+      volumeLiters: '',
+      batchTime: '',
+      description: '',
+      creationDate: '',
+      notes: '',
+      recipeFermentables: [],
+      recipeHops: [],
+      recipeMisc: [],
+      recipeYeasts: [],
+      recipeEquipment: {
+        id: '',
+        name: '',
+      },
+    },
   });
 
+  const onValid = async (data) => {
+    console.log('caiu:', data);
+    try {
+      const payload = {
+        ...data,
+      };
+
+      if (isEditing) {
+        await api.put(`/api/recipes/${id}`, payload, {
+          headers: {
+            Authorization: `Bearer ${user.token}`,
+          },
+        });
+      } else {
+        await api.post('/api/recipes', payload, {
+          headers: {
+            Authorization: `Bearer ${user.token}`,
+          },
+        });
+      }
+
+      showSuccessToast('Recipe saved successfully.');
+    } catch (err) {
+      showErrorToast('Error saving recipe. Please, try again.');
+    }
+  };
+
+  const onError = (errors) => {
+    console.log('erro:', errors);
+    const firstError = Object.values(errors)[0];
+    if (firstError?.message) {
+      showErrorToast(firstError.message);
+    }
+  };
+
   const fetchRecipe = async (recipeID) => {
-    const recipeResponse = await fetchRecipeById(recipeID, user.token);
-    setRecipe({ ...recipeResponse });
+    try {
+      const recipeResponse = await fetchRecipeById(recipeID, user.token);
+      reset(recipeResponse);
+    } catch (error) {
+      console.error('Erro ao buscar a receita:', error);
+      showErrorToast('Erro ao carregar a receita. Tente novamente.');
+    }
   };
 
   const fetchOpenAIResponse = async () => {
-    const openAIResponse = await getOpenAIResponse(recipe, user.token);
+    const values = getValues();
+    const openAIResponse = await getOpenAIResponse(values.recipe, user.token);
     setOpenAI(openAIResponse);
   };
 
@@ -171,21 +229,16 @@ export default function NewRecipe() {
       );
 
       if (selectedFermentableDetails) {
-        setRecipe((prevRecipe) => ({
-          ...prevRecipe,
-          recipeFermentables: [
-            ...(
-              Array.isArray(prevRecipe.recipeFermentables)
-                ? prevRecipe.recipeFermentables
-                : []
-            ), // Ensure it is an array
-            {
-              ...selectedFermentableDetails,
-              id: generateId(),
-              quantity: parseFloat(quantity),
-            },
-          ],
-        }));
+        const currentFermentables = getValues('recipeFermentables') || [];
+
+        const newFermentable = {
+          ...selectedFermentableDetails,
+          id: generateId(),
+          quantity: parseFloat(quantity),
+        };
+
+        setValue('recipeFermentables', [...currentFermentables, newFermentable]);
+
         closeFermentableModal();
       } else {
         showErrorToast('Selected fermentable not found.');
@@ -200,22 +253,17 @@ export default function NewRecipe() {
       const selectedHopDetails = hopList.find((hop) => hop.id === hopId);
 
       if (selectedHopDetails) {
-        setRecipe((prevRecipe) => ({
-          ...prevRecipe,
-          recipeHops: [
-            ...(
-              Array.isArray(prevRecipe.recipeHops)
-                ? prevRecipe.recipeHops
-                : []
-            ),
-            {
-              ...selectedHopDetails,
-              id: generateId(),
-              quantity: parseFloat(quantity),
-              boilTime,
-            },
-          ],
-        }));
+        const currentHops = getValues('recipeHops') || [];
+
+        setValue('recipeHops', [
+          ...currentHops,
+          {
+            ...selectedHopDetails,
+            id: generateId(),
+            quantity: parseFloat(quantity),
+            boilTime,
+          },
+        ]);
 
         closeHopModal();
       } else {
@@ -231,17 +279,16 @@ export default function NewRecipe() {
       const selectedMiscDetails = miscList.find((misc) => misc.id === miscId);
 
       if (selectedMiscDetails) {
-        setRecipe((prevRecipe) => ({
-          ...prevRecipe,
-          recipeMisc: [
-            ...(Array.isArray(prevRecipe.recipeMisc) ? prevRecipe.recipeMisc : []),
-            {
-              ...selectedMiscDetails,
-              id: generateId(),
-              quantity: parseFloat(quantity),
-            },
-          ],
-        }));
+        const currentMisc = getValues('recipeMisc') || [];
+
+        setValue('recipeMisc', [
+          ...currentMisc,
+          {
+            ...selectedMiscDetails,
+            id: generateId(),
+            quantity: parseFloat(quantity),
+          },
+        ]);
 
         closeMiscModal();
       } else {
@@ -257,17 +304,16 @@ export default function NewRecipe() {
       const selectedYeastDetails = yeastList.find((yeast) => yeast.id === yeastId);
 
       if (selectedYeastDetails) {
-        setRecipe((prevRecipe) => ({
-          ...prevRecipe,
-          recipeYeasts: [
-            ...(Array.isArray(prevRecipe.recipeYeasts) ? prevRecipe.recipeYeasts : []),
-            {
-              ...selectedYeastDetails,
-              id: generateId(),
-              quantity: parseFloat(quantity),
-            },
-          ],
-        }));
+        const currentYeasts = getValues('recipeYeasts') || [];
+
+        setValue('recipeYeasts', [
+          ...currentYeasts,
+          {
+            ...selectedYeastDetails,
+            id: generateId(),
+            quantity: parseFloat(quantity),
+          },
+        ]);
 
         closeYeastModal();
       } else {
@@ -280,7 +326,9 @@ export default function NewRecipe() {
 
   const handleChangeEquipmentRecipe = async (selectedItem) => {
     if (selectedItem) {
-      if (recipe.recipeEquipment?.name !== undefined) {
+      const currentEquipmentName = getValues('recipeEquipment.name');
+
+      if (currentEquipmentName !== undefined) {
         const result = await Swal.fire({
           title: 'Tem certeza?',
           text: 'Deseja mesmo trocar o equipamento? A troca irá atualizar a receita.',
@@ -293,21 +341,11 @@ export default function NewRecipe() {
         });
 
         if (result.isConfirmed) {
-          setRecipe((prevRecipe) => ({
-            ...prevRecipe,
-            recipeEquipment: {
-              ...selectedItem,
-            },
-          }));
+          setValue('recipeEquipment', { ...selectedItem });
           closeChangeEquipmentModal();
         }
       } else {
-        setRecipe((prevRecipe) => ({
-          ...prevRecipe,
-          recipeEquipment: {
-            ...selectedItem,
-          },
-        }));
+        setValue('recipeEquipment', { ...selectedItem });
         closeChangeEquipmentModal();
       }
     } else {
@@ -316,173 +354,84 @@ export default function NewRecipe() {
   };
 
   const handleUpdateFermentableRecipe = (updatedFermentable) => {
-    setRecipe((prevRecipe) => ({
-      ...prevRecipe,
-      recipeFermentables: prevRecipe.recipeFermentables.map(
-        (fermentable) => (
-          fermentable.id === updatedFermentable.id
-            ? updatedFermentable
-            : fermentable
-        ),
-      ),
-    }));
+    const currentFermentables = getValues('recipeFermentables') || [];
+    const updatedFermentables = currentFermentables.map((fermentable) => {
+      if (fermentable.id === updatedFermentable.id) {
+        return updatedFermentable;
+      }
+      return fermentable;
+    });
+    setValue('recipeFermentables', updatedFermentables);
   };
 
   const handleUpdateHopRecipe = (updatedHop) => {
-    setRecipe((prevRecipe) => ({
-      ...prevRecipe,
-      recipeHops: prevRecipe.recipeHops.map((hop) => (hop.id === updatedHop.id ? updatedHop : hop)),
-    }));
+    const currentHops = getValues('recipeHops') || [];
+    const updatedHops = currentHops.map((hop) => {
+      if (hop.id === updatedHop.id) {
+        return updatedHop;
+      }
+      return hop;
+    });
+    setValue('recipeHops', updatedHops);
   };
 
   const handleUpdateMiscRecipe = (updatedMisc) => {
-    setRecipe((prevRecipe) => ({
-      ...prevRecipe,
-      recipeMisc: prevRecipe.recipeMisc.map(
-        (misc) => (
-          misc.id === updatedMisc.id
-            ? updatedMisc
-            : misc
-        ),
-      ),
-    }));
+    const currentMiscs = getValues('recipeMisc') || [];
+    const updatedMiscs = currentMiscs.map((misc) => {
+      if (misc.id === updatedMisc.id) {
+        return updatedMisc;
+      }
+      return misc;
+    });
+    setValue('recipeMisc', updatedMiscs);
   };
 
   const handleUpdateYeastRecipe = (updatedYeast) => {
-    setRecipe((prevRecipe) => ({
-      ...prevRecipe,
-      recipeYeasts: prevRecipe.recipeYeasts.map(
-        (yeast) => (
-          yeast.id === updatedYeast.id
-            ? updatedYeast
-            : yeast
-        ),
-      ),
-    }));
+    const currentYeasts = getValues('recipeYeasts') || [];
+    const updatedYeasts = currentYeasts.map((yeast) => {
+      if (yeast.id === updatedYeast.id) {
+        return updatedYeast;
+      }
+      return yeast;
+    });
+    setValue('recipeYeasts', updatedYeasts);
   };
 
   const handleDeleteFermentable = (fermentableId) => {
-    setRecipe((prevRecipe) => {
-      if (!prevRecipe || !prevRecipe.recipeFermentables) {
-        return prevRecipe || {};
-      }
-
-      // Updates the state with the filtered fermentables
-      const updatedRecipe = {
-        ...prevRecipe,
-        recipeFermentables: prevRecipe.recipeFermentables.filter(
-          (fermentable) => fermentable.id !== fermentableId,
-        ),
-      };
-      return updatedRecipe;
-    });
+    const currentFermentables = getValues('recipeFermentables') || [];
+    const updatedFermentables = currentFermentables.filter(
+      (fermentable) => fermentable.id !== fermentableId,
+    );
+    setValue('recipeFermentables', updatedFermentables);
   };
 
   const handleDeleteHop = (hopID) => {
-    const updatedHops = recipe.recipeHops.filter(
-      (hop) => hop.id !== hopID,
-    );
-
-    setRecipe((prevRecipe) => ({
-      ...prevRecipe,
-      recipeHops: updatedHops,
-    }));
+    const currentHops = getValues('recipeHops') || [];
+    const updatedHops = currentHops.filter((hop) => hop.id !== hopID);
+    setValue('recipeHops', updatedHops);
   };
 
   const handleDeleteMisc = (miscID) => {
-    const updatedMisc = recipe.recipeMisc.filter(
-      (misc) => misc.id !== miscID,
-    );
-
-    setRecipe((prevRecipe) => ({
-      ...prevRecipe,
-      recipeMisc: updatedMisc,
-    }));
+    const currentMisc = getValues('recipeMisc') || [];
+    const updatedMisc = currentMisc.filter((misc) => misc.id !== miscID);
+    setValue('recipeMisc', updatedMisc);
   };
 
   const handleDeleteYeast = (yeastID) => {
-    const updatedYeasts = recipe.recipeYeasts.filter(
-      (yeast) => yeast.id !== yeastID,
-    );
-
-    setRecipe((prevRecipe) => ({
-      ...prevRecipe,
-      recipeYeasts: updatedYeasts,
-    }));
-  };
-
-  const handleRecipeChange = (e) => {
-    const { name, value } = e.target;
-    setRecipe((prevState) => ({
-      ...prevState,
-      [name]: value,
-    }));
+    const currentYeasts = getValues('recipeYeasts') || [];
+    const updatedYeasts = currentYeasts.filter((yeast) => yeast.id !== yeastID);
+    setValue('recipeYeasts', updatedYeasts);
   };
 
   const handleEquipmentChange = (e) => {
     const { name, value } = e.target;
-    setRecipe((prevState) => ({
-      ...prevState,
-      recipeEquipment: {
-        ...prevState.recipeEquipment,
-        [name]: Number(value),
-      },
-    }));
-  };
-
-  async function handleSubmit(e) {
-    e.preventDefault();
-
-    if (!recipe.name) {
-      showErrorToast('Recipe name is required.');
-    }
-
-    if (!recipe.style) {
-      showErrorToast('Beer Style is required.');
-    }
-
-    if (!recipe.recipeEquipment) {
-      showErrorToast('Equipment is required.');
-    }
-
-    if (!recipe.recipeEquipment.boilTime) {
-      showErrorToast('Boil Time is required.');
-    }
-
-    const data = {
-      name: recipe.name,
-      style: recipe.style,
-      author: recipe.author,
-      type: recipe.type,
-      description: recipe.description,
-      creationDate: recipe.creationDate,
-      notes: recipe.notes,
-      recipeFermentables: recipe.recipeFermentables,
-      recipeHops: recipe.recipeHops,
-      recipeMisc: recipe.recipeMisc,
-      recipeYeasts: recipe.recipeYeasts,
-      recipeEquipment: recipe.recipeEquipment,
+    const currentEquipment = getValues('recipeEquipment') || {};
+    const updatedEquipment = {
+      ...currentEquipment,
+      [name]: Number(value),
     };
-
-    try {
-      if (isEditing) {
-        await api.put(`/api/recipes/${id}`, data, {
-          headers: {
-            Authorization: `Bearer ${user.token}`,
-          },
-        });
-      } else {
-        await api.post('/api/recipes', data, {
-          headers: {
-            Authorization: `Bearer ${user.token}`,
-          },
-        });
-      }
-      showSuccessToast('Recipe saved successfully.');
-    } catch (err) {
-      showErrorToast('Error saving recipe. Please, try again.');
-    }
-  }
+    setValue('recipeEquipment', updatedEquipment);
+  };
 
   useEffect(() => {
     if (!user) {
@@ -494,98 +443,130 @@ export default function NewRecipe() {
     }
   }, [id, user]);
 
+  const recipeEquipment = watch('recipeEquipment');
+  const recipeFermentables = watch('recipeFermentables');
+  const recipeHops = watch('recipeHops');
+  const recipeMisc = watch('recipeMisc');
+  const recipeYeasts = watch('recipeYeasts');
+
+  const watchedStyle = watch('style');
+  const watchedBatchVolume = watch('recipeEquipment.batchVolume');
+  const watchedBoilTime = watch('recipeEquipment.boilTime');
+  const watchedEfficiency = watch('recipeEquipment.efficiency');
+
   useEffect(() => {
-    if (EBC) {
-      const color = getBeerColor(EBC);
-      setEBCColor(color);
+    const recipeData = getValues();
+
+    if (recipeData.style) {
+      const style = beerStyles.find((s) => s.name === recipeData.style);
+
+      if (style) {
+        setSelectedStyle(style);
+      }
+    } else {
+      setSelectedStyle({
+        initialOG: 1,
+        finalOG: 1,
+        initialFG: 1,
+        finalFG: 1,
+        initialABV: 0,
+        finalABV: 0,
+        initialEBC: 0,
+        finalEBC: 0,
+        initialIBU: 0,
+        finalIBU: 0,
+        initialBuGu: 0,
+        finalBuGu: 0,
+      });
     }
-  }, [EBC]);
+  }, [watchedStyle]);
 
   useEffect(() => {
-    if (recipe) {
-      // getIngredientsPorcentage
-      getIngredientsPorcentage(recipe, setRecipe);
+    const recipeData = getValues();
 
-      // getPreBoilVolume
-      const preBoilCalc = getPreBoilVolume(recipe);
+    // calculateOG
+    const OGResult = calculateOG(recipeData);
+    setOG(OGResult);
 
-      if (preBoilCalc > 0) {
-        setpreBoilVolume(preBoilCalc);
-      }
+    // calculateFG
+    const FGResult = calculateFG(recipeData, OGResult);
+    setFG(FGResult);
 
-      // calculateOG
-      const OGResult = calculateOG(recipe);
-      setOG(OGResult);
+    if (!recipeData.recipeFermentables?.length) {
+      setABV(0);
+    }
 
-      // calculateFG
-      const FGResult = calculateFG(recipe, OGResult);
+    // calculateIBU
+    const IBUresult = calculateIBU(recipeData, OGResult);
+    if (IBUresult && IBUresult.totalIBU) {
+      const { totalIBU, hasChanges, updatedHops } = IBUresult;
 
-      setFG(FGResult);
+      setIBU(parseFloat(totalIBU));
 
-      if (recipe.recipeFermentables.length === 0) {
-        setABV(0);
-      }
+      if (hasChanges) {
+        const currentHops = getValues('recipeHops');
 
-      // calculateEBC
-      const EBCResult = calculateEBC(recipe);
-
-      setEBC(EBCResult);
-
-      // calculateIBU
-      const IBUresult = calculateIBU(recipe, OGResult);
-
-      if (IBUresult && IBUresult.totalIBU) {
-        setIBU(parseFloat(IBUresult.totalIBU));
-
-        if (IBUresult.hasChanges) {
-          setRecipe((prev) => ({
-            ...prev,
-            recipeHops: IBUresult.updatedHops,
-          }));
+        if (JSON.stringify(currentHops) !== JSON.stringify(updatedHops)) {
+          setValue('recipeHops', updatedHops);
         }
-      } else {
-        setIBU(0);
       }
+    } else {
+      setIBU(0);
+    }
 
-      // calculateGU
-      const GU = (OGResult - 1) * 1000;
+    // calculateGU and BU:GU
+    const GU = (OGResult - 1) * 1000;
+    if (IBU) {
+      setBUGU((IBU / GU).toFixed(2));
+    }
 
-      if (IBU) {
-        setBUGU((IBU / GU).toFixed(2));
-      }
+    if (recipeData?.recipeFermentables?.length) {
+      const newPercentages = getIngredientsPorcentage(recipeData.recipeFermentables);
 
-      if (recipe.style) {
-        const loadStyle = beerStyles.find((style) => style.name === recipe.style);
+      const currentPercentages = getValues('recipeFermentables');
 
-        if (loadStyle) {
-          setSelectedStyle(loadStyle);
-        }
-      } else {
-        setSelectedStyle((prev) => ({
-          ...prev,
-          initialOG: 1,
-          finalOG: 1,
-          initialFG: 1,
-          finalFG: 1,
-          initialABV: 0,
-          finalABV: 0,
-          initialEBC: 0,
-          finalEBC: 0,
-          initialIBU: 0,
-          finalIBU: 0,
-          initialBuGu: 0,
-          finalBuGu: 0,
-        }));
+      if (JSON.stringify(currentPercentages) !== JSON.stringify(newPercentages)) {
+        setValue('recipeFermentables', newPercentages);
       }
     }
-  }, [recipe]);
+  }, [watchedBatchVolume, watchedEfficiency, recipeFermentables, IBU]);
 
   useEffect(() => {
-    if (EBC) {
-      const color = getBeerColor(EBC);
-      setEBCColor(color);
+    const recipeData = getValues();
+
+    // getPreBoilVolume
+    const preBoilCalc = getPreBoilVolume(recipeData);
+    if (preBoilCalc > 0) {
+      setpreBoilVolume(preBoilCalc);
     }
-  }, [EBC]);
+  }, [watchedBatchVolume, watchedBoilTime, recipeEquipment]);
+
+  useEffect(() => {
+    const recipeData = getValues();
+
+    // calculateEBC
+    const EBCResult = calculateEBC(recipeData);
+    setEBC(EBCResult);
+
+    if (EBCResult) {
+      const color = getBeerColor(EBC);
+
+      const svgObject = document.querySelector('.beer-object');
+
+      if (svgObject && svgObject.contentDocument) {
+        const svgDoc = svgObject.contentDocument;
+        const gradients = svgDoc.querySelectorAll('linearGradient, radialGradient');
+
+        gradients.forEach((gradient) => {
+          const stops = gradient.querySelectorAll('stop');
+
+          stops.forEach((stop) => {
+            stop.setAttribute('stop-color', color);
+          });
+        });
+      }
+    }
+  }, [watchedBatchVolume, recipeFermentables]);
 
   useEffect(() => {
     if (OG && FG) {
@@ -594,66 +575,38 @@ export default function NewRecipe() {
     }
   }, [OG, FG]);
 
-  useEffect(() => {
-    const svgObject = document.querySelector('.beer-object');
-
-    if (svgObject && svgObject.contentDocument) {
-      const svgDoc = svgObject.contentDocument;
-      const gradients = svgDoc.querySelectorAll('linearGradient, radialGradient');
-
-      gradients.forEach((gradient) => {
-        const stops = gradient.querySelectorAll('stop');
-
-        stops.forEach((stop) => {
-          stop.setAttribute('stop-color', EBCColor);
-        });
-      });
-    }
-  }, [EBCColor]);
-
-  useEffect(() => {
-    setRecipe((prevRecipe) => {
-      if (prevRecipe.style !== selectedStyle.name) {
-        return { ...prevRecipe, style: selectedStyle.name };
-      }
-      return prevRecipe;
-    });
-  }, [selectedStyle]);
-
   return (
     <div>
       <Sidebar />
       <div className="recipe-container">
         <div className="content">
           <div className="top">
-            <form onSubmit={handleSubmit}>
+            <form id="formSubmit" onSubmit={handleSubmit(onValid, onError)}>
               <div className="inputs-row">
                 <div className="input-field">
                   <label htmlFor="name">
                     Recipe Name
                     <input
                       name="name"
-                      value={recipe.name}
-                      onChange={handleRecipeChange}
+                      {...register('name')}
                       disabled={isView}
                       style={{ width: '380px' }}
                     />
                   </label>
                 </div>
                 <div className="input-field">
-                  <label htmlFor="name">
+                  <label htmlFor="author">
                     Author
                     <input
                       name="author"
-                      value={recipe.author}
-                      onChange={handleRecipeChange}
+                      {...register('author')}
                       disabled={isView}
                       style={{ width: '220px' }}
                     />
                   </label>
                 </div>
                 <div className="input-field">
-                  <label htmlFor="name">
+                  <label htmlFor="style">
                     Style
                     <select
                       id="beer-style"
@@ -679,17 +632,11 @@ export default function NewRecipe() {
                   </label>
                 </div>
                 <div className="input-field">
-                  <label htmlFor="name">
+                  <label htmlFor="type">
                     Type
                     <select
-                      id="beer-type"
-                      value={recipe.type || ''}
-                      onChange={(e) => {
-                        setRecipe({
-                          ...recipe,
-                          type: e.target.value,
-                        });
-                      }}
+                      id="type"
+                      {...register('type')}
                       style={{ width: '100px' }}
                     >
                       <option value="All Grain">All Grain</option>
@@ -699,12 +646,11 @@ export default function NewRecipe() {
                   </label>
                 </div>
                 <div className="input-field">
-                  <label htmlFor="name">
+                  <label htmlFor="creationDate">
                     Creation Date
                     <input
-                      name="creation date"
-                      value={recipe.creationDate}
-                      onChange={handleRecipeChange}
+                      name="creationDate"
+                      {...register('creationDate')}
                       disabled={isView}
                       style={{ width: '100px' }}
                     />
@@ -713,13 +659,12 @@ export default function NewRecipe() {
               </div>
               <div className="inputs-row">
                 <div className="input-field">
-                  <label htmlFor="name">
+                  <label htmlFor="description">
                     Description
                     <textarea
                       className="description-textarea"
                       name="description"
-                      value={recipe.description}
-                      onChange={handleRecipeChange}
+                      {...register('description')}
                       disabled={isView}
                     />
                   </label>
@@ -733,38 +678,35 @@ export default function NewRecipe() {
                 </div>
 
                 <div className="input-field">
-                  <label htmlFor="name">
+                  <label htmlFor="recipeEquipment.name">
                     Equipment
                     <input
                       name="equipment"
-                      value={recipe.recipeEquipment.name}
-                      onChange={handleRecipeChange}
+                      {...register('recipeEquipment.name')}
                       disabled={isView}
                       style={{ width: '240px' }}
                     />
                   </label>
                 </div>
                 <div className="input-field">
-                  <label htmlFor="name">
+                  <label htmlFor="batchVolume">
                     Batch Volume
                     <input
                       name="batchVolume"
                       type="number"
-                      value={recipe.recipeEquipment.batchVolume}
-                      onChange={handleEquipmentChange}
+                      {...register('recipeEquipment.batchVolume')}
                       disabled={isView}
                       style={{ width: '90px' }}
                     />
                   </label>
                 </div>
                 <div className="input-field">
-                  <label htmlFor="name">
+                  <label htmlFor="batchTime">
                     Batch Time
                     <input
                       name="batchTime"
                       type="number"
-                      value={recipe.recipeEquipment.batchTime}
-                      onChange={handleEquipmentChange}
+                      {...register('recipeEquipment.batchTime')}
                       disabled={isView}
                       style={{ width: '90px' }}
                     />
@@ -772,33 +714,31 @@ export default function NewRecipe() {
                 </div>
 
                 <div className="input-field">
-                  <label htmlFor="name">
+                  <label htmlFor="efficiency">
                     Brew. Efficiency
                     <input
                       name="efficiency"
                       type="number"
-                      value={recipe.recipeEquipment.efficiency}
-                      onChange={handleEquipmentChange}
+                      {...register('recipeEquipment.efficiency')}
                       disabled={isView}
                       style={{ width: '90px' }}
                     />
                   </label>
                 </div>
                 <div className="input-field">
-                  <label htmlFor="name">
+                  <label htmlFor="efficiency">
                     Mash Efficiency
                     <input
                       name="efficiency"
                       type="number"
-                      value={recipe.recipeEquipment.efficiency}
-                      onChange={handleEquipmentChange}
+                      {...register('recipeEquipment.efficiency')}
                       disabled={isView}
                       style={{ width: '90px' }}
                     />
                   </label>
                 </div>
                 <div className="input-field">
-                  <label htmlFor="name">
+                  <label htmlFor="preBoilVolume">
                     Pre Boil Volume
                     <input
                       name="preBoilVolume"
@@ -811,13 +751,12 @@ export default function NewRecipe() {
                   </label>
                 </div>
                 <div className="input-field">
-                  <label htmlFor="name">
+                  <label htmlFor="boilTime">
                     Boil Time
                     <input
                       name="boilTime"
                       type="number"
-                      value={recipe.recipeEquipment.boilTime}
-                      onChange={handleEquipmentChange}
+                      {...register('recipeEquipment.boilTime')}
                       disabled={isView}
                       style={{ width: '90px' }}
                     />
@@ -860,7 +799,7 @@ export default function NewRecipe() {
             <div className="bottom-left">
               <table>
                 <tbody>
-                  {recipe.recipeFermentables?.map((fermentable) => (
+                  {(recipeFermentables || []).map((fermentable) => (
                     <tr key={fermentable.id}>
                       <td>
                         <object
@@ -890,7 +829,7 @@ export default function NewRecipe() {
                     </tr>
                   ))}
 
-                  {recipe.recipeHops?.map((hop) => (
+                  {(recipeHops || []).map((hop) => (
                     <tr key={hop.id}>
                       <td>
                         <object
@@ -921,7 +860,7 @@ export default function NewRecipe() {
                     </tr>
                   ))}
 
-                  {recipe.recipeMisc?.map((misc) => (
+                  {(recipeMisc || []).map((misc) => (
                     <tr key={misc.id}>
                       <td>
                         <object
@@ -948,7 +887,7 @@ export default function NewRecipe() {
                     </tr>
                   ))}
 
-                  {recipe.recipeYeasts?.map((yeast) => (
+                  {(recipeYeasts || []).map((yeast) => (
                     <tr key={yeast.id}>
                       <td>
                         <object
@@ -1089,7 +1028,7 @@ export default function NewRecipe() {
 
           </div>
           {!isView && (
-            <button onClick={handleSubmit} className="crud-save-button" type="submit">
+            <button form="formSubmit" className="crud-save-button" type="submit">
               Save
             </button>
           )}
