@@ -49,25 +49,19 @@ export default function NewRecipe() {
   const [isView, setIsView] = useState(false);
 
   /* Modals */
-  const [isFermentableModalOpen, setIsFermentableModalOpen] = useState(false);
-  const [isHopModalOpen, setIsHopModalOpen] = useState(false);
-  const [isMiscModalOpen, setIsMiscModalOpen] = useState(false);
-  const [isYeastModalOpen, setIsYeastModalOpen] = useState(false);
-  const [isChangeEquipmentModalOpen, setIsChangeEquipmentModalOpen] = useState(false);
-  const [isUpdateFermentableModalOpen, setIsUpdateFermentableModalOpen] = useState(false);
-  const [isUpdateHopModalOpen, setIsUpdateHopModalOpen] = useState(false);
-  const [isUpdateMiscModalOpen, setIsUpdateMiscModalOpen] = useState(false);
-  const [isUpdateYeastModalOpen, setIsUpdateYeastModalOpen] = useState(false);
+  const [activeModal, setActiveModal] = useState(null);
 
-  const closeFermentableModal = () => setIsFermentableModalOpen(false);
-  const closeHopModal = () => setIsHopModalOpen(false);
-  const closeMiscModal = () => setIsMiscModalOpen(false);
-  const closeYeastModal = () => setIsYeastModalOpen(false);
-  const closeChangeEquipmentModal = () => setIsChangeEquipmentModalOpen(false);
-  const closeUpdateFermentableModal = () => setIsUpdateFermentableModalOpen(false);
-  const closeUpdateHopModal = () => setIsUpdateHopModalOpen(false);
-  const closeUpdateMiscModal = () => setIsUpdateMiscModalOpen(false);
-  const closeUpdateYeastModal = () => setIsUpdateYeastModalOpen(false);
+  const MODALS = {
+    FERMENTABLE: 'fermentable',
+    HOP: 'hop',
+    MISC: 'misc',
+    YEAST: 'yeast',
+    CHANGE_EQUIPMENT: 'change_equipment',
+    UPDATE_FERMENTABLE: 'update_fermentable',
+    UPDATE_HOP: 'update_hop',
+    UPDATE_MISC: 'update_misc',
+    UPDATE_YEAST: 'update_yeast',
+  };
 
   const [selectedFermentable, setSelectedFermentable] = useState(null);
   const [selectedHop, setSelectedHop] = useState(null);
@@ -158,6 +152,27 @@ export default function NewRecipe() {
     }
   };
 
+  const openModal = async (type) => {
+    setActiveModal(type);
+
+    const loaders = {
+      [MODALS.FERMENTABLE]: async () => setFermentableList(await fetchFermentables(user.token)),
+      [MODALS.HOP]: async () => setHopList(await fetchHops(user.token)),
+      [MODALS.MISC]: async () => setMiscList(await fetchMisc(user.token)),
+      [MODALS.YEAST]: async () => setYeastList(await fetchYeasts(user.token)),
+    };
+
+    if (loaders[type]) {
+      try {
+        await loaders[type]();
+      } catch (err) {
+        showErrorToast('Erro ao carregar dados do modal.');
+      }
+    }
+  };
+
+  const closeModal = () => setActiveModal(null);
+
   const fetchRecipe = async (recipeID) => {
     try {
       const recipeResponse = await fetchRecipeById(recipeID, user.token);
@@ -172,54 +187,6 @@ export default function NewRecipe() {
     const values = getValues();
     const openAIResponse = await getOpenAIResponse(values.recipe, user.token);
     setOpenAI(openAIResponse);
-  };
-
-  const openFermentableModal = async () => {
-    const fermentables = await fetchFermentables(user.token);
-    setFermentableList(fermentables);
-    setIsFermentableModalOpen(true);
-  };
-
-  const openHopModal = async () => {
-    const hops = await fetchHops(user.token);
-    setHopList(hops);
-    setIsHopModalOpen(true);
-  };
-
-  const openMiscModal = async () => {
-    const misc = await fetchMisc(user.token);
-    setMiscList(misc);
-    setIsMiscModalOpen(true);
-  };
-
-  const openYeastModal = async () => {
-    const yeasts = await fetchYeasts(user.token);
-    setYeastList(yeasts);
-    setIsYeastModalOpen(true);
-  };
-
-  const openChangeEquipmentModal = async () => {
-    setIsChangeEquipmentModalOpen(true);
-  };
-
-  const handleUpdateFermentable = (fermentable) => {
-    setSelectedFermentable(fermentable);
-    setIsUpdateFermentableModalOpen(true);
-  };
-
-  const handleUpdateHop = (hop) => {
-    setSelectedHop(hop);
-    setIsUpdateHopModalOpen(true);
-  };
-
-  const handleUpdateMisc = (misc) => {
-    setSelectedMisc(misc);
-    setIsUpdateMiscModalOpen(true);
-  };
-
-  const handleUpdateYeast = (yeast) => {
-    setSelectedYeast(yeast);
-    setIsUpdateYeastModalOpen(true);
   };
 
   const handleAddFermentableRecipe = (selectedModalFermentable, quantity) => {
@@ -239,7 +206,7 @@ export default function NewRecipe() {
 
         setValue('recipeFermentables', [...currentFermentables, newFermentable]);
 
-        closeFermentableModal();
+        closeModal(MODALS.ADD_FERMENTABLE);
       } else {
         showErrorToast('Selected fermentable not found.');
       }
@@ -265,7 +232,7 @@ export default function NewRecipe() {
           },
         ]);
 
-        closeHopModal();
+        closeModal(MODALS.ADD_HOP);
       } else {
         showErrorToast('Selected hop not found.');
       }
@@ -290,7 +257,7 @@ export default function NewRecipe() {
           },
         ]);
 
-        closeMiscModal();
+        closeModal(MODALS.ADD_MISC);
       } else {
         showErrorToast('Selected misc not found.');
       }
@@ -315,7 +282,7 @@ export default function NewRecipe() {
           },
         ]);
 
-        closeYeastModal();
+        closeModal(MODALS.ADD_YEAST);
       } else {
         showErrorToast('Selected yeast not found.');
       }
@@ -342,11 +309,11 @@ export default function NewRecipe() {
 
         if (result.isConfirmed) {
           setValue('recipeEquipment', { ...selectedItem });
-          closeChangeEquipmentModal();
+          closeModal(MODALS.CHANGE_EQUIPMENT);
         }
       } else {
         setValue('recipeEquipment', { ...selectedItem });
-        closeChangeEquipmentModal();
+        closeModal(MODALS.CHANGE_EQUIPMENT);
       }
     } else {
       showErrorToast('Please select an equipment.');
@@ -672,11 +639,10 @@ export default function NewRecipe() {
               </div>
               <div className="inputs-row">
                 <div className="input-field no-flex">
-                  <button type="button" onClick={openChangeEquipmentModal} className="transparent-button">
+                  <button type="button" className="transparent-button" onClick={() => openModal(MODALS.CHANGE_EQUIPMENT)}>
                     <FiRepeat size={20} />
                   </button>
                 </div>
-
                 <div className="input-field">
                   <label htmlFor="recipeEquipment.name">
                     Equipment
@@ -712,7 +678,6 @@ export default function NewRecipe() {
                     />
                   </label>
                 </div>
-
                 <div className="input-field">
                   <label htmlFor="efficiency">
                     Brew. Efficiency
@@ -768,28 +733,28 @@ export default function NewRecipe() {
           <div className="buttons-container">
             <button
               type="button"
-              onClick={openFermentableModal}
+              onClick={() => openModal(MODALS.FERMENTABLE)}
               className="modalAddButtonFermentable"
             >
               Add Fermentable
             </button>
             <button
               type="button"
-              onClick={openHopModal}
+              onClick={() => openModal(MODALS.HOP)}
               className="modalAddButtonHop"
             >
               Add Hop
             </button>
             <button
               type="button"
-              onClick={openMiscModal}
+              onClick={() => openModal(MODALS.MISC)}
               className="modalAddButtonMisc"
             >
               Add Misc
             </button>
             <button
               type="button"
-              onClick={openYeastModal}
+              onClick={() => openModal(MODALS.YEAST)}
               className="modalAddButtonYeast"
             >
               Add Yeast
@@ -819,7 +784,14 @@ export default function NewRecipe() {
                         %
                       </td>
                       <td className="ingredients-list-button-group">
-                        <button onClick={() => handleUpdateFermentable(fermentable)} type="button" className="icon-button">
+                        <button
+                          type="button"
+                          className="icon-button"
+                          onClick={() => {
+                            setSelectedFermentable(fermentable);
+                            openModal(MODALS.UPDATE_FERMENTABLE);
+                          }}
+                        >
                           <FiEdit size={20} />
                         </button>
                         <button onClick={() => handleDeleteFermentable(fermentable.id)} type="button" className="icon-button">
@@ -850,7 +822,14 @@ export default function NewRecipe() {
                         IBUs
                       </td>
                       <td className="ingredients-list-button-group">
-                        <button onClick={() => handleUpdateHop(hop)} type="button" className="icon-button">
+                        <button
+                          type="button"
+                          className="icon-button"
+                          onClick={() => {
+                            setSelectedHop(hop);
+                            openModal(MODALS.UPDATE_HOP);
+                          }}
+                        >
                           <FiEdit size={20} />
                         </button>
                         <button onClick={() => handleDeleteHop(hop.id)} type="button" className="icon-button">
@@ -877,7 +856,14 @@ export default function NewRecipe() {
                       <td>{misc.type}</td>
                       <td />
                       <td className="ingredients-list-button-group">
-                        <button onClick={() => handleUpdateMisc(misc)} type="button" className="icon-button">
+                        <button
+                          type="button"
+                          className="icon-button"
+                          onClick={() => {
+                            setSelectedMisc(misc);
+                            openModal(MODALS.UPDATE_MISC);
+                          }}
+                        >
                           <FiEdit size={20} />
                         </button>
                         <button onClick={() => handleDeleteMisc(misc.id)} type="button" className="icon-button">
@@ -904,7 +890,14 @@ export default function NewRecipe() {
                       <td>{yeast.type}</td>
                       <td />
                       <td className="ingredients-list-button-group">
-                        <button onClick={() => handleUpdateYeast(yeast)} type="button" className="icon-button">
+                        <button
+                          type="button"
+                          className="icon-button"
+                          onClick={() => {
+                            setSelectedYeast(yeast);
+                            openModal(MODALS.UPDATE_YEAST);
+                          }}
+                        >
                           <FiEdit size={20} />
                         </button>
                         <button onClick={() => handleDeleteYeast(yeast.id)} type="button" className="icon-button">
@@ -1023,9 +1016,7 @@ export default function NewRecipe() {
                 overflow: 'hidden',
               }}
             />
-
             <button type="button" onClick={fetchOpenAIResponse} className="ButtonMystical">Mystical Brew Wisdom</button>
-
           </div>
           {!isView && (
             <button form="formSubmit" className="crud-save-button" type="submit">
@@ -1033,59 +1024,77 @@ export default function NewRecipe() {
             </button>
           )}
         </div>
-        <AddFermentableModal
-          isOpen={isFermentableModalOpen}
-          closeModal={closeFermentableModal}
-          fermentableList={fermentableList}
-          handleAddFermentableRecipe={handleAddFermentableRecipe}
-        />
-        <AddHopModal
-          isOpen={isHopModalOpen}
-          closeModal={closeHopModal}
-          hopList={hopList}
-          handleAddHopRecipe={handleAddHopRecipe}
-        />
-        <AddMiscModal
-          isOpen={isMiscModalOpen}
-          closeModal={closeMiscModal}
-          miscList={miscList}
-          handleAddMiscRecipe={handleAddMiscRecipe}
-        />
-        <AddYeastModal
-          isOpen={isYeastModalOpen}
-          closeModal={closeYeastModal}
-          yeastList={yeastList}
-          handleAddYeastRecipe={handleAddYeastRecipe}
-        />
-        <ChangeEquipmentModal
-          isOpen={isChangeEquipmentModalOpen}
-          closeModal={closeChangeEquipmentModal}
-          handleChangeEquipmentRecipe={handleChangeEquipmentRecipe}
-        />
-        <UpdateFermentableModal
-          isOpen={isUpdateFermentableModalOpen}
-          closeModal={closeUpdateFermentableModal}
-          selectedFermentable={selectedFermentable}
-          handleUpdateFermentableRecipe={handleUpdateFermentableRecipe}
-        />
-        <UpdateHopModal
-          isOpen={isUpdateHopModalOpen}
-          closeModal={closeUpdateHopModal}
-          selectedHop={selectedHop}
-          handleUpdateHopRecipe={handleUpdateHopRecipe}
-        />
-        <UpdateMiscModal
-          isOpen={isUpdateMiscModalOpen}
-          closeModal={closeUpdateMiscModal}
-          selectedMisc={selectedMisc}
-          handleUpdateMiscRecipe={handleUpdateMiscRecipe}
-        />
-        <UpdateYeastModal
-          isOpen={isUpdateYeastModalOpen}
-          closeModal={closeUpdateYeastModal}
-          selectedYeast={selectedYeast}
-          handleUpdateYeastRecipe={handleUpdateYeastRecipe}
-        />
+        {activeModal === MODALS.FERMENTABLE && (
+          <AddFermentableModal
+            isOpen
+            closeModal={closeModal}
+            fermentableList={fermentableList}
+            handleAddFermentableRecipe={handleAddFermentableRecipe}
+          />
+        )}
+        {activeModal === MODALS.HOP && (
+          <AddHopModal
+            isOpen
+            closeModal={closeModal}
+            hopList={hopList}
+            handleAddHopRecipe={handleAddHopRecipe}
+          />
+        )}
+        {activeModal === MODALS.MISC && (
+          <AddMiscModal
+            isOpen
+            closeModal={closeModal}
+            miscList={miscList}
+            handleAddMiscRecipe={handleAddMiscRecipe}
+          />
+        )}
+        {activeModal === MODALS.YEAST && (
+          <AddYeastModal
+            isOpen
+            closeModal={closeModal}
+            yeastList={yeastList}
+            handleAddYeastRecipe={handleAddYeastRecipe}
+          />
+        )}
+        {activeModal === MODALS.CHANGE_EQUIPMENT && (
+          <ChangeEquipmentModal
+            isOpen
+            closeModal={closeModal}
+            handleChangeEquipmentRecipe={handleChangeEquipmentRecipe}
+          />
+        )}
+        {activeModal === MODALS.UPDATE_FERMENTABLE && (
+          <UpdateFermentableModal
+            isOpen
+            closeModal={closeModal}
+            selectedFermentable={selectedFermentable}
+            handleUpdateFermentableRecipe={handleUpdateFermentableRecipe}
+          />
+        )}
+        {activeModal === MODALS.UPDATE_HOP && (
+          <UpdateHopModal
+            isOpen
+            closeModal={closeModal}
+            selectedHop={selectedHop}
+            handleUpdateHopRecipe={handleUpdateHopRecipe}
+          />
+        )}
+        {activeModal === MODALS.UPDATE_MISC && (
+          <UpdateMiscModal
+            isOpen
+            closeModal={closeModal}
+            selectedMisc={selectedMisc}
+            handleUpdateMiscRecipe={handleUpdateMiscRecipe}
+          />
+        )}
+        {activeModal === MODALS.UPDATE_YEAST && (
+          <UpdateYeastModal
+            isOpen
+            closeModal={closeModal}
+            selectedYeast={selectedYeast}
+            handleUpdateYeastRecipe={handleUpdateYeastRecipe}
+          />
+        )}
       </div>
     </div>
   );
