@@ -1,9 +1,16 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useEffect, useContext } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { useForm } from 'react-hook-form';
+import { yupResolver } from '@hookform/resolvers/yup';
+import schema from './schema';
 
-import { fetchFermentableById, updateFermentable, addFermentable } from '../../../services/fermentables';
+import {
+  fetchFermentableById,
+  updateFermentable,
+  addFermentable,
+} from '../../../services/fermentables';
+
 import { showErrorToast, showSuccessToast } from '../../../utils/notifications';
-
 import AuthContext from '../../../context/AuthContext';
 
 import '../../../Styles/crud.css';
@@ -13,202 +20,156 @@ export default function NewFermentable() {
   const { recordUserId, id } = useParams();
   const navigate = useNavigate();
 
-  const [itemUserId, setItemUserId] = useState('');
-  const [name, setName] = useState('');
-  const [description, setDescription] = useState('');
-  const [type, setType] = useState('Base');
-  const [supplier, setSupplier] = useState('');
-  const [ebc, setEBC] = useState('');
-  const [potentialExtract, setPotentialExtract] = useState('');
-  const [unitPrice, setUnitPrice] = useState('');
-  const [stockQuantity, setStockQuantity] = useState('');
-  const [isEditing, setIsEditing] = useState(false);
-  const [isView, setIsView] = useState(false);
+  const isDetail = window.location.pathname.includes('/details');
+  const isEditing = id && !isDetail;
+  const isView = id && isDetail;
 
-  async function fetchFermentable(itemID) {
-    try {
-      const fermentable = await fetchFermentableById(user.token, recordUserId, itemID);
-      setItemUserId(recordUserId);
-      setName(fermentable.name);
-      setDescription(fermentable.description);
-      setType(fermentable.type);
-      setSupplier(fermentable.supplier);
-      setEBC(fermentable.ebc);
-      setPotentialExtract(fermentable.potentialExtract);
-      setUnitPrice(fermentable.unit_price);
-      setStockQuantity(fermentable.stock_quantity);
-    } catch (err) {
-      showErrorToast(`Error loading fermentable record. ${err}`);
-      navigate('/FermentableList');
-    }
-  }
-
-  async function handleSubmit(e) {
-    e.preventDefault();
-
-    const data = {
-      itemUserId,
-      name,
-      description,
-      type,
-      supplier,
-      ebc,
-      potentialExtract,
-      unit_price: unitPrice,
-      stock_quantity: stockQuantity,
-    };
-
-    try {
-      if (isEditing) {
-        await updateFermentable(user.token, id, data);
-        showSuccessToast('Fermentable has been updated.');
-      } else {
-        await addFermentable(user.token, data);
-        showSuccessToast('Added new fermentable successfully.');
-      }
-      navigate('/FermentableList');
-    } catch (err) {
-      showErrorToast(`${err.message}`);
-    }
-  }
-
-  function getTitle() {
-    if (isEditing) return 'Update Fermentable';
-    if (isView) return 'Fermentable Details';
-    return 'Add New Fermentable';
-  }
+  const {
+    register,
+    handleSubmit,
+    reset,
+  } = useForm({
+    resolver: yupResolver(schema),
+    defaultValues: {
+      name: '',
+      supplier: '',
+      description: '',
+      type: 'base',
+      ebc: '',
+      potentialExtract: '',
+    },
+  });
 
   useEffect(() => {
     if (!user) {
       navigate('/');
     } else if (id) {
-      const isDetailsPage = window.location.pathname.includes('/details');
-      setIsView(isDetailsPage);
-      setIsEditing(!isDetailsPage);
-      fetchFermentable(id);
+      fetchFermentableById(user.token, recordUserId, id)
+        .then((fermentable) => {
+          reset({
+            name: fermentable.name || '',
+            supplier: fermentable.supplier || '',
+            description: fermentable.description || '',
+            type: fermentable.type || 'base',
+            ebc: fermentable.ebc || '',
+            potentialExtract: fermentable.potentialExtract || '',
+          });
+        })
+        .catch((err) => {
+          showErrorToast(`Error loading fermentable record. ${err}`);
+          navigate('/FermentableList');
+        });
     }
-  }, [id, user, navigate]);
+  }, [id, user, navigate, recordUserId, reset]);
+
+  const getTitle = () => {
+    if (isEditing) return 'Update Fermentable';
+    if (isView) return 'Fermentable Details';
+    return 'Add New Fermentable';
+  };
+
+  const onValid = async (data) => {
+    const payload = {
+      ...data,
+      itemUserId: recordUserId,
+    };
+
+    try {
+      if (isEditing) {
+        await updateFermentable(user.token, id, payload);
+        showSuccessToast('Fermentable has been updated.');
+      } else {
+        await addFermentable(user.token, payload);
+        showSuccessToast('Added new fermentable successfully.');
+      }
+      navigate('/FermentableList');
+    } catch (err) {
+      showErrorToast(`Error saving fermentable record: ${err.message}`);
+    }
+  };
+
+  const onError = (errors) => {
+    const firstError = Object.values(errors)[0];
+    if (firstError?.message) {
+      showErrorToast(firstError.message);
+    }
+  };
 
   return (
-    <div>
-      <div className="crud-container">
-        <section>
-          <h1>{getTitle()}</h1>
-        </section>
-        <div className="content">
-          <form onSubmit={handleSubmit}>
-            <div className="inputs-row">
-              <div className="input-field">
-                <label htmlFor="name">
-                  Name
-                  <input
-                    id="name"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    disabled={isView}
-                    style={{ width: '430px' }}
-                  />
-                </label>
-              </div>
-              <div className="input-field">
-                <label htmlFor="supplier">
-                  Supplier
-                  <input
-                    id="supplier"
-                    value={supplier}
-                    onChange={(e) => setSupplier(e.target.value)}
-                    disabled={isView}
-                  />
-                </label>
-              </div>
+    <div className="crud-container">
+      <section>
+        <h1>{getTitle()}</h1>
+      </section>
+      <div className="content">
+        <form onSubmit={handleSubmit(onValid, onError)}>
+          <div className="inputs-row">
+            <div className="input-field">
+              <label htmlFor="name">Name</label>
+              <input
+                id="name"
+                {...register('name')}
+                disabled={isView}
+                style={{ width: '430px' }}
+              />
             </div>
-            <div className="inputs-row">
-              <div className="input-field">
-                <label htmlFor="description">
-                  Description
-                  <textarea
-                    id="description"
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                    disabled={isView}
-                  />
-                </label>
-              </div>
+            <div className="input-field">
+              <label htmlFor="supplier">Supplier</label>
+              <input
+                id="supplier"
+                {...register('supplier')}
+                disabled={isView}
+              />
             </div>
-            <div className="inputs-row">
-              <div className="input-field">
-                <label htmlFor="type">
-                  Type
-                  <select
-                    id="type"
-                    value={type}
-                    onChange={(e) => setType(e.target.value)}
-                    disabled={isView}
-                  >
-                    <option value="base">Base</option>
-                    <option value="Specialty">Specialty</option>
-                    <option value="Adjunct">Adjunct</option>
-                  </select>
-                </label>
-              </div>
-              <div className="input-field">
-                <label htmlFor="ebc">
-                  Color Degree
-                  <input
-                    id="ebc"
-                    type="number"
-                    value={ebc}
-                    onChange={(e) => setEBC(e.target.value)}
-                    disabled={isView}
-                  />
-                </label>
-              </div>
-              <div className="input-field">
-                <label htmlFor="potentialExtract">
-                  Potential Extract
-                  <input
-                    id="potentialExtract"
-                    type="number"
-                    value={potentialExtract}
-                    onChange={(e) => setPotentialExtract(e.target.value)}
-                    disabled={isView}
-                  />
-                </label>
-              </div>
+          </div>
+          <div className="inputs-row">
+            <div className="input-field">
+              <label htmlFor="description">Description</label>
+              <textarea
+                id="description"
+                {...register('description')}
+                disabled={isView}
+              />
             </div>
-            <div className="inputs-row">
-              <div className="input-field">
-                <label htmlFor="unitPrice">
-                  Unit Price
-                  <input
-                    id="unitPrice"
-                    type="number"
-                    value={unitPrice}
-                    onChange={(e) => setUnitPrice(e.target.value)}
-                    disabled={isView}
-                  />
-                </label>
-              </div>
-              <div className="input-field">
-                <label htmlFor="stockQuantity">
-                  Stock Quantity
-                  <input
-                    id="stockQuantity"
-                    type="number"
-                    value={stockQuantity}
-                    onChange={(e) => setStockQuantity(e.target.value)}
-                    disabled={isView}
-                  />
-                </label>
-              </div>
+          </div>
+          <div className="inputs-row">
+            <div className="input-field">
+              <label htmlFor="type">Type</label>
+              <select
+                id="type"
+                {...register('type')}
+                disabled={isView}
+              >
+                <option value="Base">Base</option>
+                <option value="Specialty">Specialty</option>
+                <option value="Adjunct">Adjunct</option>
+              </select>
             </div>
-            {!isView && (
-              <button className="crud-save-button" type="submit">
-                Save
-              </button>
-            )}
-          </form>
-        </div>
+            <div className="input-field">
+              <label htmlFor="ebc">Color Degree</label>
+              <input
+                id="ebc"
+                type="number"
+                {...register('ebc')}
+                disabled={isView}
+              />
+            </div>
+            <div className="input-field">
+              <label htmlFor="potentialExtract">Potential Extract</label>
+              <input
+                id="potentialExtract"
+                type="number"
+                step="any"
+                {...register('potentialExtract')}
+                disabled={isView}
+              />
+            </div>
+          </div>
+          {!isView && (
+            <button className="crud-save-button" type="submit">
+              Save
+            </button>
+          )}
+        </form>
       </div>
     </div>
   );

@@ -86,7 +86,6 @@ def create_yeasts_bp():
             form=sanitize(data.get("form")),
             attenuation=sanitize(data.get("attenuation")),
             temperature_range=sanitize(data.get("temperatureRange")),
-            alcohol_tolerance=sanitize(data.get("alcoholTolerance")),
             flavor_profile=sanitize(data.get("flavorProfile")),
             flocculation=sanitize(data.get("flocculation")),
             description=sanitize(data.get("description")),
@@ -122,7 +121,6 @@ def create_yeasts_bp():
                 form=official_item.form,
                 attenuation=official_item.attenuation,
                 temperature_range=official_item.temperature_range,
-                alcohol_tolerance=official_item.alcohol_tolerance,
                 flavor_profile=official_item.flavor_profile,
                 flocculation=official_item.flocculation,
                 description=official_item.description
@@ -134,7 +132,6 @@ def create_yeasts_bp():
             new_item.form = data.get("form", new_item.form)
             new_item.attenuation = data.get("attenuation", new_item.attenuation)
             new_item.temperature_range = data.get("temperatureRange", new_item.temperature_range)
-            new_item.alcohol_tolerance = data.get("alcoholTolerance", new_item.alcohol_tolerance)
             new_item.flavor_profile = data.get("flavorProfile", new_item.flavor_profile)
             new_item.flocculation = data.get("flocculation", new_item.flocculation)
             new_item.description = data.get("description", new_item.description)
@@ -155,7 +152,6 @@ def create_yeasts_bp():
             item.form = data.get("form", item.form)
             item.attenuation = data.get("attenuation", item.attenuation)
             item.temperature_range = data.get("temperatureRange", item.temperature_range)
-            item.alcohol_tolerance = data.get("alcoholTolerance", item.alcohol_tolerance)
             item.flavor_profile = data.get("flavorProfile", item.flavor_profile)
             item.flocculation = data.get("flocculation", item.flocculation)
             item.description = data.get("description", item.description)

@@ -139,7 +139,6 @@ class Yeast(db.Model):
     form = db.Column(db.String(15))
     attenuation = db.Column(db.Numeric(5, 2))
     temperature_range = db.Column(db.String(15))
-    alcohol_tolerance = db.Column(db.String(15))
     flavor_profile = db.Column(db.String(100))
     flocculation = db.Column(db.String(15))
     description = db.Column(db.Text)
@@ -155,7 +154,6 @@ class Yeast(db.Model):
             "form": self.form,
             "attenuation": float(self.attenuation) if self.attenuation else None,
             "temperatureRange": self.temperature_range,
-            "alcoholTolerance": self.alcohol_tolerance,
             "flavorProfile": self.flavor_profile,
             "flocculation": self.flocculation,
             "description": self.description,
@@ -371,7 +369,6 @@ class RecipeYeast(db.Model):
     form = db.Column(db.String(15), nullable=False)
     attenuation = db.Column(db.String(20), nullable=False)
     temperature_range = db.Column(db.String(15), nullable=False)
-    alcohol_tolerance = db.Column(db.String(15), nullable=False)
     flavor_profile = db.Column(db.Text)
     flocculation = db.Column(db.String(15), nullable=False)
     description = db.Column(db.Text)
@@ -381,6 +378,7 @@ class RecipeYeast(db.Model):
         return {
             "id": self.id,
             "userId": self.user_id,
+
             "recipeId": self.recipe_id,
             "name": self.name,
             "manufacturer": self.manufacturer,
@@ -388,7 +386,6 @@ class RecipeYeast(db.Model):
             "form": self.form,
             "attenuation": self.attenuation,
             "temperatureRange": self.temperature_range,
-            "alcoholTolerance": self.alcohol_tolerance,
             "flavorProfile": self.flavor_profile,
             "flocculation": self.flocculation,
             "description": self.description,

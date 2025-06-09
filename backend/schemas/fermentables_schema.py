@@ -30,8 +30,8 @@ class FermentablesSchema(Schema):
 
     @validates("type")
     def validate_type(self, value, *args, **kwargs):
-        if value.strip() not in ['Base', 'Specialty', 'Adjunct', 'Sugar']:
-            raise ValidationError("Invalid type. Must be one of: Base, Specialty, Adjunct, Sugar.")
+        if value.strip() not in ['Base', 'Specialty', 'Adjunct']:
+            raise ValidationError("Invalid type. Must be one of: Base, Specialty or Adjunct.")
 
     @validates("supplier")
     def validate_supplier(self, value, *args, **kwargs):

@@ -1,5 +1,8 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useEffect, useContext } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { useForm } from 'react-hook-form';
+import { yupResolver } from '@hookform/resolvers/yup';
+import schema from './schema';
 
 import { fetchEquipmentById, updateEquipment, addEquipment } from '../../services/equipments';
 
@@ -14,77 +17,28 @@ export default function NewEquipment() {
   const { recordUserId, id } = useParams();
   const navigate = useNavigate();
 
-  const [itemUserId, setItemUserId] = useState('');
-  const [name, setName] = useState('');
-  const [description, setDescription] = useState('');
-  const [efficiency, setEfficiency] = useState('');
-  const [batchVolume, setBatchVolume] = useState('');
-  const [batchTime, setBatchTime] = useState('');
-  const [boilTime, setBoilTime] = useState('');
-  const [boilTemperature, setBoilTemperature] = useState('');
-  const [boilOff, setBoilOff] = useState('');
-  const [trubLoss, setTrubLoss] = useState('');
-  const [deadSpace, setDeadSpace] = useState('');
+  const [isEditing, setIsEditing] = React.useState(false);
+  const [isView, setIsView] = React.useState(false);
 
-  const [isEditing, setIsEditing] = useState(false);
-  const [isView, setIsView] = useState(false);
-
-  async function fetchEquipment(userId, itemID) {
-    try {
-      const equipment = await fetchEquipmentById(user.token, userId, itemID);
-      setItemUserId(recordUserId);
-      setName(equipment.name);
-      setDescription(equipment.description);
-      setEfficiency(equipment.efficiency);
-      setBatchVolume(equipment.batchVolume);
-      setBatchTime(equipment.batchTime);
-      setBoilTime(equipment.boilTime);
-      setBoilTemperature(equipment.boilTemperature);
-      setBoilOff(equipment.boilOff);
-      setTrubLoss(equipment.trubLoss);
-      setDeadSpace(equipment.deadSpace);
-    } catch (err) {
-      showErrorToast(`Error loading equipment record. ${err}`);
-      navigate('/EquipmentList');
-    }
-  }
-
-  async function handleSubmit(e) {
-    e.preventDefault();
-
-    const data = {
-      itemUserId,
-      name,
-      description,
-      efficiency,
-      batchVolume,
-      boilTime,
-      batchTime,
-      boilTemperature,
-      boilOff,
-      trubLoss,
-      deadSpace,
-    };
-
-    try {
-      if (isEditing) {
-        await updateEquipment(user.token, id, data);
-        showSuccessToast('Equipment has been updated.');
-      } else {
-        await addEquipment(user.token, data);
-        showSuccessToast('Added new equipment successfully.');
-      }
-      navigate('/EquipmentList');
-    } catch (err) {
-      showErrorToast(`Error saving equipment record: ${err.message}`);
-    }
-  }
-
-  const renderHeader = () => {
-    if (isEditing) return 'Update Equipment';
-    if (isView) return 'Equipment Details';
-    return 'Add New Equipment';
-  };
+  const {
+    register,
+    handleSubmit,
+    reset,
+  } = useForm({
+    resolver: yupResolver(schema),
+    defaultValues: {
+      name: '',
+      description: '',
+      efficiency: '',
+      batchVolume: '',
+      batchTime: '',
+      boilTime: '',
+      boilTemperature: '',
+      boilOff: '',
+      trubLoss: '',
+      deadSpace: '',
+    },
+  });
 
   useEffect(() => {
     if (!user) {
@@ -93,9 +47,62 @@ export default function NewEquipment() {
       const isDetail = window.location.pathname.includes('/details');
       setIsView(isDetail);
       setIsEditing(!isDetail);
-      fetchEquipment(recordUserId, id);
+
+      fetchEquipmentById(user.token, recordUserId, id)
+        .then((equipment) => {
+          reset({
+            name: equipment.name || '',
+            description: equipment.description || '',
+            efficiency: equipment.efficiency || '',
+            batchVolume: equipment.batchVolume || '',
+            batchTime: equipment.batchTime || '',
+            boilTime: equipment.boilTime || '',
+            boilTemperature: equipment.boilTemperature || '',
+            boilOff: equipment.boilOff || '',
+            trubLoss: equipment.trubLoss || '',
+            deadSpace: equipment.deadSpace || '',
+          });
+        })
+        .catch((err) => {
+          showErrorToast(`Error loading equipment record. ${err}`);
+          navigate('/EquipmentList');
+        });
     }
-  }, [id, user, navigate, recordUserId]);
+  }, [id, user, navigate, recordUserId, reset]);
+
+  const renderHeader = () => {
+    if (isEditing) return 'Update Equipment';
+    if (isView) return 'Equipment Details';
+    return 'Add New Equipment';
+  };
+
+  const onValid = async (data) => {
+
+    const payload = {
+      ...data,
+      itemUserId: recordUserId,
+    };
+
+    try {
+      if (isEditing) {
+        await updateEquipment(user.token, id, payload);
+        showSuccessToast('Equipment has been updated.');
+      } else {
+        await addEquipment(user.token, payload);
+        showSuccessToast('Added new equipment successfully.');
+      }
+      navigate('/EquipmentList');
+    } catch (err) {
+      showErrorToast(`Error saving equipment record: ${err.message}`);
+    }
+  };
+
+  const onError = (errors) => {
+    const firstError = Object.values(errors)[0];
+    if (firstError?.message) {
+      showErrorToast(firstError.message);
+    }
+  };
 
   return (
     <div>
@@ -104,7 +111,7 @@ export default function NewEquipment() {
           <h1>{renderHeader()}</h1>
         </section>
         <div className="content">
-          <form onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit(onValid, onError)}>
             <div className="inputs-row">
               <div className="input-field">
                 <label htmlFor="name">
@@ -112,8 +119,7 @@ export default function NewEquipment() {
                   <input
                     type="text"
                     id="name"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
+                    {...register('name')}
                     disabled={isView}
                   />
                 </label>
@@ -125,8 +131,7 @@ export default function NewEquipment() {
                   Description
                   <textarea
                     id="description"
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
+                    {...register('description')}
                     disabled={isView}
                   />
                 </label>
@@ -139,8 +144,7 @@ export default function NewEquipment() {
                   <input
                     id="batchVolume"
                     type="number"
-                    value={batchVolume}
-                    onChange={(e) => setBatchVolume(e.target.value)}
+                    {...register('batchVolume')}
                     disabled={isView}
                   />
                 </label>
@@ -151,8 +155,7 @@ export default function NewEquipment() {
                   <input
                     id="batchTime"
                     type="number"
-                    value={batchTime}
-                    onChange={(e) => setBatchTime(e.target.value)}
+                    {...register('batchTime')}
                     disabled={isView}
                   />
                 </label>
@@ -163,8 +166,7 @@ export default function NewEquipment() {
                   <input
                     id="boilTime"
                     type="number"
-                    value={boilTime}
-                    onChange={(e) => setBoilTime(e.target.value)}
+                    {...register('boilTime')}
                     disabled={isView}
                   />
                 </label>
@@ -175,8 +177,7 @@ export default function NewEquipment() {
                   <input
                     id="boilTemperature"
                     type="number"
-                    value={boilTemperature}
-                    onChange={(e) => setBoilTemperature(e.target.value)}
+                    {...register('boilTemperature')}
                     disabled={isView}
                   />
                 </label>
@@ -189,8 +190,7 @@ export default function NewEquipment() {
                   <input
                     id="efficiency"
                     type="number"
-                    value={efficiency}
-                    onChange={(e) => setEfficiency(e.target.value)}
+                    {...register('efficiency')}
                     disabled={isView}
                   />
                 </label>
@@ -201,8 +201,7 @@ export default function NewEquipment() {
                   <input
                     id="boilOff"
                     type="number"
-                    value={boilOff}
-                    onChange={(e) => setBoilOff(e.target.value)}
+                    {...register('boilOff')}
                     disabled={isView}
                   />
                 </label>
@@ -213,8 +212,7 @@ export default function NewEquipment() {
                   <input
                     id="trubLoss"
                     type="number"
-                    value={trubLoss}
-                    onChange={(e) => setTrubLoss(e.target.value)}
+                    {...register('trubLoss')}
                     disabled={isView}
                   />
                 </label>
@@ -225,8 +223,7 @@ export default function NewEquipment() {
                   <input
                     id="deadSpace"
                     type="number"
-                    value={deadSpace}
-                    onChange={(e) => setDeadSpace(e.target.value)}
+                    {...register('deadSpace')}
                     disabled={isView}
                   />
                 </label>

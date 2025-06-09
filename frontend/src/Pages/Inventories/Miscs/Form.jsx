@@ -1,5 +1,8 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useEffect, useContext } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { useForm } from 'react-hook-form';
+import { yupResolver } from '@hookform/resolvers/yup';
+import schema from './schema';
 
 import { fetchMiscById, updateMisc, addMisc } from '../../../services/misc';
 import { showErrorToast, showSuccessToast } from '../../../utils/notifications';
@@ -10,75 +13,80 @@ import '../../../Styles/crud.css';
 
 export default function NewMisc() {
   const { user } = useContext(AuthContext);
-  const { recordUserId } = useParams();
-  const { id } = useParams();
+  const { recordUserId, id } = useParams();
   const navigate = useNavigate();
 
-  const [itemUserId, setItemUserId] = useState('');
-  const [name, setName] = useState('');
-  const [description, setDescription] = useState('');
-  const [type, setType] = useState('Spice');
+  const isDetail = window.location.pathname.includes('/details');
+  const isEditing = !!id && !isDetail;
+  const isView = !!id && isDetail;
 
-  const [isEditing, setIsEditing] = useState(false);
-  const [isView, setIsView] = useState(false);
-
-  async function fetchMisc(userId, itemID) {
-    try {
-      const misc = await fetchMiscById(user.token, userId, itemID);
-      setItemUserId(recordUserId);
-      setName(misc.name);
-      setDescription(misc.description);
-      setType(misc.type);
-    } catch (err) {
-      showErrorToast(`Error loading misc record.${err}`);
-      navigate('/MiscList');
-    }
-  }
-
-  async function handleSubmit(e) {
-    e.preventDefault();
-
-    const data = {
-      itemUserId,
-      name,
-      description,
-      type,
-    };
-
-    try {
-      if (isEditing) {
-        await updateMisc(user.token, id, data);
-        showSuccessToast('Misc has been updated.');
-      } else {
-        await addMisc(user.token, data);
-        showSuccessToast('Added new misc successfully.');
-      }
-      navigate('/MiscList');
-    } catch (err) {
-      showErrorToast(`${err.message}`);
-    }
-  }
-
-  function getTitle() {
-    if (isEditing) return 'Update Fermentable';
-    if (isView) return 'Fermentable Details';
-    return 'Add New Fermentable';
-  }
+  const {
+    register,
+    handleSubmit,
+    reset,
+  } = useForm({
+    resolver: yupResolver(schema),
+    defaultValues: {
+      name: '',
+      description: '',
+      type: 'Flavor',
+    },
+  });
 
   useEffect(() => {
     if (!user) {
       navigate('/');
-    } else if (id) {
-      if (window.location.pathname.includes('/details')) {
-        setIsView(true);
-        setIsEditing(false);
-      } else {
-        setIsView(false);
-        setIsEditing(true);
-      }
-      fetchMisc(recordUserId, id);
+      return;
     }
-  }, [id, user, navigate]);
+
+    if (id) {
+      fetchMiscById(user.token, recordUserId, id)
+        .then((misc) => {
+          reset({
+            name: misc.name || '',
+            description: misc.description || '',
+            type: misc.type || 'Flavor',
+          });
+        })
+        .catch((err) => {
+          showErrorToast(`Error loading misc record. ${err}`);
+          navigate('/MiscList');
+        });
+    }
+  }, [id, user, navigate, recordUserId, reset]);
+
+  const getTitle = () => {
+    if (isEditing) return 'Update Misc';
+    if (isView) return 'Misc Details';
+    return 'Add New Misc';
+  };
+
+  const onValid = async (data) => {
+    const payload = {
+      ...data,
+      itemUserId: recordUserId,
+    };
+
+    try {
+      if (isEditing) {
+        await updateMisc(user.token, id, payload);
+        showSuccessToast('Misc has been updated.');
+      } else {
+        await addMisc(user.token, payload);
+        showSuccessToast('Added new misc successfully.');
+      }
+      navigate('/MiscList');
+    } catch (err) {
+      showErrorToast(`Error saving misc record: ${err.message}`);
+    }
+  };
+
+  const onError = (errors) => {
+    const firstError = Object.values(errors)[0];
+    if (firstError?.message) {
+      showErrorToast(firstError.message);
+    }
+  };
 
   return (
     <div>
@@ -87,25 +95,24 @@ export default function NewMisc() {
           <h1>{getTitle()}</h1>
         </section>
         <div className="content">
-          <form onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit(onValid, onError)}>
             <div className="inputs-row">
               <div className="input-field">
                 <label htmlFor="name">
                   Name
                   <input
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
+                    {...register('name')}
                     disabled={isView}
                     style={{ width: '430px' }}
                   />
                 </label>
               </div>
               <div className="input-field">
-                <label htmlFor="name">
+                <label htmlFor="type">
                   Type
                   <select
-                    value={type}
-                    onChange={(e) => setType(e.target.value)}
+                    {...register('type')}
+                    disabled={isView}
                   >
                     <option value="Flavor">Flavor</option>
                     <option value="Fining">Fining</option>
@@ -119,24 +126,22 @@ export default function NewMisc() {
             </div>
             <div className="inputs-row">
               <div className="input-field">
-                <label htmlFor="name">
+                <label htmlFor="description">
                   Description
                   <textarea
-                    type="Description"
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
+                    {...register('description')}
                     disabled={isView}
                   />
                 </label>
               </div>
             </div>
+            {!isView && (
+              <button className="crud-save-button" type="submit">
+                Save
+              </button>
+            )}
           </form>
         </div>
-        {!isView && (
-        <button onClick={handleSubmit} className="crud-save-button" type="submit">
-          Save
-        </button>
-        )}
       </div>
     </div>
   );
