@@ -189,106 +189,31 @@ export default function NewRecipe() {
     setOpenAI(openAIResponse);
   };
 
-  const handleAddFermentableRecipe = (selectedModalFermentable, quantity) => {
-    if (selectedModalFermentable && quantity) {
-      const selectedFermentableDetails = fermentableList.find(
-        (fermentable) => fermentable.id === selectedModalFermentable,
-      );
-
-      if (selectedFermentableDetails) {
-        const currentFermentables = getValues('recipeFermentables') || [];
-
-        const newFermentable = {
-          ...selectedFermentableDetails,
-          id: generateId(),
-          quantity: parseFloat(quantity),
-        };
-
-        setValue('recipeFermentables', [...currentFermentables, newFermentable]);
-
-        closeModal(MODALS.ADD_FERMENTABLE);
-      } else {
-        showErrorToast('Selected fermentable not found.');
-      }
-    } else {
-      showErrorToast('Please select a fermentable and enter a quantity.');
+  const handleAddIngredient = (list, setListKey, modalType, itemId, quantity, extraFields = {}) => {
+    if (!itemId || !quantity) {
+      showErrorToast('Selecione um item e insira a quantidade.');
+      return;
     }
-  };
 
-  const handleAddHopRecipe = (hopId, quantity, boilTime) => {
-    if (hopId && quantity && boilTime) {
-      const selectedHopDetails = hopList.find((hop) => hop.id === hopId);
-
-      if (selectedHopDetails) {
-        const currentHops = getValues('recipeHops') || [];
-
-        setValue('recipeHops', [
-          ...currentHops,
-          {
-            ...selectedHopDetails,
-            id: generateId(),
-            quantity: parseFloat(quantity),
-            boilTime,
-          },
-        ]);
-
-        closeModal(MODALS.ADD_HOP);
-      } else {
-        showErrorToast('Selected hop not found.');
-      }
-    } else {
-      showErrorToast('Please select a hop and enter a quantity.');
+    const selectedItem = list.find((item) => item.id === itemId);
+    if (!selectedItem) {
+      showErrorToast('Item selecionado não encontrado.');
+      return;
     }
-  };
 
-  const handleAddMiscRecipe = (miscId, quantity) => {
-    if (miscId && quantity) {
-      const selectedMiscDetails = miscList.find((misc) => misc.id === miscId);
+    console.log('caiu aqui');
 
-      if (selectedMiscDetails) {
-        const currentMisc = getValues('recipeMisc') || [];
-
-        setValue('recipeMisc', [
-          ...currentMisc,
-          {
-            ...selectedMiscDetails,
-            id: generateId(),
-            quantity: parseFloat(quantity),
-          },
-        ]);
-
-        closeModal(MODALS.ADD_MISC);
-      } else {
-        showErrorToast('Selected misc not found.');
-      }
-    } else {
-      showErrorToast('Please select a misc and enter a quantity.');
-    }
-  };
-
-  const handleAddYeastRecipe = (yeastId, quantity) => {
-    if (yeastId && quantity) {
-      const selectedYeastDetails = yeastList.find((yeast) => yeast.id === yeastId);
-
-      if (selectedYeastDetails) {
-        const currentYeasts = getValues('recipeYeasts') || [];
-
-        setValue('recipeYeasts', [
-          ...currentYeasts,
-          {
-            ...selectedYeastDetails,
-            id: generateId(),
-            quantity: parseFloat(quantity),
-          },
-        ]);
-
-        closeModal(MODALS.ADD_YEAST);
-      } else {
-        showErrorToast('Selected yeast not found.');
-      }
-    } else {
-      showErrorToast('Please select a yeast and enter a quantity.');
-    }
+    const currentItems = getValues(setListKey) ?? [];
+    console.log(currentItems);
+    const newItem = {
+      ...selectedItem,
+      id: generateId(),
+      quantity: parseFloat(quantity),
+      ...extraFields,
+    };
+    console.log(newItem);
+    setValue(setListKey, [...currentItems, newItem]);
+    closeModal(modalType);
   };
 
   const handleChangeEquipmentRecipe = async (selectedItem) => {
@@ -1025,27 +950,52 @@ export default function NewRecipe() {
           )}
         </div>
         {activeModal === MODALS.FERMENTABLE && (
-          <AddFermentableModal
-            isOpen
-            closeModal={closeModal}
-            fermentableList={fermentableList}
-            handleAddFermentableRecipe={handleAddFermentableRecipe}
-          />
+        <AddFermentableModal
+          isOpen
+          closeModal={closeModal}
+          ingredientList={fermentableList}
+          handleAddFermentableRecipe={(onAddId, onAddQuantity) => (
+            handleAddIngredient(
+              fermentableList,
+              'recipeFermentables',
+              MODALS.FERMENTABLE,
+              onAddId,
+              onAddQuantity,
+            )
+          )}
+        />
         )}
         {activeModal === MODALS.HOP && (
-          <AddHopModal
-            isOpen
-            closeModal={closeModal}
-            hopList={hopList}
-            handleAddHopRecipe={handleAddHopRecipe}
-          />
+        <AddHopModal
+          isOpen
+          closeModal={closeModal}
+          hopList={hopList}
+          handleAddHopRecipe={(onAddId, onAddQuantity, onAddBoilTime) => (
+            handleAddIngredient(
+              hopList,
+              'recipeHops',
+              MODALS.ADD_HOP,
+              onAddId,
+              onAddQuantity,
+              { boilTime: onAddBoilTime },
+            )
+          )}
+        />
         )}
         {activeModal === MODALS.MISC && (
           <AddMiscModal
             isOpen
             closeModal={closeModal}
             miscList={miscList}
-            handleAddMiscRecipe={handleAddMiscRecipe}
+            handleAddMiscRecipe={(onAddId, onAddQuantity) => (
+              handleAddIngredient(
+                miscList,
+                'recipeMisc',
+                MODALS.MISC,
+                onAddId,
+                onAddQuantity,
+              )
+            )}
           />
         )}
         {activeModal === MODALS.YEAST && (
@@ -1053,7 +1003,15 @@ export default function NewRecipe() {
             isOpen
             closeModal={closeModal}
             yeastList={yeastList}
-            handleAddYeastRecipe={handleAddYeastRecipe}
+            handleAddYeastRecipe={(onAddId, onAddQuantity) => (
+              handleAddIngredient(
+                yeastList,
+                'recipeYeasts',
+                MODALS.YEAST,
+                onAddId,
+                onAddQuantity,
+              )
+            )}
           />
         )}
         {activeModal === MODALS.CHANGE_EQUIPMENT && (
