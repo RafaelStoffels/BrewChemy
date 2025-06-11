@@ -77,7 +77,6 @@ export default function NewEquipment() {
   };
 
   const onValid = async (data) => {
-
     const payload = {
       ...data,
       itemUserId: recordUserId,

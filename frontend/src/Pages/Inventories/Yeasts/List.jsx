@@ -1,52 +1,73 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { FiTrash2, FiEdit, FiBookOpen } from 'react-icons/fi';
+import { useNavigate } from 'react-router-dom';
+
+import ItemListPage from '../../../Components/ItemListPage';
+
 import { searchYeasts, fetchYeasts, deleteYeast } from '../../../services/yeasts';
 import { showInfoToast, showErrorToast, showSuccessToast } from '../../../utils/notifications';
-import SearchInput from '../../../Components/SearchInput';
 
 import AuthContext from '../../../context/AuthContext';
-import Sidebar from '../../../Components/Sidebar';
-import '../../../Styles/list.css';
 
 export default function YeastList() {
   const { user } = useContext(AuthContext);
   const [itemList, setItemList] = useState([]);
-
   const navigate = useNavigate();
 
-  const searchItemsFunction = async (term) => {
+  const onSearch = async (term) => {
     try {
       showInfoToast('Searching data...');
-      const response = await searchYeasts(user.token, term);
+      const result = await searchYeasts(user.token, term);
 
-      if (Array.isArray(response) && response.length === 0) {
+      if (Array.isArray(result) && result.length === 0) {
         showInfoToast('Data not found');
       } else {
-        setItemList(response);
+        setItemList(result);
       }
     } catch (err) {
       showErrorToast(`Error: ${err}`);
     }
   };
 
-  async function handleDetails(recordUserId, itemListId) {
-    navigate(`/Yeasts/${recordUserId}/${itemListId}/details`);
-  }
+  const onDetails = (userId, id) => navigate(`/Yeasts/${userId}/${id}/details`);
+  const onUpdate = (userId, id) => navigate(`/Yeasts/${userId}/${id}/edit`);
 
-  async function handleUpdate(recordUserId, itemListId) {
-    navigate(`/Yeasts/${recordUserId}/${itemListId}/edit`);
-  }
-
-  async function handleDelete(recordUserId, itemListId) {
+  const onDelete = async (userId, id) => {
     try {
-      await deleteYeast(user.token, recordUserId, itemListId);
-      setItemList(itemList.filter((item) => item.id !== itemListId));
+      await deleteYeast(user.token, userId, id);
+      setItemList((prev) => prev.filter((item) => item.id !== id));
       showSuccessToast('Yeast deleted.');
     } catch (err) {
       showErrorToast(`${err}`);
     }
-  }
+  };
+
+  const renderItem = (item) => (
+    <>
+      <p>
+        Manufacturer:
+        {item.manufacturer}
+      </p>
+      <p>
+        Type:
+        {item.type}
+      </p>
+      <p>
+        Flavor Profile:
+        {item.flavor_profile}
+      </p>
+      <p>
+        Attenuation:
+        {item.attenuation}
+      </p>
+      <p>
+        Description:
+        {' '}
+        {item.description.length > 140
+          ? `${item.description.substring(0, 140)}...`
+          : item.description}
+      </p>
+    </>
+  );
 
   useEffect(() => {
     if (!user) {
@@ -56,7 +77,7 @@ export default function YeastList() {
         try {
           const yeasts = await fetchYeasts(user.token);
           setItemList(yeasts);
-        } catch (err) {
+        } catch {
           showErrorToast('Error loading yeast');
         }
       };
@@ -65,64 +86,15 @@ export default function YeastList() {
   }, [user, navigate]);
 
   return (
-    <div>
-      <Sidebar />
-      <div className="list-container">
-        <div className="div-addButton">
-          <Link className="Addbutton" to="/Yeasts/new">Add new yeasts</Link>
-        </div>
-
-        <SearchInput onSearch={searchItemsFunction} />
-
-        <h1>Yeasts</h1>
-        <ul>
-          {itemList.map((item) => (
-            <li key={item.id}>
-              <h2 className="item-title">
-                {item.name}
-                {' '}
-                {item.officialId && <span className="custom-label">[custom]</span>}
-              </h2>
-              <div className="item-details">
-                <p>
-                  Manufacturer:
-                  {item.manufacturer}
-                </p>
-                <p>
-                  Type:
-                  {item.type}
-                </p>
-                <p>
-                  Flavor Profile:
-                  {item.flavor_profile}
-                </p>
-                <p>
-                  Attenuation:
-                  {item.attenuation}
-                </p>
-                <p>
-                  Description:
-                  {' '}
-                  {item.description.length > 140
-                    ? `${item.description.substring(0, 140)}...`
-                    : item.description}
-                </p>
-              </div>
-              <div className="button-group">
-                <button onClick={() => handleDetails(item.userId, item.id)} type="button" className="icon-button">
-                  <FiBookOpen size={20} />
-                </button>
-                <button onClick={() => handleUpdate(item.userId, item.id)} type="button" className="icon-button">
-                  <FiEdit size={20} />
-                </button>
-                <button onClick={() => handleDelete(item.userId, item.id)} type="button" className="icon-button">
-                  <FiTrash2 size={20} />
-                </button>
-              </div>
-            </li>
-          ))}
-        </ul>
-      </div>
-    </div>
+    <ItemListPage
+      title="Yeasts"
+      itemList={itemList}
+      onSearch={onSearch}
+      onDetails={onDetails}
+      onUpdate={onUpdate}
+      onDelete={onDelete}
+      renderItem={renderItem}
+      addNewRoute="/Yeasts/new"
+    />
   );
 }

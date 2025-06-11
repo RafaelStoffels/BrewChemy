@@ -1,115 +1,75 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { FiTrash2, FiEdit, FiBookOpen } from 'react-icons/fi';
+import { useNavigate } from 'react-router-dom';
+
+import ItemListPage from '../../Components/ItemListPage';
 
 import { searchEquipments, fetchEquipments, deleteEquipment } from '../../services/equipments';
 import { showInfoToast, showErrorToast, showSuccessToast } from '../../utils/notifications';
-
 import AuthContext from '../../context/AuthContext';
-
-import Sidebar from '../../Components/Sidebar';
-import SearchInput from '../../Components/SearchInput';
-
-import '../../Styles/list.css';
 
 export default function EquipmentList() {
   const { user } = useContext(AuthContext);
   const [itemList, setItemList] = useState([]);
-
   const navigate = useNavigate();
 
-  const searchItemsFunction = async (term) => {
+  const onSearch = async (term) => {
     try {
       showInfoToast('Searching data...');
-      const recipeResponse = await searchEquipments(user.token, term);
+      const result = await searchEquipments(user.token, term);
 
-      if (Array.isArray(recipeResponse) && recipeResponse.length === 0) {
+      if (Array.isArray(result) && result.length === 0) {
         showInfoToast('Data not found');
       } else {
-        setItemList(recipeResponse);
+        setItemList(result);
       }
     } catch (err) {
       showErrorToast(`${err}`);
     }
   };
 
-  async function handleDetails(recordUserId, itemListId) {
-    navigate(`/Equipments/${recordUserId}/${itemListId}/details`);
-  }
+  const onDetails = (userId, id) => navigate(`/Equipments/${userId}/${id}/details`);
+  const onUpdate = (userId, id) => navigate(`/Equipments/${userId}/${id}/edit`);
 
-  async function handleUpdate(recordUserId, itemListId) {
-    navigate(`/Equipments/${recordUserId}/${itemListId}/edit`);
-  }
-
-  async function handleDelete(recordUserId, itemListId) {
+  const onDelete = async (userId, id) => {
     try {
-      await deleteEquipment(user.token, recordUserId, itemListId);
-      setItemList(itemList.filter((item) => item.id !== itemListId));
+      await deleteEquipment(user.token, userId, id);
+      setItemList((prev) => prev.filter((item) => item.id !== id));
       showSuccessToast('Equipment deleted.');
     } catch (err) {
       showErrorToast(`${err}`);
     }
-  }
+  };
+
+  const renderItem = (item) => (
+    <p>{item.description}</p>
+  );
 
   useEffect(() => {
     if (!user) {
       navigate('/');
     } else {
-      const loadEquipments = async () => {
+      const loadItems = async () => {
         try {
-          const equipments = await fetchEquipments(user.token);
-          setItemList(equipments);
+          const result = await fetchEquipments(user.token);
+          setItemList(result);
         } catch (err) {
           showErrorToast('Error loading equipments');
         }
       };
-      loadEquipments();
+      loadItems();
     }
   }, [user, navigate]);
 
   return (
-    <div>
-      <Sidebar />
-      <div className="list-container">
-        <div className="div-addButton">
-          <Link className="Addbutton" to="/Equipments/new">Add new equipment</Link>
-        </div>
-
-        <SearchInput onSearch={searchItemsFunction} />
-
-        <h1>Equipments</h1>
-        <ul>
-          {itemList.map((item) => (
-            <li key={item.id}>
-              <h2 className="item-title">
-                {item.name}
-                {' '}
-                {item.officialId && <span className="custom-label">[custom]</span>}
-              </h2>
-              <div className="item-details">
-                <p>
-                  Description:
-                  {' '}
-                  {item.description.length > 140
-                    ? `${item.description.substring(0, 140)}...`
-                    : item.description}
-                </p>
-              </div>
-              <div className="button-group">
-                <button onClick={() => handleDetails(item.userId, item.id)} type="button" className="icon-button">
-                  <FiBookOpen size={20} />
-                </button>
-                <button onClick={() => handleUpdate(item.userId, item.id)} type="button" className="icon-button">
-                  <FiEdit size={20} />
-                </button>
-                <button onClick={() => handleDelete(item.userId, item.id)} type="button" className="icon-button">
-                  <FiTrash2 size={20} />
-                </button>
-              </div>
-            </li>
-          ))}
-        </ul>
-      </div>
-    </div>
+    <ItemListPage
+      title="Equipments"
+      itemList={itemList}
+      onSearch={onSearch}
+      onDetails={onDetails}
+      onUpdate={onUpdate}
+      onDelete={onDelete}
+      renderItem={renderItem}
+      addNewRoute="/Equipments/new"
+    />
   );
 }
