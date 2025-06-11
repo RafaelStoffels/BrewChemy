@@ -152,6 +152,9 @@ export default function NewRecipe() {
     }
   };
 
+  // =======================
+  // Open/Close Modals
+  // =======================
   const openModal = async (type) => {
     setActiveModal(type);
 
@@ -173,6 +176,9 @@ export default function NewRecipe() {
 
   const closeModal = () => setActiveModal(null);
 
+  // =======================
+  // Fetch Recipe
+  // =======================
   const fetchRecipe = async (recipeID) => {
     try {
       const recipeResponse = await fetchRecipeById(recipeID, user.token);
@@ -183,12 +189,9 @@ export default function NewRecipe() {
     }
   };
 
-  const fetchOpenAIResponse = async () => {
-    const values = getValues();
-    const openAIResponse = await getOpenAIResponse(values.recipe, user.token);
-    setOpenAI(openAIResponse);
-  };
-
+  // =======================
+  // Add Ingredient Function
+  // =======================
   const handleAddIngredient = (list, setListKey, modalType, itemId, quantity, extraFields = {}) => {
     if (!itemId || !quantity) {
       showErrorToast('Selecione um item e insira a quantidade.');
@@ -201,21 +204,20 @@ export default function NewRecipe() {
       return;
     }
 
-    console.log('caiu aqui');
-
     const currentItems = getValues(setListKey) ?? [];
-    console.log(currentItems);
     const newItem = {
       ...selectedItem,
       id: generateId(),
       quantity: parseFloat(quantity),
       ...extraFields,
     };
-    console.log(newItem);
     setValue(setListKey, [...currentItems, newItem]);
     closeModal(modalType);
   };
 
+  // =======================
+  // Equipment Change Function
+  // =======================
   const handleChangeEquipmentRecipe = async (selectedItem) => {
     if (selectedItem) {
       const currentEquipmentName = getValues('recipeEquipment.name');
@@ -245,76 +247,6 @@ export default function NewRecipe() {
     }
   };
 
-  const handleUpdateFermentableRecipe = (updatedFermentable) => {
-    const currentFermentables = getValues('recipeFermentables') || [];
-    const updatedFermentables = currentFermentables.map((fermentable) => {
-      if (fermentable.id === updatedFermentable.id) {
-        return updatedFermentable;
-      }
-      return fermentable;
-    });
-    setValue('recipeFermentables', updatedFermentables);
-  };
-
-  const handleUpdateHopRecipe = (updatedHop) => {
-    const currentHops = getValues('recipeHops') || [];
-    const updatedHops = currentHops.map((hop) => {
-      if (hop.id === updatedHop.id) {
-        return updatedHop;
-      }
-      return hop;
-    });
-    setValue('recipeHops', updatedHops);
-  };
-
-  const handleUpdateMiscRecipe = (updatedMisc) => {
-    const currentMiscs = getValues('recipeMisc') || [];
-    const updatedMiscs = currentMiscs.map((misc) => {
-      if (misc.id === updatedMisc.id) {
-        return updatedMisc;
-      }
-      return misc;
-    });
-    setValue('recipeMisc', updatedMiscs);
-  };
-
-  const handleUpdateYeastRecipe = (updatedYeast) => {
-    const currentYeasts = getValues('recipeYeasts') || [];
-    const updatedYeasts = currentYeasts.map((yeast) => {
-      if (yeast.id === updatedYeast.id) {
-        return updatedYeast;
-      }
-      return yeast;
-    });
-    setValue('recipeYeasts', updatedYeasts);
-  };
-
-  const handleDeleteFermentable = (fermentableId) => {
-    const currentFermentables = getValues('recipeFermentables') || [];
-    const updatedFermentables = currentFermentables.filter(
-      (fermentable) => fermentable.id !== fermentableId,
-    );
-    setValue('recipeFermentables', updatedFermentables);
-  };
-
-  const handleDeleteHop = (hopID) => {
-    const currentHops = getValues('recipeHops') || [];
-    const updatedHops = currentHops.filter((hop) => hop.id !== hopID);
-    setValue('recipeHops', updatedHops);
-  };
-
-  const handleDeleteMisc = (miscID) => {
-    const currentMisc = getValues('recipeMisc') || [];
-    const updatedMisc = currentMisc.filter((misc) => misc.id !== miscID);
-    setValue('recipeMisc', updatedMisc);
-  };
-
-  const handleDeleteYeast = (yeastID) => {
-    const currentYeasts = getValues('recipeYeasts') || [];
-    const updatedYeasts = currentYeasts.filter((yeast) => yeast.id !== yeastID);
-    setValue('recipeYeasts', updatedYeasts);
-  };
-
   const handleEquipmentChange = (e) => {
     const { name, value } = e.target;
     const currentEquipment = getValues('recipeEquipment') || {};
@@ -325,6 +257,70 @@ export default function NewRecipe() {
     setValue('recipeEquipment', updatedEquipment);
   };
 
+  // =======================
+  // Item Update Functions
+  // =======================
+  const handleUpdateRecipeItem = (fieldName, updatedItem) => {
+    const currentItems = getValues(fieldName) || [];
+    const updatedItems = currentItems.map((item) => (
+      item.id === updatedItem.id ? updatedItem : item
+    ));
+    setValue(fieldName, updatedItems);
+  };
+
+  const handleUpdateFermentableRecipe = (updatedFermentable) => {
+    handleUpdateRecipeItem('recipeFermentables', updatedFermentable);
+  };
+
+  const handleUpdateHopRecipe = (updatedHop) => {
+    handleUpdateRecipeItem('recipeHops', updatedHop);
+  };
+
+  const handleUpdateMiscRecipe = (updatedMisc) => {
+    handleUpdateRecipeItem('recipeMisc', updatedMisc);
+  };
+
+  const handleUpdateYeastRecipe = (updatedYeast) => {
+    handleUpdateRecipeItem('recipeYeasts', updatedYeast);
+  };
+
+  // =======================
+  // Item Delete Functions
+  // =======================
+  const handleDeleteRecipeItem = (fieldName, itemId) => {
+    const currentItems = getValues(fieldName) || [];
+    const updatedItems = currentItems.filter((item) => item.id !== itemId);
+    setValue(fieldName, updatedItems);
+  };
+
+  const handleDeleteFermentable = (fermentableId) => {
+    handleDeleteRecipeItem('recipeFermentables', fermentableId);
+  };
+
+  const handleDeleteHop = (hopId) => {
+    handleDeleteRecipeItem('recipeHops', hopId);
+  };
+
+  const handleDeleteMisc = (miscId) => {
+    handleDeleteRecipeItem('recipeMisc', miscId);
+  };
+
+  const handleDeleteYeast = (yeastId) => {
+    handleDeleteRecipeItem('recipeYeasts', yeastId);
+  };
+
+  // =======================
+  // Fetch OpenAI
+  // =======================
+  const fetchOpenAIResponse = async () => {
+    const values = getValues();
+    const openAIResponse = await getOpenAIResponse(values.recipe, user.token);
+    setOpenAI(openAIResponse);
+  };
+
+  // =======================
+  // useEffects
+  // =======================
   useEffect(() => {
     if (!user) {
       navigate('/');
