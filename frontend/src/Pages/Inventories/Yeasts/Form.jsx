@@ -5,7 +5,7 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import schema from './schema'; // <-- Aqui devem estar as regras do Yup
 
 import { fetchYeastById, updateYeast, addYeast } from '../../../services/yeasts';
-import { showErrorToast, showSuccessToast } from '../../../utils/notifications';
+import { showErrorToast } from '../../../utils/notifications';
 
 import AuthContext from '../../../context/AuthContext';
 
@@ -60,8 +60,7 @@ export default function NewYeast() {
             flocculation: yeast.flocculation || '',
           });
         })
-        .catch((err) => {
-          showErrorToast(`Error loading yeast record. ${err}`);
+        .catch(() => {
           navigate('/YeastList');
         });
     }
@@ -82,14 +81,12 @@ export default function NewYeast() {
     try {
       if (isEditing) {
         await updateYeast(user.token, id, payload);
-        showSuccessToast('Yeast has been updated.');
       } else {
         await addYeast(user.token, payload);
-        showSuccessToast('Added new yeast successfully.');
       }
       navigate('/YeastList');
     } catch (err) {
-      showErrorToast(`Error saving yeast record: ${err.message}`);
+      //
     }
   };
 

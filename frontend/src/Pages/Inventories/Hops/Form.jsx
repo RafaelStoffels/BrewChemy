@@ -5,7 +5,7 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import schema from './schema';
 
 import { fetchHopById, updateHop, addHop } from '../../../services/hops';
-import { showErrorToast, showSuccessToast } from '../../../utils/notifications';
+import { showErrorToast } from '../../../utils/notifications';
 
 import AuthContext from '../../../context/AuthContext';
 
@@ -61,8 +61,7 @@ export default function NewHop() {
             betaAcidContent: hop.betaAcidContent || '',
           });
         })
-        .catch((err) => {
-          showErrorToast(`Error loading hop record. ${err}`);
+        .catch(() => {
           navigate('/HopList');
         });
     }
@@ -83,14 +82,12 @@ export default function NewHop() {
     try {
       if (isEditing) {
         await updateHop(user.token, id, payload);
-        showSuccessToast('Hop has been updated.');
       } else {
         await addHop(user.token, payload);
-        showSuccessToast('Added new hop successfully.');
       }
       navigate('/HopList');
     } catch (err) {
-      showErrorToast(`Error saving hop record: ${err.message}`);
+      //
     }
   };
 

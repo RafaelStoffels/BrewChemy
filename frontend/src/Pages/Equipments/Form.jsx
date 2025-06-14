@@ -6,7 +6,7 @@ import schema from './schema';
 
 import { fetchEquipmentById, updateEquipment, addEquipment } from '../../services/equipments';
 
-import { showErrorToast, showSuccessToast } from '../../utils/notifications';
+import { showErrorToast } from '../../utils/notifications';
 
 import AuthContext from '../../context/AuthContext';
 
@@ -63,8 +63,7 @@ export default function NewEquipment() {
             deadSpace: equipment.deadSpace || '',
           });
         })
-        .catch((err) => {
-          showErrorToast(`Error loading equipment record. ${err}`);
+        .catch(() => {
           navigate('/EquipmentList');
         });
     }
@@ -85,14 +84,12 @@ export default function NewEquipment() {
     try {
       if (isEditing) {
         await updateEquipment(user.token, id, payload);
-        showSuccessToast('Equipment has been updated.');
       } else {
         await addEquipment(user.token, payload);
-        showSuccessToast('Added new equipment successfully.');
       }
       navigate('/EquipmentList');
     } catch (err) {
-      showErrorToast(`Error saving equipment record: ${err.message}`);
+      //
     }
   };
 

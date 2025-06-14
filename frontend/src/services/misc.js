@@ -1,6 +1,7 @@
 import api from './api';
+import { showErrorToast, showSuccessToast } from '../utils/notifications';
 
-export async function searchMiscs(userToken, term) {
+export async function searchMiscs(userToken, term, { showToast = true } = {}) {
   try {
     const response = await api.get('/api/miscs/search', {
       headers: { Authorization: `Bearer ${userToken}` },
@@ -8,96 +9,106 @@ export async function searchMiscs(userToken, term) {
     });
     return response.data;
   } catch (err) {
-    if (err.response && err.response.status === 401) {
-      throw new Error('Your session has expired. Please log in again.');
+    let msg = 'Error loading miscs';
+    if (err.response?.status === 401) {
+      msg = 'Your session has expired. Please log in again.';
+    } else if (err.response?.data?.message || err.response?.data?.error) {
+      msg = err.response.data.message || err.response.data.error;
     }
-    throw new Error('Error loading miscs');
+    if (showToast) showErrorToast(msg);
+    throw new Error(msg);
   }
 }
 
-export async function fetchMisc(userToken) {
+export async function fetchMisc(userToken, { showToast = true } = {}) {
   try {
-    const response = await api.get('api/miscs', {
+    const response = await api.get('/api/miscs', {
       headers: { Authorization: `Bearer ${userToken}` },
     });
     return response.data;
   } catch (err) {
-    if (err.response && err.response.status === 401) {
-      throw new Error('Your session has expired. Please log in again.');
+    let msg = 'Error loading miscs';
+    if (err.response?.status === 401) {
+      msg = 'Your session has expired. Please log in again.';
+    } else if (err.response?.data?.message || err.response?.data?.error) {
+      msg = err.response.data.message || err.response.data.error;
     }
-    throw new Error('Error loading misc');
+    if (showToast) showErrorToast(msg);
+    throw new Error(msg);
   }
 }
 
-export async function fetchMiscById(userToken, recordUserId, id) {
+export async function fetchMiscById(userToken, recordUserId, id, { showToast = true } = {}) {
   try {
     const response = await api.get(`/api/miscs/${recordUserId}/${id}`, {
       headers: { Authorization: `Bearer ${userToken}` },
     });
     return response.data;
   } catch (err) {
-    if (err.response) {
-      const { status, data } = err.response;
-
-      if (status === 401) {
-        throw new Error('Your session has expired. Please log in again.');
-      }
-
-      if (data && data.message) {
-        throw new Error(`Error loading equipment: ${data.message}`);
-      }
+    let msg = 'Error loading misc';
+    if (err.response?.status === 401) {
+      msg = 'Your session has expired. Please log in again.';
+    } else if (err.response?.data?.message || err.response?.data?.error) {
+      msg = err.response.data.message || err.response.data.error;
     }
-
-    throw new Error('An unexpected error occurred while loading equipment.');
+    if (showToast) showErrorToast(msg);
+    throw new Error(msg);
   }
 }
 
-export async function deleteMisc(userToken, recordUserId, id) {
+export async function deleteMisc(userToken, recordUserId, id, { showToast = true } = {}) {
   try {
-    const response = await api.delete(`api/miscs/${recordUserId}/${id}`, {
+    const response = await api.delete(`/api/miscs/${recordUserId}/${id}`, {
       headers: { Authorization: `Bearer ${userToken}` },
     });
+    if (showToast) showSuccessToast('Misc deleted successfully.');
     return response.data;
   } catch (err) {
-    if (err.response) {
-      const { status, data } = err.response;
-
-      if (status === 401) {
-        throw new Error('Your session has expired. Please log in again.');
-      }
-
-      if (data && data.message) {
-        throw new Error(`${data.message}`);
-      }
+    let msg = 'Error deleting misc';
+    if (err.response?.status === 401) {
+      msg = 'Your session has expired. Please log in again.';
+    } else if (err.response?.data?.message || err.response?.data?.error) {
+      msg = err.response.data.message || err.response.data.error;
     }
-    throw new Error('Error deleting misc');
+    if (showToast) showErrorToast(msg);
+    throw new Error(msg);
   }
 }
 
-export async function addMisc(userToken, dataInput) {
+export async function addMisc(userToken, dataInput, { showToast = true } = {}) {
   try {
     const response = await api.post('/api/miscs', dataInput, {
       headers: { Authorization: `Bearer ${userToken}` },
     });
+    if (showToast) showSuccessToast('Misc added successfully.');
     return response.data;
   } catch (err) {
-    if (err.response && err.response.status === 401) {
-      throw new Error('Your session has expired. Please log in again.');
+    let msg = 'Error adding misc';
+    if (err.response?.status === 401) {
+      msg = 'Your session has expired. Please log in again.';
+    } else if (err.response?.data?.message || err.response?.data?.error) {
+      msg = err.response.data.message || err.response.data.error;
     }
-    throw new Error('Error adding misc');
+    if (showToast) showErrorToast(msg);
+    throw new Error(msg);
   }
 }
 
-export async function updateMisc(userToken, id, dataInput) {
+export async function updateMisc(userToken, id, dataInput, { showToast = true } = {}) {
   try {
     const response = await api.put(`/api/miscs/${id}`, dataInput, {
       headers: { Authorization: `Bearer ${userToken}` },
     });
+    if (showToast) showSuccessToast('Misc updated successfully.');
     return response.data;
   } catch (err) {
-    if (err.response && err.response.status === 401) {
-      throw new Error('Your session has expired. Please log in again.');
+    let msg = 'Error updating misc';
+    if (err.response?.status === 401) {
+      msg = 'Your session has expired. Please log in again.';
+    } else if (err.response?.data?.message || err.response?.data?.error) {
+      msg = err.response.data.message || err.response.data.error;
     }
-    throw new Error('Error updating misc');
+    if (showToast) showErrorToast(msg);
+    throw new Error(msg);
   }
 }

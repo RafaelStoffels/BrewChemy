@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { sendPasswordResetEmail } from '../../../services/users';
-import { showSuccessToast, showErrorToast, showInfoToast } from '../../../utils/notifications';
+import { showErrorToast } from '../../../utils/notifications';
 
 import '../../../Styles/crud.css';
 
@@ -30,13 +30,10 @@ export default function NewAccount() {
 
     try {
       await sendPasswordResetEmail(data);
+      navigate('/');
     } catch (err) {
-      showErrorToast(`Error sending email: ${err}`);
+      //
     }
-
-    showSuccessToast('User created.');
-    showInfoToast('An email has been sent to reset your password. Please check your inbox.');
-    navigate('/');
   }
 
   return (

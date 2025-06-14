@@ -1,39 +1,46 @@
 import api from './api';
+import { showErrorToast, showSuccessToast } from '../utils/notifications';
 
-export async function fetchRecipes(token) {
+export async function fetchRecipes(userToken, { showToast = true } = {}) {
   try {
-    const response = await api.get('api/recipes', {
-      headers: { Authorization: `Bearer ${token}` },
+    const response = await api.get('/api/recipes', {
+      headers: { Authorization: `Bearer ${userToken}` },
     });
     return response.data;
   } catch (err) {
-    throw new Error('Error loading recipes');
+    const msg = 'Error loading recipes';
+    if (showToast) showErrorToast(msg);
+    throw new Error(msg);
   }
 }
 
-export async function fetchRecipeById(recipeId, token) {
+export async function fetchRecipeById(userToken, recipeId, { showToast = true } = {}) {
   try {
     const response = await api.get(`/api/recipes/${recipeId}`, {
-      headers: { Authorization: `Bearer ${token}` },
+      headers: { Authorization: `Bearer ${userToken}` },
     });
-
     return response.data;
   } catch (err) {
-    throw new Error(err);
+    const msg = 'Error loading recipe';
+    if (showToast) showErrorToast(msg);
+    throw new Error(msg);
   }
 }
 
-export async function deleteRecipe(itemId, token) {
+export async function deleteRecipe(userToken, itemId, { showToast = true } = {}) {
   try {
-    await api.delete(`api/recipes/${itemId}`, {
-      headers: { Authorization: `Bearer ${token}` },
+    await api.delete(`/api/recipes/${itemId}`, {
+      headers: { Authorization: `Bearer ${userToken}` },
     });
+    if (showToast) showSuccessToast('Recipe deleted successfully.');
   } catch (err) {
-    throw new Error('Error deleting recipe');
+    const msg = 'Error deleting recipe';
+    if (showToast) showErrorToast(msg);
+    throw new Error(msg);
   }
 }
 
-export async function searchRecipes(userToken, term) {
+export async function searchRecipes(userToken, term, { showToast = true } = {}) {
   try {
     const response = await api.get('/api/recipes/search', {
       headers: { Authorization: `Bearer ${userToken}` },
@@ -41,9 +48,39 @@ export async function searchRecipes(userToken, term) {
     });
     return response.data;
   } catch (err) {
-    if (err.response && err.response.status === 401) {
-      throw new Error('Your session has expired. Please log in again.');
+    let msg = 'Error loading recipes';
+    if (err.response?.status === 401) {
+      msg = 'Your session has expired. Please log in again.';
     }
-    throw new Error('Error loading yeasts');
+    if (showToast) showErrorToast(msg);
+    throw new Error(msg);
+  }
+}
+
+export async function addRecipe(userToken, dataInput, { showToast = true } = {}) {
+  try {
+    const response = await api.post('/api/recipes', dataInput, {
+      headers: { Authorization: `Bearer ${userToken}` },
+    });
+    if (showToast) showSuccessToast('Recipe saved successfully.');
+    return response.data;
+  } catch (err) {
+    const msg = 'Error saving recipe. Please, try again.';
+    if (showToast) showErrorToast(msg);
+    throw new Error(msg);
+  }
+}
+
+export async function updateRecipe(userToken, id, dataInput, { showToast = true } = {}) {
+  try {
+    const response = await api.put(`/api/recipes/${id}`, dataInput, {
+      headers: { Authorization: `Bearer ${userToken}` },
+    });
+    if (showToast) showSuccessToast('Recipe saved successfully.');
+    return response.data;
+  } catch (err) {
+    const msg = 'Error saving recipe. Please, try again.';
+    if (showToast) showErrorToast(msg);
+    throw new Error(msg);
   }
 }

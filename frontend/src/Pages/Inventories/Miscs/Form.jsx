@@ -5,7 +5,7 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import schema from './schema';
 
 import { fetchMiscById, updateMisc, addMisc } from '../../../services/misc';
-import { showErrorToast, showSuccessToast } from '../../../utils/notifications';
+import { showErrorToast } from '../../../utils/notifications';
 
 import AuthContext from '../../../context/AuthContext';
 
@@ -48,8 +48,7 @@ export default function NewMisc() {
             type: misc.type || 'Flavor',
           });
         })
-        .catch((err) => {
-          showErrorToast(`Error loading misc record. ${err}`);
+        .catch(() => {
           navigate('/MiscList');
         });
     }
@@ -70,14 +69,12 @@ export default function NewMisc() {
     try {
       if (isEditing) {
         await updateMisc(user.token, id, payload);
-        showSuccessToast('Misc has been updated.');
       } else {
         await addMisc(user.token, payload);
-        showSuccessToast('Added new misc successfully.');
       }
       navigate('/MiscList');
     } catch (err) {
-      showErrorToast(`Error saving misc record: ${err.message}`);
+      //
     }
   };
 

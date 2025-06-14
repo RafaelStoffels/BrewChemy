@@ -1,6 +1,7 @@
 import api from './api';
+import { showErrorToast, showSuccessToast } from '../utils/notifications';
 
-export async function searchEquipments(userToken, term) {
+export async function searchEquipments(userToken, term, { showToast = true } = {}) {
   try {
     const response = await api.get('/api/equipments/search', {
       headers: { Authorization: `Bearer ${userToken}` },
@@ -8,96 +9,106 @@ export async function searchEquipments(userToken, term) {
     });
     return response.data;
   } catch (err) {
-    if (err.response && err.response.status === 401) {
-      throw new Error('Your session has expired. Please log in again.');
+    let msg = 'Error loading equipments';
+    if (err.response?.status === 401) {
+      msg = 'Your session has expired. Please log in again.';
+    } else if (err.response?.data?.message || err.response?.data?.error) {
+      msg = err.response.data.message || err.response.data.error;
     }
-    throw new Error('Error loading equipments');
+    if (showToast) showErrorToast(msg);
+    throw new Error(msg);
   }
 }
 
-export async function fetchEquipments(userToken) {
+export async function fetchEquipments(userToken, { showToast = true } = {}) {
   try {
-    const response = await api.get('api/equipments', {
+    const response = await api.get('/api/equipments', {
       headers: { Authorization: `Bearer ${userToken}` },
     });
     return response.data;
   } catch (err) {
-    if (err.response && err.response.status === 401) {
-      throw new Error('Your session has expired. Please log in again.');
+    let msg = 'Error loading equipments';
+    if (err.response?.status === 401) {
+      msg = 'Your session has expired. Please log in again.';
+    } else if (err.response?.data?.message || err.response?.data?.error) {
+      msg = err.response.data.message || err.response.data.error;
     }
-    throw new Error('Error loading equipments');
+    if (showToast) showErrorToast(msg);
+    throw new Error(msg);
   }
 }
 
-export async function fetchEquipmentById(userToken, recordUserId, id) {
+export async function fetchEquipmentById(userToken, recordUserId, id, { showToast = true } = {}) {
   try {
     const response = await api.get(`/api/equipments/${recordUserId}/${id}`, {
       headers: { Authorization: `Bearer ${userToken}` },
     });
     return response.data;
   } catch (err) {
-    if (err.response) {
-      const { status, data } = err.response;
-
-      if (status === 401) {
-        throw new Error('Your session has expired. Please log in again.');
-      }
-
-      if (data && data.message) {
-        throw new Error(`Error loading equipment: ${data.message}`);
-      }
+    let msg = 'Error loading equipment';
+    if (err.response?.status === 401) {
+      msg = 'Your session has expired. Please log in again.';
+    } else if (err.response?.data?.message || err.response?.data?.error) {
+      msg = err.response.data.message || err.response.data.error;
     }
-
-    throw new Error('An unexpected error occurred while loading equipment.');
+    if (showToast) showErrorToast(msg);
+    throw new Error(msg);
   }
 }
 
-export async function deleteEquipment(userToken, recordUserId, id) {
+export async function deleteEquipment(userToken, recordUserId, id, { showToast = true } = {}) {
   try {
-    const response = await api.delete(`api/equipments/${recordUserId}/${id}`, {
+    const response = await api.delete(`/api/equipments/${recordUserId}/${id}`, {
       headers: { Authorization: `Bearer ${userToken}` },
     });
+    if (showToast) showSuccessToast('Equipment deleted successfully.');
     return response.data;
   } catch (err) {
-    if (err.response) {
-      const { status, data } = err.response;
-
-      if (status === 401) {
-        throw new Error('Your session has expired. Please log in again.');
-      }
-
-      if (data && data.message) {
-        throw new Error(`${data.message}`);
-      }
+    let msg = 'Error deleting equipment';
+    if (err.response?.status === 401) {
+      msg = 'Your session has expired. Please log in again.';
+    } else if (err.response?.data?.message || err.response?.data?.error) {
+      msg = err.response.data.message || err.response.data.error;
     }
-    throw new Error('Error deleting equipment');
+    if (showToast) showErrorToast(msg);
+    throw new Error(msg);
   }
 }
 
-export async function addEquipment(userToken, dataInput) {
+export async function addEquipment(userToken, dataInput, { showToast = true } = {}) {
   try {
     const response = await api.post('/api/equipments', dataInput, {
       headers: { Authorization: `Bearer ${userToken}` },
     });
+    if (showToast) showSuccessToast('Equipment added successfully.');
     return response.data;
   } catch (err) {
-    if (err.response && err.response.status === 401) {
-      throw new Error('Your session has expired. Please log in again.');
+    let msg = 'Error adding equipment';
+    if (err.response?.status === 401) {
+      msg = 'Your session has expired. Please log in again.';
+    } else if (err.response?.data?.message || err.response?.data?.error) {
+      msg = err.response.data.message || err.response.data.error;
     }
-    throw new Error('Error adding equipment');
+    if (showToast) showErrorToast(msg);
+    throw new Error(msg);
   }
 }
 
-export async function updateEquipment(userToken, id, dataInput) {
+export async function updateEquipment(userToken, id, dataInput, { showToast = true } = {}) {
   try {
     const response = await api.put(`/api/equipments/${id}`, dataInput, {
       headers: { Authorization: `Bearer ${userToken}` },
     });
+    if (showToast) showSuccessToast('Equipment updated successfully.');
     return response.data;
   } catch (err) {
-    if (err.response && err.response.status === 401) {
-      throw new Error('Your session has expired. Please log in again.');
+    let msg = 'Error updating equipment';
+    if (err.response?.status === 401) {
+      msg = 'Your session has expired. Please log in again.';
+    } else if (err.response?.data?.message || err.response?.data?.error) {
+      msg = err.response.data.message || err.response.data.error;
     }
-    throw new Error('Error updating equipment');
+    if (showToast) showErrorToast(msg);
+    throw new Error(msg);
   }
 }
