@@ -2,7 +2,7 @@ from flask import Blueprint, request, jsonify
 from AuthTokenVerifier import token_required
 import openai
 import os
-
+from dotenv import load_dotenv
 
 class ChatGPT:
     def __init__(self, api_key: str):
@@ -37,6 +37,8 @@ def openai_route():
             return jsonify({"error": "No recipe provided"}), 400
 
         try:
+            load_dotenv()
+
             api_key = os.getenv('OPENAI_API_KEY')
 
             chatgpt = ChatGPT(api_key=api_key)

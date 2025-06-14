@@ -8,14 +8,13 @@ import Swal from 'sweetalert2';
 
 import schema from './schemas/formSchema';
 
-import { showSuccessToast, showErrorToast } from '../../utils/notifications';
+import { showErrorToast } from '../../utils/notifications';
 
-import api from '../../services/api';
 import { fetchFermentables } from '../../services/fermentables';
 import { fetchHops } from '../../services/hops';
 import { fetchMisc } from '../../services/misc';
 import { fetchYeasts } from '../../services/yeasts';
-import { fetchRecipeById } from '../../services/recipes';
+import { fetchRecipeById, addRecipe, updateRecipe } from '../../services/recipes';
 
 import getOpenAIResponse from '../../services/openAI';
 
@@ -118,29 +117,16 @@ export default function NewRecipe() {
   });
 
   const onValid = async (data) => {
-    console.log('caiu:', data);
     try {
-      const payload = {
-        ...data,
-      };
+      const payload = { ...data };
 
       if (isEditing) {
-        await api.put(`/api/recipes/${id}`, payload, {
-          headers: {
-            Authorization: `Bearer ${user.token}`,
-          },
-        });
+        await updateRecipe(user.token, id, payload);
       } else {
-        await api.post('/api/recipes', payload, {
-          headers: {
-            Authorization: `Bearer ${user.token}`,
-          },
-        });
+        await addRecipe(user.token, payload);
       }
-
-      showSuccessToast('Recipe saved successfully.');
     } catch (err) {
-      showErrorToast('Error saving recipe. Please, try again.');
+      //
     }
   };
 
@@ -181,11 +167,10 @@ export default function NewRecipe() {
   // =======================
   const fetchRecipe = async (recipeID) => {
     try {
-      const recipeResponse = await fetchRecipeById(recipeID, user.token);
+      const recipeResponse = await fetchRecipeById(user.token, recipeID);
       reset(recipeResponse);
     } catch (error) {
-      console.error('Erro ao buscar a receita:', error);
-      showErrorToast('Erro ao carregar a receita. Tente novamente.');
+      //
     }
   };
 
@@ -313,9 +298,19 @@ export default function NewRecipe() {
   // Fetch OpenAI
   // =======================
   const fetchOpenAIResponse = async () => {
-    const values = getValues();
-    const openAIResponse = await getOpenAIResponse(values.recipe, user.token);
-    setOpenAI(openAIResponse);
+    const recipe = getValues();
+
+    if (!recipe?.style || typeof recipe !== 'object') {
+      showErrorToast('Recipe data is missing or invalid.');
+      return;
+    }
+
+    try {
+      const openAIResponse = await getOpenAIResponse(recipe, user.token);
+      setOpenAI(openAIResponse);
+    } catch (err) {
+      console.error('Error fetching OpenAI response:', err);
+    }
   };
 
   // =======================

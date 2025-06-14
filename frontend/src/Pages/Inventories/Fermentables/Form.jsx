@@ -10,7 +10,7 @@ import {
   addFermentable,
 } from '../../../services/fermentables';
 
-import { showErrorToast, showSuccessToast } from '../../../utils/notifications';
+import { showErrorToast } from '../../../utils/notifications';
 import AuthContext from '../../../context/AuthContext';
 
 import '../../../Styles/crud.css';
@@ -55,8 +55,7 @@ export default function NewFermentable() {
             potentialExtract: fermentable.potentialExtract || '',
           });
         })
-        .catch((err) => {
-          showErrorToast(`Error loading fermentable record. ${err}`);
+        .catch(() => {
           navigate('/FermentableList');
         });
     }
@@ -77,14 +76,12 @@ export default function NewFermentable() {
     try {
       if (isEditing) {
         await updateFermentable(user.token, id, payload);
-        showSuccessToast('Fermentable has been updated.');
       } else {
         await addFermentable(user.token, payload);
-        showSuccessToast('Added new fermentable successfully.');
       }
       navigate('/FermentableList');
     } catch (err) {
-      showErrorToast(`Error saving fermentable record: ${err.message}`);
+      //
     }
   };
 

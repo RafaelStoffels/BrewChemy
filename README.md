@@ -86,6 +86,7 @@ npm start
 | `DB_HOST`                    | Database´s host                          | Yes      | `localhost`                              |
 | `DB_PORT`                    | Database´s port number                   | Yes      | `db_port_number`                         |
 | `DB_NAME`                    | Database´s name                          | Yes      | `brewchemy`                              |
+| `OPENAI_API_KEY`             | openAI key to activate AI                | No       | `openAI_key`                             |
 ```
 
 ### Frontend
@@ -104,6 +105,7 @@ BrewChemy/
 ├── backend/
 │   ├── app.py
 │   └── routes/
+│   └── schemas/
 ├── frontend/
 │   ├── src/
 │   │   ├── Components/

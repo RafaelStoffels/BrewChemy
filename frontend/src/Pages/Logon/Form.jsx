@@ -4,6 +4,7 @@ import { FiLogIn } from 'react-icons/fi';
 
 import { showErrorToast } from '../../utils/notifications';
 import api from '../../services/api';
+import { me } from '../../services/users';
 
 import AuthContext from '../../context/AuthContext';
 
@@ -25,7 +26,10 @@ export default function Logon() {
       const response = await api.post('api/login', { email, password });
       const { token } = response.data;
 
-      login({ token });
+      const userInfo = await me(token);
+      const fullUser = { ...userInfo, token };
+
+      login(fullUser);
       navigate('/RecipeList');
     } catch (error) {
       if (error.response) {
@@ -49,12 +53,13 @@ export default function Logon() {
   useEffect(() => {
     const handleRedirectLogin = async () => {
       const token = searchParams.get('token');
+      if (!token) return;
 
-      const success = await login({ token });
+      const userInfo = await me(token);
+      const fullUser = { ...userInfo, token };
 
-      if (success) {
-        navigate('/RecipeList');
-      }
+      login(fullUser);
+      navigate('/RecipeList');
     };
 
     handleRedirectLogin();

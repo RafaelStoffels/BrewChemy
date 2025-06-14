@@ -6,8 +6,8 @@ import { SidebarProvider } from './context/SidebarContext';
 
 import CreateAccount from './Pages/Logon/CreateAccount';
 import ChangePassword from './Pages/Logon/ChangePassword';
-import ForgotPassword from './Pages/Logon/ForgotPassword';
-import Logon from './Pages/Logon';
+import ForgotPassword from './Pages/Logon/ForgotPassword/Form';
+import Logon from './Pages/Logon/Form';
 import Main from './Pages/Main';
 import EquipmentList from './Pages/Equipments/List';
 import Equipment from './Pages/Equipments/Form';

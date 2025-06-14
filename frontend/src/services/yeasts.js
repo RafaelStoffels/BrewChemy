@@ -1,6 +1,7 @@
 import api from './api';
+import { showErrorToast, showSuccessToast } from '../utils/notifications';
 
-export async function searchYeasts(userToken, term) {
+export async function searchYeasts(userToken, term, { showToast = true } = {}) {
   try {
     const response = await api.get('/api/yeasts/search', {
       headers: { Authorization: `Bearer ${userToken}` },
@@ -8,96 +9,104 @@ export async function searchYeasts(userToken, term) {
     });
     return response.data;
   } catch (err) {
-    if (err.response && err.response.status === 401) {
-      throw new Error('Your session has expired. Please log in again.');
+    let msg = 'Error loading yeasts';
+    if (err.response?.status === 401) {
+      msg = 'Your session has expired. Please log in again.';
     }
-    throw new Error('Error loading yeasts');
+    if (showToast) showErrorToast(msg);
+    throw new Error(msg);
   }
 }
 
-export async function fetchYeasts(userToken) {
+export async function fetchYeasts(userToken, { showToast = true } = {}) {
   try {
-    const response = await api.get('api/yeasts', {
+    const response = await api.get('/api/yeasts', {
       headers: { Authorization: `Bearer ${userToken}` },
     });
     return response.data;
   } catch (err) {
-    if (err.response && err.response.status === 401) {
-      throw new Error('Your session has expired. Please log in again.');
+    let msg = 'Error loading yeasts';
+    if (err.response?.status === 401) {
+      msg = 'Your session has expired. Please log in again.';
     }
-    throw new Error('Error loading yeasts');
+    if (showToast) showErrorToast(msg);
+    throw new Error(msg);
   }
 }
 
-export async function fetchYeastById(userToken, recordUserId, id) {
+export async function fetchYeastById(userToken, recordUserId, id, { showToast = true } = {}) {
   try {
     const response = await api.get(`/api/yeasts/${recordUserId}/${id}`, {
       headers: { Authorization: `Bearer ${userToken}` },
     });
     return response.data;
   } catch (err) {
+    let msg = 'An unexpected error occurred while loading yeast.';
     if (err.response) {
       const { status, data } = err.response;
-
       if (status === 401) {
-        throw new Error('Your session has expired. Please log in again.');
-      }
-
-      if (data && data.message) {
-        throw new Error(`Error loading yeast: ${data.message}`);
+        msg = 'Your session has expired. Please log in again.';
+      } else if (data?.message) {
+        msg = `Error loading yeast: ${data.message}`;
       }
     }
-
-    throw new Error('An unexpected error occurred while loading yeast.');
+    if (showToast) showErrorToast(msg);
+    throw new Error(msg);
   }
 }
 
-export async function deleteYeast(userToken, recordUserId, id) {
+export async function deleteYeast(userToken, recordUserId, id, { showToast = true } = {}) {
   try {
-    const response = await api.delete(`api/yeasts/${recordUserId}/${id}`, {
+    const response = await api.delete(`/api/yeasts/${recordUserId}/${id}`, {
       headers: { Authorization: `Bearer ${userToken}` },
     });
+    if (showToast) showSuccessToast('Yeast deleted successfully.');
     return response.data;
   } catch (err) {
+    let msg = 'Error deleting yeast';
     if (err.response) {
       const { status, data } = err.response;
-
       if (status === 401) {
-        throw new Error('Your session has expired. Please log in again.');
-      }
-
-      if (data && data.message) {
-        throw new Error(`${data.message}`);
+        msg = 'Your session has expired. Please log in again.';
+      } else if (data?.message) {
+        msg = data.message;
       }
     }
-    throw new Error('Error deleting yeast');
+    if (showToast) showErrorToast(msg);
+    throw new Error(msg);
   }
 }
 
-export async function addYeast(userToken, dataInput) {
+export async function addYeast(userToken, dataInput, { showToast = true } = {}) {
   try {
     const response = await api.post('/api/yeasts', dataInput, {
       headers: { Authorization: `Bearer ${userToken}` },
     });
+    if (showToast) showSuccessToast('Yeast added successfully.');
     return response.data;
   } catch (err) {
-    if (err.response && err.response.status === 401) {
-      throw new Error('Your session has expired. Please log in again.');
+    let msg = 'Error adding yeast';
+    if (err.response?.status === 401) {
+      msg = 'Your session has expired. Please log in again.';
     }
-    throw new Error('Error adding yeast');
+    if (showToast) showErrorToast(msg);
+    throw new Error(msg);
   }
 }
 
-export async function updateYeast(userToken, id, dataInput) {
+export async function updateYeast(userToken, id, dataInput, { showToast = true } = {}) {
   try {
     const response = await api.put(`/api/yeasts/${id}`, dataInput, {
       headers: { Authorization: `Bearer ${userToken}` },
     });
+    if (showToast) showSuccessToast('Yeast updated successfully.');
     return response.data;
   } catch (err) {
-    if (err.response && err.response.status === 401) {
-      throw new Error('Your session has expired. Please log in again.');
+    let msg = 'Error updating yeast';
+    if (err.response?.status === 401) {
+      msg = 'Your session has expired. Please log in again.';
     }
-    throw new Error('Error updating yeast');
+    if (showToast) showErrorToast(msg);
+    throw new Error(msg);
   }
 }
