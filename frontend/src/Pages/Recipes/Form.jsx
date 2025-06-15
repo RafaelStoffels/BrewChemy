@@ -13,10 +13,9 @@ import { showErrorToast } from '../../utils/notifications';
 import useAuthRedirect from '../../hooks/useAuthRedirect';
 import useFormMode from '../../hooks/useFormMode';
 
-import { fetchFermentables } from '../../services/fermentables';
-import { fetchHops } from '../../services/hops';
-import { fetchMisc } from '../../services/misc';
-import { fetchYeasts } from '../../services/yeasts';
+import useRecipeCalculations from './hooks/useRecipeCalculations';
+import useIngredientModals from './hooks/useIngredientModals';
+
 import { fetchRecipeById, addRecipe, updateRecipe } from '../../services/recipes';
 
 import getOpenAIResponse from '../../services/openAI';
@@ -31,11 +30,6 @@ import {
   UpdateFermentableModal, UpdateHopModal, UpdateMiscModal, UpdateYeastModal,
 } from './FormModals';
 
-import {
-  calculateOG, calculateFG, calculateIBU, calculateEBC, getPreBoilVolume, getIngredientsPorcentage,
-} from './utils/calculation';
-
-import getBeerColor from './utils/getBeerColor';
 import beerStyles from './utils/getBeerStyles';
 
 import OGBar from './Components/Indicators';
@@ -49,31 +43,25 @@ export default function NewRecipe() {
 
   const { isEditing, isView } = useFormMode();
 
-  /* Modals */
-  const [activeModal, setActiveModal] = useState(null);
-
-  const MODALS = {
-    FERMENTABLE: 'fermentable',
-    HOP: 'hop',
-    MISC: 'misc',
-    YEAST: 'yeast',
-    CHANGE_EQUIPMENT: 'change_equipment',
-    UPDATE_FERMENTABLE: 'update_fermentable',
-    UPDATE_HOP: 'update_hop',
-    UPDATE_MISC: 'update_misc',
-    UPDATE_YEAST: 'update_yeast',
-  };
-
-  const [selectedFermentable, setSelectedFermentable] = useState(null);
-  const [selectedHop, setSelectedHop] = useState(null);
-  const [selectedMisc, setSelectedMisc] = useState(null);
-  const [selectedYeast, setSelectedYeast] = useState(null);
-
-  /* Lists */
-  const [fermentableList, setFermentableList] = useState([]);
-  const [hopList, setHopList] = useState([]);
-  const [miscList, setMiscList] = useState([]);
-  const [yeastList, setYeastList] = useState([]);
+  // Ingredients Modals
+  const {
+    activeModal,
+    openModal,
+    closeModal,
+    fermentableList,
+    hopList,
+    miscList,
+    yeastList,
+    selectedFermentable,
+    setSelectedFermentable,
+    selectedHop,
+    setSelectedHop,
+    selectedMisc,
+    setSelectedMisc,
+    selectedYeast,
+    setSelectedYeast,
+    MODALS,
+  } = useIngredientModals(user.token);
 
   /* Dinamic Variables */
   const [OG, setOG] = useState('');
@@ -138,30 +126,6 @@ export default function NewRecipe() {
       showErrorToast(firstError.message);
     }
   };
-
-  // =======================
-  // Open/Close Modals
-  // =======================
-  const openModal = async (type) => {
-    setActiveModal(type);
-
-    const loaders = {
-      [MODALS.FERMENTABLE]: async () => setFermentableList(await fetchFermentables(user.token)),
-      [MODALS.HOP]: async () => setHopList(await fetchHops(user.token)),
-      [MODALS.MISC]: async () => setMiscList(await fetchMisc(user.token)),
-      [MODALS.YEAST]: async () => setYeastList(await fetchYeasts(user.token)),
-    };
-
-    if (loaders[type]) {
-      try {
-        await loaders[type]();
-      } catch (err) {
-        showErrorToast('Erro ao carregar dados do modal.');
-      }
-    }
-  };
-
-  const closeModal = () => setActiveModal(null);
 
   // =======================
   // Fetch Recipe
@@ -350,99 +314,25 @@ export default function NewRecipe() {
     }
   }, [watchedStyle]);
 
-  useEffect(() => {
-    const recipeData = getValues();
-
-    // calculateOG
-    const OGResult = calculateOG(recipeData);
-    setOG(OGResult);
-
-    // calculateFG
-    const FGResult = calculateFG(recipeData, OGResult);
-    setFG(FGResult);
-
-    if (!recipeData.recipeFermentables?.length) {
-      setABV(0);
-    }
-
-    // calculateIBU
-    const IBUresult = calculateIBU(recipeData, OGResult);
-    if (IBUresult && IBUresult.totalIBU) {
-      const { totalIBU, hasChanges, updatedHops } = IBUresult;
-
-      setIBU(parseFloat(totalIBU));
-
-      if (hasChanges) {
-        const currentHops = getValues('recipeHops');
-
-        if (JSON.stringify(currentHops) !== JSON.stringify(updatedHops)) {
-          setValue('recipeHops', updatedHops);
-        }
-      }
-    } else {
-      setIBU(0);
-    }
-
-    // calculateGU and BU:GU
-    const GU = (OGResult - 1) * 1000;
-    if (IBU) {
-      setBUGU((IBU / GU).toFixed(2));
-    }
-
-    if (recipeData?.recipeFermentables?.length) {
-      const newPercentages = getIngredientsPorcentage(recipeData.recipeFermentables);
-
-      const currentPercentages = getValues('recipeFermentables');
-
-      if (JSON.stringify(currentPercentages) !== JSON.stringify(newPercentages)) {
-        setValue('recipeFermentables', newPercentages);
-      }
-    }
-  }, [watchedBatchVolume, watchedEfficiency, recipeFermentables, IBU]);
-
-  useEffect(() => {
-    const recipeData = getValues();
-
-    // getPreBoilVolume
-    const preBoilCalc = getPreBoilVolume(recipeData);
-    if (preBoilCalc > 0) {
-      setpreBoilVolume(preBoilCalc);
-    }
-  }, [watchedBatchVolume, watchedBoilTime, recipeEquipment]);
-
-  useEffect(() => {
-    const recipeData = getValues();
-
-    // calculateEBC
-    const EBCResult = calculateEBC(recipeData);
-    setEBC(EBCResult);
-
-    if (EBCResult) {
-      const color = getBeerColor(EBC);
-
-      const svgObject = document.querySelector('.beer-object');
-
-      if (svgObject && svgObject.contentDocument) {
-        const svgDoc = svgObject.contentDocument;
-        const gradients = svgDoc.querySelectorAll('linearGradient, radialGradient');
-
-        gradients.forEach((gradient) => {
-          const stops = gradient.querySelectorAll('stop');
-
-          stops.forEach((stop) => {
-            stop.setAttribute('stop-color', color);
-          });
-        });
-      }
-    }
-  }, [watchedBatchVolume, recipeFermentables]);
-
-  useEffect(() => {
-    if (OG && FG) {
-      const abvValue = ((OG - FG) * 131.25).toFixed(2);
-      setABV(abvValue > 0 ? abvValue : 0);
-    }
-  }, [OG, FG]);
+  useRecipeCalculations({
+    watchedBatchVolume,
+    watchedEfficiency,
+    watchedBoilTime,
+    recipeEquipment,
+    recipeFermentables,
+    IBU,
+    OG,
+    FG,
+    setOG,
+    setFG,
+    setEBC,
+    setIBU,
+    setABV,
+    setBUGU,
+    setpreBoilVolume,
+    getValues,
+    setValue,
+  });
 
   return (
     <div>
