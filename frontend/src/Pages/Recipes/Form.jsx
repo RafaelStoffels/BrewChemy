@@ -1,36 +1,33 @@
+// React and libraries
 import React, { useState, useEffect, useContext } from 'react';
 import { useParams } from 'react-router-dom';
-
 import { FiTrash2, FiEdit, FiRepeat } from 'react-icons/fi';
 import Swal from 'sweetalert2';
 
-import { showErrorToast } from '../../utils/notifications';
-
+// Context and hooks
+import AuthContext from '../../context/AuthContext';
 import useAuthRedirect from '../../hooks/useAuthRedirect';
 import useFormMode from '../../hooks/useFormMode';
-
-import useRecipeCalculations from './hooks/useRecipeCalculations';
 import useIngredientModals from './hooks/useIngredientModals';
 import useRecipeForm from './hooks/useRecipeForm';
+import useRecipeCalculations from './hooks/useRecipeCalculations';
 
+// Utils and services
 import { fetchRecipeById } from '../../services/recipes';
-
 import getOpenAIResponse from '../../services/openAI';
+import { showErrorToast } from '../../utils/notifications';
 
-import AuthContext from '../../context/AuthContext';
-
+// Components
 import Sidebar from '../../Components/Sidebar';
-
 import {
   AddFermentableModal, AddHopModal, AddMiscModal, AddYeastModal,
   ChangeEquipmentModal,
   UpdateFermentableModal, UpdateHopModal, UpdateMiscModal, UpdateYeastModal,
 } from './FormModals';
-
-import beerStyles from './utils/getBeerStyles';
-
 import OGBar from './Components/Indicators';
 
+// Styles
+import beerStyles from './utils/getBeerStyles';
 import './Form.css';
 
 export default function NewRecipe() {
@@ -172,14 +169,14 @@ export default function NewRecipe() {
   // =======================
   // Item Update Functions
   // =======================
-  const handleUpdateIngredient = (type, updatedItem) => {
-    const fieldMap = {
-      fermentable: 'recipeFermentables',
-      hop: 'recipeHops',
-      misc: 'recipeMisc',
-      yeast: 'recipeYeasts',
-    };
+  const fieldMap = {
+    fermentable: 'recipeFermentables',
+    hop: 'recipeHops',
+    misc: 'recipeMisc',
+    yeast: 'recipeYeasts',
+  };
 
+  const handleUpdateIngredient = (type, updatedItem) => {
     const fieldName = fieldMap[type];
     if (!fieldName) return;
 
@@ -193,13 +190,6 @@ export default function NewRecipe() {
   // Item Delete Functions
   // =======================
   const handleDeleteIngredient = (type, itemId) => {
-    const fieldMap = {
-      fermentable: 'recipeFermentables',
-      hop: 'recipeHops',
-      misc: 'recipeMisc',
-      yeast: 'recipeYeasts',
-    };
-
     const fieldName = fieldMap[type];
     if (!fieldName) return;
 
@@ -295,6 +285,7 @@ export default function NewRecipe() {
                   <label htmlFor="name">
                     Recipe Name
                     <input
+                      id="name"
                       name="name"
                       {...register('name')}
                       disabled={isView}
@@ -306,6 +297,7 @@ export default function NewRecipe() {
                   <label htmlFor="author">
                     Author
                     <input
+                      id="author"
                       name="author"
                       {...register('author')}
                       disabled={isView}
@@ -317,7 +309,7 @@ export default function NewRecipe() {
                   <label htmlFor="style">
                     Style
                     <select
-                      id="beer-style"
+                      id="style"
                       value={selectedStyle.name || ''}
                       onChange={(e) => {
                         const selectedName = e.target.value;
@@ -357,6 +349,7 @@ export default function NewRecipe() {
                   <label htmlFor="creationDate">
                     Creation Date
                     <input
+                      id="creationDate"
                       name="creationDate"
                       {...register('creationDate')}
                       disabled={isView}
@@ -370,6 +363,7 @@ export default function NewRecipe() {
                   <label htmlFor="description">
                     Description
                     <textarea
+                      id="description"
                       className="description-textarea"
                       name="description"
                       {...register('description')}
@@ -381,6 +375,7 @@ export default function NewRecipe() {
               <div className="inputs-row">
                 <div className="input-field no-flex">
                   <button
+                    id=""
                     type="button"
                     className="transparent-button"
                     onClick={() => openModal(MODALS.CHANGE_EQUIPMENT)}
@@ -389,9 +384,10 @@ export default function NewRecipe() {
                   </button>
                 </div>
                 <div className="input-field">
-                  <label htmlFor="recipeEquipment.name">
+                  <label htmlFor="equipment">
                     Equipment
                     <input
+                      id="equipment"
                       name="equipment"
                       {...register('recipeEquipment.name')}
                       disabled={isView}
@@ -403,6 +399,7 @@ export default function NewRecipe() {
                   <label htmlFor="batchVolume">
                     Batch Volume
                     <input
+                      id="batchVolume"
                       name="batchVolume"
                       type="number"
                       {...register('recipeEquipment.batchVolume')}
@@ -415,6 +412,7 @@ export default function NewRecipe() {
                   <label htmlFor="batchTime">
                     Batch Time
                     <input
+                      id="batchTime"
                       name="batchTime"
                       type="number"
                       {...register('recipeEquipment.batchTime')}
@@ -424,10 +422,11 @@ export default function NewRecipe() {
                   </label>
                 </div>
                 <div className="input-field">
-                  <label htmlFor="efficiency">
+                  <label htmlFor="brewEfficiency">
                     Brew. Efficiency
                     <input
-                      name="efficiency"
+                      id="brewEfficiency"
+                      name="brewEfficiency"
                       type="number"
                       {...register('recipeEquipment.efficiency')}
                       disabled={isView}
@@ -436,10 +435,11 @@ export default function NewRecipe() {
                   </label>
                 </div>
                 <div className="input-field">
-                  <label htmlFor="efficiency">
+                  <label htmlFor="mashEfficiency">
                     Mash Efficiency
                     <input
-                      name="efficiency"
+                      id="mashEfficiency"
+                      name="mashEfficiency"
                       type="number"
                       {...register('recipeEquipment.efficiency')}
                       disabled={isView}
@@ -451,6 +451,7 @@ export default function NewRecipe() {
                   <label htmlFor="preBoilVolume">
                     Pre Boil Volume
                     <input
+                      id="preBoilVolume"
                       name="preBoilVolume"
                       type="number"
                       value={preBoilVolume}
@@ -464,6 +465,7 @@ export default function NewRecipe() {
                   <label htmlFor="boilTime">
                     Boil Time
                     <input
+                      id="boilTime"
                       name="boilTime"
                       type="number"
                       {...register('recipeEquipment.boilTime')}
