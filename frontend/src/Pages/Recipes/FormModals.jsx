@@ -767,9 +767,9 @@ export function UpdateFermentableModal({
                       type: e.target.value,
                     }))}
                   >
-                    <option value="base">Base</option>
-                    <option value="especial">Specialty</option>
-                    <option value="adjunct">Adjunct</option>
+                    <option value="Base">Base</option>
+                    <option value="Specialty">Specialty</option>
+                    <option value="Adjunct">Adjunct</option>
                   </select>
                 </label>
               </div>
