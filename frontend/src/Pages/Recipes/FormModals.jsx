@@ -127,7 +127,12 @@ export function AddFermentableModal({ isOpen, closeModal, handleAddFermentableRe
             </div>
           </div>
         </div>
-        <button type="button" onClick={handleSaveButton} className="crud-save-button" style={{ marginTop: '70px' }}>
+        <button
+          type="button"
+          onClick={handleSaveButton}
+          className="crud-save-button"
+          style={{ marginTop: '70px' }}
+        >
           Add Fermentable
         </button>
       </form>
@@ -427,7 +432,12 @@ export function AddMiscModal({ isOpen, closeModal, handleAddMiscRecipe }) {
               </label>
             </div>
           </div>
-          <button type="button" onClick={handleSaveButton} className="crud-save-button" style={{ marginTop: '70px' }}>
+          <button
+            type="button"
+            onClick={handleSaveButton}
+            className="crud-save-button"
+            style={{ marginTop: '70px' }}
+          >
             Add Misc
           </button>
         </div>
@@ -552,7 +562,12 @@ export function AddYeastModal({ isOpen, closeModal, handleAddYeastRecipe }) {
               </label>
             </div>
           </div>
-          <button type="button" onClick={handleSaveButton} className="crud-save-button" style={{ marginTop: '70px' }}>
+          <button
+            type="button"
+            onClick={handleSaveButton}
+            className="crud-save-button"
+            style={{ marginTop: '70px' }}
+          >
             Add Yeast
           </button>
         </div>
@@ -643,8 +658,12 @@ export function ChangeEquipmentModal({ isOpen, closeModal, handleChangeEquipment
           </ul>
           )}
         </div>
-
-        <button onClick={handleSaveButton} type="submit" className="crud-save-button" style={{ marginTop: '150px' }}>
+        <button
+          onClick={handleSaveButton}
+          type="submit"
+          className="crud-save-button"
+          style={{ marginTop: '150px' }}
+        >
           Change Equipment
         </button>
       </div>
@@ -659,7 +678,7 @@ ChangeEquipmentModal.propTypes = {
 };
 
 export function UpdateFermentableModal({
-  isOpen, closeModal, selectedFermentable, handleUpdateFermentableRecipe,
+  isOpen, closeModal, selectedFermentable, onUpdate,
 }) {
   const [localFermentableObject, setLocalFermentableObject] = useState(null);
 
@@ -689,7 +708,7 @@ export function UpdateFermentableModal({
     try {
       await updateFermentableSchema.validate(localFermentableObject, { abortEarly: false });
 
-      handleUpdateFermentableRecipe(localFermentableObject);
+      onUpdate(localFermentableObject);
 
       closeModal();
     } catch (err) {
@@ -816,11 +835,11 @@ UpdateFermentableModal.propTypes = {
   isOpen: PropTypes.bool.isRequired,
   closeModal: PropTypes.func.isRequired,
   selectedFermentable: PropTypes.func.isRequired,
-  handleUpdateFermentableRecipe: PropTypes.func.isRequired,
+  onUpdate: PropTypes.func.isRequired,
 };
 
 export function UpdateHopModal({
-  isOpen, closeModal, selectedHop, handleUpdateHopRecipe,
+  isOpen, closeModal, selectedHop, onUpdate,
 }) {
   const [localHopObject, setLocalHopObject] = useState(null);
 
@@ -850,7 +869,7 @@ export function UpdateHopModal({
     try {
       await updateHopSchema.validate(localHopObject, { abortEarly: false });
 
-      handleUpdateHopRecipe(localHopObject);
+      onUpdate(localHopObject);
 
       closeModal();
     } catch (err) {
@@ -983,11 +1002,11 @@ UpdateHopModal.propTypes = {
   isOpen: PropTypes.bool.isRequired,
   closeModal: PropTypes.func.isRequired,
   selectedHop: PropTypes.func.isRequired,
-  handleUpdateHopRecipe: PropTypes.func.isRequired,
+  onUpdate: PropTypes.func.isRequired,
 };
 
 export function UpdateMiscModal({
-  isOpen, closeModal, selectedMisc, handleUpdateMiscRecipe,
+  isOpen, closeModal, selectedMisc, onUpdate,
 }) {
   const [localMiscObject, setLocalMiscObject] = useState(null);
 
@@ -1016,7 +1035,7 @@ export function UpdateMiscModal({
     try {
       await updateMiscSchema.validate(localMiscObject, { abortEarly: false });
 
-      handleUpdateMiscRecipe(localMiscObject);
+      onUpdate(localMiscObject);
 
       closeModal();
     } catch (err) {
@@ -1147,11 +1166,11 @@ UpdateMiscModal.propTypes = {
   isOpen: PropTypes.bool.isRequired,
   closeModal: PropTypes.func.isRequired,
   selectedMisc: PropTypes.func.isRequired,
-  handleUpdateMiscRecipe: PropTypes.func.isRequired,
+  onUpdate: PropTypes.func.isRequired,
 };
 
 export function UpdateYeastModal({
-  isOpen, closeModal, selectedYeast, handleUpdateYeastRecipe,
+  isOpen, closeModal, selectedYeast, onUpdate,
 }) {
   const [localYeastObject, setLocalYeastObject] = useState(null);
 
@@ -1194,7 +1213,7 @@ export function UpdateYeastModal({
     try {
       await updateYeastSchema.validate(yeastFromRefs, { abortEarly: false });
 
-      handleUpdateYeastRecipe(yeastFromRefs);
+      onUpdate(yeastFromRefs);
 
       closeModal();
     } catch (err) {
@@ -1357,5 +1376,5 @@ UpdateYeastModal.propTypes = {
   isOpen: PropTypes.bool.isRequired,
   closeModal: PropTypes.func.isRequired,
   selectedYeast: PropTypes.func.isRequired,
-  handleUpdateYeastRecipe: PropTypes.func.isRequired,
+  onUpdate: PropTypes.func.isRequired,
 };

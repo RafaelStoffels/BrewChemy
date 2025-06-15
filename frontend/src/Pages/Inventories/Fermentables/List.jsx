@@ -3,8 +3,10 @@ import { useNavigate } from 'react-router-dom';
 
 import ItemListPage from '../../../Components/ItemListPage';
 
+import useAuthRedirect from '../../../hooks/useAuthRedirect';
+
 import { searchFermentables, fetchFermentables, deleteFermentable } from '../../../services/fermentables';
-import { showInfoToast, showErrorToast, showSuccessToast } from '../../../utils/notifications';
+import { showInfoToast, showErrorToast } from '../../../utils/notifications';
 
 import AuthContext from '../../../context/AuthContext';
 
@@ -15,7 +17,6 @@ export default function FermentableList() {
 
   const onSearch = async (term) => {
     try {
-      showInfoToast('Searching data...');
       const result = await searchFermentables(user.token, term);
 
       if (Array.isArray(result) && result.length === 0) {
@@ -35,9 +36,8 @@ export default function FermentableList() {
     try {
       await deleteFermentable(user.token, userId, id);
       setItemList((prev) => prev.filter((item) => item.id !== id));
-      showSuccessToast('Fermentable deleted.');
     } catch (err) {
-      showErrorToast(`${err}`);
+      //
     }
   };
 
@@ -65,25 +65,26 @@ export default function FermentableList() {
     </>
   );
 
+  // =======================
+  // useEffects
+  // =======================
+  useAuthRedirect(user);
+
   useEffect(() => {
-    if (!user) {
-      navigate('/');
-    } else {
-      const loadItems = async () => {
-        try {
-          const result = await fetchFermentables(user.token);
-          setItemList(result);
-        } catch (err) {
-          showErrorToast('Error loading fermentables');
-        }
-      };
-      loadItems();
-    }
-  }, [user, navigate]);
+    const loadItems = async () => {
+      try {
+        const result = await fetchFermentables(user.token);
+        setItemList(result);
+      } catch (err) {
+        showErrorToast('Error loading fermentables');
+      }
+    };
+    loadItems();
+  }, [user]);
 
   return (
     <ItemListPage
-      title="Fermentables"
+      title="Fermentable"
       itemList={itemList}
       onSearch={onSearch}
       onDetails={onDetails}

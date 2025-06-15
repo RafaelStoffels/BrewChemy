@@ -1,11 +1,15 @@
-import React, { useEffect, useContext, useState } from 'react';
+import React, { useEffect, useContext } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import schema from './schema';
 
+import useAuthRedirect from '../../../hooks/useAuthRedirect';
+import useFormMode from '../../../hooks/useFormMode';
+
 import { fetchHopById, updateHop, addHop } from '../../../services/hops';
 import { showErrorToast } from '../../../utils/notifications';
+import getFormTitle from '../../../utils/formTitle';
 
 import AuthContext from '../../../context/AuthContext';
 
@@ -16,8 +20,7 @@ export default function NewHop() {
   const { recordUserId, id } = useParams();
   const navigate = useNavigate();
 
-  const [isEditing, setIsEditing] = useState(false);
-  const [isView, setIsView] = useState(false);
+  const { isEditing, isView } = useFormMode();
 
   const {
     register,
@@ -37,41 +40,36 @@ export default function NewHop() {
     },
   });
 
+  // =======================
+  // useEffects
+  // =======================
+  useAuthRedirect(user);
+
   useEffect(() => {
-    if (!user) {
-      navigate('/');
-      return;
-    }
+    const loadHop = async () => {
+      if (!id) return;
 
-    if (id) {
-      const isDetail = window.location.pathname.includes('/details');
-      setIsView(isDetail);
-      setIsEditing(!isDetail);
-
-      fetchHopById(user.token, recordUserId, id)
-        .then((hop) => {
-          reset({
-            name: hop.name || '',
-            supplier: hop.supplier || '',
-            description: hop.description || '',
-            countryOfOrigin: hop.countryOfOrigin || '',
-            type: hop.type || 'Pellet',
-            useType: hop.useType || 'Boil',
-            alphaAcidContent: hop.alphaAcidContent || '',
-            betaAcidContent: hop.betaAcidContent || '',
-          });
-        })
-        .catch(() => {
-          navigate('/HopList');
+      try {
+        const hop = await fetchHopById(user.token, recordUserId, id);
+        reset({
+          name: hop.name || '',
+          supplier: hop.supplier || '',
+          description: hop.description || '',
+          countryOfOrigin: hop.countryOfOrigin || '',
+          type: hop.type || 'Pellet',
+          useType: hop.useType || 'Boil',
+          alphaAcidContent: hop.alphaAcidContent || '',
+          betaAcidContent: hop.betaAcidContent || '',
         });
-    }
+      } catch {
+        navigate('/HopList');
+      }
+    };
+
+    loadHop();
   }, [id, user, navigate, recordUserId, reset]);
 
-  const getTitle = () => {
-    if (isEditing) return 'Update Hop';
-    if (isView) return 'Hop Details';
-    return 'Add New Hop';
-  };
+  const title = getFormTitle('Equipment', isEditing, isView);
 
   const onValid = async (data) => {
     const payload = {
@@ -102,7 +100,7 @@ export default function NewHop() {
     <div>
       <div className="crud-container">
         <section>
-          <h1>{getTitle()}</h1>
+          <h1>{title}</h1>
         </section>
         <div className="content">
           <form onSubmit={handleSubmit(onValid, onError)}>

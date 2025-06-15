@@ -4,8 +4,12 @@ import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import schema from './schema';
 
+import useAuthRedirect from '../../../hooks/useAuthRedirect';
+import useFormMode from '../../../hooks/useFormMode';
+
 import { fetchMiscById, updateMisc, addMisc } from '../../../services/misc';
 import { showErrorToast } from '../../../utils/notifications';
+import getFormTitle from '../../../utils/formTitle';
 
 import AuthContext from '../../../context/AuthContext';
 
@@ -16,9 +20,7 @@ export default function NewMisc() {
   const { recordUserId, id } = useParams();
   const navigate = useNavigate();
 
-  const isDetail = window.location.pathname.includes('/details');
-  const isEditing = !!id && !isDetail;
-  const isView = !!id && isDetail;
+  const { isEditing, isView } = useFormMode();
 
   const {
     register,
@@ -33,32 +35,31 @@ export default function NewMisc() {
     },
   });
 
-  useEffect(() => {
-    if (!user) {
-      navigate('/');
-      return;
-    }
+  // =======================
+  // useEffects
+  // =======================
+  useAuthRedirect(user);
 
-    if (id) {
-      fetchMiscById(user.token, recordUserId, id)
-        .then((misc) => {
-          reset({
-            name: misc.name || '',
-            description: misc.description || '',
-            type: misc.type || 'Flavor',
-          });
-        })
-        .catch(() => {
-          navigate('/MiscList');
+  useEffect(() => {
+    const loadMisc = async () => {
+      if (!id) return;
+
+      try {
+        const misc = await fetchMiscById(user.token, recordUserId, id);
+        reset({
+          name: misc.name || '',
+          description: misc.description || '',
+          type: misc.type || 'Flavor',
         });
-    }
+      } catch {
+        navigate('/MiscList');
+      }
+    };
+
+    loadMisc();
   }, [id, user, navigate, recordUserId, reset]);
 
-  const getTitle = () => {
-    if (isEditing) return 'Update Misc';
-    if (isView) return 'Misc Details';
-    return 'Add New Misc';
-  };
+  const title = getFormTitle('Equipment', isEditing, isView);
 
   const onValid = async (data) => {
     const payload = {
@@ -89,7 +90,7 @@ export default function NewMisc() {
     <div>
       <div className="crud-container">
         <section>
-          <h1>{getTitle()}</h1>
+          <h1>{title}</h1>
         </section>
         <div className="content">
           <form onSubmit={handleSubmit(onValid, onError)}>

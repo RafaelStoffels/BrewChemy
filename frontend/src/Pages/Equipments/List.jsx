@@ -3,8 +3,10 @@ import { useNavigate } from 'react-router-dom';
 
 import ItemListPage from '../../Components/ItemListPage';
 
+import useAuthRedirect from '../../hooks/useAuthRedirect';
+
 import { searchEquipments, fetchEquipments, deleteEquipment } from '../../services/equipments';
-import { showInfoToast, showErrorToast, showSuccessToast } from '../../utils/notifications';
+import { showInfoToast, showErrorToast } from '../../utils/notifications';
 import AuthContext from '../../context/AuthContext';
 
 export default function EquipmentList() {
@@ -14,7 +16,6 @@ export default function EquipmentList() {
 
   const onSearch = async (term) => {
     try {
-      showInfoToast('Searching data...');
       const result = await searchEquipments(user.token, term);
 
       if (Array.isArray(result) && result.length === 0) {
@@ -34,7 +35,6 @@ export default function EquipmentList() {
     try {
       await deleteEquipment(user.token, userId, id);
       setItemList((prev) => prev.filter((item) => item.id !== id));
-      showSuccessToast('Equipment deleted.');
     } catch (err) {
       showErrorToast(`${err}`);
     }
@@ -44,25 +44,26 @@ export default function EquipmentList() {
     <p>{item.description}</p>
   );
 
+  // =======================
+  // useEffects
+  // =======================
+  useAuthRedirect(user);
+
   useEffect(() => {
-    if (!user) {
-      navigate('/');
-    } else {
-      const loadItems = async () => {
-        try {
-          const result = await fetchEquipments(user.token);
-          setItemList(result);
-        } catch (err) {
-          showErrorToast('Error loading equipments');
-        }
-      };
-      loadItems();
-    }
-  }, [user, navigate]);
+    const loadItems = async () => {
+      try {
+        const result = await fetchEquipments(user.token);
+        setItemList(result);
+      } catch (err) {
+        showErrorToast('Error loading equipments');
+      }
+    };
+    loadItems();
+  }, [user]);
 
   return (
     <ItemListPage
-      title="Equipments"
+      title="Equipment"
       itemList={itemList}
       onSearch={onSearch}
       onDetails={onDetails}

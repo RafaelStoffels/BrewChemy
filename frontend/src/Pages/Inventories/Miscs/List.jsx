@@ -3,8 +3,10 @@ import { useNavigate } from 'react-router-dom';
 
 import ItemListPage from '../../../Components/ItemListPage';
 
+import useAuthRedirect from '../../../hooks/useAuthRedirect';
+
 import { searchMiscs, fetchMisc, deleteMisc } from '../../../services/misc';
-import { showInfoToast, showErrorToast, showSuccessToast } from '../../../utils/notifications';
+import { showInfoToast, showErrorToast } from '../../../utils/notifications';
 
 import AuthContext from '../../../context/AuthContext';
 
@@ -15,7 +17,6 @@ export default function MiscList() {
 
   const onSearch = async (term) => {
     try {
-      showInfoToast('Searching data...');
       const result = await searchMiscs(user.token, term);
 
       if (Array.isArray(result) && result.length === 0) {
@@ -35,9 +36,8 @@ export default function MiscList() {
     try {
       await deleteMisc(user.token, userId, id);
       setItemList((prev) => prev.filter((item) => item.id !== id));
-      showSuccessToast('Misc deleted.');
     } catch (err) {
-      showErrorToast(`${err}`);
+      //
     }
   };
 
@@ -57,21 +57,22 @@ export default function MiscList() {
     </>
   );
 
+  // =======================
+  // useEffects
+  // =======================
+  useAuthRedirect(user);
+
   useEffect(() => {
-    if (!user) {
-      navigate('/');
-    } else {
-      const loadMisc = async () => {
-        try {
-          const miscs = await fetchMisc(user.token);
-          setItemList(miscs);
-        } catch {
-          showErrorToast('Error loading misc');
-        }
-      };
-      loadMisc();
-    }
-  }, [user, navigate]);
+    const loadMisc = async () => {
+      try {
+        const miscs = await fetchMisc(user.token);
+        setItemList(miscs);
+      } catch {
+        showErrorToast('Error loading misc');
+      }
+    };
+    loadMisc();
+  }, [user]);
 
   return (
     <ItemListPage
