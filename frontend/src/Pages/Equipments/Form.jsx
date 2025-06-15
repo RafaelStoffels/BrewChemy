@@ -4,10 +4,17 @@ import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import schema from './schema';
 
-import { fetchEquipmentById, updateEquipment, addEquipment } from '../../services/equipments';
+import useAuthRedirect from '../../hooks/useAuthRedirect';
+import useFormMode from '../../hooks/useFormMode';
+
+import {
+  fetchEquipmentById,
+  updateEquipment,
+  addEquipment,
+} from '../../services/equipments';
 
 import { showErrorToast } from '../../utils/notifications';
-
+import getFormTitle from '../../utils/formTitle';
 import AuthContext from '../../context/AuthContext';
 
 import '../../Styles/crud.css';
@@ -17,8 +24,7 @@ export default function NewEquipment() {
   const { recordUserId, id } = useParams();
   const navigate = useNavigate();
 
-  const [isEditing, setIsEditing] = React.useState(false);
-  const [isView, setIsView] = React.useState(false);
+  const { isEditing, isView } = useFormMode();
 
   const {
     register,
@@ -40,40 +46,35 @@ export default function NewEquipment() {
     },
   });
 
-  useEffect(() => {
-    if (!user) {
-      navigate('/');
-    } else if (id) {
-      const isDetail = window.location.pathname.includes('/details');
-      setIsView(isDetail);
-      setIsEditing(!isDetail);
+  useAuthRedirect(user);
 
-      fetchEquipmentById(user.token, recordUserId, id)
-        .then((equipment) => {
-          reset({
-            name: equipment.name || '',
-            description: equipment.description || '',
-            efficiency: equipment.efficiency || '',
-            batchVolume: equipment.batchVolume || '',
-            batchTime: equipment.batchTime || '',
-            boilTime: equipment.boilTime || '',
-            boilTemperature: equipment.boilTemperature || '',
-            boilOff: equipment.boilOff || '',
-            trubLoss: equipment.trubLoss || '',
-            deadSpace: equipment.deadSpace || '',
-          });
-        })
-        .catch(() => {
-          navigate('/EquipmentList');
+  useEffect(() => {
+    const loadEquipment = async () => {
+      if (!id) return;
+
+      try {
+        const equipment = await fetchEquipmentById(user.token, recordUserId, id);
+        reset({
+          name: equipment.name || '',
+          description: equipment.description || '',
+          efficiency: equipment.efficiency || '',
+          batchVolume: equipment.batchVolume || '',
+          batchTime: equipment.batchTime || '',
+          boilTime: equipment.boilTime || '',
+          boilTemperature: equipment.boilTemperature || '',
+          boilOff: equipment.boilOff || '',
+          trubLoss: equipment.trubLoss || '',
+          deadSpace: equipment.deadSpace || '',
         });
-    }
+      } catch {
+        navigate('/EquipmentList');
+      }
+    };
+
+    loadEquipment();
   }, [id, user, navigate, recordUserId, reset]);
 
-  const renderHeader = () => {
-    if (isEditing) return 'Update Equipment';
-    if (isView) return 'Equipment Details';
-    return 'Add New Equipment';
-  };
+  const title = getFormTitle('Equipment', isEditing, isView);
 
   const onValid = async (data) => {
     const payload = {
@@ -101,137 +102,115 @@ export default function NewEquipment() {
   };
 
   return (
-    <div>
-      <div className="crud-container">
-        <section>
-          <h1>{renderHeader()}</h1>
-        </section>
-        <div className="content">
-          <form onSubmit={handleSubmit(onValid, onError)}>
-            <div className="inputs-row">
-              <div className="input-field">
-                <label htmlFor="name">
-                  Name
-                  <input
-                    type="text"
-                    id="name"
-                    {...register('name')}
-                    disabled={isView}
-                  />
-                </label>
-              </div>
+    <div className="crud-container">
+      <section>
+        <h1>{title}</h1>
+      </section>
+      <div className="content">
+        <form onSubmit={handleSubmit(onValid, onError)}>
+          <div className="inputs-row">
+            <div className="input-field">
+              <label htmlFor="name">Name</label>
+              <input
+                id="name"
+                type="text"
+                {...register('name')}
+                disabled={isView}
+              />
             </div>
-            <div className="inputs-row">
-              <div className="input-field">
-                <label htmlFor="description">
-                  Description
-                  <textarea
-                    id="description"
-                    {...register('description')}
-                    disabled={isView}
-                  />
-                </label>
-              </div>
+            <div className="input-field">
+              <label htmlFor="efficiency">Efficiency</label>
+              <input
+                id="efficiency"
+                type="number"
+                {...register('efficiency')}
+                disabled={isView}
+              />
             </div>
-            <div className="inputs-row">
-              <div className="input-field">
-                <label htmlFor="batchVolume">
-                  Batch Volume
-                  <input
-                    id="batchVolume"
-                    type="number"
-                    {...register('batchVolume')}
-                    disabled={isView}
-                  />
-                </label>
-              </div>
-              <div className="input-field">
-                <label htmlFor="batchTime">
-                  Batch Time
-                  <input
-                    id="batchTime"
-                    type="number"
-                    {...register('batchTime')}
-                    disabled={isView}
-                  />
-                </label>
-              </div>
-              <div className="input-field">
-                <label htmlFor="boilTime">
-                  Boil Time
-                  <input
-                    id="boilTime"
-                    type="number"
-                    {...register('boilTime')}
-                    disabled={isView}
-                  />
-                </label>
-              </div>
-              <div className="input-field">
-                <label htmlFor="boilTemperature">
-                  Boil Temperature
-                  <input
-                    id="boilTemperature"
-                    type="number"
-                    {...register('boilTemperature')}
-                    disabled={isView}
-                  />
-                </label>
-              </div>
+          </div>
+          <div className="inputs-row">
+            <div className="input-field">
+              <label htmlFor="description">Description</label>
+              <textarea
+                id="description"
+                {...register('description')}
+                disabled={isView}
+              />
             </div>
-            <div className="inputs-row">
-              <div className="input-field">
-                <label htmlFor="efficiency">
-                  Efficiency
-                  <input
-                    id="efficiency"
-                    type="number"
-                    {...register('efficiency')}
-                    disabled={isView}
-                  />
-                </label>
-              </div>
-              <div className="input-field">
-                <label htmlFor="boilOff">
-                  Boil Off
-                  <input
-                    id="boilOff"
-                    type="number"
-                    {...register('boilOff')}
-                    disabled={isView}
-                  />
-                </label>
-              </div>
-              <div className="input-field">
-                <label htmlFor="trubLoss">
-                  Trub Loss
-                  <input
-                    id="trubLoss"
-                    type="number"
-                    {...register('trubLoss')}
-                    disabled={isView}
-                  />
-                </label>
-              </div>
-              <div className="input-field">
-                <label htmlFor="deadSpace">
-                  Dead Space
-                  <input
-                    id="deadSpace"
-                    type="number"
-                    {...register('deadSpace')}
-                    disabled={isView}
-                  />
-                </label>
-              </div>
+          </div>
+          <div className="inputs-row">
+            <div className="input-field">
+              <label htmlFor="batchVolume">Batch Volume</label>
+              <input
+                id="batchVolume"
+                type="number"
+                {...register('batchVolume')}
+                disabled={isView}
+              />
             </div>
-            {!isView && (
-              <button className="crud-save-button" type="submit">
-                Save
-              </button>
-            )}
-          </form>
-        </div>
+            <div className="input-field">
+              <label htmlFor="batchTime">Batch Time</label>
+              <input
+                id="batchTime"
+                type="number"
+                {...register('batchTime')}
+                disabled={isView}
+              />
+            </div>
+            <div className="input-field">
+              <label htmlFor="boilTime">Boil Time</label>
+              <input
+                id="boilTime"
+                type="number"
+                {...register('boilTime')}
+                disabled={isView}
+              />
+            </div>
+          </div>
+          <div className="inputs-row">
+            <div className="input-field">
+              <label htmlFor="boilTemperature">Boil Temperature</label>
+              <input
+                id="boilTemperature"
+                type="number"
+                {...register('boilTemperature')}
+                disabled={isView}
+              />
+            </div>
+            <div className="input-field">
+              <label htmlFor="boilOff">Boil Off</label>
+              <input
+                id="boilOff"
+                type="number"
+                {...register('boilOff')}
+                disabled={isView}
+              />
+            </div>
+            <div className="input-field">
+              <label htmlFor="trubLoss">Trub Loss</label>
+              <input
+                id="trubLoss"
+                type="number"
+                {...register('trubLoss')}
+                disabled={isView}
+              />
+            </div>
+            <div className="input-field">
+              <label htmlFor="deadSpace">Dead Space</label>
+              <input
+                id="deadSpace"
+                type="number"
+                {...register('deadSpace')}
+                disabled={isView}
+              />
+            </div>
+          </div>
+          {!isView && (
+            <button className="crud-save-button" type="submit">
+              Save
+            </button>
+          )}
+        </form>
       </div>
     </div>
   );

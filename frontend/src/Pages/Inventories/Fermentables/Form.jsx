@@ -4,6 +4,9 @@ import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import schema from './schema';
 
+import useAuthRedirect from '../../../hooks/useAuthRedirect';
+import useFormMode from '../../../hooks/useFormMode';
+
 import {
   fetchFermentableById,
   updateFermentable,
@@ -11,6 +14,7 @@ import {
 } from '../../../services/fermentables';
 
 import { showErrorToast } from '../../../utils/notifications';
+import getFormTitle from '../../../utils/formTitle';
 import AuthContext from '../../../context/AuthContext';
 
 import '../../../Styles/crud.css';
@@ -20,9 +24,7 @@ export default function NewFermentable() {
   const { recordUserId, id } = useParams();
   const navigate = useNavigate();
 
-  const isDetail = window.location.pathname.includes('/details');
-  const isEditing = id && !isDetail;
-  const isView = id && isDetail;
+  const { isEditing, isView } = useFormMode();
 
   const {
     register,
@@ -40,32 +42,34 @@ export default function NewFermentable() {
     },
   });
 
+  // =======================
+  // useEffects
+  // =======================
+  useAuthRedirect(user);
+
   useEffect(() => {
-    if (!user) {
-      navigate('/');
-    } else if (id) {
-      fetchFermentableById(user.token, recordUserId, id)
-        .then((fermentable) => {
-          reset({
-            name: fermentable.name || '',
-            supplier: fermentable.supplier || '',
-            description: fermentable.description || '',
-            type: fermentable.type || 'base',
-            ebc: fermentable.ebc || '',
-            potentialExtract: fermentable.potentialExtract || '',
-          });
-        })
-        .catch(() => {
-          navigate('/FermentableList');
+    const loadFermentable = async () => {
+      if (!id) return;
+
+      try {
+        const fermentable = await fetchFermentableById(user.token, recordUserId, id);
+        reset({
+          name: fermentable.name || '',
+          supplier: fermentable.supplier || '',
+          description: fermentable.description || '',
+          type: fermentable.type || 'base',
+          ebc: fermentable.ebc || '',
+          potentialExtract: fermentable.potentialExtract || '',
         });
-    }
+      } catch {
+        navigate('/FermentableList');
+      }
+    };
+
+    loadFermentable();
   }, [id, user, navigate, recordUserId, reset]);
 
-  const getTitle = () => {
-    if (isEditing) return 'Update Fermentable';
-    if (isView) return 'Fermentable Details';
-    return 'Add New Fermentable';
-  };
+  const title = getFormTitle('Equipment', isEditing, isView);
 
   const onValid = async (data) => {
     const payload = {
@@ -95,7 +99,7 @@ export default function NewFermentable() {
   return (
     <div className="crud-container">
       <section>
-        <h1>{getTitle()}</h1>
+        <h1>{title}</h1>
       </section>
       <div className="content">
         <form onSubmit={handleSubmit(onValid, onError)}>

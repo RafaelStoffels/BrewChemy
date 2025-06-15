@@ -4,8 +4,12 @@ import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import schema from './schema'; // <-- Aqui devem estar as regras do Yup
 
+import useAuthRedirect from '../../../hooks/useAuthRedirect';
+import useFormMode from '../../../hooks/useFormMode';
+
 import { fetchYeastById, updateYeast, addYeast } from '../../../services/yeasts';
 import { showErrorToast } from '../../../utils/notifications';
+import getFormTitle from '../../../utils/formTitle';
 
 import AuthContext from '../../../context/AuthContext';
 
@@ -16,9 +20,7 @@ export default function NewYeast() {
   const { recordUserId, id } = useParams();
   const navigate = useNavigate();
 
-  const isDetail = window.location.pathname.includes('/details');
-  const isEditing = !!id && !isDetail;
-  const isView = !!id && isDetail;
+  const { isEditing, isView } = useFormMode();
 
   const {
     register,
@@ -39,38 +41,37 @@ export default function NewYeast() {
     },
   });
 
-  useEffect(() => {
-    if (!user) {
-      navigate('/');
-      return;
-    }
+  // =======================
+  // useEffects
+  // =======================
+  useAuthRedirect(user);
 
-    if (id) {
-      fetchYeastById(user.token, recordUserId, id)
-        .then((yeast) => {
-          reset({
-            name: yeast.name || '',
-            manufacturer: yeast.manufacturer || '',
-            description: yeast.description || '',
-            flavorProfile: yeast.flavorProfile || '',
-            type: yeast.type || 'Ale',
-            form: yeast.form || 'Dry',
-            attenuation: yeast.attenuation || '',
-            temperatureRange: yeast.temperatureRange || '',
-            flocculation: yeast.flocculation || '',
-          });
-        })
-        .catch(() => {
-          navigate('/YeastList');
+  useEffect(() => {
+    const loadYeast = async () => {
+      if (!id) return;
+
+      try {
+        const yeast = await fetchYeastById(user.token, recordUserId, id);
+        reset({
+          name: yeast.name || '',
+          manufacturer: yeast.manufacturer || '',
+          description: yeast.description || '',
+          flavorProfile: yeast.flavorProfile || '',
+          type: yeast.type || 'Ale',
+          form: yeast.form || 'Dry',
+          attenuation: yeast.attenuation || '',
+          temperatureRange: yeast.temperatureRange || '',
+          flocculation: yeast.flocculation || '',
         });
-    }
+      } catch {
+        navigate('/YeastList');
+      }
+    };
+
+    loadYeast();
   }, [id, user, navigate, recordUserId, reset]);
 
-  const getTitle = () => {
-    if (isEditing) return 'Update Yeast';
-    if (isView) return 'Yeast Details';
-    return 'Add New Yeast';
-  };
+  const title = getFormTitle('Equipment', isEditing, isView);
 
   const onValid = async (data) => {
     const payload = {
@@ -101,7 +102,7 @@ export default function NewYeast() {
     <div>
       <div className="crud-container">
         <section>
-          <h1>{getTitle()}</h1>
+          <h1>{title}</h1>
         </section>
         <div className="content">
           <form onSubmit={handleSubmit(onValid, onError)}>

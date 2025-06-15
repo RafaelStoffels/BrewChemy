@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 
@@ -9,6 +9,9 @@ import Swal from 'sweetalert2';
 import schema from './schemas/formSchema';
 
 import { showErrorToast } from '../../utils/notifications';
+
+import useAuthRedirect from '../../hooks/useAuthRedirect';
+import useFormMode from '../../hooks/useFormMode';
 
 import { fetchFermentables } from '../../services/fermentables';
 import { fetchHops } from '../../services/hops';
@@ -34,6 +37,7 @@ import {
 
 import getBeerColor from './utils/getBeerColor';
 import beerStyles from './utils/getBeerStyles';
+
 import OGBar from './Components/Indicators';
 
 import './Form.css';
@@ -41,11 +45,9 @@ import './Form.css';
 export default function NewRecipe() {
   const { user } = useContext(AuthContext);
   const { id } = useParams();
-  const navigate = useNavigate();
   const generateId = () => `fermentable-${Date.now()}`;
 
-  const [isEditing, setIsEditing] = useState(false);
-  const [isView, setIsView] = useState(false);
+  const { isEditing, isView } = useFormMode();
 
   /* Modals */
   const [activeModal, setActiveModal] = useState(null);
@@ -131,7 +133,6 @@ export default function NewRecipe() {
   };
 
   const onError = (errors) => {
-    console.log('erro:', errors);
     const firstError = Object.values(errors)[0];
     if (firstError?.message) {
       showErrorToast(firstError.message);
@@ -245,53 +246,40 @@ export default function NewRecipe() {
   // =======================
   // Item Update Functions
   // =======================
-  const handleUpdateRecipeItem = (fieldName, updatedItem) => {
+  const handleUpdateIngredient = (type, updatedItem) => {
+    const fieldMap = {
+      fermentable: 'recipeFermentables',
+      hop: 'recipeHops',
+      misc: 'recipeMisc',
+      yeast: 'recipeYeasts',
+    };
+
+    const fieldName = fieldMap[type];
+    if (!fieldName) return;
+
     const currentItems = getValues(fieldName) || [];
-    const updatedItems = currentItems.map((item) => (
-      item.id === updatedItem.id ? updatedItem : item
-    ));
+    const updatedItems = currentItems.map((item) => (item.id === updatedItem.id ? updatedItem : item));
+
     setValue(fieldName, updatedItems);
-  };
-
-  const handleUpdateFermentableRecipe = (updatedFermentable) => {
-    handleUpdateRecipeItem('recipeFermentables', updatedFermentable);
-  };
-
-  const handleUpdateHopRecipe = (updatedHop) => {
-    handleUpdateRecipeItem('recipeHops', updatedHop);
-  };
-
-  const handleUpdateMiscRecipe = (updatedMisc) => {
-    handleUpdateRecipeItem('recipeMisc', updatedMisc);
-  };
-
-  const handleUpdateYeastRecipe = (updatedYeast) => {
-    handleUpdateRecipeItem('recipeYeasts', updatedYeast);
   };
 
   // =======================
   // Item Delete Functions
   // =======================
-  const handleDeleteRecipeItem = (fieldName, itemId) => {
+  const handleDeleteIngredient = (type, itemId) => {
+    const fieldMap = {
+      fermentable: 'recipeFermentables',
+      hop: 'recipeHops',
+      misc: 'recipeMisc',
+      yeast: 'recipeYeasts',
+    };
+
+    const fieldName = fieldMap[type];
+    if (!fieldName) return;
+
     const currentItems = getValues(fieldName) || [];
     const updatedItems = currentItems.filter((item) => item.id !== itemId);
     setValue(fieldName, updatedItems);
-  };
-
-  const handleDeleteFermentable = (fermentableId) => {
-    handleDeleteRecipeItem('recipeFermentables', fermentableId);
-  };
-
-  const handleDeleteHop = (hopId) => {
-    handleDeleteRecipeItem('recipeHops', hopId);
-  };
-
-  const handleDeleteMisc = (miscId) => {
-    handleDeleteRecipeItem('recipeMisc', miscId);
-  };
-
-  const handleDeleteYeast = (yeastId) => {
-    handleDeleteRecipeItem('recipeYeasts', yeastId);
   };
 
   // =======================
@@ -309,19 +297,17 @@ export default function NewRecipe() {
       const openAIResponse = await getOpenAIResponse(recipe, user.token);
       setOpenAI(openAIResponse);
     } catch (err) {
-      console.error('Error fetching OpenAI response:', err);
+      //
     }
   };
 
   // =======================
   // useEffects
   // =======================
+  useAuthRedirect(user);
+
   useEffect(() => {
-    if (!user) {
-      navigate('/');
-    } else if (id) {
-      setIsView(window.location.pathname.includes('/details'));
-      setIsEditing(!window.location.pathname.includes('/details'));
+    if (id) {
       fetchRecipe(id);
     }
   }, [id, user]);
@@ -555,7 +541,11 @@ export default function NewRecipe() {
               </div>
               <div className="inputs-row">
                 <div className="input-field no-flex">
-                  <button type="button" className="transparent-button" onClick={() => openModal(MODALS.CHANGE_EQUIPMENT)}>
+                  <button
+                    type="button"
+                    className="transparent-button"
+                    onClick={() => openModal(MODALS.CHANGE_EQUIPMENT)}
+                  >
                     <FiRepeat size={20} />
                   </button>
                 </div>
@@ -710,7 +700,11 @@ export default function NewRecipe() {
                         >
                           <FiEdit size={20} />
                         </button>
-                        <button onClick={() => handleDeleteFermentable(fermentable.id)} type="button" className="icon-button">
+                        <button
+                          type="button"
+                          className="icon-button"
+                          onClick={() => handleDeleteIngredient('fermentable', fermentable.id)}
+                        >
                           <FiTrash2 size={20} />
                         </button>
                       </td>
@@ -748,7 +742,11 @@ export default function NewRecipe() {
                         >
                           <FiEdit size={20} />
                         </button>
-                        <button onClick={() => handleDeleteHop(hop.id)} type="button" className="icon-button">
+                        <button
+                          type="button"
+                          className="icon-button"
+                          onClick={() => handleDeleteIngredient('hop', hop.id)}
+                        >
                           <FiTrash2 size={20} />
                         </button>
                       </td>
@@ -782,7 +780,11 @@ export default function NewRecipe() {
                         >
                           <FiEdit size={20} />
                         </button>
-                        <button onClick={() => handleDeleteMisc(misc.id)} type="button" className="icon-button">
+                        <button
+                          type="button"
+                          className="icon-button"
+                          onClick={() => handleDeleteIngredient('misc', misc.id)}
+                        >
                           <FiTrash2 size={20} />
                         </button>
                       </td>
@@ -816,7 +818,11 @@ export default function NewRecipe() {
                         >
                           <FiEdit size={20} />
                         </button>
-                        <button onClick={() => handleDeleteYeast(yeast.id)} type="button" className="icon-button">
+                        <button
+                          type="button"
+                          className="icon-button"
+                          onClick={() => handleDeleteIngredient('yeast', yeast.id)}
+                        >
                           <FiTrash2 size={20} />
                         </button>
                       </td>
@@ -932,7 +938,13 @@ export default function NewRecipe() {
                 overflow: 'hidden',
               }}
             />
-            <button type="button" onClick={fetchOpenAIResponse} className="ButtonMystical">Mystical Brew Wisdom</button>
+            <button
+              type="button"
+              className="ButtonMystical"
+              onClick={fetchOpenAIResponse}
+            >
+              Mystical Brew Wisdom
+            </button>
           </div>
           {!isView && (
             <button form="formSubmit" className="crud-save-button" type="submit">
@@ -1017,7 +1029,7 @@ export default function NewRecipe() {
             isOpen
             closeModal={closeModal}
             selectedFermentable={selectedFermentable}
-            handleUpdateFermentableRecipe={handleUpdateFermentableRecipe}
+            onUpdate={(updatedFermentable) => handleUpdateIngredient('fermentable', updatedFermentable)}
           />
         )}
         {activeModal === MODALS.UPDATE_HOP && (
@@ -1025,7 +1037,7 @@ export default function NewRecipe() {
             isOpen
             closeModal={closeModal}
             selectedHop={selectedHop}
-            handleUpdateHopRecipe={handleUpdateHopRecipe}
+            onUpdate={(updatedHop) => handleUpdateIngredient('hop', updatedHop)}
           />
         )}
         {activeModal === MODALS.UPDATE_MISC && (
@@ -1033,7 +1045,7 @@ export default function NewRecipe() {
             isOpen
             closeModal={closeModal}
             selectedMisc={selectedMisc}
-            handleUpdateMiscRecipe={handleUpdateMiscRecipe}
+            onUpdate={(updatedMisc) => handleUpdateIngredient('misc', updatedMisc)}
           />
         )}
         {activeModal === MODALS.UPDATE_YEAST && (
@@ -1041,7 +1053,7 @@ export default function NewRecipe() {
             isOpen
             closeModal={closeModal}
             selectedYeast={selectedYeast}
-            handleUpdateYeastRecipe={handleUpdateYeastRecipe}
+            onUpdate={(updatedYeast) => handleUpdateIngredient('yeast', updatedYeast)}
           />
         )}
       </div>

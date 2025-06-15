@@ -110,6 +110,7 @@ BrewChemy/
 │   ├── src/
 │   │   ├── Components/
 │   │   ├── context/
+│   │   ├── hooks/
 │   │   ├── Pages/
 │   │   ├── services/
 │   │   ├── Styles/

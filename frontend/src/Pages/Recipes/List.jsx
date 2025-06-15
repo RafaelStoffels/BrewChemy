@@ -5,6 +5,8 @@ import { FiTrash2, FiEdit, FiBookOpen } from 'react-icons/fi';
 import Sidebar from '../../Components/Sidebar';
 import SearchInput from '../../Components/SearchInput';
 
+import useAuthRedirect from '../../hooks/useAuthRedirect';
+
 import { fetchRecipes, deleteRecipe, searchRecipes } from '../../services/recipes';
 import api from '../../services/api';
 
@@ -22,7 +24,6 @@ export default function MaltList() {
 
   const searchItemsFunction = async (term) => {
     try {
-      showInfoToast('Searching data...');
       const response = await searchRecipes(api, user.token, term);
 
       if (Array.isArray(response) && response.length === 0) {
@@ -52,22 +53,23 @@ export default function MaltList() {
     }
   }
 
+  // =======================
+  // useEffects
+  // =======================
+  useAuthRedirect(user);
+
   useEffect(() => {
     const fetchData = async () => {
-      if (!user) {
-        navigate('/');
-      } else {
-        try {
-          const data = await fetchRecipes(user.token);
-          setItemList(data);
-        } catch (err) {
-          showErrorToast('Error loading recipes');
-        }
+      try {
+        const data = await fetchRecipes(user.token);
+        setItemList(data);
+      } catch (err) {
+        showErrorToast('Error loading recipes');
       }
     };
 
     fetchData();
-  }, [user, navigate]);
+  }, [user]);
 
   return (
     <div>

@@ -3,8 +3,10 @@ import { useNavigate } from 'react-router-dom';
 
 import ItemListPage from '../../../Components/ItemListPage';
 
+import useAuthRedirect from '../../../hooks/useAuthRedirect';
+
 import { searchYeasts, fetchYeasts, deleteYeast } from '../../../services/yeasts';
-import { showInfoToast, showErrorToast, showSuccessToast } from '../../../utils/notifications';
+import { showInfoToast, showErrorToast } from '../../../utils/notifications';
 
 import AuthContext from '../../../context/AuthContext';
 
@@ -15,7 +17,6 @@ export default function YeastList() {
 
   const onSearch = async (term) => {
     try {
-      showInfoToast('Searching data...');
       const result = await searchYeasts(user.token, term);
 
       if (Array.isArray(result) && result.length === 0) {
@@ -35,9 +36,8 @@ export default function YeastList() {
     try {
       await deleteYeast(user.token, userId, id);
       setItemList((prev) => prev.filter((item) => item.id !== id));
-      showSuccessToast('Yeast deleted.');
     } catch (err) {
-      showErrorToast(`${err}`);
+      //
     }
   };
 
@@ -69,25 +69,26 @@ export default function YeastList() {
     </>
   );
 
+  // =======================
+  // useEffects
+  // =======================
+  useAuthRedirect(user);
+
   useEffect(() => {
-    if (!user) {
-      navigate('/');
-    } else {
-      const loadYeasts = async () => {
-        try {
-          const yeasts = await fetchYeasts(user.token);
-          setItemList(yeasts);
-        } catch {
-          showErrorToast('Error loading yeast');
-        }
-      };
-      loadYeasts();
-    }
-  }, [user, navigate]);
+    const loadYeasts = async () => {
+      try {
+        const yeasts = await fetchYeasts(user.token);
+        setItemList(yeasts);
+      } catch {
+        showErrorToast('Error loading yeast');
+      }
+    };
+    loadYeasts();
+  }, [user]);
 
   return (
     <ItemListPage
-      title="Yeasts"
+      title="Yeast"
       itemList={itemList}
       onSearch={onSearch}
       onDetails={onDetails}

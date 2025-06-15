@@ -25,6 +25,7 @@ export default function ItemListPage({
         <div className="div-addButton">
           <Link className="Addbutton" to={addNewRoute}>
             Add new
+            {' '}
             {title.toLowerCase()}
           </Link>
         </div>
