@@ -113,7 +113,6 @@ def create_recipes_bp():
                 form=yeast_data_item["form"],
                 attenuation=yeast_data_item["attenuation"],
                 temperature_range=yeast_data_item["temperature_range"],
-                alcohol_tolerance=yeast_data_item["alcohol_tolerance"],
                 flavor_profile=yeast_data_item.get("flavor_profile"),
                 flocculation=yeast_data_item["flocculation"],
                 description=yeast_data_item.get("description"),
@@ -278,7 +277,6 @@ def create_recipes_bp():
                 existing_yeast.form = yeast_data_item["form"]
                 existing_yeast.attenuation = yeast_data_item["attenuation"]
                 existing_yeast.temperature_range = yeast_data_item["temperatureRange"]
-                existing_yeast.alcohol_tolerance = yeast_data_item["alcoholTolerance"]
                 existing_yeast.flavor_profile = yeast_data_item.get("flavorProfile")
                 existing_yeast.flocculation = yeast_data_item["flocculation"]
                 existing_yeast.description = yeast_data_item.get("description")
@@ -292,7 +290,6 @@ def create_recipes_bp():
                     form=yeast_data_item["form"],
                     attenuation=yeast_data_item["attenuation"],
                     temperature_range=yeast_data_item["temperatureRange"],
-                    alcohol_tolerance=yeast_data_item["alcoholTolerance"],
                     flavor_profile=yeast_data_item.get("flavorProfile"),
                     flocculation=yeast_data_item["flocculation"],
                     description=yeast_data_item.get("description"),

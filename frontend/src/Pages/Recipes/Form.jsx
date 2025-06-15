@@ -1,12 +1,8 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useParams } from 'react-router-dom';
-import { useForm } from 'react-hook-form';
-import { yupResolver } from '@hookform/resolvers/yup';
 
 import { FiTrash2, FiEdit, FiRepeat } from 'react-icons/fi';
 import Swal from 'sweetalert2';
-
-import schema from './schemas/formSchema';
 
 import { showErrorToast } from '../../utils/notifications';
 
@@ -15,8 +11,9 @@ import useFormMode from '../../hooks/useFormMode';
 
 import useRecipeCalculations from './hooks/useRecipeCalculations';
 import useIngredientModals from './hooks/useIngredientModals';
+import useRecipeForm from './hooks/useRecipeForm';
 
-import { fetchRecipeById, addRecipe, updateRecipe } from '../../services/recipes';
+import { fetchRecipeById } from '../../services/recipes';
 
 import getOpenAIResponse from '../../services/openAI';
 
@@ -82,50 +79,22 @@ export default function NewRecipe() {
     reset,
     getValues,
     setValue,
-    watch,
-  } = useForm({
-    resolver: yupResolver(schema),
-    defaultValues: {
-      name: '',
-      author: '',
-      type: '',
-      style: '',
-      volumeLiters: '',
-      batchTime: '',
-      description: '',
-      creationDate: '',
-      notes: '',
-      recipeFermentables: [],
-      recipeHops: [],
-      recipeMisc: [],
-      recipeYeasts: [],
-      recipeEquipment: {
-        id: '',
-        name: '',
-      },
-    },
-  });
+    onValid,
+    onError,
+    watchedFields,
+  } = useRecipeForm({ isEditing, recipeId: id, userToken: user.token });
 
-  const onValid = async (data) => {
-    try {
-      const payload = { ...data };
-
-      if (isEditing) {
-        await updateRecipe(user.token, id, payload);
-      } else {
-        await addRecipe(user.token, payload);
-      }
-    } catch (err) {
-      //
-    }
-  };
-
-  const onError = (errors) => {
-    const firstError = Object.values(errors)[0];
-    if (firstError?.message) {
-      showErrorToast(firstError.message);
-    }
-  };
+  const {
+    recipeEquipment,
+    recipeFermentables,
+    recipeHops,
+    recipeMisc,
+    recipeYeasts,
+    style: watchedStyle,
+    batchVolume: watchedBatchVolume,
+    boilTime: watchedBoilTime,
+    efficiency: watchedEfficiency,
+  } = watchedFields;
 
   // =======================
   // Fetch Recipe
@@ -275,17 +244,6 @@ export default function NewRecipe() {
       fetchRecipe(id);
     }
   }, [id, user]);
-
-  const recipeEquipment = watch('recipeEquipment');
-  const recipeFermentables = watch('recipeFermentables');
-  const recipeHops = watch('recipeHops');
-  const recipeMisc = watch('recipeMisc');
-  const recipeYeasts = watch('recipeYeasts');
-
-  const watchedStyle = watch('style');
-  const watchedBatchVolume = watch('recipeEquipment.batchVolume');
-  const watchedBoilTime = watch('recipeEquipment.boilTime');
-  const watchedEfficiency = watch('recipeEquipment.efficiency');
 
   useEffect(() => {
     const recipeData = getValues();
