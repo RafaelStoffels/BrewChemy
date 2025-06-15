@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import {
   calculateOG,
   calculateFG,
@@ -16,19 +16,17 @@ export default function useRecipeCalculations({
   watchedBoilTime,
   recipeEquipment,
   recipeFermentables,
-  IBU,
-  OG,
-  FG,
-  setOG,
-  setFG,
-  setEBC,
-  setIBU,
-  setABV,
-  setBUGU,
-  setpreBoilVolume,
   getValues,
   setValue,
 }) {
+  const [OG, setOG] = useState(0);
+  const [FG, setFG] = useState(0);
+  const [IBU, setIBU] = useState(0);
+  const [EBC, setEBC] = useState(0);
+  const [ABV, setABV] = useState(0);
+  const [BUGU, setBUGU] = useState(0);
+  const [preBoilVolume, setPreBoilVolume] = useState(0);
+
   useEffect(() => {
     const recipeData = getValues();
 
@@ -56,10 +54,12 @@ export default function useRecipeCalculations({
       setIBU(0);
     }
 
-    // calculate GU and BU:GU
+    // calculate GU and BU:GU (BUGU)
     const GU = (OGResult - 1) * 1000;
-    if (IBU) {
+    if (GU > 0 && IBU) {
       setBUGU((IBU / GU).toFixed(2));
+    } else {
+      setBUGU(0);
     }
 
     // calculate percentage of fermentables
@@ -80,7 +80,7 @@ export default function useRecipeCalculations({
 
     const preBoilCalc = getPreBoilVolume(recipeData);
     if (preBoilCalc > 0) {
-      setpreBoilVolume(preBoilCalc);
+      setPreBoilVolume(preBoilCalc);
     }
   }, [watchedBatchVolume, watchedBoilTime, recipeEquipment]);
 
@@ -113,4 +113,14 @@ export default function useRecipeCalculations({
       setABV(abvValue > 0 ? abvValue : 0);
     }
   }, [OG, FG]);
+
+  return {
+    OG,
+    FG,
+    IBU,
+    EBC,
+    ABV,
+    BUGU,
+    preBoilVolume,
+  };
 }

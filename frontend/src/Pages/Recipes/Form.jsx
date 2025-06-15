@@ -61,14 +61,7 @@ export default function NewRecipe() {
   } = useIngredientModals(user.token);
 
   /* Dinamic Variables */
-  const [OG, setOG] = useState('');
-  const [FG, setFG] = useState('');
-  const [EBC, setEBC] = useState(0);
-  const [IBU, setIBU] = useState(0);
-  const [ABV, setABV] = useState(0);
-  const [BUGU, setBUGU] = useState(0);
   const [openAI, setOpenAI] = useState('');
-  const [preBoilVolume, setpreBoilVolume] = useState(0);
 
   /* Components */
   const [selectedStyle, setSelectedStyle] = useState('');
@@ -272,22 +265,20 @@ export default function NewRecipe() {
     }
   }, [watchedStyle]);
 
-  useRecipeCalculations({
+  const {
+    OG,
+    FG,
+    IBU,
+    EBC,
+    ABV,
+    BUGU,
+    preBoilVolume,
+  } = useRecipeCalculations({
     watchedBatchVolume,
     watchedEfficiency,
     watchedBoilTime,
     recipeEquipment,
     recipeFermentables,
-    IBU,
-    OG,
-    FG,
-    setOG,
-    setFG,
-    setEBC,
-    setIBU,
-    setABV,
-    setBUGU,
-    setpreBoilVolume,
     getValues,
     setValue,
   });
