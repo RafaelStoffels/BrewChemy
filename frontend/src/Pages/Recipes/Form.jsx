@@ -226,7 +226,7 @@ export default function NewRecipe() {
     if (id) {
       fetchRecipe(id);
     }
-  }, [id, user]);
+  }, []);
 
   useEffect(() => {
     const recipeData = getValues();
