@@ -153,3 +153,9 @@ max-line-length = 90
 ### Frontend
 
 This project follows the [Airbnb JavaScript Style Guide](https://github.com/airbnb/javascript) using ESLint to enforce consistent code quality and best practices.
+
+## License
+
+This project is licensed under the [Creative Commons Attribution-NonCommercial 4.0 International License (CC BY-NC 4.0)](https://creativecommons.org/licenses/by-nc/4.0/).
+
+You are free to use, modify, and share this project for **non-commercial purposes only**, provided that proper attribution is given to the original author.
