@@ -4,6 +4,7 @@ from flask_cors import CORS
 from db import db, configure_db
 from openai_bp import openai_route
 from flask_mail import Mail
+from flask_migrate import Migrate
 
 from routes.equipments_bp import create_equipments_bp
 from routes.fermentables_bp import create_fermentables_bp
@@ -40,6 +41,8 @@ def create_app():
     # CORS(app, resources={r"/api/*": {"origins": "*"}})
     # CORS(app, resources={r"/api/*": {"origins": "http://localhost:5000"}})
 
+    migrate = Migrate(app, db)
+
     CORS(app)
 
     # Registro das blueprints
@@ -73,8 +76,5 @@ if __name__ == "__main__":
     # Absolute path to the SSL certificates
     ssl_cert_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'ssl', 'cert.pem')
     ssl_key_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'ssl', 'private.key')
-
-    with app.app_context():
-        db.create_all()  # Creates the tables in the database
 
     app.run(ssl_context=(ssl_cert_path, ssl_key_path), debug=True)

@@ -19,7 +19,14 @@
   ],
   "rules": {
     "linebreak-style": ["error", "unix"],
-    "jsx-a11y/label-has-associated-control": "warn",
+    "jsx-a11y/label-has-associated-control": [
+      "warn",
+      {
+        "required": {
+          "some": ["nesting", "id"]
+        }
+      }
+    ],
     "jsx-a11y/control-has-associated-label": "warn",
     "import/no-unresolved": "warn",
     "react/jsx-props-no-spreading": [

@@ -41,28 +41,16 @@ Livedemo: https://brewchemy-react.onrender.com/
 - [Yup](https://github.com/jquense/yup) – for schema-based form validation
 - [ESLint](https://eslint.org/) – for linting and code style enforcement
 
-## 📦 Installation
+## 🚀 Installation (1 command)
 
-### 🔗 Clone the Repository
+Make sure you have **Docker** and **Docker Compose** installed.
 
+Then, just run:
+
+```bash
 git clone https://github.com/RafaelStoffels/BrewChemy.git
-
-### 🧰 Backend Setup (Flask)
-
-```bash
-cd backend
-python -m venv venv
-venv\Scripts\activate
-pip install -r requirements.txt
-python app.py
-```
-
-### Frontend:
-
-```bash
-cd ../frontend
-npm install
-npm start
+cd Brewchemy
+docker-compose up --build
 ```
 
 ## ⚙️ Environment variables

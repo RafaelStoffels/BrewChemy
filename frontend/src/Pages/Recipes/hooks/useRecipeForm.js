@@ -48,8 +48,7 @@ export default function useRecipeForm({ isEditing, recipeId, userToken }) {
       }
       navigate('/RecipeList');
     } catch (err) {
-      console.error(err);
-      showErrorToast('Error saving recipe record.');
+      showErrorToast('Error saving recipe record. ', err);
     }
   };
 
