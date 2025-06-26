@@ -31,7 +31,10 @@ export default function NewAccount() {
     setConfirmPasswordError('');
 
     if (!validatePassword(password)) {
-      showErrorToast('Password must be at least 8 characters long, with a number and a mix of uppercase and lowercase letters.');
+      showErrorToast(
+        'Password must be at least 8 characters long, '
+        + 'with a number and a mix of uppercase and lowercase letters.',
+      );
       return;
     }
     setPasswordError('');

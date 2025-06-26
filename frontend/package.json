@@ -30,7 +30,8 @@
     }
   },
   "scripts": {
-    "start": "cross-env HTTPS=true SSL_CRT_FILE=./ssl/localhost.pem SSL_KEY_FILE=./ssl/localhost-key.pem react-scripts start",
+    "start": "react-scripts start",
+    "start:https": "cross-env HTTPS=true SSL_CRT_FILE=./ssl/localhost.pem SSL_KEY_FILE=./ssl/localhost-key.pem react-scripts start",
     "build": "react-scripts build",
     "eject": "react-scripts eject"
   },

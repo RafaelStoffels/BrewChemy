@@ -9,18 +9,18 @@ class Equipment(db.Model):
 
     # Table Definition
     id = db.Column(db.Integer, primary_key=True)
-    official_id = db.Column(db.Integer, nullable=False)
+    official_id = db.Column(db.Integer)
     user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'), nullable=False)
     name = db.Column(db.String(50), nullable=False)
     description = db.Column(db.Text)
     efficiency = db.Column(db.Numeric(5, 2), nullable=False)
     batch_volume = db.Column(db.Numeric(10, 2), nullable=False)
-    batch_time = db.Column(db.Integer, nullable=False)
-    boil_time = db.Column(db.Integer, nullable=False)
+    batch_time = db.Column(db.Integer)
+    boil_time = db.Column(db.Integer)
     boil_temperature = db.Column(db.Numeric(5, 2), nullable=False)
-    boil_off = db.Column(db.Numeric(5, 2), nullable=False)
-    trub_loss = db.Column(db.Numeric(5, 2), nullable=False)
-    dead_space = db.Column(db.Numeric(5, 2), nullable=False)
+    boil_off = db.Column(db.Numeric(5, 2))
+    trub_loss = db.Column(db.Numeric(5, 2))
+    dead_space = db.Column(db.Numeric(5, 2))
 
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
@@ -48,15 +48,15 @@ class Fermentable(db.Model):
 
     # Table Definition
     id = db.Column(db.Integer, primary_key=True)
-    official_id = db.Column(db.Integer, nullable=False)
+    official_id = db.Column(db.Integer)
     user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'), nullable=False)
     name = db.Column(db.String(40), nullable=False)
     description = db.Column(db.Text)
-    ebc = db.Column(db.Numeric(5, 2), nullable=False)
+    ebc = db.Column(db.Numeric(5, 2))
     potential_extract = db.Column(db.Numeric(5, 3), nullable=False)
     type = db.Column(db.String(15), nullable=False)
-    stock_quantity = db.Column(db.Integer, nullable=False)
-    supplier = db.Column(db.String(40), nullable=False)
+    stock_quantity = db.Column(db.Integer)
+    supplier = db.Column(db.String(40))
     unit_price = db.Column(db.Numeric(10, 2))
 
     def to_dict(self):
@@ -77,7 +77,7 @@ class Hop(db.Model):
     __tablename__ = 'hops'
 
     id = db.Column(db.Integer, primary_key=True)
-    official_id = db.Column(db.Integer, nullable=False)
+    official_id = db.Column(db.Integer)
     user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'), nullable=False)
     name = db.Column(db.String(40), nullable=False)
     supplier = db.Column(db.String(40))
@@ -109,7 +109,7 @@ class Misc(db.Model):
 
     # Table Definition
     id = db.Column(db.Integer, primary_key=True)
-    official_id = db.Column(db.Integer, nullable=False)
+    official_id = db.Column(db.Integer)
     user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'), nullable=False)
     name = db.Column(db.String(40), nullable=False)
     description = db.Column(db.Text)
@@ -131,7 +131,7 @@ class Yeast(db.Model):
 
     # Table Definition
     id = db.Column(db.Integer, primary_key=True)
-    official_id = db.Column(db.Integer, nullable=False)
+    official_id = db.Column(db.Integer)
     user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'), nullable=False)
     name = db.Column(db.String(40), nullable=False)
     manufacturer = db.Column(db.String(60))
@@ -240,10 +240,10 @@ class RecipeEquipment(db.Model):
     batch_volume = db.Column(db.Numeric(10, 2), nullable=False)
     boil_time = db.Column(db.Integer, nullable=False)
     boil_temperature = db.Column(db.Numeric(5, 2), nullable=False)
-    batch_time = db.Column(db.Integer, nullable=False)
-    boil_off = db.Column(db.Numeric(5, 2), nullable=False)
-    dead_space = db.Column(db.Numeric(5, 2), nullable=False)
-    trub_loss = db.Column(db.Numeric(5, 2), nullable=False)
+    batch_time = db.Column(db.Integer)
+    boil_off = db.Column(db.Numeric(5, 2))
+    dead_space = db.Column(db.Numeric(5, 2))
+    trub_loss = db.Column(db.Numeric(5, 2))
 
     def to_dict(self):
         return {
@@ -270,7 +270,6 @@ class RecipeFermentable(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'), nullable=False)
     recipe_id = db.Column(db.Integer, db.ForeignKey('recipes.id'), nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'), nullable=False)
     name = db.Column(db.String(40), nullable=False)
     description = db.Column(db.Text)
     ebc = db.Column(db.Numeric(5, 2), nullable=False)
@@ -364,13 +363,13 @@ class RecipeYeast(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'), nullable=False)
     recipe_id = db.Column(db.Integer, db.ForeignKey('recipes.id'), nullable=False)
     name = db.Column(db.String(40), nullable=False)
-    manufacturer = db.Column(db.String(100), nullable=False)
-    type = db.Column(db.String(15), nullable=False)
-    form = db.Column(db.String(15), nullable=False)
-    attenuation = db.Column(db.String(20), nullable=False)
-    temperature_range = db.Column(db.String(15), nullable=False)
+    manufacturer = db.Column(db.String(100))
+    type = db.Column(db.String(15))
+    form = db.Column(db.String(15))
+    attenuation = db.Column(db.String(20))
+    temperature_range = db.Column(db.String(15))
     flavor_profile = db.Column(db.Text)
-    flocculation = db.Column(db.String(15), nullable=False)
+    flocculation = db.Column(db.String(15))
     description = db.Column(db.Text)
     quantity = db.Column(db.Numeric)
 
@@ -401,11 +400,11 @@ class User(db.Model):
     email = db.Column(db.String(100), unique=True, nullable=False)
     password_hash = db.Column(db.String(255), nullable=False)
     created_at = db.Column(db.TIMESTAMP, default=db.func.current_timestamp())
-    last_login = db.Column(db.TIMESTAMP, nullable=True)
-    is_active = db.Column(db.Boolean, default=True)
-    brewery = db.Column(db.String(60), nullable=True)
-    google_id = db.Column(db.String(100), unique=True, nullable=True)
-    status = db.Column(db.String(15), nullable=True)
+    last_login = db.Column(db.TIMESTAMP)
+    is_active = db.Column(db.Boolean)
+    brewery = db.Column(db.String(60))
+    google_id = db.Column(db.String(100), unique=True)
+    status = db.Column(db.String(15))
 
     def to_dict(self):
         return {

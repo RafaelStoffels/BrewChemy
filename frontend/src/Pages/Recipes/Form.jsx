@@ -609,7 +609,7 @@ export default function NewRecipe() {
                       </td>
                       <td><strong>{misc.name}</strong></td>
                       <td>{misc.type}</td>
-                      <td />
+                      <td aria-hidden="true">&nbsp;</td>
                       <td className="ingredients-list-button-group">
                         <button
                           type="button"
@@ -647,7 +647,7 @@ export default function NewRecipe() {
                       </td>
                       <td><strong>{yeast.name}</strong></td>
                       <td>{yeast.type}</td>
-                      <td />
+                      <td aria-hidden="true">&nbsp;</td>
                       <td className="ingredients-list-button-group">
                         <button
                           type="button"

@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  backend:
+    build: ./backend
+    ports:
+      - "5000:5000"
+    depends_on:
+      - db
+    environment:
+      - FLASK_APP=app.py
+      - FLASK_ENV=development
+      - DATABASE_URL=postgresql://postgres:brewchemy@db:5432/brewchemy
+      - OAUTHLIB_INSECURE_TRANSPORT=1
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:3000"
+    command: npm start
+
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: brewchemy
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: brewchemy
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:

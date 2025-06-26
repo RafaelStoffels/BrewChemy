@@ -37,7 +37,10 @@ export default function NewAccount() {
     setConfirmPasswordError('');
 
     if (!validatePassword(password)) {
-      showErrorToast('Password must be at least 8 characters long, with a number and a mix of uppercase and lowercase letters.');
+      showErrorToast(
+        'Password must be at least 8 characters long, '
+        + 'with a number and a mix of uppercase and lowercase letters.',
+      );
       return;
     }
     setPasswordError('');
@@ -60,7 +63,10 @@ export default function NewAccount() {
       showErrorToast(`Error creating user. ${err}`);
     }
     showSuccessToast('User created.');
-    showInfoToast('An email with an activation code has been sent. Please check your inbox and activate your account.');
+    showInfoToast(
+      'An email with an activation code has been sent. '
+      + 'Please check your inbox and activate your account.',
+    );
     navigate('/');
   }
 
