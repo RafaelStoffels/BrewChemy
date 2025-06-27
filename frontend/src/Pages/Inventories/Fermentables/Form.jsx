@@ -150,6 +150,7 @@ export default function NewFermentable() {
               <input
                 id="ebc"
                 type="number"
+                step="any"
                 {...register('ebc')}
                 disabled={isView}
               />
