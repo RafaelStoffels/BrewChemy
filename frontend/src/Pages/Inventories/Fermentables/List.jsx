@@ -45,14 +45,17 @@ export default function FermentableList() {
     <>
       <p>
         Supplier:
+        {' '}
         {item.supplier}
       </p>
       <p>
         Type:
+        {' '}
         {item.type}
       </p>
       <p>
         EBC:
+        {' '}
         {item.ebc}
       </p>
       <p>

@@ -42,7 +42,10 @@ const schema = Yup.object().shape({
     .max(100, 'Temperature range must be at most 100 characters'),
 
   flocculation: Yup.string()
-    .nullable()
+    .oneOf(
+      ['Low', 'Medium', 'Medium - High', 'High', 'Very High'],
+      'Invalid form',
+    )
     .max(100, 'Flocculation must be at most 100 characters'),
 });
 

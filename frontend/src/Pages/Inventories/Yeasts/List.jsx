@@ -45,19 +45,13 @@ export default function YeastList() {
     <>
       <p>
         Manufacturer:
+        {' '}
         {item.manufacturer}
       </p>
       <p>
         Type:
+        {' '}
         {item.type}
-      </p>
-      <p>
-        Flavor Profile:
-        {item.flavor_profile}
-      </p>
-      <p>
-        Attenuation:
-        {item.attenuation}
       </p>
       <p>
         Description:

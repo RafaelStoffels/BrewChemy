@@ -59,7 +59,7 @@ export default function NewMisc() {
     loadMisc();
   }, [id, user, navigate, recordUserId, reset]);
 
-  const title = getFormTitle('Equipment', isEditing, isView);
+  const title = getFormTitle('Misc', isEditing, isView);
 
   const onValid = async (data) => {
     const payload = {

@@ -45,6 +45,7 @@ export default function HopList() {
     <>
       <p>
         Supplier:
+        {' '}
         {item.supplier}
       </p>
       <p>

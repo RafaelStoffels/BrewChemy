@@ -45,6 +45,7 @@ export default function MiscList() {
     <>
       <p>
         Type:
+        {' '}
         {item.type}
       </p>
       <p>
