@@ -1,3 +1,6 @@
+/* ======================================
+   Container Layout
+====================================== */
 .list-container {
     margin-left: 250px;
     width: 100%;
@@ -7,14 +10,17 @@
 
 .list-container h1 {
     margin-top: 30px;
-    margin-bottom: 15px;
+    margin-bottom: 8px;
 }
 
+/* ======================================
+   List Grid Structure
+====================================== */
 .list-container ul {
     display: grid;
     flex-wrap: wrap;
-    grid-template-columns: repeat(2, 1fr);
-    grid-gap: 22px;
+    grid-template-columns: repeat(4, 1fr);
+    grid-gap: 12px;
     list-style: none;
 }
 
@@ -25,6 +31,9 @@
     position: relative;
 }
 
+/* ======================================
+   List Item Content
+====================================== */
 .list-container ul li strong {
     display: block;
     margin-bottom: 16px;
@@ -41,6 +50,9 @@
     font-size: 14px;
 }
 
+/* ======================================
+   Button Group on List Item
+====================================== */
 .list-container ul li .button-group {
     position: absolute;
     top: 13px;
@@ -49,24 +61,43 @@
     gap: 8px;
 }
 
+/* ======================================
+   Add Button Section
+====================================== */
 .div-addButton {
     text-align: right;
 }
 
+/* ======================================
+   Item Titles and Details
+====================================== */
 .item-title {
     font-size: 20px;
     font-weight: bold;
-    margin-bottom: 12px; /* Dá mais espaço entre o título e os detalhes */
+    margin-bottom: 12px;
 }
 
 .item-details p {
-    margin-bottom: 1px; /* Reduz o espaçamento entre os <p> */
+    margin-bottom: 1px;
     font-size: 14px;
     color: #444242;
 }
 
+/* ======================================
+   Labels and Inputs
+====================================== */
 .custom-label {
-    font-size: 0.8em; /* Reduz o tamanho da fonte */
-    color: rgb(101, 94, 89); /* Opcional: deixa o texto mais discreto */
-    margin-left: 5px; /* Dá um espaço entre o nome e [custom] */
+    font-size: 0.8em;
+    color: rgb(101, 94, 89);
+    margin-left: 5px;
   }
+
+.search-input {
+  width: 100%;
+  max-width: 400px;
+  padding: 10px;
+  font-size: 16px;
+  border-radius: 8px;
+  border: 1px solid #744410;
+  margin-bottom: 15px;
+}

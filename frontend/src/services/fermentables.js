@@ -9,7 +9,7 @@ export async function searchFermentables(userToken, term, { showToast = true } =
     });
     return response.data;
   } catch (err) {
-    let msg = 'Error loading fermentables';
+    let msg = 'Error searching fermentables';
     if (err.response?.status === 401) {
       msg = 'Your session has expired. Please log in again.';
     } else if (err.response?.data?.message || err.response?.data?.error) {

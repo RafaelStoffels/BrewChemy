@@ -4,10 +4,13 @@ from models import Recipe, RecipeEquipment, RecipeFermentable, RecipeHop, Recipe
 from AuthTokenVerifier import token_required
 from marshmallow import ValidationError
 from schemas.recipes_schema import RecipeSchema
+import logging
 
 
 def create_recipes_bp():
     recipes_bp = Blueprint("recipes", __name__)
+
+    logging.basicConfig(level=logging.INFO)
 
     @recipes_bp.route("/recipes/search", methods=["GET"])
     @token_required

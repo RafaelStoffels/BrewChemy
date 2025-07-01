@@ -61,6 +61,8 @@ export default function MaltList() {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        if (!user?.token) return;
+
         const data = await fetchRecipes(user.token);
         setItemList(data);
       } catch (err) {

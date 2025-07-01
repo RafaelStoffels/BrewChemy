@@ -76,6 +76,8 @@ export default function FermentableList() {
   useEffect(() => {
     const loadItems = async () => {
       try {
+        if (!user?.token) return;
+
         const result = await fetchFermentables(user.token);
         setItemList(result);
       } catch (err) {
@@ -87,7 +89,7 @@ export default function FermentableList() {
 
   return (
     <ItemListPage
-      title="Fermentable"
+      title="Fermentables"
       itemList={itemList}
       onSearch={onSearch}
       onDetails={onDetails}

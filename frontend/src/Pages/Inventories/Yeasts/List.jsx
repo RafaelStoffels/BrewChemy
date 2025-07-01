@@ -71,6 +71,8 @@ export default function YeastList() {
   useEffect(() => {
     const loadYeasts = async () => {
       try {
+        if (!user?.token) return;
+
         const yeasts = await fetchYeasts(user.token);
         setItemList(yeasts);
       } catch {
@@ -82,7 +84,7 @@ export default function YeastList() {
 
   return (
     <ItemListPage
-      title="Yeast"
+      title="Yeasts"
       itemList={itemList}
       onSearch={onSearch}
       onDetails={onDetails}

@@ -8,7 +8,7 @@ import { me } from '../../services/users';
 
 import AuthContext from '../../context/AuthContext';
 
-import './styles.css';
+import './Form.css';
 
 export default function Logon() {
   const { login } = useContext(AuthContext);
@@ -74,55 +74,58 @@ export default function Logon() {
           data="/logo.svg"
           aria-label="Logo da Brewchemy"
         >
-          Logo da Brewchemy
+          a
         </object>
+        <div className="bottom-div">
+          <form onSubmit={handleSubmit}>
+            <h1>Login</h1>
+            {errorMessage && <p className="error-message">{errorMessage}</p>}
 
-        <form onSubmit={handleSubmit}>
-          <h1>Faça seu login</h1>
-          {errorMessage && <p className="error-message">{errorMessage}</p>}
+            <label htmlFor="email">
+              E-mail
+              <input
+                id="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+            </label>
 
-          <label htmlFor="email">
-            E-mail
-            <input
-              id="email"
-              placeholder="E-mail"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-          </label>
+            <label htmlFor="password">
+              Password
+              <input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+            </label>
 
-          <label htmlFor="password">
-            Senha
-            <input
-              id="password"
-              placeholder="Senha"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-          </label>
+            <button className="buttonLogin" type="submit">
+              Login
+              {' '}
+              <FiLogIn size={16} color="#fff" />
+            </button>
 
-          <button className="buttonLogin" type="submit">
-            Login
-            {' '}
-            <FiLogIn size={16} color="#fff" />
-          </button>
+            <button
+              type="button"
+              onClick={handleGoogleLoginRedirect}
+              className="buttonGoogleLogIn"
+              aria-label="Entrar com Google"
+            >
+              <img
+                src="googleSignin.png"
+                alt="Entrar com Google"
+              />
+            </button>
 
-          <button
-            type="button"
-            onClick={handleGoogleLoginRedirect}
-            className="buttonGoogleLogIn"
-            aria-label="Entrar com Google"
-          >
-            <img
-              src="googleSignin.png"
-              alt="Entrar com Google"
-            />
-          </button>
-
-          <Link to="/ForgotPassword">Forgot password?</Link>
-          <Link to="/CreateAccount">Create account</Link>
-        </form>
+            <Link to="/ForgotPassword" style={{ marginTop: '30px' }}>
+              Forgot password?
+            </Link>
+            <Link to="/CreateAccount" style={{ marginTop: '15px' }}>
+              Create account
+            </Link>
+          </form>
+        </div>
       </section>
     </div>
   );

@@ -33,11 +33,11 @@ function SearchInput({ searchTerm, setSearchTerm, onSearch }) {
 
   return (
     <input
+      className="search-input"
       type="text"
       placeholder="Search..."
       value={currentSearchTerm}
       onChange={handleChange}
-      style={{ marginBottom: '15px', padding: '5px' }}
     />
   );
 }

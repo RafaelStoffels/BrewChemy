@@ -1,4 +1,4 @@
-from marshmallow import Schema, fields, validates, ValidationError
+from marshmallow import Schema, fields, validates, ValidationError, EXCLUDE
 from schemas.equipments_schema import EquipmentsSchema
 from schemas.fermentables_schema import FermentablesSchema
 from schemas.hops_schema import HopsSchema
@@ -8,8 +8,9 @@ from marshmallow.validate import OneOf
 
 
 class RecipeSchema(Schema):
-    id = fields.Int(dump_only=True)
-    userId = fields.Int(required=True)
+    class Meta:
+        unknown = EXCLUDE
+
     name = fields.Str(required=True)
     style = fields.Str()
     description = fields.Str()
@@ -23,6 +24,12 @@ class RecipeSchema(Schema):
     recipeMisc = fields.Nested(MiscsSchema, many=True)
     recipeYeasts = fields.Nested(YeastsSchema, many=True)
 
+    VALID_TYPES = {
+        "All Grain",
+        "Extract",
+        "Partial Mash"
+    }
+
     @validates("name")
     def validate_name(self, value, *args, **kwargs):
         if not value.strip():
@@ -31,7 +38,7 @@ class RecipeSchema(Schema):
             raise ValidationError("Name must be at most 40 characters long.")
 
     @validates("style")
-    def validate_name(self, value, *args, **kwargs):
+    def validate_style(self, value, *args, **kwargs):
         if not value.strip():
             raise ValidationError("Style must not be empty.")
 
