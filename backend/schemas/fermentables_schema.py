@@ -1,6 +1,9 @@
-from marshmallow import Schema, fields, validates, ValidationError
+from marshmallow import Schema, fields, validates, ValidationError, EXCLUDE
 
 class FermentablesSchema(Schema):
+    class Meta:
+        unknown = EXCLUDE
+
     itemUserId = fields.Int(load_only=True)
     id = fields.Int(dump_only=True)
     name = fields.Str(required=True)

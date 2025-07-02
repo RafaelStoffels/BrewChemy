@@ -45,6 +45,7 @@ export default function HopList() {
     <>
       <p>
         Supplier:
+        {' '}
         {item.supplier}
       </p>
       <p>
@@ -65,6 +66,8 @@ export default function HopList() {
   useEffect(() => {
     const loadHops = async () => {
       try {
+        if (!user?.token) return;
+
         const hops = await fetchHops(user.token);
         setItemList(hops);
       } catch {
@@ -76,7 +79,7 @@ export default function HopList() {
 
   return (
     <ItemListPage
-      title="Hop"
+      title="Hops"
       itemList={itemList}
       onSearch={onSearch}
       onDetails={onDetails}

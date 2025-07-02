@@ -176,7 +176,10 @@ class Recipe(db.Model):
 
     recipe_equipment = db.relationship(
         'RecipeEquipment',
-        backref='recipe'
+        backref='recipe',
+        lazy=True,
+        cascade="all, delete-orphan",
+        uselist=False
     )
     recipe_fermentables = db.relationship(
         'RecipeFermentable',
@@ -205,7 +208,7 @@ class Recipe(db.Model):
 
     def to_dict(self):
         # Checks if there is any equipment associated with the recipe
-        recipe_equipment = self.recipe_equipment[0] if self.recipe_equipment else None
+        recipe_equipment = self.recipe_equipment if self.recipe_equipment else None
 
         return {
             "id": self.id,
@@ -277,7 +280,7 @@ class RecipeFermentable(db.Model):
     type = db.Column(db.String(15))
     supplier = db.Column(db.String(40))
     unit_price = db.Column(db.Numeric(10, 2))
-    quantity = db.Column(db.Numeric)
+    quantity = db.Column(db.Numeric, nullable=False)
 
     def to_dict(self):
         return {
@@ -308,7 +311,7 @@ class RecipeHop(db.Model):
     use_type = db.Column(db.String(15))
     country_of_origin = db.Column(db.String(50))
     description = db.Column(db.Text)
-    quantity = db.Column(db.Numeric)
+    quantity = db.Column(db.Numeric, nullable=False)
     boil_time = db.Column(db.Integer)
 
     def to_dict(self):
@@ -337,7 +340,7 @@ class RecipeMisc(db.Model):
     name = db.Column(db.String(40), nullable=False)
     description = db.Column(db.Text)
     type = db.Column(db.String(15))
-    quantity = db.Column(db.Numeric)
+    quantity = db.Column(db.Numeric, nullable=False)
     use = db.Column(db.String(15))
     time = db.Column(db.Integer)
 
@@ -371,7 +374,7 @@ class RecipeYeast(db.Model):
     flavor_profile = db.Column(db.Text)
     flocculation = db.Column(db.String(15))
     description = db.Column(db.Text)
-    quantity = db.Column(db.Numeric)
+    quantity = db.Column(db.Numeric, nullable=False)
 
     def to_dict(self):
         return {

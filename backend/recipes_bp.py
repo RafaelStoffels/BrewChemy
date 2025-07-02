@@ -4,10 +4,13 @@ from models import Recipe, RecipeEquipment, RecipeFermentable, RecipeHop, Recipe
 from AuthTokenVerifier import token_required
 from marshmallow import ValidationError
 from schemas.recipes_schema import RecipeSchema
+import logging
 
 
 def create_recipes_bp():
     recipes_bp = Blueprint("recipes", __name__)
+
+    logging.basicConfig(level=logging.INFO)
 
     @recipes_bp.route("/recipes/search", methods=["GET"])
     @token_required
@@ -60,6 +63,24 @@ def create_recipes_bp():
         db.session.add(new_recipe)
         db.session.flush()
 
+        equipment_data = data.get("recipeEquipment")
+        if equipment_data:
+            new_equipment = RecipeEquipment(
+                recipe_id=new_recipe.id,
+                user_id=current_user_id,
+                name=equipment_data["name"],
+                description=equipment_data.get("description"),
+                efficiency=equipment_data["efficiency"],
+                batch_volume=equipment_data["batchVolume"],
+                boil_time=equipment_data["boilTime"],
+                boil_temperature=equipment_data["boilTemperature"],
+                batch_time=equipment_data["batchTime"],
+                boil_off=equipment_data["boilOff"],
+                dead_space=equipment_data["deadSpace"],
+                trub_loss=equipment_data["trubLoss"]
+            )
+            db.session.add(new_equipment)
+
         fermentables_data = data.get("recipeFermentables", [])
         for fermentable_data in fermentables_data:
             new_fermentable = RecipeFermentable(
@@ -80,6 +101,7 @@ def create_recipes_bp():
         for hop_data in hops_data:
             new_hop = RecipeHop(
                 recipe_id=new_recipe.id,
+                user_id=current_user_id,
                 name=hop_data["name"],
                 alpha_acid_content=hop_data.get("alphaAcidContent"),
                 beta_acid_content=hop_data.get("betaAcidContent"),
@@ -92,14 +114,15 @@ def create_recipes_bp():
             db.session.add(new_hop)
 
         miscs_data = data.get("recipeMisc", [])
+
         for misc_data in miscs_data:
             new_misc = RecipeMisc(
                 recipe_id=new_recipe.id,
+                user_id=current_user_id,
                 name=misc_data["name"],
-                description=misc_data["description"],
+                description=misc_data.get("description"),
                 type=misc_data["type"],
-                quantity=misc_data["quantity"],
-                use=misc_data["use"]
+                quantity=misc_data["quantity"]
             )
             db.session.add(new_misc)
 
@@ -107,12 +130,12 @@ def create_recipes_bp():
         for yeast_data_item in yeast_data:
             new_yeast = RecipeYeast(
                 recipe_id=new_recipe.id,
+                user_id=current_user_id,
                 name=yeast_data_item["name"],
                 manufacturer=yeast_data_item["manufacturer"],
                 type=yeast_data_item["type"],
                 form=yeast_data_item["form"],
                 attenuation=yeast_data_item["attenuation"],
-                temperature_range=yeast_data_item["temperature_range"],
                 flavor_profile=yeast_data_item.get("flavor_profile"),
                 flocculation=yeast_data_item["flocculation"],
                 description=yeast_data_item.get("description"),
@@ -249,7 +272,6 @@ def create_recipes_bp():
                 misc.description = misc_item.get("description", misc.description)
                 misc.type = misc_item.get("type", misc.type)
                 misc.quantity = misc_item.get("quantity", misc.quantity)
-                misc.use = misc_item.get("use", misc.use)
                 misc.time = misc_item.get("time", misc.time)
             else:
                 new_misc = RecipeMisc(
@@ -289,7 +311,6 @@ def create_recipes_bp():
                     type=yeast_data_item["type"],
                     form=yeast_data_item["form"],
                     attenuation=yeast_data_item["attenuation"],
-                    temperature_range=yeast_data_item["temperatureRange"],
                     flavor_profile=yeast_data_item.get("flavorProfile"),
                     flocculation=yeast_data_item["flocculation"],
                     description=yeast_data_item.get("description"),

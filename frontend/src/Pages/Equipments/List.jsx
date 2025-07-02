@@ -52,6 +52,8 @@ export default function EquipmentList() {
   useEffect(() => {
     const loadItems = async () => {
       try {
+        if (!user?.token) return;
+
         const result = await fetchEquipments(user.token);
         setItemList(result);
       } catch (err) {
@@ -63,7 +65,7 @@ export default function EquipmentList() {
 
   return (
     <ItemListPage
-      title="Equipment"
+      title="Equipments"
       itemList={itemList}
       onSearch={onSearch}
       onDetails={onDetails}

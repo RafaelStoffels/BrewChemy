@@ -69,7 +69,7 @@ export default function NewHop() {
     loadHop();
   }, [id, user, navigate, recordUserId, reset]);
 
-  const title = getFormTitle('Equipment', isEditing, isView);
+  const title = getFormTitle('Hop', isEditing, isView);
 
   const onValid = async (data) => {
     const payload = {

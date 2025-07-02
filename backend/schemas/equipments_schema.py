@@ -1,6 +1,9 @@
-from marshmallow import Schema, fields, validates, ValidationError
+from marshmallow import Schema, fields, validates, ValidationError, EXCLUDE
 
 class EquipmentsSchema(Schema):
+    class Meta:
+        unknown = EXCLUDE
+
     itemUserId = fields.Int(load_only=True)
     id = fields.Int(dump_only=True)
     name = fields.Str(required=True)
@@ -10,10 +13,10 @@ class EquipmentsSchema(Schema):
     batchVolume = fields.Decimal(required=True, as_string=True)
     batchTime = fields.Int(required=True)
     boilTime = fields.Int(required=True)
-    boilTemperature = fields.Decimal(required=True, as_string=True)
-    boilOff = fields.Decimal(required=True, as_string=True)
-    trubLoss = fields.Decimal(required=True, as_string=True)
-    deadSpace = fields.Decimal(required=True, as_string=True)
+    boilTemperature = fields.Decimal(as_string=True)
+    boilOff = fields.Decimal(as_string=True)
+    trubLoss = fields.Decimal(as_string=True)
+    deadSpace = fields.Decimal(as_string=True)
 
     @validates("name")
     def validate_name(self, value, *args, **kwargs):

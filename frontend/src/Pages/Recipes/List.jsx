@@ -46,7 +46,7 @@ export default function MaltList() {
 
   async function handleDelete(itemListId) {
     try {
-      await deleteRecipe(itemListId, user.token);
+      await deleteRecipe(user.token, itemListId);
       setItemList(itemList.filter((item) => item.id !== itemListId));
     } catch (err) {
       showErrorToast(`Error deleting data.${err}`);
@@ -61,6 +61,8 @@ export default function MaltList() {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        if (!user?.token) return;
+
         const data = await fetchRecipes(user.token);
         setItemList(data);
       } catch (err) {

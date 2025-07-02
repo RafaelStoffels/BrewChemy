@@ -1,3 +1,6 @@
+/* ======================================
+   CRUD Container Layout
+====================================== */
 .crud-container {
     margin-left: 250px;
     width: 800px;
@@ -17,6 +20,9 @@
     margin-bottom: 15px;
 }
 
+/* ======================================
+   List/Grid Items
+====================================== */
 .crud-container ul {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -31,6 +37,9 @@
     position: relative;
 }
 
+/* ======================================
+   Item Content Styling
+====================================== */
 .crud-container ul li strong {
     display: block;
     margin-bottom: 16px;
@@ -47,6 +56,9 @@
     font-size: 16px;
 }
 
+/* ======================================
+   Button Group (Top Right of Item)
+====================================== */
 .crud-container ul li .button-group {
     position: absolute;
     top: 10px;
@@ -65,10 +77,16 @@
     opacity: 0.8;
 }
 
+/* ======================================
+   Add Button Container
+====================================== */
 .div-addButton {
     text-align: right;
 }
 
+/* ======================================
+   Section Alignment
+====================================== */
 .crud-container section {
     text-align: center;
-  }
+}

@@ -45,19 +45,13 @@ export default function YeastList() {
     <>
       <p>
         Manufacturer:
+        {' '}
         {item.manufacturer}
       </p>
       <p>
         Type:
+        {' '}
         {item.type}
-      </p>
-      <p>
-        Flavor Profile:
-        {item.flavor_profile}
-      </p>
-      <p>
-        Attenuation:
-        {item.attenuation}
       </p>
       <p>
         Description:
@@ -77,6 +71,8 @@ export default function YeastList() {
   useEffect(() => {
     const loadYeasts = async () => {
       try {
+        if (!user?.token) return;
+
         const yeasts = await fetchYeasts(user.token);
         setItemList(yeasts);
       } catch {
@@ -88,7 +84,7 @@ export default function YeastList() {
 
   return (
     <ItemListPage
-      title="Yeast"
+      title="Yeasts"
       itemList={itemList}
       onSearch={onSearch}
       onDetails={onDetails}

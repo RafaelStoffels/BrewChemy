@@ -1,13 +1,29 @@
-from marshmallow import Schema, fields, validates, ValidationError
+from marshmallow import Schema, fields, validates, ValidationError, EXCLUDE
 
 class MiscsSchema(Schema):
+    class Meta:
+        unknown = EXCLUDE
+
     itemUserId = fields.Int(load_only=True)
     id = fields.Int(dump_only=True)
     name = fields.Str(required=True)
     description = fields.Str(allow_none=True)
-    type = fields.Str(required=True)
+    type = fields.Str()
+    quantity = fields.Int(required=True)
+    use = fields.Str()
 
     VALID_TYPES = {
+        "",
+        "Flavor",
+        "Fining",
+        "Herb",
+        "Spice",
+        "Water Agent",
+        "Other"
+    }
+
+    VALID_USES = {
+        "",
         "Flavor",
         "Fining",
         "Herb",
@@ -25,7 +41,10 @@ class MiscsSchema(Schema):
 
     @validates("type")
     def validate_type(self, value, *args, **kwargs):
-        if not value.strip():
-            raise ValidationError("Type is required and cannot be empty.")
         if value and value not in self.VALID_TYPES:
             raise ValidationError(f"Type must be one of: {', '.join(self.VALID_TYPES)}.")
+
+    @validates("use")
+    def validate_type(self, value, *args, **kwargs):
+        if value and value not in self.VALID_USES:
+            raise ValidationError(f"Type must be one of: {', '.join(self.VALID_USES)}.")

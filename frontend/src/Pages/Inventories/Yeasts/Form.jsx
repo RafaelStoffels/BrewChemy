@@ -2,7 +2,7 @@ import React, { useEffect, useContext } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
-import schema from './schema'; // <-- Aqui devem estar as regras do Yup
+import schema from './schema';
 
 import useAuthRedirect from '../../../hooks/useAuthRedirect';
 import useFormMode from '../../../hooks/useFormMode';
@@ -37,7 +37,7 @@ export default function NewYeast() {
       form: 'Dry',
       attenuation: '',
       temperatureRange: '',
-      flocculation: '',
+      flocculation: 'Low',
     },
   });
 
@@ -61,7 +61,7 @@ export default function NewYeast() {
           form: yeast.form || 'Dry',
           attenuation: yeast.attenuation || '',
           temperatureRange: yeast.temperatureRange || '',
-          flocculation: yeast.flocculation || '',
+          flocculation: yeast.flocculation || 'Low',
         });
       } catch {
         navigate('/YeastList');
@@ -71,7 +71,7 @@ export default function NewYeast() {
     loadYeast();
   }, [id, user, navigate, recordUserId, reset]);
 
-  const title = getFormTitle('Equipment', isEditing, isView);
+  const title = getFormTitle('Yeast', isEditing, isView);
 
   const onValid = async (data) => {
     const payload = {
@@ -143,20 +143,19 @@ export default function NewYeast() {
             <div className="inputs-row">
               <div className="input-field">
                 <label>
-                  Flavor Profile
+                  Attenuation
                   <input
-                    {...register('flavorProfile')}
+                    style={{ width: '100px' }}
+                    type="number"
+                    {...register('attenuation')}
                     disabled={isView}
                   />
                 </label>
               </div>
-            </div>
-
-            <div className="inputs-row">
               <div className="input-field">
                 <label>
                   Type
-                  <select {...register('type')} disabled={isView}>
+                  <select style={{ width: '150px' }} {...register('type')} disabled={isView}>
                     <option value="Ale">Ale</option>
                     <option value="Lager">Lager</option>
                     <option value="Hybrid">Hybrid</option>
@@ -171,7 +170,7 @@ export default function NewYeast() {
               <div className="input-field">
                 <label>
                   Form
-                  <select {...register('form')} disabled={isView}>
+                  <select style={{ width: '170px' }} {...register('form')} disabled={isView}>
                     <option value="Dry">Dry</option>
                     <option value="Liquid">Liquid</option>
                     <option value="Culture">Culture</option>
@@ -182,34 +181,14 @@ export default function NewYeast() {
 
               <div className="input-field">
                 <label>
-                  Attenuation %
-                  <input
-                    type="number"
-                    {...register('attenuation')}
-                    disabled={isView}
-                  />
-                </label>
-              </div>
-
-              <div className="input-field">
-                <label>
-                  Temperature Range
-                  <input
-                    {...register('temperatureRange')}
-                    disabled={isView}
-                  />
-                </label>
-              </div>
-            </div>
-
-            <div className="inputs-row">
-              <div className="input-field">
-                <label>
                   Flocculation
-                  <input
-                    {...register('flocculation')}
-                    disabled={isView}
-                  />
+                  <select style={{ width: '200px' }} {...register('flocculation')} disabled={isView}>
+                    <option value="Low">Low</option>
+                    <option value="Medium">Medium</option>
+                    <option value="Medium - High">Medium - High</option>
+                    <option value="High">High</option>
+                    <option value="Very High">Very High</option>
+                  </select>
                 </label>
               </div>
               <div className="input-field" />

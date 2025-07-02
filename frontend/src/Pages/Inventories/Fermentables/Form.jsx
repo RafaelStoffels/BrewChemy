@@ -36,7 +36,7 @@ export default function NewFermentable() {
       name: '',
       supplier: '',
       description: '',
-      type: 'base',
+      type: 'Base',
       ebc: '',
       potentialExtract: '',
     },
@@ -57,7 +57,7 @@ export default function NewFermentable() {
           name: fermentable.name || '',
           supplier: fermentable.supplier || '',
           description: fermentable.description || '',
-          type: fermentable.type || 'base',
+          type: fermentable.type || 'Base',
           ebc: fermentable.ebc || '',
           potentialExtract: fermentable.potentialExtract || '',
         });
@@ -69,7 +69,7 @@ export default function NewFermentable() {
     loadFermentable();
   }, [id, user, navigate, recordUserId, reset]);
 
-  const title = getFormTitle('Equipment', isEditing, isView);
+  const title = getFormTitle('Fermentable', isEditing, isView);
 
   const onValid = async (data) => {
     const payload = {
@@ -150,6 +150,7 @@ export default function NewFermentable() {
               <input
                 id="ebc"
                 type="number"
+                step="any"
                 {...register('ebc')}
                 disabled={isView}
               />

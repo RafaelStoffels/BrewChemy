@@ -1,7 +1,10 @@
-from marshmallow import Schema, fields, validates, ValidationError
+from marshmallow import Schema, fields, validates, ValidationError, EXCLUDE
 from marshmallow.validate import OneOf
 
 class YeastsSchema(Schema):
+    class Meta:
+        unknown = EXCLUDE
+
     itemUserId = fields.Int(load_only=True)
     id = fields.Int(dump_only=True)
     name = fields.Str(required=True)
@@ -9,7 +12,6 @@ class YeastsSchema(Schema):
     type = fields.Str(required=True,)
     form = fields.Str(allow_none=True)
     attenuation = fields.Decimal(as_string=True, allow_none=True)
-    temperatureRange = fields.Str(allow_none=True)
     flavorProfile = fields.Str(allow_none=True)
     flocculation = fields.Str(allow_none=True)
     description = fields.Str(allow_none=True)

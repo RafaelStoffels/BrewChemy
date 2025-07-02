@@ -55,7 +55,7 @@ export default function NewRecipe() {
     selectedYeast,
     setSelectedYeast,
     MODALS,
-  } = useIngredientModals(user.token);
+  } = useIngredientModals(user?.token || '');
 
   /* Dinamic Variables */
   const [openAI, setOpenAI] = useState('');
@@ -72,7 +72,14 @@ export default function NewRecipe() {
     onValid,
     onError,
     watchedFields,
-  } = useRecipeForm({ isEditing, recipeId: id, userToken: user.token });
+  } = useRecipeForm({
+    isEditing,
+    recipeId: id,
+    userToken: user?.token || '',
+    defaultValues: {
+      type: 'All Grain',
+    },
+  });
 
   const {
     recipeEquipment,
@@ -91,6 +98,8 @@ export default function NewRecipe() {
   // =======================
   const fetchRecipe = async (recipeID) => {
     try {
+      if (!user?.token) return;
+
       const recipeResponse = await fetchRecipeById(user.token, recipeID);
       reset(recipeResponse);
     } catch (error) {
@@ -223,10 +232,16 @@ export default function NewRecipe() {
   useAuthRedirect(user);
 
   useEffect(() => {
-    if (id) {
-      fetchRecipe(id);
+    if (!user?.token || !id) return;
+
+    fetchRecipe(id);
+  }, [user?.token, id]);
+
+  useEffect(() => {
+    if (!isEditing) {
+      setValue('type', 'All Grain');
     }
-  }, []);
+  }, [isEditing, setValue]);
 
   useEffect(() => {
     const recipeData = getValues();
@@ -278,7 +293,7 @@ export default function NewRecipe() {
       <Sidebar />
       <div className="recipe-container">
         <div className="content">
-          <div className="top">
+          <div className="top-container">
             <form id="formSubmit" onSubmit={handleSubmit(onValid, onError)}>
               <div className="inputs-row">
                 <div className="input-field">
@@ -289,7 +304,7 @@ export default function NewRecipe() {
                       name="name"
                       {...register('name')}
                       disabled={isView}
-                      style={{ width: '380px' }}
+                      style={{ width: '450px' }}
                     />
                   </label>
                 </div>
@@ -301,48 +316,8 @@ export default function NewRecipe() {
                       name="author"
                       {...register('author')}
                       disabled={isView}
-                      style={{ width: '220px' }}
+                      style={{ width: '395px' }}
                     />
-                  </label>
-                </div>
-                <div className="input-field">
-                  <label htmlFor="style">
-                    Style
-                    <select
-                      id="style"
-                      value={selectedStyle.name || ''}
-                      onChange={(e) => {
-                        const selectedName = e.target.value;
-                        const matchedStyle = beerStyles.find((s) => s.name === selectedName);
-                        if (matchedStyle) {
-                          setSelectedStyle(matchedStyle);
-                        } else {
-                          setSelectedStyle({ name: '' }); // fallback
-                        }
-                      }}
-                      style={{ width: '200px' }}
-                    >
-                      <option value="">Select a style</option>
-                      {beerStyles.map((s) => (
-                        <option key={s.name} value={s.name}>
-                          {s.name}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-                </div>
-                <div className="input-field">
-                  <label htmlFor="type">
-                    Type
-                    <select
-                      id="type"
-                      {...register('type')}
-                      style={{ width: '100px' }}
-                    >
-                      <option value="All Grain">All Grain</option>
-                      <option value="Extract">Extract</option>
-                      <option value="Partial Mash">Partial Mash</option>
-                    </select>
                   </label>
                 </div>
                 <div className="input-field">
@@ -353,11 +328,12 @@ export default function NewRecipe() {
                       name="creationDate"
                       {...register('creationDate')}
                       disabled={isView}
-                      style={{ width: '100px' }}
+                      style={{ width: '200px' }}
                     />
                   </label>
                 </div>
               </div>
+
               <div className="inputs-row">
                 <div className="input-field">
                   <label htmlFor="description">
@@ -372,6 +348,7 @@ export default function NewRecipe() {
                   </label>
                 </div>
               </div>
+
               <div className="inputs-row">
                 <div className="input-field no-flex">
                   <button
@@ -391,10 +368,54 @@ export default function NewRecipe() {
                       name="equipment"
                       {...register('recipeEquipment.name')}
                       disabled={isView}
-                      style={{ width: '240px' }}
+                      style={{ width: '500px' }}
                     />
                   </label>
                 </div>
+                <div className="input-field">
+                  <label htmlFor="style">
+                    Style
+                    <select
+                      id="style"
+                      {...register('style')}
+                      value={selectedStyle.name || ''}
+                      onChange={(e) => {
+                        const selectedName = e.target.value;
+                        const matchedStyle = beerStyles.find((s) => s.name === selectedName);
+                        if (matchedStyle) {
+                          setSelectedStyle(matchedStyle);
+                        } else {
+                          setSelectedStyle({ name: '' }); // fallback
+                        }
+                      }}
+                      style={{ width: '350px' }}
+                    >
+                      <option value="">Select a style</option>
+                      {beerStyles.map((s) => (
+                        <option key={s.name} value={s.name}>
+                          {s.name}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                </div>
+                <div className="input-field">
+                  <label htmlFor="type">
+                    Type
+                    <select
+                      id="type"
+                      {...register('type')}
+                      style={{ width: '155px' }}
+                    >
+                      <option value="All Grain">All Grain</option>
+                      <option value="Extract">Extract</option>
+                      <option value="Partial Mash">Partial Mash</option>
+                    </select>
+                  </label>
+                </div>
+              </div>
+
+              <div className="inputs-row">
                 <div className="input-field">
                   <label htmlFor="batchVolume">
                     Batch Volume
@@ -404,7 +425,7 @@ export default function NewRecipe() {
                       type="number"
                       {...register('recipeEquipment.batchVolume')}
                       disabled={isView}
-                      style={{ width: '90px' }}
+                      style={{ width: '150px' }}
                     />
                   </label>
                 </div>
@@ -417,7 +438,7 @@ export default function NewRecipe() {
                       type="number"
                       {...register('recipeEquipment.batchTime')}
                       disabled={isView}
-                      style={{ width: '90px' }}
+                      style={{ width: '150px' }}
                     />
                   </label>
                 </div>
@@ -430,7 +451,7 @@ export default function NewRecipe() {
                       type="number"
                       {...register('recipeEquipment.efficiency')}
                       disabled={isView}
-                      style={{ width: '90px' }}
+                      style={{ width: '150px' }}
                     />
                   </label>
                 </div>
@@ -443,7 +464,7 @@ export default function NewRecipe() {
                       type="number"
                       {...register('recipeEquipment.efficiency')}
                       disabled={isView}
-                      style={{ width: '90px' }}
+                      style={{ width: '150px' }}
                     />
                   </label>
                 </div>
@@ -457,7 +478,7 @@ export default function NewRecipe() {
                       value={preBoilVolume}
                       onChange={handleEquipmentChange}
                       disabled
-                      style={{ width: '90px' }}
+                      style={{ width: '150px' }}
                     />
                   </label>
                 </div>
@@ -470,7 +491,7 @@ export default function NewRecipe() {
                       type="number"
                       {...register('recipeEquipment.boilTime')}
                       disabled={isView}
-                      style={{ width: '90px' }}
+                      style={{ width: '160px' }}
                     />
                   </label>
                 </div>
@@ -483,13 +504,19 @@ export default function NewRecipe() {
               onClick={() => openModal(MODALS.FERMENTABLE)}
               className="modalAddButtonFermentable"
             >
-              Add Fermentable
+              🌾 Add Fermentable
             </button>
             <button
               type="button"
               onClick={() => openModal(MODALS.HOP)}
               className="modalAddButtonHop"
             >
+              <object
+                className="hop-object"
+                type="image/svg+xml"
+                data="/hop.svg"
+                aria-label="Hop icon"
+              />
               Add Hop
             </button>
             <button
@@ -497,14 +524,14 @@ export default function NewRecipe() {
               onClick={() => openModal(MODALS.MISC)}
               className="modalAddButtonMisc"
             >
-              Add Misc
+              🧂 Add Misc
             </button>
             <button
               type="button"
               onClick={() => openModal(MODALS.YEAST)}
               className="modalAddButtonYeast"
             >
-              Add Yeast
+              🧬 Add Yeast
             </button>
           </div>
           <div className="bottom-container">
@@ -677,6 +704,11 @@ export default function NewRecipe() {
                 <strong>OG:</strong>
                 {' '}
                 {OG}
+                <span style={{ color: '#555' }}>
+                  {selectedStyle.initialOG !== 1 && selectedStyle.finalOG !== 1 && (
+                    ` (${selectedStyle.initialOG} - ${selectedStyle.finalOG})`
+                  )}
+                </span>
               </div>
               <div className="bar-container">
                 <OGBar
@@ -691,6 +723,11 @@ export default function NewRecipe() {
                 <strong>FG:</strong>
                 {' '}
                 {FG}
+                <span style={{ color: '#555' }}>
+                  {selectedStyle.initialFG > 1 && selectedStyle.finalFG > 1 && (
+                    ` (${selectedStyle.initialFG} - ${selectedStyle.finalFG})`
+                  )}
+                </span>
               </div>
               <div className="bar-container">
                 <OGBar
@@ -705,6 +742,11 @@ export default function NewRecipe() {
                 <strong>ABV:</strong>
                 {' '}
                 {ABV}
+                <span style={{ color: '#555' }}>
+                  {selectedStyle.initialABV > 0 && selectedStyle.finalABV > 0 && (
+                    ` (${selectedStyle.initialABV} - ${selectedStyle.finalABV})`
+                  )}
+                </span>
               </div>
               <div className="bar-container">
                 <OGBar
@@ -719,6 +761,11 @@ export default function NewRecipe() {
                 <strong>EBC:</strong>
                 {' '}
                 {EBC}
+                <span style={{ color: '#555' }}>
+                  {selectedStyle.initialEBC > 0 && selectedStyle.finalEBC > 0 && (
+                    ` (${selectedStyle.initialEBC} - ${selectedStyle.finalEBC})`
+                  )}
+                </span>
               </div>
               <div className="bar-container">
                 <OGBar
@@ -733,6 +780,11 @@ export default function NewRecipe() {
                 <strong>IBU:</strong>
                 {' '}
                 {IBU}
+                <span style={{ color: '#555' }}>
+                  {selectedStyle.initialIBU > 0 && selectedStyle.finalIBU > 0 && (
+                    ` (${selectedStyle.initialIBU} - ${selectedStyle.finalIBU})`
+                  )}
+                </span>
               </div>
               <div className="bar-container">
                 <OGBar
@@ -747,6 +799,11 @@ export default function NewRecipe() {
                 <strong>BU/GU:</strong>
                 {' '}
                 {BUGU}
+                <span style={{ color: '#555' }}>
+                  {selectedStyle.initialBuGu > 0 && selectedStyle.finalBuGu > 0 && (
+                    ` (${selectedStyle.initialBuGu} - ${selectedStyle.finalBuGu})`
+                  )}
+                </span>
               </div>
               <div className="bar-container">
                 <OGBar
@@ -758,15 +815,19 @@ export default function NewRecipe() {
                 />
               </div>
             </div>
+
             <div className="bottom-right-beer">
               <object
                 className="beer-object"
                 type="image/svg+xml"
                 data="/beer.svg"
                 aria-label="Beer icon"
+                alt="Beer color"
+                title={`Approximate beer color (EBC: ${EBC})`}
               />
             </div>
           </div>
+
           <div className="IA">
             <textarea
               name="IA"

@@ -45,6 +45,7 @@ export default function MiscList() {
     <>
       <p>
         Type:
+        {' '}
         {item.type}
       </p>
       <p>
@@ -65,6 +66,8 @@ export default function MiscList() {
   useEffect(() => {
     const loadMisc = async () => {
       try {
+        if (!user?.token) return;
+
         const miscs = await fetchMisc(user.token);
         setItemList(miscs);
       } catch {
