@@ -16,6 +16,7 @@ export default function useRecipeCalculations({
   watchedBoilTime,
   recipeEquipment,
   recipeFermentables,
+  recipeHops,
   getValues,
   setValue,
 }) {
@@ -36,6 +37,7 @@ export default function useRecipeCalculations({
 
     // calculate FG
     const FGResult = calculateFG(recipeData, OGResult);
+    console.log(FGResult);
     setFG(FGResult);
 
     // calculate IBU
@@ -73,7 +75,7 @@ export default function useRecipeCalculations({
     } else {
       setABV(0);
     }
-  }, [watchedBatchVolume, watchedEfficiency, recipeFermentables, IBU]);
+  }, [watchedBatchVolume, watchedEfficiency, recipeFermentables, recipeHops, IBU]);
 
   useEffect(() => {
     const recipeData = getValues();

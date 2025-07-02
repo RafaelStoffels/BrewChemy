@@ -143,7 +143,7 @@ export default function NewYeast() {
             <div className="inputs-row">
               <div className="input-field">
                 <label>
-                  Attenuation
+                  Attenuation %
                   <input
                     style={{ width: '100px' }}
                     type="number"

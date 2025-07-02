@@ -139,11 +139,13 @@ export default function NewRecipe() {
   const handleChangeEquipmentRecipe = async (selectedItem) => {
     if (selectedItem) {
       const currentEquipmentName = getValues('recipeEquipment.name');
+      console.log('entrou');
+      console.log(recipeEquipment.name);
 
-      if (currentEquipmentName !== undefined) {
+      if (currentEquipmentName !== undefined && currentEquipmentName.trim() !== '') {
         const result = await Swal.fire({
-          title: 'Tem certeza?',
-          text: 'Deseja mesmo trocar o equipamento? A troca irá atualizar a receita.',
+          title: 'Are you sure?',
+          text: 'Do you really want to change the equipment? Changing it will update the recipe.',
           icon: 'warning',
           showCancelButton: true,
           confirmButtonColor: '#3085d6',
@@ -284,6 +286,7 @@ export default function NewRecipe() {
     watchedBoilTime,
     recipeEquipment,
     recipeFermentables,
+    recipeHops,
     getValues,
     setValue,
   });

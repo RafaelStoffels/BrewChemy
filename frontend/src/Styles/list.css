@@ -29,25 +29,22 @@
     padding: 15px;
     border-radius: 8px;
     position: relative;
+    
 }
 
 /* ======================================
    List Item Content
 ====================================== */
-.list-container ul li strong {
-    display: block;
-    margin-bottom: 16px;
-    color: #41414d;
-}
-
-.list-container ul li p + strong {
-    margin-top: 32px;
-}
-
 .list-container ul li p {
     color: #4b4949;
     line-height: 21px;
     font-size: 14px;
+}
+
+.item-title {
+  font-size: 20px;
+  font-weight: bold;
+  margin-top: 11px; /* novo */
 }
 
 /* ======================================
@@ -55,7 +52,7 @@
 ====================================== */
 .list-container ul li .button-group {
     position: absolute;
-    top: 13px;
+    top: 10px;
     right: 13px;
     display: flex;
     gap: 8px;
@@ -99,5 +96,6 @@
   font-size: 16px;
   border-radius: 8px;
   border: 1px solid #744410;
-  margin-bottom: 15px;
+  margin-top: 20px;
+  margin-bottom: 5px;
 }
