@@ -948,7 +948,7 @@ export function UpdateHopModal({
                     type="number"
                     value={localHopObject.boilTime || ''}
                     onChange={(e) => handleChange('boilTime', e.target.value)}
-                    style={{ width: '100px' }}
+                    style={{ width: '165px' }}
                   />
                 </label>
               </div>
@@ -1025,7 +1025,6 @@ export function UpdateMiscModal({
     description: React.useRef(null),
     time: React.useRef(null),
     type: React.useRef(null),
-    use: React.useRef(null),
     quantity: React.useRef(null),
   };
 
@@ -1093,7 +1092,7 @@ export function UpdateMiscModal({
                     type="number"
                     value={localMiscObject.time || ''}
                     onChange={(e) => handleChange('time', e.target.value)}
-                    style={{ width: '100px' }}
+                    style={{ width: '120px' }}
                   />
                 </label>
               </div>
@@ -1103,6 +1102,7 @@ export function UpdateMiscModal({
                   <select
                     ref={inputRefs.type}
                     value={localMiscObject.type}
+                    style={{ width: '230px' }}
                     onChange={(e) => setLocalMiscObject((prev) => ({
                       ...prev,
                       type: e.target.value,
@@ -1114,27 +1114,6 @@ export function UpdateMiscModal({
                     <option value="Spice">Spice</option>
                     <option value="Water Agent">Water Agent</option>
                     <option value="Other">Other</option>
-                  </select>
-                </label>
-              </div>
-              <div className="input-field">
-                <label htmlFor="use">
-                  Use
-                  <select
-                    ref={inputRefs.use}
-                    value={localMiscObject.use}
-                    onChange={(e) => setLocalMiscObject((prev) => ({
-                      ...prev,
-                      use: e.target.value,
-                    }))}
-                  >
-                    <option value="Boil">Boil</option>
-                    <option value="Bottling">Bottling</option>
-                    <option value="Flameout">Flameout</option>
-                    <option value="Mash">Mash</option>
-                    <option value="Primary">Primary</option>
-                    <option value="Secundary">Secundary</option>
-                    <option value="Sparge">Sparge</option>
                   </select>
                 </label>
               </div>
@@ -1199,21 +1178,10 @@ export function UpdateYeastModal({
   const handleSaveButton = async (e) => {
     e.preventDefault();
 
-    const yeastFromRefs = {
-      name: inputRefs.name.current?.value || '',
-      manufacturer: inputRefs.manufacturer.current?.value || '',
-      description: inputRefs.description.current?.value || '',
-      type: inputRefs.type.current?.value || '',
-      form: inputRefs.form.current?.value || '',
-      flocculation: inputRefs.flocculation.current?.value || '',
-      attenuation: inputRefs.attenuation.current?.value || '',
-      quantity: parseFloat(inputRefs.quantity.current?.value) || 0,
-    };
-
     try {
-      await updateYeastSchema.validate(yeastFromRefs, { abortEarly: false });
+      await updateYeastSchema.validate(localYeastObject, { abortEarly: false });
 
-      onUpdate(yeastFromRefs);
+      onUpdate(localYeastObject);
 
       closeModal();
     } catch (err) {

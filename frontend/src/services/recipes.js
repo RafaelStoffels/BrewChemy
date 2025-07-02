@@ -83,12 +83,14 @@ export async function addRecipe(userToken, dataInput, { showToast = true } = {})
     if (showToast) showSuccessToast('Recipe saved successfully.');
     return response.data;
   } catch (err) {
-    let msg = 'Error loading equipment';
+    let msg = 'Error saving recipe';
+
     if (err.response?.status === 401) {
       msg = 'Your session has expired. Please log in again.';
     } else if (err.response?.data?.message || err.response?.data?.error) {
       msg = err.response.data.message || err.response.data.error;
     }
+
     if (showToast) showErrorToast(msg);
     throw new Error(msg);
   }
@@ -102,7 +104,7 @@ export async function updateRecipe(userToken, id, dataInput, { showToast = true 
     if (showToast) showSuccessToast('Recipe saved successfully.');
     return response.data;
   } catch (err) {
-    let msg = 'Error loading equipment';
+    let msg = 'Error updating recipe';
     if (err.response?.status === 401) {
       msg = 'Your session has expired. Please log in again.';
     } else if (err.response?.data?.message || err.response?.data?.error) {

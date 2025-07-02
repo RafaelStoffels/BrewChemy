@@ -38,7 +38,7 @@ export const updateHopSchema = Yup.object().shape({
   alphaAcidContent: Yup.number()
     .typeError('Alpha Acid must be a number.')
     .min(0, 'Alpha Acid must be 0 or more.')
-    .required('Alpha Acid is required.'),
+    .notRequired('Alpha Acid is required.'),
   betaAcidContent: Yup.number()
     .typeError('Beta Acid must be a number.')
     .min(0, 'Beta Acid must be 0 or more.')
@@ -46,7 +46,7 @@ export const updateHopSchema = Yup.object().shape({
   boilTime: Yup.number()
     .typeError('Boil time must be a number.')
     .min(0, 'Boil time must be 0 or more.')
-    .required('Boil time is required.'),
+    .notRequired('Boil time is required.'),
   useType: Yup.string()
     .oneOf(validUseTypes, 'Invalid use type.')
     .required('Use type is required.'),

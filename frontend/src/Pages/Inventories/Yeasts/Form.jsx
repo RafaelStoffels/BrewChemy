@@ -143,20 +143,19 @@ export default function NewYeast() {
             <div className="inputs-row">
               <div className="input-field">
                 <label>
-                  Flavor Profile
+                  Attenuation
                   <input
-                    {...register('flavorProfile')}
+                    style={{ width: '100px' }}
+                    type="number"
+                    {...register('attenuation')}
                     disabled={isView}
                   />
                 </label>
               </div>
-            </div>
-
-            <div className="inputs-row">
               <div className="input-field">
                 <label>
                   Type
-                  <select {...register('type')} disabled={isView}>
+                  <select style={{ width: '150px' }} {...register('type')} disabled={isView}>
                     <option value="Ale">Ale</option>
                     <option value="Lager">Lager</option>
                     <option value="Hybrid">Hybrid</option>
@@ -171,7 +170,7 @@ export default function NewYeast() {
               <div className="input-field">
                 <label>
                   Form
-                  <select {...register('form')} disabled={isView}>
+                  <select style={{ width: '170px' }} {...register('form')} disabled={isView}>
                     <option value="Dry">Dry</option>
                     <option value="Liquid">Liquid</option>
                     <option value="Culture">Culture</option>
@@ -183,7 +182,7 @@ export default function NewYeast() {
               <div className="input-field">
                 <label>
                   Flocculation
-                  <select {...register('flocculation')} disabled={isView}>
+                  <select style={{ width: '200px' }} {...register('flocculation')} disabled={isView}>
                     <option value="Low">Low</option>
                     <option value="Medium">Medium</option>
                     <option value="Medium - High">Medium - High</option>

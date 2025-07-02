@@ -20,7 +20,7 @@ export const updateFermentableSchema = yup.object().shape({
     .nullable(),
   type: yup
     .string()
-    .oneOf(['base', 'especial', 'adjunct'], 'Invalid fermentable type')
+    .oneOf(['Base', 'Specialty', 'Adjunct'], 'Invalid fermentable type')
     .required('Fermentable Type is required'),
   supplier: yup
     .string()

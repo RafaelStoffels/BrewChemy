@@ -9,16 +9,6 @@ const validTypes = [
   'Other',
 ];
 
-const validUses = [
-  'Boil',
-  'Bottling',
-  'Flameout',
-  'Mash',
-  'Primary',
-  'Secundary',
-  'Sparge',
-];
-
 // Schema para adicionar um item misc
 export const addMiscSchema = Yup.object().shape({
   selectedItem: Yup.object()
@@ -40,13 +30,10 @@ export const updateMiscSchema = Yup.object().shape({
   time: Yup.number()
     .typeError('Time must be a number')
     .min(0, 'Time must be 0 or more')
-    .required('Time is required'),
+    .notRequired('Time is required'),
   type: Yup.string()
     .oneOf(validTypes, 'Invalid type')
     .required('Type is required'),
-  use: Yup.string()
-    .oneOf(validUses, 'Invalid use')
-    .required('Use is required'),
   quantity: Yup.number()
     .typeError('Quantity must be a number')
     .positive('Quantity must be greater than zero')

@@ -12,7 +12,6 @@ class YeastsSchema(Schema):
     type = fields.Str(required=True,)
     form = fields.Str(allow_none=True)
     attenuation = fields.Decimal(as_string=True, allow_none=True)
-    temperatureRange = fields.Str(allow_none=True)
     flavorProfile = fields.Str(allow_none=True)
     flocculation = fields.Str(allow_none=True)
     description = fields.Str(allow_none=True)
