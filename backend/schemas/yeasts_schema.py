@@ -15,6 +15,7 @@ class YeastsSchema(Schema):
     flavorProfile = fields.Str(allow_none=True)
     flocculation = fields.Str(allow_none=True)
     description = fields.Str(allow_none=True)
+    quantity = fields.Float(required=False)
 
     VALID_TYPES = {"Ale", "Lager", "Wine", "Champagne", "Brett", "Wild", "Other"}
     VALID_FORMS = {"Liquid", "Dry", "Slant", "Culture", "Other"}

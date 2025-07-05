@@ -65,7 +65,7 @@ export default function EquipmentList() {
 
   return (
     <ItemListPage
-      title="Equipments"
+      title="Equipment"
       itemList={itemList}
       onSearch={onSearch}
       onDetails={onDetails}

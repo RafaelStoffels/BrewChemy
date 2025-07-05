@@ -89,7 +89,7 @@ export default function FermentableList() {
 
   return (
     <ItemListPage
-      title="Fermentables"
+      title="Fermentable"
       itemList={itemList}
       onSearch={onSearch}
       onDetails={onDetails}

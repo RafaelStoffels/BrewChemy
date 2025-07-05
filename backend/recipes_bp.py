@@ -116,13 +116,15 @@ def create_recipes_bp():
         miscs_data = data.get("recipeMisc", [])
 
         for misc_data in miscs_data:
+            #logging.info(misc_data)
+            
             new_misc = RecipeMisc(
                 recipe_id=new_recipe.id,
                 user_id=current_user_id,
                 name=misc_data["name"],
                 description=misc_data.get("description"),
                 type=misc_data["type"],
-                quantity=misc_data["quantity"]
+                quantity=misc_data.get("quantity"),
             )
             db.session.add(new_misc)
 

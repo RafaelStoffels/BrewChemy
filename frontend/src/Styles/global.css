@@ -1,8 +1,6 @@
 /* ======================================
    Fonts and Global Reset
 ====================================== */
-@import url('https://fonts.googleapis.com/css?family=Roboto:300,500,700&display=swap');
-
 * {
     margin: 0;
     padding: 0;
@@ -10,10 +8,14 @@
     box-sizing: border-box;
 }
 
-body{
-    font: 400 13px Roboto, sans-serif;
-    background: #ebd492;
-    -webkit-font-smoothing: antialiased;
+body {
+  font-weight: 400;
+  font-size: 15px;
+  font-family: "Helvetica Neue", Arial, sans-serif;
+  background: #ebd492 !important;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale; /* para Firefox */
+  line-height: 1.3;
 }
 
 div {
@@ -24,7 +26,11 @@ div {
    Typography and Form Base Styles
 ====================================== */
 input, button, textarea, select {
-    font: 400 14px Roboto, sans-serif;
+    font-weight: 400;
+    font-size: 15px;
+    font-family: "Helvetica Neue", Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
 input, textarea, select {
@@ -101,13 +107,13 @@ textarea{
 .crud-save-button{
     cursor: pointer;
     width: 100%;
-    height: 60px;
+    height: 70px;
     background: #744410;
     border: 0;
     border-radius: 8px;
     color: #FFF;
     font-weight: 700;
-    margin-top: 9px;
+    margin-top: 12px;
     display: inline-block;
     text-align: center;
     text-decoration: none;
@@ -153,7 +159,7 @@ textarea{
 }
   
 .modal-content {
-    position: absolute;
+    position: fixed ;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
@@ -170,7 +176,7 @@ textarea{
 
 .modal-search-container {
     width: 100%;
-    height: 250px;
+    height: 230px;
     border: 1px solid #673d0d;
     background-color: rgba(255, 255, 255, 0.05);
     padding: 5px;
@@ -180,6 +186,10 @@ textarea{
     justify-content: center;
     align-items: center;
     overflow-y: auto;
+}
+
+.modalAddIngredient {
+  margin-top: -30px; /* Ajuste o valor conforme necessário */
 }
 
 .modal-search-results {
@@ -217,6 +227,30 @@ textarea{
     text-align: center;
     margin-bottom: 20px;  /* space between title*/
 }
+
+.modal-search-button {
+    all: unset;
+    cursor: pointer;
+    display: block;
+    padding: 1px 12px;
+    text-align: left;
+    width: 100%;
+}
+
+.modal-search-button.selected {
+    background-color: #b7702a;
+}
+
+.modal-search-results {
+  overflow-y: auto;
+  scrollbar-width: none;           /* Firefox */
+  -ms-overflow-style: none;        /* Internet Explorer, Old Edge */
+}
+
+.modal-search-results::-webkit-scrollbar {
+  display: none;                   /* Chrome, Safari, Opera */
+}
+
 
 /* ======================================
    Login Buttons

@@ -82,7 +82,7 @@ export function AddFermentableModal({ isOpen, closeModal, handleAddFermentableRe
     >
       <h2>Select a fermentable</h2>
       <form onSubmit={handleAddFermentableRecipe}>
-        <div className="modal">
+        <div className="modalAddIngredient">
           <SearchInput
             searchTerm={searchTerm}
             setSearchTerm={setSearchTerm}
@@ -131,7 +131,7 @@ export function AddFermentableModal({ isOpen, closeModal, handleAddFermentableRe
           type="button"
           onClick={handleSaveButton}
           className="crud-save-button"
-          style={{ marginTop: '70px' }}
+          style={{ marginTop: '80px' }}
         >
           Add Fermentable
         </button>
@@ -223,7 +223,7 @@ export function AddHopModal({ isOpen, closeModal, handleAddHopRecipe }) {
     >
       <h2>Select a Hop</h2>
       <form onSubmit={handleSaveButton}>
-        <div className="modal">
+        <div className="modalAddIngredient">
           <SearchInput
             searchTerm={searchTerm}
             setSearchTerm={setSearchTerm}
@@ -392,7 +392,7 @@ export function AddMiscModal({ isOpen, closeModal, handleAddMiscRecipe }) {
     >
       <h2>Select a Misc</h2>
       <form onSubmit={handleSaveButton}>
-        <div className="modal">
+        <div className="modalAddIngredient">
           <SearchInput
             searchTerm={searchTerm}
             setSearchTerm={setSearchTerm}
@@ -436,7 +436,7 @@ export function AddMiscModal({ isOpen, closeModal, handleAddMiscRecipe }) {
             type="button"
             onClick={handleSaveButton}
             className="crud-save-button"
-            style={{ marginTop: '70px' }}
+            style={{ marginTop: '80px' }}
           >
             Add Misc
           </button>
@@ -519,7 +519,7 @@ export function AddYeastModal({ isOpen, closeModal, handleAddYeastRecipe }) {
     >
       <h2>Select an Yeast</h2>
       <form onSubmit={handleSaveButton}>
-        <div className="modal">
+        <div className="modalAddIngredient">
           <SearchInput
             searchTerm={searchTerm}
             setSearchTerm={setSearchTerm}
@@ -566,7 +566,7 @@ export function AddYeastModal({ isOpen, closeModal, handleAddYeastRecipe }) {
             type="button"
             onClick={handleSaveButton}
             className="crud-save-button"
-            style={{ marginTop: '70px' }}
+            style={{ marginTop: '80px' }}
           >
             Add Yeast
           </button>
@@ -634,7 +634,7 @@ export function ChangeEquipmentModal({ isOpen, closeModal, handleChangeEquipment
       overlayClassName="modal-overlay"
     >
       <h2>Select an Equipment</h2>
-      <div className="modal">
+      <div className="modalAddIngredient">
         <SearchInput
           searchTerm={searchTerm}
           setSearchTerm={setSearchTerm}
@@ -662,7 +662,7 @@ export function ChangeEquipmentModal({ isOpen, closeModal, handleChangeEquipment
           onClick={handleSaveButton}
           type="submit"
           className="crud-save-button"
-          style={{ marginTop: '150px' }}
+          style={{ marginTop: '160px' }}
         >
           Change Equipment
         </button>
@@ -738,11 +738,12 @@ export function UpdateFermentableModal({
     >
       {localFermentableObject ? (
         <form onSubmit={handleSaveButton}>
-          <div className="modal">
+          <div className="modalBrewChemy">
             <h2>Update Fermentable</h2>
             <label htmlFor="name">
               Name
               <input
+                style={{ width: '540px' }}
                 ref={inputRefs.name}
                 value={localFermentableObject.name || ''}
                 onChange={(e) => handleChange('name', e.target.value)}
@@ -751,6 +752,7 @@ export function UpdateFermentableModal({
             <label htmlFor="name">
               Description
               <textarea
+                style={{ width: '540px' }}
                 value={localFermentableObject.description || ''}
                 onChange={(e) => handleChange('description', e.target.value)}
               />
@@ -819,7 +821,7 @@ export function UpdateFermentableModal({
                 </label>
               </div>
             </div>
-            <button className="crud-save-button" type="submit" style={{ marginTop: '140px' }}>
+            <button className="crud-save-button" type="submit" style={{ marginTop: '110px' }}>
               Save
             </button>
           </div>
@@ -899,11 +901,12 @@ export function UpdateHopModal({
     >
       {localHopObject ? (
         <form onSubmit={handleSaveButton}>
-          <div className="modal">
+          <div className="modalBrewChemy">
             <h2>Update Hop</h2>
             <label htmlFor="name">
               Name
               <input
+                style={{ width: '540px' }}
                 ref={inputRefs.name}
                 value={localHopObject.name || ''}
                 onChange={(e) => handleChange('name', e.target.value)}
@@ -912,6 +915,7 @@ export function UpdateHopModal({
             <label htmlFor="description">
               Description
               <textarea
+                style={{ width: '540px' }}
                 ref={inputRefs.description}
                 value={localHopObject.description || ''}
                 onChange={(e) => handleChange('description', e.target.value)}
@@ -986,7 +990,7 @@ export function UpdateHopModal({
               </div>
             </div>
 
-            <button className="crud-save-button" type="submit" style={{ marginTop: '140px' }}>
+            <button className="crud-save-button" type="submit" style={{ marginTop: '110px' }}>
               Save
             </button>
           </div>
@@ -1064,11 +1068,12 @@ export function UpdateMiscModal({
     >
       {localMiscObject ? (
         <form onSubmit={handleSaveButton}>
-          <div className="modal">
+          <div className="modalBrewChemy">
             <h2>Update Misc</h2>
             <label htmlFor="name">
               Name
               <input
+                style={{ width: '540px' }}
                 ref={inputRefs.name}
                 value={localMiscObject.name || ''}
                 onChange={(e) => handleChange('name', e.target.value)}
@@ -1077,6 +1082,7 @@ export function UpdateMiscModal({
             <label htmlFor="description">
               Description
               <textarea
+                style={{ width: '540px' }}
                 ref={inputRefs.description}
                 value={localMiscObject.description || ''}
                 onChange={(e) => handleChange('description', e.target.value)}
@@ -1129,7 +1135,7 @@ export function UpdateMiscModal({
                 </label>
               </div>
             </div>
-            <button className="crud-save-button" type="submit" style={{ marginTop: '210px' }}>
+            <button className="crud-save-button" type="submit" style={{ marginTop: '180px' }}>
               Save
             </button>
           </div>
@@ -1211,13 +1217,14 @@ export function UpdateYeastModal({
     >
       {localYeastObject ? (
         <form onSubmit={handleSaveButton}>
-          <div className="modal">
+          <div className="modalBrewChemy">
             <h2>Update Yeast</h2>
             <div className="inputs-row">
               <div className="input-field">
                 <label htmlFor="name">
                   Name
                   <input
+                    style={{ width: '260px' }}
                     ref={inputRefs.name}
                     value={localYeastObject.name || ''}
                     onChange={(e) => handleChange('name', e.target.value)}
@@ -1228,6 +1235,7 @@ export function UpdateYeastModal({
                 <label htmlFor="manufacturer">
                   Manufacturer
                   <input
+                    style={{ width: '260px' }}
                     ref={inputRefs.manufacturer}
                     value={localYeastObject.manufacturer || ''}
                     onChange={(e) => handleChange('manufacturer', e.target.value)}
@@ -1238,6 +1246,7 @@ export function UpdateYeastModal({
             <label htmlFor="description">
               Description
               <textarea
+                style={{ width: '540px' }}
                 ref={inputRefs.description}
                 value={localYeastObject.description || ''}
                 onChange={(e) => handleChange('description', e.target.value)}
@@ -1329,7 +1338,7 @@ export function UpdateYeastModal({
             </div>
           </div>
 
-          <button className="crud-save-button" type="submit" style={{ marginTop: '140px' }}>
+          <button className="crud-save-button" type="submit" style={{ marginTop: '110px' }}>
             Save
           </button>
         </form>

@@ -13,6 +13,7 @@ class FermentablesSchema(Schema):
     type = fields.Str(required=True)
     supplier = fields.Str(required=True)
     unitPrice = fields.Decimal(allow_none=True, as_string=True)
+    quantity = fields.Float(required=False)
 
     @validates("name")
     def validate_name(self, value, *args, **kwargs):

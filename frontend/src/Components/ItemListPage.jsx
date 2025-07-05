@@ -32,7 +32,10 @@ export default function ItemListPage({
 
         <SearchInput onSearch={onSearch} />
 
-        <h1>{title}</h1>
+        <h1>
+          {title}
+          s
+        </h1>
         <ul>
           {itemList.map((item) => (
             <li key={item.id}>

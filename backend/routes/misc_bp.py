@@ -4,9 +4,12 @@ from models import Misc
 from AuthTokenVerifier import token_required
 from marshmallow import ValidationError
 from schemas.miscs_schema import MiscsSchema
+import logging
 
 def create_misc_bp():
     misc_bp = Blueprint("misc", __name__)
+
+    logging.basicConfig(level=logging.INFO)
 
     @misc_bp.route("/miscs/search", methods=["GET"])
     @token_required
@@ -137,7 +140,6 @@ def create_misc_bp():
     @misc_bp.route("/miscs/<int:itemUserId>/<int:id>", methods=["DELETE"])
     @token_required
     def delete_misc_item(current_user_id, itemUserId, id):
-        print("chegou aqui")
 
         if itemUserId != current_user_id:
             return jsonify({"message": "Cannot delete official record"}), 404

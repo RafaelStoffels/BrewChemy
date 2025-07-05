@@ -19,6 +19,7 @@ export default function useRecipeCalculations({
   recipeHops,
   getValues,
   setValue,
+  svgRef,
 }) {
   const [OG, setOG] = useState(0);
   const [FG, setFG] = useState(0);
@@ -92,22 +93,19 @@ export default function useRecipeCalculations({
     const EBCResult = calculateEBC(recipeData);
     setEBC(EBCResult);
 
-    if (EBCResult) {
+    if (EBCResult && svgRef?.current) {
       const color = getBeerColor(EBCResult);
-      const svgObject = document.querySelector('.beer-object');
+      const svgRoot = svgRef.current;
 
-      if (svgObject?.contentDocument) {
-        const svgDoc = svgObject.contentDocument;
-        const gradients = svgDoc.querySelectorAll('linearGradient, radialGradient');
+      const gradients = svgRoot.querySelectorAll('linearGradient, radialGradient');
 
-        gradients.forEach((gradient) => {
-          gradient.querySelectorAll('stop').forEach((stop) => {
-            stop.setAttribute('stop-color', color);
-          });
+      gradients.forEach((gradient) => {
+        gradient.querySelectorAll('stop').forEach((stop) => {
+          stop.setAttribute('stop-color', color);
         });
-      }
+      });
     }
-  }, [watchedBatchVolume, recipeFermentables]);
+  }, [watchedBatchVolume, recipeFermentables, svgRef]);
 
   useEffect(() => {
     if (OG && FG) {
