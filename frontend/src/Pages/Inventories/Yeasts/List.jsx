@@ -84,7 +84,7 @@ export default function YeastList() {
 
   return (
     <ItemListPage
-      title="Yeasts"
+      title="Yeast"
       itemList={itemList}
       onSearch={onSearch}
       onDetails={onDetails}

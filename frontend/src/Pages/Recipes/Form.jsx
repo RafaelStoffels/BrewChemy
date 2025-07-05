@@ -1,8 +1,12 @@
 // React and libraries
-import React, { useState, useEffect, useContext } from 'react';
+import React, {
+  useState, useRef, useEffect, useContext,
+} from 'react';
 import { useParams } from 'react-router-dom';
 import { FiTrash2, FiEdit, FiRepeat } from 'react-icons/fi';
 import Swal from 'sweetalert2';
+import { usePopper } from 'react-popper';
+import { ReactComponent as BeerSVG } from '../../assets/beer.svg';
 
 // Context and hooks
 import AuthContext from '../../context/AuthContext';
@@ -37,6 +41,23 @@ export default function NewRecipe() {
 
   const { isEditing, isView } = useFormMode();
 
+  const popoverRef = useRef(null);
+  const [show, setShow] = useState(false);
+  const svgRef = useRef(null);
+  const [popoverContent, setPopoverContent] = useState('Loading...');
+
+  const { styles, attributes } = usePopper(svgRef.current, popoverRef.current, {
+    placement: 'bottom',
+    modifiers: [
+      {
+        name: 'offset',
+        options: {
+          offset: [0, -50],
+        },
+      },
+    ],
+  });
+
   // Ingredients Modals
   const {
     activeModal,
@@ -56,9 +77,6 @@ export default function NewRecipe() {
     setSelectedYeast,
     MODALS,
   } = useIngredientModals(user?.token || '');
-
-  /* Dinamic Variables */
-  const [openAI, setOpenAI] = useState('');
 
   /* Components */
   const [selectedStyle, setSelectedStyle] = useState('');
@@ -140,10 +158,10 @@ export default function NewRecipe() {
     if (selectedItem) {
       const currentEquipmentName = getValues('recipeEquipment.name');
 
-      if (currentEquipmentName !== undefined) {
+      if (currentEquipmentName !== undefined && currentEquipmentName.trim() !== '') {
         const result = await Swal.fire({
-          title: 'Tem certeza?',
-          text: 'Deseja mesmo trocar o equipamento? A troca irá atualizar a receita.',
+          title: 'Are you sure?',
+          text: 'Do you really want to change the equipment? Changing it will update the recipe.',
           icon: 'warning',
           showCancelButton: true,
           confirmButtonColor: '#3085d6',
@@ -214,13 +232,14 @@ export default function NewRecipe() {
     const recipe = getValues();
 
     if (!recipe?.style || typeof recipe !== 'object') {
-      showErrorToast('Recipe data is missing or invalid.');
+      showErrorToast('Recipe data is missing wmor invalid.');
+      setPopoverContent('Recipe data is missing or invalid.');
       return;
     }
 
     try {
       const openAIResponse = await getOpenAIResponse(recipe, user.token);
-      setOpenAI(openAIResponse);
+      setPopoverContent(openAIResponse);
     } catch (err) {
       //
     }
@@ -242,6 +261,27 @@ export default function NewRecipe() {
       setValue('type', 'All Grain');
     }
   }, [isEditing, setValue]);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        popoverRef.current
+        && !popoverRef.current.contains(event.target)
+        && svgRef.current
+        && !svgRef.current.contains(event.target)
+      ) {
+        setShow(false);
+      }
+    };
+
+    if (show) {
+      document.addEventListener('mousedown', handleClickOutside);
+    } else {
+      document.removeEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [show]);
 
   useEffect(() => {
     const recipeData = getValues();
@@ -284,8 +324,10 @@ export default function NewRecipe() {
     watchedBoilTime,
     recipeEquipment,
     recipeFermentables,
+    recipeHops,
     getValues,
     setValue,
+    svgRef,
   });
 
   return (
@@ -817,37 +859,61 @@ export default function NewRecipe() {
             </div>
 
             <div className="bottom-right-beer">
-              <object
-                className="beer-object"
-                type="image/svg+xml"
-                data="/beer.svg"
-                aria-label="Beer icon"
-                alt="Beer color"
-                title={`Approximate beer color (EBC: ${EBC})`}
+              <BeerSVG
+                className="beer-svg-icon"
+                ref={svgRef}
+                onClick={async () => {
+                  const newShow = !show;
+
+                  if (newShow) {
+                    setPopoverContent('Consulting mystical wisdom.');
+                    setShow(true);
+
+                    await fetchOpenAIResponse();
+                  } else {
+                    setShow(false);
+                  }
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    svgRef.current?.click();
+                  }
+                }}
+                role="button"
+                tabIndex="0"
+                style={{ cursor: 'pointer' }}
+                title="Tap here and explore the secrets of alchemist’s mystical wisdom for this recipe."
               />
+
+              {show && (
+                <div
+                  className="wide-popover"
+                  ref={popoverRef}
+                  style={{
+                    ...styles.popper,
+                    backgroundColor: '#fff',
+                    border: '1px solid #ccc',
+                    borderRadius: 4,
+                    padding: '12px',
+                    maxWidth: 300,
+                    boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
+                    zIndex: 9999,
+                  }}
+                  {...attributes.popper}
+                >
+                  <div className="popover-header" style={{ fontWeight: 'bold', marginBottom: 12, fontSize: '1rem' }}>
+                    Alchemist’s Mystical Wisdom
+                  </div>
+                  <div className="popover-body">
+                    {popoverContent}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
-          <div className="IA">
-            <textarea
-              name="IA"
-              placeholder="Mystical Wisdom"
-              value={openAI}
-              disabled
-              style={{
-                width: '880px',
-                height: '85px',
-                overflow: 'hidden',
-              }}
-            />
-            <button
-              type="button"
-              className="ButtonMystical"
-              onClick={fetchOpenAIResponse}
-            >
-              Mystical Brew Wisdom
-            </button>
-          </div>
           {!isView && (
             <button form="formSubmit" className="crud-save-button" type="submit">
               Save

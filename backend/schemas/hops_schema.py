@@ -14,6 +14,7 @@ class HopsSchema(Schema):
     countryOfOrigin = fields.Str(allow_none=True)
     description = fields.Str(allow_none=True)
     useType = fields.Str(required=True)
+    quantity = fields.Float(required=False)
 
     VALID_TYPES = {"Pellet", "Whole", "Cryo", "CO2 Extract"}
     VALID_USE_TYPES = {"Boil", "Dry Hop", "Aroma", "Mash", "First Wort"}

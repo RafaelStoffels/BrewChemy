@@ -9,20 +9,9 @@ class MiscsSchema(Schema):
     name = fields.Str(required=True)
     description = fields.Str(allow_none=True)
     type = fields.Str()
-    quantity = fields.Int(required=True)
-    use = fields.Str()
+    quantity = fields.Float(required=False)
 
     VALID_TYPES = {
-        "",
-        "Flavor",
-        "Fining",
-        "Herb",
-        "Spice",
-        "Water Agent",
-        "Other"
-    }
-
-    VALID_USES = {
         "",
         "Flavor",
         "Fining",
@@ -43,8 +32,3 @@ class MiscsSchema(Schema):
     def validate_type(self, value, *args, **kwargs):
         if value and value not in self.VALID_TYPES:
             raise ValidationError(f"Type must be one of: {', '.join(self.VALID_TYPES)}.")
-
-    @validates("use")
-    def validate_type(self, value, *args, **kwargs):
-        if value and value not in self.VALID_USES:
-            raise ValidationError(f"Type must be one of: {', '.join(self.VALID_USES)}.")

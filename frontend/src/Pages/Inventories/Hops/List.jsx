@@ -79,7 +79,7 @@ export default function HopList() {
 
   return (
     <ItemListPage
-      title="Hops"
+      title="Hop"
       itemList={itemList}
       onSearch={onSearch}
       onDetails={onDetails}
