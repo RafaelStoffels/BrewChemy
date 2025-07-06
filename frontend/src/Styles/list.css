@@ -36,7 +36,7 @@
    List Item Content
 ====================================== */
 .list-container ul li p {
-    color: #4b4949;
+    color:rgb(60, 59, 59);
     line-height: 21px;
     font-size: 14px;
 }

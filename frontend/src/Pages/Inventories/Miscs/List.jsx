@@ -44,12 +44,12 @@ export default function MiscList() {
   const renderItem = (item) => (
     <>
       <p>
-        Type:
+        <strong>Type:</strong>
         {' '}
         {item.type}
       </p>
       <p>
-        Description:
+        <strong>Description:</strong>
         {' '}
         {item.description.length > 140
           ? `${item.description.substring(0, 140)}...`

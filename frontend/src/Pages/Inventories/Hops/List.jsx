@@ -44,12 +44,12 @@ export default function HopList() {
   const renderItem = (item) => (
     <>
       <p>
-        Supplier:
+        <strong>Supplier:</strong>
         {' '}
         {item.supplier}
       </p>
       <p>
-        Description:
+        <strong>Description:</strong>
         {' '}
         {item.description.length > 140
           ? `${item.description.substring(0, 140)}...`

@@ -44,22 +44,22 @@ export default function FermentableList() {
   const renderItem = (item) => (
     <>
       <p>
-        Supplier:
+        <strong>Supplier:</strong>
         {' '}
         {item.supplier}
       </p>
       <p>
-        Type:
+        <strong>Type:</strong>
         {' '}
         {item.type}
       </p>
       <p>
-        EBC:
+        <strong>EBC:</strong>
         {' '}
         {item.ebc}
       </p>
       <p>
-        Description:
+        <strong>Description:</strong>
         {' '}
         {item.description.length > 140
           ? `${item.description.substring(0, 140)}...`
