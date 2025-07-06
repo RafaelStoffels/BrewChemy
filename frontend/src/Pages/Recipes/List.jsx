@@ -1,30 +1,23 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { FiTrash2, FiEdit, FiBookOpen } from 'react-icons/fi';
+import { useNavigate } from 'react-router-dom';
 
-import Sidebar from '../../Components/Sidebar';
-import SearchInput from '../../Components/SearchInput';
-
+import ItemListPage from '../../Components/ItemListPage';
 import useAuthRedirect from '../../hooks/useAuthRedirect';
 
 import { fetchRecipes, deleteRecipe, searchRecipes } from '../../services/recipes';
-import api from '../../services/api';
-
 import { showErrorToast, showInfoToast } from '../../utils/notifications';
 
 import AuthContext from '../../context/AuthContext';
 
-import '../../Styles/list.css';
-
-export default function MaltList() {
+export default function RecipeList() {
   const { user } = useContext(AuthContext);
   const [itemList, setItemList] = useState([]);
 
   const navigate = useNavigate();
 
-  const searchItemsFunction = async (term) => {
+  const onSearch = async (term) => {
     try {
-      const response = await searchRecipes(api, user.token, term);
+      const response = await searchRecipes(user.token, term);
 
       if (Array.isArray(response) && response.length === 0) {
         showInfoToast('Data not found');
@@ -36,22 +29,39 @@ export default function MaltList() {
     }
   };
 
-  async function handleDetails(itemListId) {
-    navigate(`/Recipes/${itemListId}/details`);
-  }
+  const onDetails = (userId, id) => navigate(`/Recipes/${id}/details`);
+  const onUpdate = (userId, id) => navigate(`/Recipes/${id}/edit`);
 
-  async function handleUpdate(itemListId) {
-    navigate(`/Recipes/${itemListId}/edit`);
-  }
-
-  async function handleDelete(itemListId) {
+  const onDelete = async (userId, id) => {
     try {
-      await deleteRecipe(user.token, itemListId);
-      setItemList(itemList.filter((item) => item.id !== itemListId));
+      await deleteRecipe(user.token, id);
+      setItemList((prev) => prev.filter((item) => item.id !== id));
     } catch (err) {
-      showErrorToast(`Error deleting data.${err}`);
+      showErrorToast(`Error deleting data. ${err}`);
     }
-  }
+  };
+
+  const renderItem = (item) => (
+    <>
+      <p>
+        <strong>Author:</strong>
+        {' '}
+        {item.author}
+      </p>
+      <p>
+        <strong>Style:</strong>
+        {' '}
+        {item.style}
+      </p>
+      <p>
+        <strong>Description:</strong>
+        {' '}
+        {item.description.length > 140
+          ? `${item.description.substring(0, 140)}...`
+          : item.description}
+      </p>
+    </>
+  );
 
   // =======================
   // useEffects
@@ -59,7 +69,7 @@ export default function MaltList() {
   useAuthRedirect(user);
 
   useEffect(() => {
-    const fetchData = async () => {
+    const loadItems = async () => {
       try {
         if (!user?.token) return;
 
@@ -70,56 +80,19 @@ export default function MaltList() {
       }
     };
 
-    fetchData();
+    loadItems();
   }, [user]);
 
   return (
-    <div>
-      <Sidebar />
-      <div className="list-container">
-        <div className="div-addButton">
-          <Link className="Addbutton" to="/Recipes/new">Add new Recipe</Link>
-        </div>
-
-        <SearchInput onSearch={searchItemsFunction} />
-
-        <h1>Recipes</h1>
-        <ul>
-          {itemList.map((item) => (
-            <li key={item.id}>
-              <h2 className="item-title">{item.name}</h2>
-              <div className="item-details">
-                <p>
-                  Author:
-                  {item.author}
-                </p>
-                <p>
-                  Style:
-                  {item.style}
-                </p>
-                <p>
-                  Description:
-                  {' '}
-                  {item.description.length > 140
-                    ? `${item.description.substring(0, 140)}...`
-                    : item.description}
-                </p>
-              </div>
-              <div className="button-group">
-                <button onClick={() => handleDetails(item.id)} type="button" className="icon-button">
-                  <FiBookOpen size={20} />
-                </button>
-                <button onClick={() => handleUpdate(item.id)} type="button" className="icon-button">
-                  <FiEdit size={20} />
-                </button>
-                <button onClick={() => handleDelete(item.id)} type="button" className="icon-button">
-                  <FiTrash2 size={20} />
-                </button>
-              </div>
-            </li>
-          ))}
-        </ul>
-      </div>
-    </div>
+    <ItemListPage
+      title="Recipe"
+      itemList={itemList}
+      onSearch={onSearch}
+      onDetails={onDetails}
+      onUpdate={onUpdate}
+      onDelete={onDelete}
+      renderItem={renderItem}
+      addNewRoute="/Recipes/new"
+    />
   );
 }

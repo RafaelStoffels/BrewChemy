@@ -128,10 +128,7 @@
    Animations
 ====================================== */
 @keyframes shake {
-  0%, 100% { transform: translate(0, 0); }
-  20% { transform: translate(-1px, 1px); }
-  0%, 100% { filter: brightness(1); }
-  50% { filter: brightness(0.7); }
+  20% { filter: brightness(0.8); }
 }
 .shake-on-hover:hover {
   animation: shake 0.5s;

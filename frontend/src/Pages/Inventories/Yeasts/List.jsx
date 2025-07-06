@@ -44,17 +44,17 @@ export default function YeastList() {
   const renderItem = (item) => (
     <>
       <p>
-        Manufacturer:
+        <strong>Manufacturer:</strong>
         {' '}
         {item.manufacturer}
       </p>
       <p>
-        Type:
+        <strong>Type:</strong>
         {' '}
         {item.type}
       </p>
       <p>
-        Description:
+        <strong>Description:</strong>
         {' '}
         {item.description.length > 140
           ? `${item.description.substring(0, 140)}...`
