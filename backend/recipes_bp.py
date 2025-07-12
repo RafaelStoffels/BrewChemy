@@ -109,7 +109,8 @@ def create_recipes_bp():
                 country_of_origin=hop_data.get("countryOfOrigin"),
                 description=hop_data.get("description"),
                 quantity=hop_data.get("quantity"),
-                boil_time=hop_data.get("boilTime")
+                boil_time=hop_data.get("boilTime"),
+                usage_stage=hop_data.get("usageStage")
             )
             db.session.add(new_hop)
 
@@ -249,6 +250,7 @@ def create_recipes_bp():
                 hop.description = hop_data.get("description", hop.description)
                 hop.quantity = hop_data.get("quantity", hop.quantity)
                 hop.boil_time = hop_data.get("boilTime", hop.boil_time)
+                hop.usage_stage = hop_data.get("usageStage", hop.usage_stage)
             else:
                 new_hop = RecipeHop(
                     recipe_id=recipe.id,
@@ -259,7 +261,8 @@ def create_recipes_bp():
                     country_of_origin=hop_data.get("countryOfOrigin"),
                     description=hop_data.get("description"),
                     quantity=hop_data.get("quantity"),
-                    boil_time=hop_data.get("boilTime")
+                    boil_time=hop_data.get("boilTime"),
+                    usage_stage=hop_data.get("usageStage")
                 )
                 db.session.add(new_hop)
 

@@ -151,7 +151,7 @@ export function AddHopModal({ isOpen, closeModal, handleAddHopRecipe }) {
   const [quantity, setQuantity] = useState('');
   const [alphaAcid, setAlphaAcid] = useState('');
   const [boilTime, setBoilTime] = useState(60);
-  const [useType, setUseType] = useState('Boil');
+  const [usageStage, setUsageStage] = useState('Boil');
   const [searchTerm, setSearchTerm] = useState('');
   const [itemList, setItemList] = useState([]);
 
@@ -174,19 +174,19 @@ export function AddHopModal({ isOpen, closeModal, handleAddHopRecipe }) {
     quantity: React.useRef(null),
     boilTime: React.useRef(null),
     alphaAcid: React.useRef(null),
-    useType: React.useRef(null),
+    usageStage: React.useRef(null),
   };
 
   const handleSaveButton = async () => {
     try {
       await addHopSchema.validate(
         {
-          selectedItem, quantity, boilTime, alphaAcid, useType,
+          selectedItem, quantity, boilTime, alphaAcid, usageStage,
         },
         { abortEarly: false },
       );
 
-      handleAddHopRecipe(selectedItem.id, quantity, boilTime, alphaAcid, useType);
+      handleAddHopRecipe(selectedItem.id, quantity, boilTime, alphaAcid, usageStage);
       closeModal();
     } catch (err) {
       if (err.inner && err.inner.length > 0) {
@@ -253,16 +253,16 @@ export function AddHopModal({ isOpen, closeModal, handleAddHopRecipe }) {
           </div>
           <div className="inputs-row">
             <div className="input-field" style={{ marginTop: '10px' }}>
-              <label htmlFor="useType">
-                Use Type
+              <label htmlFor="usageStage">
+                Usage stage
                 <select
-                  ref={inputRefs.useType}
-                  value={useType}
-                  onChange={(e) => setUseType(e.target.value)}
+                  ref={inputRefs.usageStage}
+                  value={usageStage}
+                  onChange={(e) => setUsageStage(e.target.value)}
                 >
                   <option value="Boil">Boil</option>
                   <option value="Dry Hop">Dry Hop</option>
-                  <option value="Aroma">Aroma</option>
+                  <option value="Whirlpool">Whirlpool</option>
                   <option value="Mash">Mash</option>
                   <option value="First Wort">First Wort</option>
                 </select>
@@ -861,7 +861,7 @@ export function UpdateHopModal({
     alphaAcidContent: React.useRef(null),
     betaAcidContent: React.useRef(null),
     boilTime: React.useRef(null),
-    useType: React.useRef(null),
+    usageStage: React.useRef(null),
     quantity: React.useRef(null),
   };
 
@@ -959,19 +959,19 @@ export function UpdateHopModal({
             </div>
             <div className="inputs-row">
               <div className="input-field">
-                <label htmlFor="useType">
-                  Use Type
+                <label htmlFor="usageStage">
+                  Usage stage
                   <select
-                    ref={inputRefs.useType}
-                    value={localHopObject.useType}
+                    ref={inputRefs.usageStage}
+                    value={localHopObject.usageStage}
                     onChange={(e) => setLocalHopObject((prev) => ({
                       ...prev,
-                      useType: e.target.value,
+                      usageStage: e.target.value,
                     }))}
                   >
                     <option value="Boil">Boil</option>
                     <option value="Dry Hop">Dry Hop</option>
-                    <option value="Aroma">Aroma</option>
+                    <option value="Whirlpool">Whirlpool</option>
                     <option value="Mash">Mash</option>
                     <option value="First Wort">First Wort</option>
                   </select>

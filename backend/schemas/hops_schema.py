@@ -17,7 +17,7 @@ class HopsSchema(Schema):
     quantity = fields.Float(required=False)
 
     VALID_TYPES = {"Pellet", "Whole", "Cryo", "CO2 Extract"}
-    VALID_USE_TYPES = {"Boil", "Dry Hop", "Aroma", "Mash", "First Wort"}
+    VALID_USE_TYPES = {"Aroma", "Bittering", "Dual-purpose"}
 
     @validates("name")
     def validate_name(self, value, *args, **kwargs):

@@ -3,7 +3,7 @@ import * as Yup from 'yup';
 const validUseTypes = [
   'Boil',
   'Dry Hop',
-  'Aroma',
+  'Whirlpool',
   'Mash',
   'First Wort',
 ];
@@ -11,9 +11,6 @@ const validUseTypes = [
 export const addHopSchema = Yup.object().shape({
   selectedItem: Yup.object()
     .required('Please select a hop.'),
-  useType: Yup.string()
-    .oneOf(validUseTypes, 'Invalid use type.')
-    .required('Use type is required.'),
   boilTime: Yup.number()
     .typeError('Boil time must be a number.')
     .min(0, 'Boil time must be 0 or more.')

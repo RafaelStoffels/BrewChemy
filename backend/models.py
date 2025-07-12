@@ -100,7 +100,7 @@ class Hop(db.Model):
             "type": self.type,
             "useType": self.use_type,
             "countryOfOrigin": self.country_of_origin,
-            "description": self.description,
+            "description": self.description
         }
 
 
@@ -313,6 +313,7 @@ class RecipeHop(db.Model):
     description = db.Column(db.Text)
     quantity = db.Column(db.Numeric, nullable=False)
     boil_time = db.Column(db.Integer)
+    usage_stage = db.Column(db.String(15))
 
     def to_dict(self):
         return {
@@ -326,7 +327,8 @@ class RecipeHop(db.Model):
             "countryOfOrigin": self.country_of_origin,
             "description": self.description,
             "quantity": float(self.quantity) if self.quantity else None,
-            "boilTime": self.boil_time
+            "boilTime": self.boil_time,
+            "usageStage": self.usage_stage
         }
 
 

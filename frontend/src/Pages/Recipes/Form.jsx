@@ -369,7 +369,7 @@ export default function NewRecipe() {
                       id="creationDate"
                       name="creationDate"
                       {...register('creationDate')}
-                      disabled={isView}
+                      disabled="TRUE"
                       style={{ width: '200px' }}
                     />
                   </label>
@@ -635,7 +635,7 @@ export default function NewRecipe() {
                         g
                       </td>
                       <td><strong>{hop.name}</strong></td>
-                      <td>{hop.useType}</td>
+                      <td>{hop.usageStage}</td>
                       <td>
                         {hop.ibu}
                         {' '}
@@ -903,7 +903,14 @@ export default function NewRecipe() {
                   }}
                   {...attributes.popper}
                 >
-                  <div className="popover-header" style={{ fontWeight: 'bold', marginBottom: 12, fontSize: '1rem' }}>
+                  <div
+                    className="popover-header"
+                    style={{
+                      fontWeight: 'bold',
+                      marginBottom: 12,
+                      fontSize: '1rem',
+                    }}
+                  >
                     Alchemist’s Mystical Wisdom
                   </div>
                   <div className="popover-body">
@@ -941,14 +948,18 @@ export default function NewRecipe() {
           isOpen
           closeModal={closeModal}
           hopList={hopList}
-          handleAddHopRecipe={(onAddId, onAddQuantity, onAddBoilTime) => (
+          handleAddHopRecipe={(onAddId, onAddQuantity, onAddBoilTime, onAddAlphaAcid, onAddUsageStage) => (
             handleAddIngredient(
               hopList,
               'recipeHops',
               MODALS.ADD_HOP,
               onAddId,
               onAddQuantity,
-              { boilTime: onAddBoilTime },
+              {
+                boilTime: onAddBoilTime,
+                alphaAcid: onAddAlphaAcid,
+                usageStage: onAddUsageStage,
+              },
             )
           )}
         />

@@ -8,7 +8,7 @@ export async function fetchRecipes(userToken, { showToast = true } = {}) {
     });
     return response.data;
   } catch (err) {
-    let msg = 'Error loading equipment';
+    let msg = 'Error loading recipe';
     if (err.response?.status === 401) {
       msg = 'Your session has expired. Please log in again.';
     } else if (err.response?.data?.message || err.response?.data?.error) {
@@ -26,7 +26,7 @@ export async function fetchRecipeById(userToken, recipeId, { showToast = true } 
     });
     return response.data;
   } catch (err) {
-    let msg = 'Error loading equipment';
+    let msg = 'Error loading recipe';
     if (err.response?.status === 401) {
       msg = 'Your session has expired. Please log in again.';
     } else if (err.response?.data?.message || err.response?.data?.error) {
@@ -44,7 +44,7 @@ export async function deleteRecipe(userToken, itemId, { showToast = true } = {})
     });
     if (showToast) showSuccessToast('Recipe deleted successfully.');
   } catch (err) {
-    let msg = 'Error loading equipment';
+    let msg = 'Error loading recipe';
     if (err.response?.status === 401) {
       msg = 'Your session has expired. Please log in again.';
     } else if (err.response?.data?.message || err.response?.data?.error) {
@@ -63,7 +63,7 @@ export async function searchRecipes(userToken, term, { showToast = true } = {}) 
     });
     return response.data;
   } catch (err) {
-    let msg = 'Error loading equipment';
+    let msg = 'Error loading recipe';
     if (err.response?.status === 401) {
       msg = 'Your session has expired. Please log in again.';
     } else if (err.response?.data?.message || err.response?.data?.error) {
@@ -98,6 +98,7 @@ export async function addRecipe(userToken, dataInput, { showToast = true } = {})
 
 export async function updateRecipe(userToken, id, dataInput, { showToast = true } = {}) {
   try {
+    console.log(dataInput);
     const response = await api.put(`/api/recipes/${id}`, dataInput, {
       headers: { Authorization: `Bearer ${userToken}` },
     });

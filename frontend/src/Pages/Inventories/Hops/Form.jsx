@@ -171,11 +171,9 @@ export default function NewHop() {
                     {...register('useType')}
                     disabled={isView}
                   >
-                    <option value="Boil">Boil</option>
-                    <option value="Dry Hop">Dry Hop</option>
                     <option value="Aroma">Aroma</option>
-                    <option value="Mash">Mash</option>
-                    <option value="First Wort">First Wort</option>
+                    <option value="Bittering">Bittering</option>
+                    <option value="Dual-purpose">Dual-purpose</option>
                   </select>
                 </label>
               </div>
