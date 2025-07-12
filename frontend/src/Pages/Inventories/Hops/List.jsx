@@ -49,6 +49,11 @@ export default function HopList() {
         {item.supplier}
       </p>
       <p>
+        <strong>Use type:</strong>
+        {' '}
+        {item.useType}
+      </p>
+      <p>
         <strong>Description:</strong>
         {' '}
         {item.description.length > 140

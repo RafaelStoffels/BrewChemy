@@ -22,7 +22,7 @@ const schema = Yup.object().shape({
     .required('Type is required'),
 
   useType: Yup.string()
-    .oneOf(['Boil', 'Dry Hop', 'Aroma', 'Mash', 'First Wort'], 'Invalid use type')
+    .oneOf(['Aroma', 'Bittering', 'Dual-purpose'], 'Invalid use type')
     .required('Use Type is required'),
 
   alphaAcidContent: Yup.number()
