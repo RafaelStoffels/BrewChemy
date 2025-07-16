@@ -17,6 +17,7 @@ export default function useRecipeCalculations({
   recipeEquipment,
   recipeFermentables,
   recipeHops,
+  recipeYeasts,
   getValues,
   setValue,
   svgRef,
@@ -76,7 +77,7 @@ export default function useRecipeCalculations({
     } else {
       setABV(0);
     }
-  }, [watchedBatchVolume, watchedEfficiency, recipeFermentables, recipeHops, IBU]);
+  }, [watchedBatchVolume, watchedEfficiency, recipeFermentables, recipeHops, recipeYeasts, IBU]);
 
   useEffect(() => {
     const recipeData = getValues();

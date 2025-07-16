@@ -56,10 +56,3 @@ class RecipeSchema(Schema):
             raise ValidationError("Type is required and cannot be empty.")
         if value not in self.VALID_TYPES:
             raise ValidationError(f"Type must be one of: {', '.join(self.VALID_TYPES)}.")
-
-    @validates("usageStage")
-    def validate_type(self, value, *args, **kwargs):
-        if not value.strip():
-            raise ValidationError("Usage stage is required and cannot be empty.")
-        if value not in self.VALID_TYPES:
-            raise ValidationError(f"Usage stage must be one of: {', '.join(self.VALID_TYPES)}.")

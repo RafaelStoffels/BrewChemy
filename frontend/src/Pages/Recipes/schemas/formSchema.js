@@ -7,10 +7,6 @@ const schema = yup.object().shape({
   type: yup.string()
     .oneOf(['All Grain', 'Extract', 'Partial Mash'], 'Invalid type')
     .required('Type is required'),
-  creationDate: yup
-    .date()
-    .typeError('Creation Date must be a valid date')
-    .notRequired(),
 
   description: yup.string().notRequired(),
 

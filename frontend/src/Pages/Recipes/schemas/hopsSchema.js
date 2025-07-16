@@ -1,6 +1,6 @@
 import * as Yup from 'yup';
 
-const validUseTypes = [
+const validUsageStage = [
   'Boil',
   'Dry Hop',
   'Whirlpool',
@@ -44,8 +44,8 @@ export const updateHopSchema = Yup.object().shape({
     .typeError('Boil time must be a number.')
     .min(0, 'Boil time must be 0 or more.')
     .notRequired('Boil time is required.'),
-  useType: Yup.string()
-    .oneOf(validUseTypes, 'Invalid use type.')
+  usageStage: Yup.string()
+    .oneOf(validUsageStage, 'Invalid use type.')
     .required('Use type is required.'),
   quantity: Yup.number()
     .typeError('Quantity must be a number.')
