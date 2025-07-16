@@ -325,6 +325,7 @@ export default function NewRecipe() {
     recipeEquipment,
     recipeFermentables,
     recipeHops,
+    recipeYeasts,
     getValues,
     setValue,
     svgRef,
