@@ -258,7 +258,18 @@ export function AddHopModal({ isOpen, closeModal, handleAddHopRecipe }) {
                 <select
                   ref={inputRefs.usageStage}
                   value={usageStage}
-                  onChange={(e) => setUsageStage(e.target.value)}
+                  onChange={(e) => {
+                    const { value } = e.target;
+                    setUsageStage(value);
+
+                    if (value === 'Whirlpool') {
+                      setBoilTime(10);
+                    } else if (value === 'Dry Hop') {
+                      setBoilTime(0);
+                    } else if (value === 'Boil') {
+                      setBoilTime(60);
+                    }
+                  }}
                 >
                   <option value="Boil">Boil</option>
                   <option value="Dry Hop">Dry Hop</option>
@@ -964,10 +975,22 @@ export function UpdateHopModal({
                   <select
                     ref={inputRefs.usageStage}
                     value={localHopObject.usageStage}
-                    onChange={(e) => setLocalHopObject((prev) => ({
-                      ...prev,
-                      usageStage: e.target.value,
-                    }))}
+                    onChange={(e) => {
+                      const { value } = e.target;
+                      setLocalHopObject((prev) => {
+                        const updated = { ...prev, usageStage: value };
+
+                        if (value === 'Whirlpool') {
+                          updated.boilTime = 10;
+                        } else if (value === 'Dry Hop') {
+                          updated.boilTime = 0;
+                        } else if (value === 'Boil') {
+                          updated.boilTime = 60;
+                        }
+
+                        return updated;
+                      });
+                    }}
                   >
                     <option value="Boil">Boil</option>
                     <option value="Dry Hop">Dry Hop</option>
