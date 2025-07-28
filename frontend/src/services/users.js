@@ -14,6 +14,35 @@ export async function me(userToken, { showToast = true } = {}) {
   }
 }
 
+export async function loginUser(email, password, { login, navigate }) {
+  try {
+    const response = await api.post('api/login', { email, password });
+    const { token } = response.data;
+
+    const userInfo = await me(token);
+    const fullUser = { ...userInfo, token };
+
+    login(fullUser);
+    navigate('/RecipeList');
+  } catch (error) {
+    if (error.response) {
+      if (error.response.status === 404) {
+        showErrorToast('Endpoint not found. Please check the URL.');
+      } else if (error.response.status === 401) {
+        showErrorToast('Invalid credentials. Please check your email or password.');
+      } else if (error.response.status === 500) {
+        const backendMsg = error.response.data?.error || 'Internal server error.';
+        showErrorToast(backendMsg);
+      } else {
+        showErrorToast('Login failed. Please try again later.');
+      }
+    } else {
+      showErrorToast('Network or server error. Please check your connection and try again.');
+    }
+    throw error;
+  }
+}
+
 export async function addUser(data, { showToast = true } = {}) {
   try {
     await api.post('/api/users', data);

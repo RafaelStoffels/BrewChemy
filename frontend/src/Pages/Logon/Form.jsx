@@ -2,9 +2,7 @@ import React, { useEffect, useState, useContext } from 'react';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { FiLogIn } from 'react-icons/fi';
 
-import { showErrorToast } from '../../utils/notifications';
-import api from '../../services/api';
-import { me } from '../../services/users';
+import { me, loginUser } from '../../services/users';
 
 import AuthContext from '../../context/AuthContext';
 
@@ -14,35 +12,15 @@ export default function Logon() {
   const { login } = useContext(AuthContext);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [errorMessage, setErrorMessage] = useState('');
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setErrorMessage('');
-
     try {
-      const response = await api.post('api/login', { email, password });
-      const { token } = response.data;
-
-      const userInfo = await me(token);
-      const fullUser = { ...userInfo, token };
-
-      login(fullUser);
-      navigate('/RecipeList');
-    } catch (error) {
-      if (error.response) {
-        if (error.response.status === 404) {
-          showErrorToast('Endpoint not found. Please check the URL.');
-        } else if (error.response.status === 401) {
-          showErrorToast('Invalid credentials. Please check your email or password.');
-        } else {
-          showErrorToast('Login failed. Please try again later.');
-        }
-      } else {
-        showErrorToast('Network or server error. Please check your connection and try again.');
-      }
+      await loginUser(email, password, { login, navigate });
+    } catch (err) {
+      //
     }
   };
 
@@ -79,7 +57,6 @@ export default function Logon() {
         <div className="bottom-div">
           <form onSubmit={handleSubmit}>
             <h1>Login</h1>
-            {errorMessage && <p className="error-message">{errorMessage}</p>}
 
             <label htmlFor="email">
               E-mail
