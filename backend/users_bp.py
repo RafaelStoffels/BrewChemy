@@ -245,6 +245,10 @@ def create_users_bp():
             if user and user.status == "active":
                 if user.check_password(password_hash):
 
+                    user.last_login = datetime.datetime.utcnow()
+
+                    db.session.commit()
+
                     token = jwt.encode(
                         {
                             'user_id': user.user_id,
@@ -317,7 +321,8 @@ def create_users_bp():
                     email=user_info.get("email"),
                     google_id=google_id,
                     password_hash=generate_password_hash(temp_password),
-                    brewery=None
+                    brewery=None,
+                    status='active'
                 )
 
                 db.session.add(user)

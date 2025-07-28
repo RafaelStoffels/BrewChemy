@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 import { AuthProvider } from './context/AuthContext';
@@ -28,6 +28,10 @@ import 'react-toastify/dist/ReactToastify.css';
 import './Styles/global.css';
 
 function App() {
+  useEffect(() => {
+    document.title = 'Brewchemy';
+  }, []);
+
   return (
     <AuthProvider>
       <SidebarProvider>
