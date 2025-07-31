@@ -177,15 +177,21 @@ def create_users_bp():
     @users_bp.route("/users", methods=["POST"])
     def add_user():
         data = request.json
+        email = data.get("email")
+
+        existing_user = User.query.filter_by(email=email).first()
+        if existing_user:
+            return jsonify({"message": "Email already registered."}), 400
 
         new_user = User(
             user_id=random.randint(1, 1000000),
             name=data.get("name"),
-            email=data.get("email"),
+            email=email,
             password_hash=generate_password_hash(data.get("password")),
             brewery=data.get("brewery"),
             status="pending"
         )
+
         db.session.add(new_user)
         db.session.commit()
 
