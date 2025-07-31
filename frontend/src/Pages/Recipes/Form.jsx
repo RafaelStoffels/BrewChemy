@@ -130,13 +130,13 @@ export default function NewRecipe() {
   // =======================
   const handleAddIngredient = (list, setListKey, modalType, itemId, quantity, extraFields = {}) => {
     if (!itemId || !quantity) {
-      showErrorToast('Selecione um item e insira a quantidade.');
+      showErrorToast('Select an item and insert its quantity.');
       return;
     }
 
     const selectedItem = list.find((item) => item.id === itemId);
     if (!selectedItem) {
-      showErrorToast('Item selecionado não encontrado.');
+      showErrorToast('Selected item not found.');
       return;
     }
 

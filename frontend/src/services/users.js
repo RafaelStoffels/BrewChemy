@@ -43,14 +43,31 @@ export async function loginUser(email, password, { login, navigate }) {
   }
 }
 
-export async function addUser(data, { showToast = true } = {}) {
+export async function addUser(data) {
   try {
     await api.post('/api/users', data);
-    if (showToast) showSuccessToast('User created successfully.');
-  } catch (err) {
-    const msg = err.response?.data?.error || 'Error creating user.';
-    if (showToast) showErrorToast(msg);
-    throw new Error(msg);
+    showSuccessToast(
+      'An email with an activation code has been sent. '
+      + 'Please check your inbox and activate your account.',
+    );
+  } catch (error) {
+    if (error.response) {
+      if (error.response.status === 400) {
+        showErrorToast(error.response.data.message);
+      } else if (error.response.status === 404) {
+        showErrorToast('Endpoint not found. Please check the URL.');
+      } else if (error.response.status === 401) {
+        showErrorToast('Invalid credentials. Please check your email or password.');
+      } else if (error.response.status === 500) {
+        const backendMsg = error.response.data?.error || 'Internal server error.';
+        showErrorToast(backendMsg);
+      } else {
+        showErrorToast('User creation failed, please try again later.');
+      }
+    } else {
+      showErrorToast('Network or server error. Please check your connection and try again.');
+    }
+    throw error;
   }
 }
 

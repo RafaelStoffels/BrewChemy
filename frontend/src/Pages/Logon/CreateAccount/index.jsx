@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { addUser } from '../../../services/users';
-import { showSuccessToast, showErrorToast, showInfoToast } from '../../../utils/notifications';
+import { showErrorToast } from '../../../utils/notifications';
 
 import '../../../Styles/crud.css';
 
@@ -60,13 +60,8 @@ export default function NewAccount() {
     try {
       await addUser(data);
     } catch (err) {
-      showErrorToast(`Error creating user. ${err}`);
+      //
     }
-    showSuccessToast('User created.');
-    showInfoToast(
-      'An email with an activation code has been sent. '
-      + 'Please check your inbox and activate your account.',
-    );
     navigate('/');
   }
 
