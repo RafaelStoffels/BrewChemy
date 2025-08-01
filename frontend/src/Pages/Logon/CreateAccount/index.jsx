@@ -59,10 +59,10 @@ export default function NewAccount() {
 
     try {
       await addUser(data);
+      navigate('/EmailSent');
     } catch (err) {
-      //
+      navigate('/');
     }
-    navigate('/');
   }
 
   return (

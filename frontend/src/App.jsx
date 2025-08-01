@@ -4,8 +4,9 @@ import { ToastContainer } from 'react-toastify';
 import { AuthProvider } from './context/AuthContext';
 import { SidebarProvider } from './context/SidebarContext';
 
-import CreateAccount from './Pages/Logon/CreateAccount';
 import ChangePassword from './Pages/Logon/ChangePassword';
+import CreateAccount from './Pages/Logon/CreateAccount';
+import EmailSent from './Pages/Logon/CreateAccount/EmailSent';
 import ForgotPassword from './Pages/Logon/ForgotPassword/Form';
 import Logon from './Pages/Logon/Form';
 import Main from './Pages/Main';
@@ -42,6 +43,7 @@ function App() {
             {/* no need layout */}
             <Route path="/" element={<Logon />} />
             <Route path="/CreateAccount" element={<CreateAccount />} />
+            <Route path="/EmailSent" element={<EmailSent />} />
             <Route path="/ForgotPassword" element={<ForgotPassword />} />
             <Route path="/ChangePassword" element={<ChangePassword />} />
 
