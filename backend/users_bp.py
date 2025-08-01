@@ -10,7 +10,7 @@ from models import User
 from requests_oauthlib import OAuth2Session
 from werkzeug.security import generate_password_hash
 from AuthTokenVerifier import token_required
-
+import logging
 
 SECRET_KEY = os.getenv('SECRET_KEY', 'default-secret-key')
 CLIENT_ID = os.getenv('GOOGLE_CLIENT_ID')
@@ -39,6 +39,8 @@ def generate_temp_password():
 
 def create_users_bp():
     users_bp = Blueprint("users", __name__)
+
+    logging.basicConfig(level=logging.INFO)
 
     def send_confirmation_email(user):
         try:
@@ -334,9 +336,16 @@ def create_users_bp():
                 db.session.add(user)
                 db.session.commit()
             else:
+                if user.status == "pending":
+                    user.status = "active"
+                    db.session.commit()
+
                 if not user.google_id:
                     user.google_id = google_id
                     db.session.commit()
+                
+                user.last_login = datetime.datetime.utcnow()
+                db.session.commit()
 
         except Exception as e:
             db.session.rollback()
