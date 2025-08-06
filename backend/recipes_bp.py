@@ -152,6 +152,9 @@ def create_recipes_bp():
     @recipes_bp.route("/recipes/<int:id>", methods=["PUT"])
     @token_required
     def update_recipe(current_user_id, id):
+
+        #logging.info(f'current_user_id: {current_user_id}')
+
         recipe = Recipe.query.filter_by(id=id, user_id=current_user_id).first()
         if recipe is None:
             return jsonify({"message": "Recipe not found"}), 404
@@ -254,6 +257,7 @@ def create_recipes_bp():
             else:
                 new_hop = RecipeHop(
                     recipe_id=recipe.id,
+                    user_id=current_user_id,
                     name=hop_data["name"],
                     alpha_acid_content=hop_data.get("alphaAcidContent"),
                     beta_acid_content=hop_data.get("betaAcidContent"),
@@ -281,6 +285,7 @@ def create_recipes_bp():
             else:
                 new_misc = RecipeMisc(
                     recipe_id=recipe.id,
+                    user_id=current_user_id,
                     name=misc_item["name"],
                     description=misc_item.get("description"),
                     type=misc_item.get("type"),
@@ -311,6 +316,7 @@ def create_recipes_bp():
             else:
                 new_yeast = RecipeYeast(
                     recipe_id=recipe.id,
+                    user_id=current_user_id,
                     name=yeast_data_item["name"],
                     manufacturer=yeast_data_item["manufacturer"],
                     type=yeast_data_item["type"],
