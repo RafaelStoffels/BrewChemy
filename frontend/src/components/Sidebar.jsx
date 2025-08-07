@@ -67,6 +67,10 @@ function Sidebar() {
         <Link to="/RecipeList">Recipes</Link>
       </li>
 
+      <li className={location.pathname === '/Changelog' ? 'active' : ''}>
+        <Link to="/Changelog">Changelog</Link>
+      </li>
+
       <li>
         <button type="button" onClick={handleLogout} className="logout-button">
           Logout
@@ -81,6 +85,7 @@ function Sidebar() {
       <nav className="menu">
         {menuItems}
       </nav>
+      <div className="version-info">v1.0.0-beta</div>
     </div>
   );
 }
