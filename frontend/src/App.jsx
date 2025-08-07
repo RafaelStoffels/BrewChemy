@@ -4,6 +4,7 @@ import { ToastContainer } from 'react-toastify';
 import { AuthProvider } from './context/AuthContext';
 import { SidebarProvider } from './context/SidebarContext';
 
+import Changelog from './Pages/Changelog/Form';
 import ChangePassword from './Pages/Logon/ChangePassword';
 import CreateAccount from './Pages/Logon/CreateAccount';
 import EmailSent from './Pages/Logon/CreateAccount/EmailSent';
@@ -49,6 +50,7 @@ function App() {
 
             {/* layout - sidebar */}
             <Route element={<Layout />}>
+              <Route path="/Changelog" element={<Changelog />} />
               <Route path="/Main" element={<Main />} />
               <Route path="/EquipmentList" element={<EquipmentList />} />
               <Route path="/Equipments/:recordUserId/:id/details" element={<Equipment />} />
