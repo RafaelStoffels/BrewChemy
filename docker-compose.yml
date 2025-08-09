@@ -1,4 +1,22 @@
 services:
+  backend:
+    build: ./backend
+    ports:
+      - "5000:5000"
+    depends_on:
+      - db
+    environment:
+      - FLASK_APP=app.py
+      - FLASK_ENV=development
+      - DATABASE_URL=postgresql://postgres:brewchemy@db:5432/brewchemy
+      - OAUTHLIB_INSECURE_TRANSPORT=1
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:3000"
+    command: npm start
+
   db:
     image: postgres:15
     environment:
@@ -6,30 +24,9 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: brewchemy
     ports:
-      - "5433:5432"   # host 5433 -> container 5432
+      - "5433:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
-
-  backend:
-    build: ./backend
-    depends_on:
-      - db
-    environment:
-      FLASK_APP: app.py
-      FLASK_ENV: development
-      OAUTHLIB_INSECURE_TRANSPORT: "1"
-      # only for container
-      DATABASE_URL: postgresql+psycopg2://postgres:brewchemy@db:5432/brewchemy
-      BACKEND_URL: http://localhost:5000
-      FRONTEND_URL: http://localhost:3000
-    ports:
-      - "5000:5000"
-
-  frontend:
-    build: ./frontend
-    command: npm start
-    ports:
-      - "3000:3000"
 
 volumes:
   pgdata:
