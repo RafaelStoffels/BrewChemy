@@ -1,7 +1,9 @@
 # backend/db.py
 from flask_sqlalchemy import SQLAlchemy
 import os, pathlib
+from dotenv import load_dotenv
 
+load_dotenv()
 db = SQLAlchemy()
 
 def configure_db(app):
