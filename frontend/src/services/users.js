@@ -14,6 +14,20 @@ export async function me(userToken, { showToast = true } = {}) {
   }
 }
 
+export async function updateUser(userToken, userId, dataInput, { showToast = true } = {}) {
+  try {
+    const response = await api.put(`/api/users/${userId}`, dataInput, {
+      headers: { Authorization: `Bearer ${userToken}` },
+    });
+    if (showToast) showSuccessToast('User updated successfully.');
+    return response.data;
+  } catch (err) {
+    const msg = err.response?.data?.error || 'Failed to update user.';
+    if (showToast) showErrorToast(msg);
+    throw new Error(msg);
+  }
+}
+
 export async function loginUser(email, password, { login, navigate }) {
   try {
     const response = await api.post('api/login', { email, password });

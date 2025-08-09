@@ -32,6 +32,7 @@ import OGBar from './Components/Indicators';
 
 // Styles
 import beerStyles from './utils/getBeerStyles';
+import { toDisplayWeight } from '../../utils/displayUnits';
 import './Form.css';
 
 export default function NewRecipe() {
@@ -461,7 +462,7 @@ export default function NewRecipe() {
               <div className="inputs-row">
                 <div className="input-field">
                   <label htmlFor="batchVolume">
-                    Batch Volume
+                    Batch Volume (L)
                     <input
                       id="batchVolume"
                       name="batchVolume"
@@ -487,7 +488,7 @@ export default function NewRecipe() {
                 </div>
                 <div className="input-field">
                   <label htmlFor="brewEfficiency">
-                    Brew. Efficiency
+                    Brew. Efficiency %
                     <input
                       id="brewEfficiency"
                       name="brewEfficiency"
@@ -500,7 +501,7 @@ export default function NewRecipe() {
                 </div>
                 <div className="input-field">
                   <label htmlFor="mashEfficiency">
-                    Mash Efficiency
+                    Mash Efficiency %
                     <input
                       id="mashEfficiency"
                       name="mashEfficiency"
@@ -513,7 +514,7 @@ export default function NewRecipe() {
                 </div>
                 <div className="input-field">
                   <label htmlFor="preBoilVolume">
-                    Pre Boil Volume
+                    Pre Boil Volume (ml)
                     <input
                       id="preBoilVolume"
                       name="preBoilVolume"
@@ -590,9 +591,9 @@ export default function NewRecipe() {
                           data="/malt.svg"
                           aria-label="Malt icon"
                         />
-                        {fermentable.quantity / 1000}
+                        {toDisplayWeight(fermentable.quantity, user?.weightUnit === 'oz' ? 'oz' : 'g')}
                         {' '}
-                        kg
+                        {user?.weightUnit === 'oz' ? 'oz' : 'kg'}
                       </td>
                       <td><strong>{fermentable.name}</strong></td>
                       <td>{fermentable.type}</td>
@@ -631,9 +632,9 @@ export default function NewRecipe() {
                           data="/hop.svg"
                           aria-label="Hop icon"
                         />
-                        {hop.quantity}
+                        {toDisplayWeight(hop.quantity, user?.weightUnit === 'oz' ? 'oz' : 'g')}
                         {' '}
-                        g
+                        {user?.weightUnit === 'oz' ? 'oz' : 'g'}
                       </td>
                       <td><strong>{hop.name}</strong></td>
                       <td>{hop.usageStage}</td>
@@ -673,9 +674,9 @@ export default function NewRecipe() {
                           data="/misc.svg"
                           aria-label="Misc icon"
                         />
-                        {misc.quantity}
+                        {toDisplayWeight(misc.quantity, user?.weightUnit === 'oz' ? 'oz' : 'g')}
                         {' '}
-                        g
+                        {user?.weightUnit === 'oz' ? 'oz' : 'g'}
                       </td>
                       <td><strong>{misc.name}</strong></td>
                       <td>{misc.type}</td>
@@ -711,9 +712,9 @@ export default function NewRecipe() {
                           data="/yeast.svg"
                           aria-label="Yeast icon"
                         />
-                        {yeast.quantity}
+                        {toDisplayWeight(yeast.quantity, user?.weightUnit === 'oz' ? 'oz' : 'g')}
                         {' '}
-                        g
+                        {user?.weightUnit === 'oz' ? 'oz' : 'g'}
                       </td>
                       <td><strong>{yeast.name}</strong></td>
                       <td>{yeast.type}</td>

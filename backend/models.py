@@ -410,6 +410,7 @@ class User(db.Model):
     brewery = db.Column(db.String(60))
     google_id = db.Column(db.String(100), unique=True)
     status = db.Column(db.String(15))
+    weight_unit = db.Column(db.String(5), default='g')
 
     def to_dict(self):
         return {
@@ -423,6 +424,7 @@ class User(db.Model):
             "is_active": self.is_active,
             "brewery": self.brewery,
             "status": self.status,
+            "weightUnit": self.weight_unit,
         }
 
     def check_password(self, password):

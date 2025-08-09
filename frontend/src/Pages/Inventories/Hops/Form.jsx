@@ -103,7 +103,7 @@ export default function NewHop() {
           <h1>{title}</h1>
         </section>
         <div className="content">
-          <form onSubmit={handleSubmit(onValid, onError)}>
+          <form id="formSubmit" onSubmit={handleSubmit(onValid, onError)}>
             <div className="inputs-row">
               <div className="input-field">
                 <label>
@@ -202,16 +202,13 @@ export default function NewHop() {
                 </label>
               </div>
             </div>
-
-            {!isView && (
-              <div className="button-container">
-                <button className="crud-save-button" type="submit">
-                  Save
-                </button>
-              </div>
-            )}
           </form>
         </div>
+        {!isView && (
+          <button form="formSubmit" className="crud-save-button" type="submit">
+            Save
+          </button>
+        )}
       </div>
     </div>
   );

@@ -10,6 +10,9 @@ import { addYeastSchema, updateYeastSchema } from './schemas/yeastsSchema';
 import SearchInput from '../../Components/SearchInput';
 
 import { showErrorToast, showInfoToast } from '../../utils/notifications';
+import normalizeWeightForSave from '../../utils/formHelpers';
+import { ouncesToGrams } from '../../utils/unitConversion';
+import { toDisplayWeight } from '../../utils/displayUnits';
 
 import { searchEquipments, fetchEquipments } from '../../services/equipments';
 import { searchFermentables, fetchFermentables } from '../../services/fermentables';
@@ -45,7 +48,9 @@ export function AddFermentableModal({ isOpen, closeModal, handleAddFermentableRe
     try {
       await addFermentableSchema.validate({ selectedItem, quantity }, { abortEarly: false });
 
-      handleAddFermentableRecipe(selectedItem.id, quantity);
+      const qtyInGrams = normalizeWeightForSave(quantity, user?.weightUnit);
+
+      handleAddFermentableRecipe(selectedItem.id, qtyInGrams);
       closeModal();
     } catch (err) {
       if (err.inner && err.inner.length > 0) {
@@ -115,7 +120,8 @@ export function AddFermentableModal({ isOpen, closeModal, handleAddFermentableRe
           <div className="inputs-row">
             <div className="input-field" style={{ marginTop: '10px' }}>
               <label htmlFor="quantity">
-                Quantity (Grams)
+                Quantity
+                {user?.weightUnit === 'oz' ? ' (oz)' : ' (grams)'}
                 <input
                   ref={inputRefs.quantity}
                   type="number"
@@ -186,7 +192,9 @@ export function AddHopModal({ isOpen, closeModal, handleAddHopRecipe }) {
         { abortEarly: false },
       );
 
-      handleAddHopRecipe(selectedItem.id, quantity, boilTime, alphaAcid, usageStage);
+      const qtyInGrams = normalizeWeightForSave(quantity, user?.weightUnit);
+
+      handleAddHopRecipe(selectedItem.id, qtyInGrams, boilTime, alphaAcid, usageStage);
       closeModal();
     } catch (err) {
       if (err.inner && err.inner.length > 0) {
@@ -305,7 +313,8 @@ export function AddHopModal({ isOpen, closeModal, handleAddHopRecipe }) {
           <div className="inputs-row">
             <div className="input-field" style={{ marginTop: '10px' }}>
               <label htmlFor="quantity">
-                Quantity (Grams)
+                Quantity
+                {user?.weightUnit === 'oz' ? ' (oz)' : ' (grams)'}
                 <input
                   ref={inputRefs.quantity}
                   type="number"
@@ -352,7 +361,9 @@ export function AddMiscModal({ isOpen, closeModal, handleAddMiscRecipe }) {
     try {
       await addMiscSchema.validate({ selectedItem, quantity }, { abortEarly: false });
 
-      handleAddMiscRecipe(selectedItem.id, quantity);
+      const qtyInGrams = normalizeWeightForSave(quantity, user?.weightUnit);
+
+      handleAddMiscRecipe(selectedItem.id, qtyInGrams);
       closeModal();
     } catch (err) {
       if (err.inner && err.inner.length > 0) {
@@ -432,7 +443,8 @@ export function AddMiscModal({ isOpen, closeModal, handleAddMiscRecipe }) {
           <div className="inputs-row">
             <div className="input-field" style={{ marginTop: '10px' }}>
               <label htmlFor="name">
-                Quantity (Grams)
+                Quantity
+                {user?.weightUnit === 'oz' ? ' (oz)' : ' (grams)'}
                 <input
                   ref={inputRefs.quantity}
                   type="number"
@@ -493,7 +505,9 @@ export function AddYeastModal({ isOpen, closeModal, handleAddYeastRecipe }) {
     try {
       await addYeastSchema.validate({ selectedItem, quantity }, { abortEarly: false });
 
-      handleAddYeastRecipe(selectedItem.id, quantity);
+      const qtyInGrams = normalizeWeightForSave(quantity, user?.weightUnit);
+
+      handleAddYeastRecipe(selectedItem.id, qtyInGrams);
       closeModal();
     } catch (err) {
       if (err.inner && err.inner.length > 0) {
@@ -562,7 +576,8 @@ export function AddYeastModal({ isOpen, closeModal, handleAddYeastRecipe }) {
           <div className="inputs-row">
             <div className="input-field" style={{ marginTop: '10px' }}>
               <label htmlFor="name">
-                Quantity (Grams)
+                Quantity
+                {user?.weightUnit === 'oz' ? ' (oz)' : ' (grams)'}
                 <input
                   ref={inputRefs.quantity}
                   type="number"
@@ -691,7 +706,9 @@ ChangeEquipmentModal.propTypes = {
 export function UpdateFermentableModal({
   isOpen, closeModal, selectedFermentable, onUpdate,
 }) {
+  const { user } = useContext(AuthContext);
   const [localFermentableObject, setLocalFermentableObject] = useState(null);
+  const [quantityInput, setQuantityInput] = useState(''); // buffer (oz ou g)
 
   const handleChange = (key, value) => {
     setLocalFermentableObject((prev) => ({
@@ -713,31 +730,39 @@ export function UpdateFermentableModal({
     quantity: React.useRef(null),
   };
 
+  useEffect(() => {
+    if (!selectedFermentable) return;
+    setLocalFermentableObject(selectedFermentable);
+
+    const grams = selectedFermentable.quantity ?? 0;
+
+    // buffer
+    const displayUnit = user?.weightUnit === 'oz' ? 'oz' : 'g';
+    const displayValue = toDisplayWeight(grams, displayUnit);
+    setQuantityInput(String(displayValue));
+  }, [selectedFermentable, user?.weightUnit]);
+
   const handleSaveButton = async (e) => {
     e.preventDefault();
 
     try {
-      await updateFermentableSchema.validate(localFermentableObject, { abortEarly: false });
+      // convert buffer to grams
+      const num = parseFloat(String(quantityInput).replace(',', '.'));
 
-      onUpdate(localFermentableObject);
+      const qtyInGrams = user?.weightUnit === 'oz' ? ouncesToGrams(num) : num;
+
+      const payload = { ...localFermentableObject, quantity: qtyInGrams };
+
+      await updateFermentableSchema.validate(payload, { abortEarly: false });
+
+      onUpdate(payload);
 
       closeModal();
     } catch (err) {
-      if (err.inner && err.inner.length > 0) {
-        err.inner.forEach((validationError) => {
-          showErrorToast(validationError.message);
-        });
-      } else {
-        showErrorToast('Validation error.');
-      }
+      if (err?.inner?.length) err.inner.forEach((v) => showErrorToast(v.message));
+      else showErrorToast(err?.message || 'Validation error.');
     }
   };
-
-  useEffect(() => {
-    if (selectedFermentable) {
-      setLocalFermentableObject(selectedFermentable);
-    }
-  }, [selectedFermentable]);
 
   return (
     <Modal
@@ -822,12 +847,13 @@ export function UpdateFermentableModal({
               </div>
               <div className="input-field">
                 <label htmlFor="quantity">
-                  Quantity (Grams)
+                  Quantity
+                  {user?.weightUnit === 'oz' ? ' (oz)' : ' (grams)'}
                   <input
                     ref={inputRefs.quantity}
                     type="number"
-                    value={localFermentableObject.quantity || ''}
-                    onChange={(e) => handleChange('quantity', e.target.value)}
+                    value={quantityInput}
+                    onChange={(e) => setQuantityInput(e.target.value)}
                   />
                 </label>
               </div>
@@ -854,15 +880,14 @@ UpdateFermentableModal.propTypes = {
 export function UpdateHopModal({
   isOpen, closeModal, selectedHop, onUpdate,
 }) {
+  const { user } = useContext(AuthContext);
   const [localHopObject, setLocalHopObject] = useState(null);
+  const [quantityInput, setQuantityInput] = useState(''); // buffer (oz ou g)
 
   const handleChange = (key, value) => {
     setLocalHopObject((prev) => ({
       ...prev,
-      [key]: key === 'colorDegreesLovibond'
-                  || key === 'potentialExtract'
-        ? parseFloat(value) || 0
-        : value,
+      [key]: value,
     }));
   };
 
@@ -876,31 +901,38 @@ export function UpdateHopModal({
     quantity: React.useRef(null),
   };
 
+  useEffect(() => {
+    if (!selectedHop) return;
+    setLocalHopObject(selectedHop);
+
+    const grams = selectedHop.quantity ?? 0;
+
+    const displayUnit = user?.weightUnit === 'oz' ? 'oz' : 'g';
+    const displayValue = toDisplayWeight(grams, displayUnit);
+    setQuantityInput(String(displayValue));
+  }, [selectedHop, user?.weightUnit]);
+
   const handleSaveButton = async (e) => {
     e.preventDefault();
 
     try {
-      await updateHopSchema.validate(localHopObject, { abortEarly: false });
+      // convert buffer to grams
+      const num = parseFloat(String(quantityInput).replace(',', '.'));
 
-      onUpdate(localHopObject);
+      const qtyInGrams = user?.weightUnit === 'oz' ? ouncesToGrams(num) : num;
+
+      const payload = { ...localHopObject, quantity: qtyInGrams };
+
+      await updateHopSchema.validate(payload, { abortEarly: false });
+
+      onUpdate(payload);
 
       closeModal();
     } catch (err) {
-      if (err.inner && err.inner.length > 0) {
-        err.inner.forEach((validationError) => {
-          showErrorToast(validationError.message);
-        });
-      } else {
-        showErrorToast('Validation error.');
-      }
+      if (err?.inner?.length) err.inner.forEach((v) => showErrorToast(v.message));
+      else showErrorToast(err?.message || 'Validation error.');
     }
   };
-
-  useEffect(() => {
-    if (selectedHop) {
-      setLocalHopObject(selectedHop);
-    }
-  }, [selectedHop]);
 
   return (
     <Modal
@@ -1002,12 +1034,13 @@ export function UpdateHopModal({
               </div>
               <div className="input-field">
                 <label htmlFor="quantity">
-                  Quantity (Grams)
+                  Quantity
+                  {user?.weightUnit === 'oz' ? ' (oz)' : ' (grams)'}
                   <input
                     ref={inputRefs.quantity}
                     type="number"
-                    value={localHopObject.quantity || ''}
-                    onChange={(e) => handleChange('quantity', e.target.value)}
+                    value={quantityInput}
+                    onChange={(e) => setQuantityInput(e.target.value)}
                   />
                 </label>
               </div>
@@ -1035,15 +1068,14 @@ UpdateHopModal.propTypes = {
 export function UpdateMiscModal({
   isOpen, closeModal, selectedMisc, onUpdate,
 }) {
+  const { user } = useContext(AuthContext);
   const [localMiscObject, setLocalMiscObject] = useState(null);
+  const [quantityInput, setQuantityInput] = useState(''); // buffer (oz ou g)
 
   const handleChange = (key, value) => {
     setLocalMiscObject((prev) => ({
       ...prev,
-      [key]: key === 'colorDegreesLovibond'
-                  || key === 'potentialExtract'
-        ? parseFloat(value) || 0
-        : value,
+      [key]: value,
     }));
   };
 
@@ -1055,31 +1087,39 @@ export function UpdateMiscModal({
     quantity: React.useRef(null),
   };
 
+  useEffect(() => {
+    if (!selectedMisc) return;
+    setLocalMiscObject(selectedMisc);
+
+    const grams = selectedMisc.quantity ?? 0;
+
+    // buffer
+    const displayUnit = user?.weightUnit === 'oz' ? 'oz' : 'g';
+    const displayValue = toDisplayWeight(grams, displayUnit);
+    setQuantityInput(String(displayValue));
+  }, [selectedMisc, user?.weightUnit]);
+
   const handleSaveButton = async (e) => {
     e.preventDefault();
 
     try {
-      await updateMiscSchema.validate(localMiscObject, { abortEarly: false });
+      // convert buffer to grams
+      const num = parseFloat(String(quantityInput).replace(',', '.'));
 
-      onUpdate(localMiscObject);
+      const qtyInGrams = user?.weightUnit === 'oz' ? ouncesToGrams(num) : num;
+
+      const payload = { ...localMiscObject, quantity: qtyInGrams };
+
+      await updateMiscSchema.validate(payload, { abortEarly: false });
+
+      onUpdate(payload);
 
       closeModal();
     } catch (err) {
-      if (err.inner && err.inner.length > 0) {
-        err.inner.forEach((validationError) => {
-          showErrorToast(validationError.message);
-        });
-      } else {
-        showErrorToast('Validation error.');
-      }
+      if (err?.inner?.length) err.inner.forEach((v) => showErrorToast(v.message));
+      else showErrorToast(err?.message || 'Validation error.');
     }
   };
-
-  useEffect(() => {
-    if (selectedMisc) {
-      setLocalMiscObject(selectedMisc);
-    }
-  }, [selectedMisc]);
 
   return (
     <Modal
@@ -1148,12 +1188,13 @@ export function UpdateMiscModal({
               </div>
               <div className="input-field">
                 <label htmlFor="quantity">
-                  Quantity (Grams)
+                  Quantity
+                  {user?.weightUnit === 'oz' ? ' (oz)' : ' (grams)'}
                   <input
                     ref={inputRefs.quantity}
                     type="number"
-                    value={localMiscObject.quantity || ''}
-                    onChange={(e) => handleChange('quantity', e.target.value)}
+                    value={quantityInput}
+                    onChange={(e) => setQuantityInput(e.target.value)}
                   />
                 </label>
               </div>
@@ -1180,15 +1221,14 @@ UpdateMiscModal.propTypes = {
 export function UpdateYeastModal({
   isOpen, closeModal, selectedYeast, onUpdate,
 }) {
+  const { user } = useContext(AuthContext);
   const [localYeastObject, setLocalYeastObject] = useState(null);
+  const [quantityInput, setQuantityInput] = useState(''); // buffer (oz ou g)
 
   const handleChange = (key, value) => {
     setLocalYeastObject((prev) => ({
       ...prev,
-      [key]: key === 'colorDegreesLovibond'
-                  || key === 'potentialExtract'
-        ? parseFloat(value) || 0
-        : value,
+      [key]: value,
     }));
   };
 
@@ -1204,31 +1244,39 @@ export function UpdateYeastModal({
     quantity: React.useRef(null),
   };
 
+  useEffect(() => {
+    if (!selectedYeast) return;
+    setLocalYeastObject(selectedYeast);
+
+    const grams = selectedYeast.quantity ?? 0;
+
+    // buffer
+    const displayUnit = user?.weightUnit === 'oz' ? 'oz' : 'g';
+    const displayValue = toDisplayWeight(grams, displayUnit);
+    setQuantityInput(String(displayValue));
+  }, [selectedYeast, user?.weightUnit]);
+
   const handleSaveButton = async (e) => {
     e.preventDefault();
 
     try {
-      await updateYeastSchema.validate(localYeastObject, { abortEarly: false });
+      // convert buffer to grams
+      const num = parseFloat(String(quantityInput).replace(',', '.'));
 
-      onUpdate(localYeastObject);
+      const qtyInGrams = user?.weightUnit === 'oz' ? ouncesToGrams(num) : num;
+
+      const payload = { ...localYeastObject, quantity: qtyInGrams };
+
+      await updateYeastSchema.validate(payload, { abortEarly: false });
+
+      onUpdate(payload);
 
       closeModal();
     } catch (err) {
-      if (err.inner && err.inner.length > 0) {
-        err.inner.forEach((validationError) => {
-          showErrorToast(validationError.message);
-        });
-      } else {
-        showErrorToast('Validation error.');
-      }
+      if (err?.inner?.length) err.inner.forEach((v) => showErrorToast(v.message));
+      else showErrorToast(err?.message || 'Validation error.');
     }
   };
-
-  useEffect(() => {
-    if (selectedYeast) {
-      setLocalYeastObject(selectedYeast);
-    }
-  }, [selectedYeast]);
 
   return (
     <Modal
@@ -1348,12 +1396,13 @@ export function UpdateYeastModal({
               <div className="inputs-row">
                 <div className="input-field">
                   <label htmlFor="quantity">
-                    Quantity (Grams)
+                    Quantity
+                    {user?.weightUnit === 'oz' ? ' (oz)' : ' (grams)'}
                     <input
                       ref={inputRefs.quantity}
                       type="number"
-                      value={localYeastObject.quantity || ''}
-                      onChange={(e) => handleChange('quantity', e.target.value)}
+                      value={quantityInput}
+                      onChange={(e) => setQuantityInput(e.target.value)}
                     />
                   </label>
                 </div>

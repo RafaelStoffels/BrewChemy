@@ -107,7 +107,7 @@ export default function NewEquipment() {
         <h1>{title}</h1>
       </section>
       <div className="content">
-        <form onSubmit={handleSubmit(onValid, onError)}>
+        <form id="formSubmit" onSubmit={handleSubmit(onValid, onError)}>
           <div className="inputs-row">
             <div className="input-field">
               <label htmlFor="name">Name</label>
@@ -140,7 +140,7 @@ export default function NewEquipment() {
           </div>
           <div className="inputs-row">
             <div className="input-field">
-              <label htmlFor="batchVolume">Batch Volume</label>
+              <label htmlFor="batchVolume">Batch Volume (L)</label>
               <input
                 id="batchVolume"
                 type="number"
@@ -149,7 +149,7 @@ export default function NewEquipment() {
               />
             </div>
             <div className="input-field">
-              <label htmlFor="batchTime">Batch Time</label>
+              <label htmlFor="batchTime">Batch Time (minutes)</label>
               <input
                 id="batchTime"
                 type="number"
@@ -158,7 +158,7 @@ export default function NewEquipment() {
               />
             </div>
             <div className="input-field">
-              <label htmlFor="boilTime">Boil Time</label>
+              <label htmlFor="boilTime">Boil Time (minutes)</label>
               <input
                 id="boilTime"
                 type="number"
@@ -169,7 +169,7 @@ export default function NewEquipment() {
           </div>
           <div className="inputs-row">
             <div className="input-field">
-              <label htmlFor="boilTemperature">Boil Temperature</label>
+              <label htmlFor="boilTemperature">Boil Temper. (celsius)</label>
               <input
                 id="boilTemperature"
                 type="number"
@@ -178,7 +178,7 @@ export default function NewEquipment() {
               />
             </div>
             <div className="input-field">
-              <label htmlFor="boilOff">Boil Off</label>
+              <label htmlFor="boilOff">Boil Off (L)</label>
               <input
                 id="boilOff"
                 type="number"
@@ -187,7 +187,7 @@ export default function NewEquipment() {
               />
             </div>
             <div className="input-field">
-              <label htmlFor="trubLoss">Trub Loss</label>
+              <label htmlFor="trubLoss">Trub Loss (L)</label>
               <input
                 id="trubLoss"
                 type="number"
@@ -196,7 +196,7 @@ export default function NewEquipment() {
               />
             </div>
             <div className="input-field">
-              <label htmlFor="deadSpace">Dead Space</label>
+              <label htmlFor="deadSpace">Dead Space (L)</label>
               <input
                 id="deadSpace"
                 type="number"
@@ -205,13 +205,13 @@ export default function NewEquipment() {
               />
             </div>
           </div>
-          {!isView && (
-            <button className="crud-save-button" type="submit">
-              Save
-            </button>
-          )}
         </form>
       </div>
+      {!isView && (
+        <button form="formSubmit" className="crud-save-button" type="submit">
+          Save
+        </button>
+      )}
     </div>
   );
 }

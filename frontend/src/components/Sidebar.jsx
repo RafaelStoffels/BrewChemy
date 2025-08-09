@@ -67,6 +67,10 @@ function Sidebar() {
         <Link to="/RecipeList">Recipes</Link>
       </li>
 
+      <li className={location.pathname === '/Settings' ? 'active' : ''}>
+        <Link to="/Settings">Settings</Link>
+      </li>
+
       <li className={location.pathname === '/Changelog' ? 'active' : ''}>
         <Link to="/Changelog">Changelog</Link>
       </li>
@@ -85,7 +89,7 @@ function Sidebar() {
       <nav className="menu">
         {menuItems}
       </nav>
-      <div className="version-info">v1.0.0-beta</div>
+      <div className="version-info">v1.1.0-beta</div>
     </div>
   );
 }
