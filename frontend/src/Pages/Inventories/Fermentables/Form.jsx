@@ -102,7 +102,7 @@ export default function NewFermentable() {
         <h1>{title}</h1>
       </section>
       <div className="content">
-        <form onSubmit={handleSubmit(onValid, onError)}>
+        <form id="formSubmit" onSubmit={handleSubmit(onValid, onError)}>
           <div className="inputs-row">
             <div className="input-field">
               <label htmlFor="name">Name</label>
@@ -166,13 +166,13 @@ export default function NewFermentable() {
               />
             </div>
           </div>
-          {!isView && (
-            <button className="crud-save-button" type="submit">
-              Save
-            </button>
-          )}
         </form>
       </div>
+      {!isView && (
+        <button form="formSubmit" className="crud-save-button" type="submit">
+          Save
+        </button>
+      )}
     </div>
   );
 }

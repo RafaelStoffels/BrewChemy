@@ -25,6 +25,7 @@ import YeastList from './Pages/Inventories/Yeasts/List';
 import Yeast from './Pages/Inventories/Yeasts/Form';
 
 import Layout from './Components/Layout';
+import SettingsForm from './Pages/Settings/Form';
 
 import 'react-toastify/dist/ReactToastify.css';
 import './Styles/global.css';
@@ -76,6 +77,7 @@ function App() {
               <Route path="/Yeasts/:recordUserId/:id/details" element={<Yeast />} />
               <Route path="/Yeasts/:recordUserId/:id/edit" element={<Yeast />} />
               <Route path="/Yeasts/new" element={<Yeast />} />
+              <Route path="/Settings" element={<SettingsForm />} />
             </Route>
 
           </Routes>

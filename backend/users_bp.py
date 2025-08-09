@@ -172,7 +172,8 @@ def create_users_bp():
         return jsonify({
             "user_id": user.user_id,
             "name": user.name,
-            "email": user.email
+            "email": user.email,
+            "weightUnit": user.weight_unit
         })
 
 
@@ -223,6 +224,8 @@ def create_users_bp():
 
         user.brewery = data.get("brewery", user.brewery)
         user.is_active = data.get("is_active", user.is_active)
+        
+        user.weight_unit = data.get("weightUnit")
 
         db.session.commit()
         return jsonify(user.to_dict()), 200

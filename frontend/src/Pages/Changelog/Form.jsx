@@ -17,7 +17,13 @@ export default function NewEquipment() {
         <h1>Changelog</h1>
       </section>
       <div className="content">
-        <b>Aug 07, 2025</b>
+        <b>Aug 08, 2025 (v1.1.0)</b>
+        <br />
+        <br />
+        ⚖️ Added configuration option to set the weight unit to ounces or grams.
+        <br />
+        <br />
+        <b>Aug 07, 2025 (v1.0.0)</b>
         <br />
         <br />
         🎉 Official release of Brewchemy!
