@@ -26,7 +26,7 @@ const schema = Yup.object().shape({
 
   form: Yup.string()
     .oneOf(
-      ['Dry', 'Liquid', 'Culture', 'Slurry'],
+      ['Dry', 'Liquid', 'Culture', 'Slant'],
       'Invalid form',
     )
     .required('Form is required'),

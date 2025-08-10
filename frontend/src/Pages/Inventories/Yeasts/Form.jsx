@@ -174,7 +174,7 @@ export default function NewYeast() {
                     <option value="Dry">Dry</option>
                     <option value="Liquid">Liquid</option>
                     <option value="Culture">Culture</option>
-                    <option value="Slurry">Slurry</option>
+                    <option value="Slant">Slant</option>
                   </select>
                 </label>
               </div>

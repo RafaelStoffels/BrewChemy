@@ -1,114 +1,48 @@
+// services/fermentables.js
 import api from './api';
-import { showErrorToast, showSuccessToast } from '../utils/notifications';
+import { request, withAuth } from '../utils/http';
 
-export async function searchFermentables(userToken, term, { showToast = true } = {}) {
-  try {
-    const response = await api.get('/api/fermentables/search', {
-      headers: { Authorization: `Bearer ${userToken}` },
+export function searchFermentables(userToken, term, opts = {}) {
+  return request(
+    api.get('/api/fermentables/search', {
+      ...withAuth(userToken),
       params: { searchTerm: term },
-    });
-    return response.data;
-  } catch (err) {
-    let msg = 'Error searching fermentables';
-    if (err.response?.status === 401) {
-      msg = 'Your session has expired. Please log in again.';
-    } else if (err.response?.data?.message || err.response?.data?.error) {
-      msg = err.response.data.message || err.response.data.error;
-    }
-    if (showToast) showErrorToast(msg);
-    throw new Error(msg);
-  }
+    }),
+    { fallback: 'Error searching fermentables', ...opts },
+  );
 }
 
-export async function fetchFermentables(userToken, { showToast = true } = {}) {
-  try {
-    const response = await api.get('/api/fermentables', {
-      headers: { Authorization: `Bearer ${userToken}` },
-    });
-    return response.data;
-  } catch (err) {
-    let msg = 'Error loading fermentables';
-    if (err.response?.status === 401) {
-      msg = 'Your session has expired. Please log in again.';
-    } else if (err.response?.data?.message || err.response?.data?.error) {
-      msg = err.response.data.message || err.response.data.error;
-    }
-    if (showToast) showErrorToast(msg);
-    throw new Error(msg);
-  }
+export function fetchFermentables(userToken, opts = {}) {
+  return request(
+    api.get('/api/fermentables', withAuth(userToken)),
+    { fallback: 'Error loading fermentables', ...opts },
+  );
 }
 
-export async function fetchFermentableById(userToken, recordUserId, id, { showToast = true } = {}) {
-  try {
-    const response = await api.get(`/api/fermentables/${recordUserId}/${id}`, {
-      headers: { Authorization: `Bearer ${userToken}` },
-    });
-    return response.data;
-  } catch (err) {
-    let msg = 'Error loading fermentable';
-    if (err.response?.status === 401) {
-      msg = 'Your session has expired. Please log in again.';
-    } else if (err.response?.data?.message || err.response?.data?.error) {
-      msg = err.response.data.message || err.response.data.error;
-    }
-    if (showToast) showErrorToast(msg);
-    throw new Error(msg);
-  }
+export function fetchFermentableById(userToken, recordUserId, id, opts = {}) {
+  return request(
+    api.get(`/api/fermentables/${recordUserId}/${id}`, withAuth(userToken)),
+    { fallback: 'Error loading fermentable', ...opts },
+  );
 }
 
-export async function deleteFermentable(userToken, recordUserId, id, { showToast = true } = {}) {
-  try {
-    const response = await api.delete(`/api/fermentables/${recordUserId}/${id}`, {
-      headers: { Authorization: `Bearer ${userToken}` },
-    });
-    if (showToast) showSuccessToast('Fermentable deleted successfully.');
-    return response.data;
-  } catch (err) {
-    let msg = 'Error deleting fermentable';
-    if (err.response?.status === 401) {
-      msg = 'Your session has expired. Please log in again.';
-    } else if (err.response?.data?.message || err.response?.data?.error) {
-      msg = err.response.data.message || err.response.data.error;
-    }
-    if (showToast) showErrorToast(msg);
-    throw new Error(msg);
-  }
+export function deleteFermentable(userToken, recordUserId, id, opts = {}) {
+  return request(
+    api.delete(`/api/fermentables/${recordUserId}/${id}`, withAuth(userToken)),
+    { fallback: 'Error deleting fermentable', successMsg: 'Fermentable deleted successfully.', ...opts },
+  );
 }
 
-export async function addFermentable(userToken, dataInput, { showToast = true } = {}) {
-  try {
-    const response = await api.post('/api/fermentables', dataInput, {
-      headers: { Authorization: `Bearer ${userToken}` },
-    });
-    if (showToast) showSuccessToast('Fermentable added successfully.');
-    return response.data;
-  } catch (err) {
-    let msg = 'Error adding fermentable';
-    if (err.response?.status === 401) {
-      msg = 'Your session has expired. Please log in again.';
-    } else if (err.response?.data?.message || err.response?.data?.error) {
-      msg = err.response.data.message || err.response.data.error;
-    }
-    if (showToast) showErrorToast(msg);
-    throw new Error(msg);
-  }
+export function addFermentable(userToken, dataInput, opts = {}) {
+  return request(
+    api.post('/api/fermentables', dataInput, withAuth(userToken)),
+    { fallback: 'Error adding fermentable', successMsg: 'Fermentable added successfully.', ...opts },
+  );
 }
 
-export async function updateFermentable(userToken, id, dataInput, { showToast = true } = {}) {
-  try {
-    const response = await api.put(`/api/fermentables/${id}`, dataInput, {
-      headers: { Authorization: `Bearer ${userToken}` },
-    });
-    if (showToast) showSuccessToast('Fermentable updated successfully.');
-    return response.data;
-  } catch (err) {
-    let msg = 'Error updating fermentable';
-    if (err.response?.status === 401) {
-      msg = 'Your session has expired. Please log in again.';
-    } else if (err.response?.data?.message || err.response?.data?.error) {
-      msg = err.response.data.message || err.response.data.error;
-    }
-    if (showToast) showErrorToast(msg);
-    throw new Error(msg);
-  }
+export function updateFermentable(userToken, id, dataInput, opts = {}) {
+  return request(
+    api.put(`/api/fermentables/${id}`, dataInput, withAuth(userToken)),
+    { fallback: 'Error updating fermentable', successMsg: 'Fermentable updated successfully.', ...opts },
+  );
 }

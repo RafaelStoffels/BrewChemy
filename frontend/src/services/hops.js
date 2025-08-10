@@ -1,114 +1,48 @@
+// services/hops.js
 import api from './api';
-import { showErrorToast, showSuccessToast } from '../utils/notifications';
+import { request, withAuth } from '../utils/http';
 
-export async function searchHops(userToken, term, { showToast = true } = {}) {
-  try {
-    const response = await api.get('/api/hops/search', {
-      headers: { Authorization: `Bearer ${userToken}` },
+export function searchHops(userToken, term, opts = {}) {
+  return request(
+    api.get('/api/hops/search', {
+      ...withAuth(userToken),
       params: { searchTerm: term },
-    });
-    return response.data;
-  } catch (err) {
-    let msg = 'Error loading hops';
-    if (err.response?.status === 401) {
-      msg = 'Your session has expired. Please log in again.';
-    } else if (err.response?.data?.message || err.response?.data?.error) {
-      msg = err.response.data.message || err.response.data.error;
-    }
-    if (showToast) showErrorToast(msg);
-    throw new Error(msg);
-  }
+    }),
+    { fallback: 'Error loading hops', ...opts },
+  );
 }
 
-export async function fetchHops(userToken, { showToast = true } = {}) {
-  try {
-    const response = await api.get('/api/hops', {
-      headers: { Authorization: `Bearer ${userToken}` },
-    });
-    return response.data;
-  } catch (err) {
-    let msg = 'Error loading hops';
-    if (err.response?.status === 401) {
-      msg = 'Your session has expired. Please log in again.';
-    } else if (err.response?.data?.message || err.response?.data?.error) {
-      msg = err.response.data.message || err.response.data.error;
-    }
-    if (showToast) showErrorToast(msg);
-    throw new Error(msg);
-  }
+export function fetchHops(userToken, opts = {}) {
+  return request(
+    api.get('/api/hops', withAuth(userToken)),
+    { fallback: 'Error loading hops', ...opts },
+  );
 }
 
-export async function fetchHopById(userToken, recordUserId, id, { showToast = true } = {}) {
-  try {
-    const response = await api.get(`/api/hops/${recordUserId}/${id}`, {
-      headers: { Authorization: `Bearer ${userToken}` },
-    });
-    return response.data;
-  } catch (err) {
-    let msg = 'Error loading hop';
-    if (err.response?.status === 401) {
-      msg = 'Your session has expired. Please log in again.';
-    } else if (err.response?.data?.message || err.response?.data?.error) {
-      msg = err.response.data.message || err.response.data.error;
-    }
-    if (showToast) showErrorToast(msg);
-    throw new Error(msg);
-  }
+export function fetchHopById(userToken, recordUserId, id, opts = {}) {
+  return request(
+    api.get(`/api/hops/${recordUserId}/${id}`, withAuth(userToken)),
+    { fallback: 'Error loading hop', ...opts },
+  );
 }
 
-export async function deleteHop(userToken, recordUserId, id, { showToast = true } = {}) {
-  try {
-    const response = await api.delete(`/api/hops/${recordUserId}/${id}`, {
-      headers: { Authorization: `Bearer ${userToken}` },
-    });
-    if (showToast) showSuccessToast('Hop deleted successfully.');
-    return response.data;
-  } catch (err) {
-    let msg = 'Error deleting hop';
-    if (err.response?.status === 401) {
-      msg = 'Your session has expired. Please log in again.';
-    } else if (err.response?.data?.message || err.response?.data?.error) {
-      msg = err.response.data.message || err.response.data.error;
-    }
-    if (showToast) showErrorToast(msg);
-    throw new Error(msg);
-  }
+export function deleteHop(userToken, recordUserId, id, opts = {}) {
+  return request(
+    api.delete(`/api/hops/${recordUserId}/${id}`, withAuth(userToken)),
+    { fallback: 'Error deleting hop', successMsg: 'Hop deleted successfully.', ...opts },
+  );
 }
 
-export async function addHop(userToken, dataInput, { showToast = true } = {}) {
-  try {
-    const response = await api.post('/api/hops', dataInput, {
-      headers: { Authorization: `Bearer ${userToken}` },
-    });
-    if (showToast) showSuccessToast('Hop added successfully.');
-    return response.data;
-  } catch (err) {
-    let msg = 'Error adding hop';
-    if (err.response?.status === 401) {
-      msg = 'Your session has expired. Please log in again.';
-    } else if (err.response?.data?.message || err.response?.data?.error) {
-      msg = err.response.data.message || err.response.data.error;
-    }
-    if (showToast) showErrorToast(msg);
-    throw new Error(msg);
-  }
+export function addHop(userToken, dataInput, opts = {}) {
+  return request(
+    api.post('/api/hops', dataInput, withAuth(userToken)),
+    { fallback: 'Error adding hop', successMsg: 'Hop added successfully.', ...opts },
+  );
 }
 
-export async function updateHop(userToken, id, dataInput, { showToast = true } = {}) {
-  try {
-    const response = await api.put(`/api/hops/${id}`, dataInput, {
-      headers: { Authorization: `Bearer ${userToken}` },
-    });
-    if (showToast) showSuccessToast('Hop updated successfully.');
-    return response.data;
-  } catch (err) {
-    let msg = 'Error updating hop';
-    if (err.response?.status === 401) {
-      msg = 'Your session has expired. Please log in again.';
-    } else if (err.response?.data?.message || err.response?.data?.error) {
-      msg = err.response.data.message || err.response.data.error;
-    }
-    if (showToast) showErrorToast(msg);
-    throw new Error(msg);
-  }
+export function updateHop(userToken, id, dataInput, opts = {}) {
+  return request(
+    api.put(`/api/hops/${id}`, dataInput, withAuth(userToken)),
+    { fallback: 'Error updating hop', successMsg: 'Hop updated successfully.', ...opts },
+  );
 }
