@@ -1,117 +1,48 @@
+// services/recipes.js
 import api from './api';
-import { showErrorToast, showSuccessToast } from '../utils/notifications';
+import { request, withAuth } from '../utils/http';
 
-export async function fetchRecipes(userToken, { showToast = true } = {}) {
-  try {
-    const response = await api.get('/api/recipes', {
-      headers: { Authorization: `Bearer ${userToken}` },
-    });
-    return response.data;
-  } catch (err) {
-    let msg = 'Error loading recipe';
-    if (err.response?.status === 401) {
-      msg = 'Your session has expired. Please log in again.';
-    } else if (err.response?.data?.message || err.response?.data?.error) {
-      msg = err.response.data.message || err.response.data.error;
-    }
-    if (showToast) showErrorToast(msg);
-    throw new Error(msg);
-  }
+export function fetchRecipes(userToken, opts = {}) {
+  return request(
+    api.get('/api/recipes', withAuth(userToken)),
+    { fallback: 'Error loading recipes', ...opts },
+  );
 }
 
-export async function fetchRecipeById(userToken, recipeId, { showToast = true } = {}) {
-  try {
-    const response = await api.get(`/api/recipes/${recipeId}`, {
-      headers: { Authorization: `Bearer ${userToken}` },
-    });
-    return response.data;
-  } catch (err) {
-    let msg = 'Error loading recipe';
-    if (err.response?.status === 401) {
-      msg = 'Your session has expired. Please log in again.';
-    } else if (err.response?.data?.message || err.response?.data?.error) {
-      msg = err.response.data.message || err.response.data.error;
-    }
-    if (showToast) showErrorToast(msg);
-    throw new Error(msg);
-  }
+export function fetchRecipeById(userToken, recipeId, opts = {}) {
+  return request(
+    api.get(`/api/recipes/${recipeId}`, withAuth(userToken)),
+    { fallback: 'Error loading recipe', ...opts },
+  );
 }
 
-export async function deleteRecipe(userToken, itemId, { showToast = true } = {}) {
-  try {
-    await api.delete(`/api/recipes/${itemId}`, {
-      headers: { Authorization: `Bearer ${userToken}` },
-    });
-    if (showToast) showSuccessToast('Recipe deleted successfully.');
-  } catch (err) {
-    let msg = 'Error loading recipe';
-    if (err.response?.status === 401) {
-      msg = 'Your session has expired. Please log in again.';
-    } else if (err.response?.data?.message || err.response?.data?.error) {
-      msg = err.response.data.message || err.response.data.error;
-    }
-    if (showToast) showErrorToast(msg);
-    throw new Error(msg);
-  }
+export function deleteRecipe(userToken, itemId, opts = {}) {
+  return request(
+    api.delete(`/api/recipes/${itemId}`, withAuth(userToken)),
+    { fallback: 'Error deleting recipe', successMsg: 'Recipe deleted successfully.', ...opts },
+  );
 }
 
-export async function searchRecipes(userToken, term, { showToast = true } = {}) {
-  try {
-    const response = await api.get('/api/recipes/search', {
-      headers: { Authorization: `Bearer ${userToken}` },
+export function searchRecipes(userToken, term, opts = {}) {
+  return request(
+    api.get('/api/recipes/search', {
+      ...withAuth(userToken),
       params: { searchTerm: term },
-    });
-    return response.data;
-  } catch (err) {
-    let msg = 'Error loading recipe';
-    if (err.response?.status === 401) {
-      msg = 'Your session has expired. Please log in again.';
-    } else if (err.response?.data?.message || err.response?.data?.error) {
-      msg = err.response.data.message || err.response.data.error;
-    }
-    if (showToast) showErrorToast(msg);
-    throw new Error(msg);
-  }
+    }),
+    { fallback: 'Error searching recipes', ...opts },
+  );
 }
 
-export async function addRecipe(userToken, dataInput, { showToast = true } = {}) {
-  try {
-    console.log(dataInput);
-    const response = await api.post('/api/recipes', dataInput, {
-      headers: { Authorization: `Bearer ${userToken}` },
-    });
-    if (showToast) showSuccessToast('Recipe saved successfully.');
-    return response.data;
-  } catch (err) {
-    let msg = 'Error saving recipe';
-
-    if (err.response?.status === 401) {
-      msg = 'Your session has expired. Please log in again.';
-    } else if (err.response?.data?.message || err.response?.data?.error) {
-      msg = err.response.data.message || err.response.data.error;
-    }
-
-    if (showToast) showErrorToast(msg);
-    throw new Error(msg);
-  }
+export function addRecipe(userToken, dataInput, opts = {}) {
+  return request(
+    api.post('/api/recipes', dataInput, withAuth(userToken)),
+    { fallback: 'Error saving recipe', successMsg: 'Recipe saved successfully.', ...opts },
+  );
 }
 
-export async function updateRecipe(userToken, id, dataInput, { showToast = true } = {}) {
-  try {
-    console.log(dataInput);
-    const response = await api.put(`/api/recipes/${id}`, dataInput, {
-      headers: { Authorization: `Bearer ${userToken}` },
-    });
-    if (showToast) showSuccessToast('Recipe saved successfully.');
-    return response.data;
-  } catch (err) {
-    let msg = 'Error updating recipe';
-    if (err.response?.status === 401) {
-      msg = 'Your session has expired. Please log in again.';
-    } else if (err.response?.data?.message || err.response?.data?.error) {
-      msg = err.response.data.message || err.response.data.error;
-    }
-    if (showToast) showErrorToast(msg);
-    throw new Error(msg);
-  }
+export function updateRecipe(userToken, id, dataInput, opts = {}) {
+  return request(
+    api.put(`/api/recipes/${id}`, dataInput, withAuth(userToken)),
+    { fallback: 'Error updating recipe', successMsg: 'Recipe saved successfully.', ...opts },
+  );
 }
