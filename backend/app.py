@@ -2,7 +2,7 @@ import os
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from db import db, configure_db
-from openai_bp import openai_route
+from routes.openai_bp import openai_route
 from flask_mail import Mail
 from flask_migrate import Migrate
 
@@ -11,9 +11,9 @@ from routes.fermentables_bp import create_fermentables_bp
 from routes.hops_bp import create_hops_bp
 from routes.misc_bp import create_misc_bp
 from routes.yeasts_bp import create_yeasts_bp
-from recipes_bp import create_recipes_bp
-from copy_recipe_bp import create_copy_recipe_bp
-from users_bp import create_users_bp
+from routes.recipes_bp import create_recipes_bp
+from routes.copy_recipe_bp import create_copy_recipe_bp
+from routes.users_bp import create_users_bp
 
 
 mail = Mail()
