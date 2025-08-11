@@ -3,6 +3,7 @@
 /frontend/build
 /frontend/ssl
 /backend/ssl
+/backend-fastapi/.venv
 __pycache__
 .env
 .env.production
