@@ -45,6 +45,8 @@ services:
       - "10000:10000"
     volumes:
       - ./backend-fastapi/app:/app/app:rw
+    env_file:
+      - ./backend-fastapi/.env
 
 volumes:
   pgdata:
