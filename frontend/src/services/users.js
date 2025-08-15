@@ -16,21 +16,35 @@ export function updateUser(userToken, userId, dataInput, opts = {}) {
   );
 }
 
-export function loginUser(email, password, { login, navigate, ...opts }) {
-  return request(
-    api.post('api/login', { email, password }),
-    {
-      fallback: 'Login failed. Please try again later.',
-      onSuccess: async (response) => {
-        const { token } = response.data;
-        const userInfo = await me(token);
-        const fullUser = { ...userInfo, token };
-        login(fullUser);
-        navigate('/RecipeList');
-      },
-      ...opts,
-    },
-  );
+export async function loginUser(email, password, { login, navigate, ...opts }) {
+  console.log('inicio');
+  try {
+    // request() retorna response.data
+    const data = await request(
+      api.post('/api/users/login', { email, password }),
+      { showToast: false, ...opts },
+    );
+    console.log('[loginUser] data de /login:', data);
+
+    const token = data?.token ?? data?.access_token;
+    if (!token) throw new Error('Token ausente na resposta de /login');
+
+    console.log('[loginUser] chamando me()…');
+    const userInfo = await me(token, { showToast: false });
+    console.log('[loginUser] me() OK:', userInfo);
+
+    const fullUser = { ...userInfo, token };
+    console.log('[loginUser] chamando login(fullUser)…');
+    login(fullUser);
+
+    console.log('[loginUser] chamando navigate…');
+    navigate('/RecipeList', { replace: true });
+
+    console.log('[loginUser] fim');
+  } catch (err) {
+    console.error('[loginUser] erro:', err);
+    // se quiser, toast aqui
+  }
 }
 
 export function addUser(data, opts = {}) {
@@ -47,7 +61,7 @@ export function addUser(data, opts = {}) {
 
 export function sendPasswordResetEmail(data, opts = {}) {
   return request(
-    api.post('/api/sendPasswordResetEmail', data),
+    api.post('/api/users/sendPasswordResetEmail', data),
     {
       fallback: 'Error sending reset email.',
       successMsg: 'Email sent successfully. Check your inbox for a reset link.',
@@ -58,7 +72,7 @@ export function sendPasswordResetEmail(data, opts = {}) {
 
 export function changePassword(data, opts = {}) {
   return request(
-    api.post('/api/changePassword', data),
+    api.post('/api/users/changePassword', data),
     {
       fallback: 'Error changing password.',
       successMsg: 'Password changed successfully.',
