@@ -1,7 +1,9 @@
 # app/database.py
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, scoped_session, DeclarativeBase
+from sqlalchemy.orm import sessionmaker, scoped_session
+
 from .config import settings
+from .models import Base   # 🔸 importa do models (sem ciclo)
 
 engine = create_engine(
     settings.DATABASE_URL,
@@ -10,11 +12,8 @@ engine = create_engine(
 )
 
 SessionLocal = scoped_session(
-    sessionmaker(bind=engine, autocommit=False, autoflush=False)
+    sessionmaker(bind=engine, autocommit=False, autoflush=False, expire_on_commit=False)
 )
-
-class Base(DeclarativeBase):
-    pass
 
 def get_db():
     db = SessionLocal()

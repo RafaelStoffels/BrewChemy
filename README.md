@@ -29,7 +29,7 @@ Livedemo: https://brewchemy-react.onrender.com/
 
 **Backend:**
 - [Python](https://www.python.org/)
-- [Flask](https://flask.palletsprojects.com/)
+- [FastAPI](https://fastapi.tiangolo.com/)
 - [PostgreSQL](https://www.postgresql.org/)
 - [SQLAlchemy](https://www.sqlalchemy.org/)
 - [Flake8](https://flake8.pycqa.org/) – for enforcing Python code style and linting
@@ -91,9 +91,11 @@ docker-compose up --build
 ```bash
 BrewChemy/
 ├── backend/
-│   ├── app.py
-│   └── routes/
+│   ├── main.py
+│   └── routers/
 │   └── schemas/
+│   └── scripts/
+│   └── utils/
 ├── frontend/
 │   ├── src/
 │   │   ├── Components/
@@ -106,6 +108,26 @@ BrewChemy/
 │   └── public/
 └── README.md
 ```
+
+## 📂 Important Files & Scripts
+
+- **entrypoint.sh**  
+  Used only for local development with Docker.  
+  - Waits for the database to be ready  
+  - Applies migrations (`alembic upgrade head`)  
+  - Runs the seed script (`python -m app.scripts.seed`)  
+  - Starts the FastAPI server with Gunicorn  
+
+- **app/scripts/seed.py**  
+  Seeds the database with an initial admin user (idempotent, won’t duplicate).
+
+- **alembic.ini** & **migrations/**  
+  Alembic configuration and migration history.  
+  Used to keep the database schema in sync with the models.  
+
+- **app/config.py**  
+  Centralized application settings using Pydantic.  
+  All environment variables are loaded here.  
 
 ## 🤝 Contributing
 

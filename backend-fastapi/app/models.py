@@ -4,11 +4,13 @@ from __future__ import annotations
 from datetime import datetime, timezone
 from typing import Optional
 
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 from sqlalchemy import Integer, String, Text, Numeric, DateTime, Boolean, ForeignKey, Date, func
 
 from passlib.context import CryptContext
-from .database import Base
+
+class Base(DeclarativeBase):
+    pass
 
 pwd_ctx = CryptContext(
     schemes=["argon2"],              # Argon2id
@@ -20,7 +22,6 @@ pwd_ctx = CryptContext(
 
 class User(Base):
     __tablename__ = "users"
-
     user_id: Mapped[int] = mapped_column(Integer, primary_key=True)
     name: Mapped[str] = mapped_column(String(50), nullable=False)
     email: Mapped[str] = mapped_column(String(100), unique=True, nullable=False, index=True)
@@ -33,7 +34,6 @@ class User(Base):
     status: Mapped[Optional[str]] = mapped_column(String(15))
     weight_unit: Mapped[str] = mapped_column(String(5), default="g")
 
-    # ---- helpers com Argon2id ----
     def set_password(self, password: str) -> None:
         self.password_hash = pwd_ctx.hash(password)
 
@@ -54,10 +54,8 @@ class User(Base):
             "weightUnit": self.weight_unit,
         }
 
-
 class Equipment(Base):
     __tablename__ = "equipments"
-
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     official_id: Mapped[int | None] = mapped_column(Integer, nullable=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.user_id"), nullable=False, index=True)
@@ -77,11 +75,9 @@ class Equipment(Base):
         server_default=func.now(),
         nullable=False,
     )
-    
 
 class Fermentable(Base):
     __tablename__ = "fermentables"
-
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     official_id: Mapped[int | None] = mapped_column(Integer, nullable=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.user_id"), nullable=False, index=True)
@@ -94,10 +90,8 @@ class Fermentable(Base):
     supplier: Mapped[str | None] = mapped_column(String(40), nullable=True)
     unit_price: Mapped[float | None] = mapped_column(Numeric(10, 2), nullable=True)
 
-
 class Hop(Base):
     __tablename__ = "hops"
-
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     official_id: Mapped[int | None] = mapped_column(Integer, nullable=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.user_id"), nullable=False, index=True)
@@ -110,10 +104,8 @@ class Hop(Base):
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
     use_type: Mapped[str | None] = mapped_column(String(15), nullable=True)
 
-
 class Misc(Base):
     __tablename__ = "misc"
-
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     official_id: Mapped[int | None] = mapped_column(Integer, nullable=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.user_id"), nullable=False, index=True)
@@ -121,10 +113,8 @@ class Misc(Base):
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
     type: Mapped[str | None] = mapped_column(String(15), nullable=True)
 
-
 class Yeast(Base):
     __tablename__ = "yeasts"
-
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     official_id: Mapped[int | None] = mapped_column(Integer, nullable=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.user_id"), nullable=False, index=True)
@@ -138,10 +128,8 @@ class Yeast(Base):
     flocculation: Mapped[str | None] = mapped_column(String(15), nullable=True)
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
 
-
 class Recipe(Base):
     __tablename__ = "recipes"
-
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.user_id"), nullable=False, index=True)
 
@@ -169,14 +157,11 @@ class Recipe(Base):
         back_populates="recipe", cascade="all, delete-orphan", lazy="selectin"
     )
 
-
 class RecipeEquipment(Base):
     __tablename__ = "recipe_equipment"
-
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.user_id"), nullable=False, index=True)
     recipe_id: Mapped[int] = mapped_column(ForeignKey("recipes.id"), nullable=False, index=True)
-
     name: Mapped[str] = mapped_column(String(50), nullable=False)
     description: Mapped[str | None] = mapped_column(Text)
     efficiency: Mapped[float] = mapped_column(Numeric(5, 2), nullable=False)
@@ -187,17 +172,13 @@ class RecipeEquipment(Base):
     boil_off: Mapped[float | None] = mapped_column(Numeric(5, 2))
     dead_space: Mapped[float | None] = mapped_column(Numeric(5, 2))
     trub_loss: Mapped[float | None] = mapped_column(Numeric(5, 2))
-
     recipe: Mapped["Recipe"] = relationship(back_populates="recipe_equipment")
-
 
 class RecipeFermentable(Base):
     __tablename__ = "recipe_fermentables"
-
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.user_id"), nullable=False, index=True)
     recipe_id: Mapped[int] = mapped_column(ForeignKey("recipes.id"), nullable=False, index=True)
-
     name: Mapped[str] = mapped_column(String(40), nullable=False)
     description: Mapped[str | None] = mapped_column(Text)
     ebc: Mapped[float] = mapped_column(Numeric(5, 2), nullable=False)
@@ -206,17 +187,13 @@ class RecipeFermentable(Base):
     supplier: Mapped[str | None] = mapped_column(String(40))
     unit_price: Mapped[float | None] = mapped_column(Numeric(10, 2))
     quantity: Mapped[float] = mapped_column(Numeric, nullable=False)
-
     recipe: Mapped["Recipe"] = relationship(back_populates="recipe_fermentables")
-
 
 class RecipeHop(Base):
     __tablename__ = "recipe_hops"
-
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.user_id"), nullable=False, index=True)
     recipe_id: Mapped[int] = mapped_column(ForeignKey("recipes.id"), nullable=False, index=True)
-
     name: Mapped[str] = mapped_column(String(40), nullable=False)
     alpha_acid_content: Mapped[float | None] = mapped_column(Numeric(5, 2))
     beta_acid_content: Mapped[float | None] = mapped_column(Numeric(5, 2))
@@ -226,34 +203,26 @@ class RecipeHop(Base):
     quantity: Mapped[float] = mapped_column(Numeric, nullable=False)
     boil_time: Mapped[int | None] = mapped_column(Integer)
     usage_stage: Mapped[str | None] = mapped_column(String(15))
-
     recipe: Mapped["Recipe"] = relationship(back_populates="recipe_hops")
-
 
 class RecipeMisc(Base):
     __tablename__ = "recipe_misc"
-
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.user_id"), nullable=False, index=True)
     recipe_id: Mapped[int] = mapped_column(ForeignKey("recipes.id"), nullable=False, index=True)
-
     name: Mapped[str] = mapped_column(String(40), nullable=False)
     description: Mapped[str | None] = mapped_column(Text)
     type: Mapped[str | None] = mapped_column(String(15))
     quantity: Mapped[float] = mapped_column(Numeric, nullable=False)
     use: Mapped[str | None] = mapped_column(String(15))
     time: Mapped[int | None] = mapped_column(Integer)
-
     recipe: Mapped["Recipe"] = relationship(back_populates="recipe_misc")
-
 
 class RecipeYeast(Base):
     __tablename__ = "recipe_yeasts"
-
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.user_id"), nullable=False, index=True)
     recipe_id: Mapped[int] = mapped_column(ForeignKey("recipes.id"), nullable=False, index=True)
-
     name: Mapped[str] = mapped_column(String(40), nullable=False)
     manufacturer: Mapped[str | None] = mapped_column(String(100))
     type: Mapped[str | None] = mapped_column(String(15))
@@ -264,5 +233,4 @@ class RecipeYeast(Base):
     flocculation: Mapped[str | None] = mapped_column(String(15))
     description: Mapped[str | None] = mapped_column(Text)
     quantity: Mapped[float] = mapped_column(Numeric, nullable=False)
-
     recipe: Mapped["Recipe"] = relationship(back_populates="recipe_yeasts")
