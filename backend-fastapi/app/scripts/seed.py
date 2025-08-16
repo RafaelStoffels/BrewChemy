@@ -13,7 +13,6 @@ ADMIN_PASSWORD_PLAINTEXT = "$argon2id$v=19$m=65536,t=3,p=4$WEvJeW+tVSqFEKKUcg7hv
 def run():
     session = SessionLocal()
     try:
-        # verifica se já existe
         exists = session.execute(
             select(User).where(User.email == ADMIN_EMAIL)
         ).scalar_one_or_none()

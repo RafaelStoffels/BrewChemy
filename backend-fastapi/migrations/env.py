@@ -25,18 +25,6 @@ target_metadata = Base.metadata
 load_dotenv(BASE_DIR / ".env")
 
 DATABASE_URL = os.getenv("DATABASE_URL")
-if not DATABASE_URL:
-    user = os.getenv("DB_USER")
-    pwd  = os.getenv("DB_PASSWORD")
-    host = os.getenv("DB_HOST", "localhost")
-    port = os.getenv("DB_PORT", "5432")
-    name = os.getenv("DB_NAME")
-    if user and pwd and name:
-        DATABASE_URL = f"postgresql+psycopg2://{user}:{pwd}@{host}:{port}/{name}"
-    else:
-        raise RuntimeError(
-            "Defina DATABASE_URL ou as variáveis DB_USER/DB_PASSWORD/DB_HOST/DB_PORT/DB_NAME."
-        )
 
 config.set_main_option("sqlalchemy.url", DATABASE_URL)
 
