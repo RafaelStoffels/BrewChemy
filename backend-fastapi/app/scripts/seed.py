@@ -1,19 +1,14 @@
 # app/scripts/seed.py
 
 from datetime import datetime, timezone
-
-from passlib.hash import argon2  # use o mesmo hash da sua app
+from passlib.hash import argon2
 from sqlalchemy import select
-
-# ⬅️ ajuste estes imports conforme sua estrutura
-# Base e User devem vir do módulo onde você define seus modelos
 from app.models import User
-# SessionLocal deve vir do módulo que cria o engine/sessionmaker
 from app.database import SessionLocal
 
 ADMIN_EMAIL = "adm@brewchemy.com"
 ADMIN_NAME = "Adm"
-ADMIN_PASSWORD_PLAINTEXT = "troque-esta-senha"  # Troque por algo forte (ou leia de env)
+ADMIN_PASSWORD_PLAINTEXT = "$argon2id$v=19$m=65536,t=3,p=4$WEvJeW+tVSqFEKKUcg7hvA$17URKNQHd1Gw2sZ5AJJIgGfTxspwoI4lfJe0lYXtfWk"
 
 def run():
     session = SessionLocal()
@@ -27,11 +22,9 @@ def run():
             print("Adm user already exists.")
             return
 
-        # gere o hash conforme sua política (argon2 aqui)
         password_hash = argon2.hash(ADMIN_PASSWORD_PLAINTEXT)
 
         admin = User(
-            # NÃO force user_id=1 → deixe autoincrementar
             name=ADMIN_NAME,
             email=ADMIN_EMAIL,
             password_hash=password_hash,
