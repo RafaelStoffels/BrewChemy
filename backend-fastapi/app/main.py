@@ -4,6 +4,12 @@ from starlette.middleware.sessions import SessionMiddleware
 
 from .config import settings
 from .routers import users
+from .routers import equipments
+from .routers import fermentables
+from .routers import hops
+from .routers import misc
+from .routers import yeasts
+from .routers import recipes
 
 app = FastAPI(title="Brewchemy API")
 
@@ -29,3 +35,9 @@ def health():
 
 # Routes
 app.include_router(users.router)
+app.include_router(equipments.router)
+app.include_router(fermentables.router)
+app.include_router(hops.router)
+app.include_router(misc.router)
+app.include_router(yeasts.router)
+app.include_router(recipes.router)

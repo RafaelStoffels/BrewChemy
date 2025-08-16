@@ -17,6 +17,7 @@ class UserOut(BaseModel):
     email: EmailStr
     brewery: Optional[str] = None
     status: str
+    weight_unit: str | None = None
 
     class Config:
-        from_attributes = True  # pydantic v2 (equivalente ao orm_mode=True do v1)
+        from_attributes = True

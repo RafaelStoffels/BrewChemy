@@ -7,7 +7,7 @@ from email.message import EmailMessage
 from fastapi import APIRouter, BackgroundTasks, Depends, Header, HTTPException, Query, status, Request
 from fastapi.responses import JSONResponse, RedirectResponse
 from jose import jwt, JWTError, ExpiredSignatureError
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, EmailStr, Field, AliasChoices
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 from requests_oauthlib import OAuth2Session
@@ -90,7 +90,6 @@ def google_login(request: Request):
 
 @router.get("/google/callback")
 def google_callback(request: Request, db: Session = Depends(get_db)):
-    # valida state
     state = request.query_params.get("state")
     saved_state = request.session.get("oauth_state")
     if not state or not saved_state or state != saved_state:
@@ -228,6 +227,50 @@ def create_user(payload: CreateUserIn, background: BackgroundTasks, db: Session 
     return UserOut.from_orm(new_user)
 
 
+class UpdateUserIn(BaseModel):
+    name: str | None = None
+    email: EmailStr | None = None
+    password: str | None = Field(default=None, min_length=6)
+    brewery: str | None = None
+    is_active: bool | None = None
+    weight_unit: str | None = Field(default=None, validation_alias=AliasChoices("weightUnit", "weight_unit"))
+
+
+@router.put("/{user_id}", response_model=UserOut)
+def update_user(user_id: int, payload: UpdateUserIn, db: Session = Depends(get_db)):
+    user: User | None = db.query(User).get(user_id)
+    if user is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+
+    if payload.name is not None:
+        user.name = payload.name
+    if payload.email is not None:
+        user.email = payload.email
+    if payload.password:
+        user.password_hash = hash_password(payload.password)
+    if payload.brewery is not None:
+        user.brewery = payload.brewery
+    if payload.is_active is not None:
+        user.is_active = payload.is_active
+    if payload.weight_unit is not None:
+        user.weight_unit = payload.weight_unit
+
+    db.commit()
+    db.refresh(user)
+    return user
+
+
+@router.delete("/{user_id}", status_code=status.HTTP_200_OK)
+def delete_user(user_id: int, db: Session = Depends(get_db)):
+    user: User | None = db.query(User).get(user_id)
+    if user is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+
+    db.delete(user)
+    db.commit()
+    return {"message": f"User {user_id} deleted successfully"}
+
+
 def send_confirmation_email(user) -> bool:
     if not getattr(settings, "EMAIL_ENABLED", True):
         print("[email] EMAIL_ENABLED=False; pulando envio.")
@@ -329,7 +372,7 @@ def change_password(payload: ChangePasswordIn, db: Session = Depends(get_db)):
         if not user:
             raise HTTPException(status_code=404, detail="User not found")
 
-        user.password_hash = hash_password(payload.password)  # <- usa policy
+        user.password_hash = hash_password(payload.password)
         db.commit()
         return {"message": "Password changed successfully"}
 
@@ -405,3 +448,4 @@ def send_password_reset_email(
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to send email: {str(e)}")
+    
