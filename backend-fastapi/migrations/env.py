@@ -6,13 +6,10 @@ from logging.config import fileConfig
 from alembic import context
 from sqlalchemy import create_engine, pool
 
-# garante que o Alembic ache o pacote app/ mesmo rodando de fora
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
-from app.models import Base              # ajuste se seu Base estiver em outro lugar
-from app.config import settings             # importa settings do Pydantic
+from app.models import Base
 
-# Config do Alembic
 config = context.config
 
 # Logging do Alembic
@@ -20,11 +17,9 @@ if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 logger = logging.getLogger("alembic.env")
 
-# Metadados dos modelos (usados no autogenerate)
 target_metadata = Base.metadata
 
-# Database URL vem do config.py (pydantic settings)
-DATABASE_URL = settings.DATABASE_URL
+DATABASE_URL = os.environ["DATABASE_URL"]
 
 
 def run_migrations_offline():
@@ -45,7 +40,6 @@ def run_migrations_online():
     """Rodar migrations em modo online (conecta no banco)."""
 
     def process_revision_directives(ctx, revision, directives):
-        # evita gerar migration vazia com --autogenerate
         if getattr(config.cmd_opts, "autogenerate", False):
             script = directives[0]
             if script.upgrade_ops.is_empty():
