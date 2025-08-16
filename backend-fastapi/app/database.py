@@ -3,7 +3,6 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, scoped_session
 
 from .config import settings
-from .models import Base   # 🔸 importa do models (sem ciclo)
 
 engine = create_engine(
     settings.DATABASE_URL,

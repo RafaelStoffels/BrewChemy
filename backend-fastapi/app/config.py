@@ -19,6 +19,7 @@ class Settings(BaseSettings):
 
     BACKEND_URL: str
     FRONTEND_URL: Union[AnyUrl, str] = "http://localhost:3000"
+    DATABASE_URL: str
 
     # --- Google OAuth ---
     GOOGLE_CLIENT_ID: Optional[str] = None
