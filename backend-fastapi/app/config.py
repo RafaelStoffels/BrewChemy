@@ -22,6 +22,12 @@ class Settings(BaseSettings):
     JWT_ALG: str = "HS256"
     CORS_ORIGINS: str = "*"
 
+    GOOGLE_CLIENT_ID: Optional[str] = None
+    GOOGLE_CLIENT_SECRET: Optional[str] = None
+    GOOGLE_REDIRECT_URI: Optional[str] = None
+    GOOGLE_AUTH_URL: Optional[str] = None
+    GOOGLE_TOKEN_URL: Optional[str] = None
+
     # ---- E-mail
     MAIL_SERVER: Optional[str] = None
     MAIL_PORT: Optional[int] = None
