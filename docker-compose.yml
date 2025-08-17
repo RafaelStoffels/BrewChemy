@@ -10,45 +10,28 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
 
-  backend: # FLASK
+  backend:
     build: ./backend
+    command: uvicorn app.main:app --host 0.0.0.0 --port 10000 --reload --reload-dir /app/app
+    environment:
+      DATABASE_URL: postgresql+psycopg2://postgres:brewchemy@db:5432/brewchemy
+      CORS_ORIGINS: http://localhost:3000,http://localhost:5173
+      OAUTHLIB_INSECURE_TRANSPORT: "1"
+      OAUTHLIB_RELAX_TOKEN_SCOPE: "1"
     depends_on:
       - db
-    environment:
-      FLASK_APP: app.py
-      FLASK_ENV: development
-      OAUTHLIB_INSECURE_TRANSPORT: "1"
-      DATABASE_URL: postgresql+psycopg2://postgres:brewchemy@db:5432/brewchemy
-      BACKEND_URL: http://localhost:5000
-      FRONTEND_URL: http://localhost:3000
     ports:
-      - "5000:5000"
+      - "10000:10000"
+    volumes:
+      - ./backend/app:/app/app:rw
+    env_file:
+      - ./backend/.env.docker
 
   frontend:
     build: ./frontend
     command: npm start
     ports:
       - "3000:3000"
-
-  # ===== NEW: FASTAPI =====
-  backend_fastapi:
-    build: ./backend-fastapi
-    command: uvicorn app.main:app --host 0.0.0.0 --port 10000 --reload --reload-dir /app/app
-    environment:
-      DATABASE_URL: postgresql+psycopg2://postgres:brewchemy@db:5432/brewchemy
-      JWT_SECRET: ${JWT_SECRET:-dA0r1f3nCDSI9XBNPuDOSxmBpnTQfylf77sn_bNYwe2PNtkTCWJ1m_eUAtJVOMr_uD2vHw-Fuji3pQFVdDI4bg}
-      JWT_ALG: HS256
-      CORS_ORIGINS: http://localhost:3000,http://localhost:5173
-      OAUTHLIB_INSECURE_TRANSPORT: 1
-      OAUTHLIB_RELAX_TOKEN_SCOPE: 1
-    depends_on:
-      - db
-    ports:
-      - "10000:10000"
-    volumes:
-      - ./backend-fastapi/app:/app/app:rw
-    env_file:
-      - ./backend-fastapi/.env
 
 volumes:
   pgdata:

@@ -1,85 +1,57 @@
-import logging
+# migrations/env.py
+from __future__ import annotations
+import os
+import sys
+from pathlib import Path
 from logging.config import fileConfig
 
-from flask import current_app
 from alembic import context
+from sqlalchemy import engine_from_config, pool
 
-# Alembic Config
+BASE_DIR = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(BASE_DIR))
+
+from app.config import settings
+from app.models import Base 
+
 config = context.config
+if config.config_file_name:
+    fileConfig(config.config_file_name)
 
-# Logging
-fileConfig(config.config_file_name)
-logger = logging.getLogger('alembic.env')
+db_url = settings.DATABASE_URL
+if not db_url:
+    raise RuntimeError("DATABASE_URL not defined. Configure via env or DB_*.")
+config.set_main_option("sqlalchemy.url", db_url)
 
+target_metadata = Base.metadata
 
-def get_engine():
-    try:
-        # Flask-SQLAlchemy < 3 / Alchemical
-        return current_app.extensions['migrate'].db.get_engine()
-    except (TypeError, AttributeError):
-        # Flask-SQLAlchemy >= 3
-        return current_app.extensions['migrate'].db.engine
-
-
-def get_engine_url():
-    try:
-        return get_engine().url.render_as_string(hide_password=False).replace('%', '%%')
-    except AttributeError:
-        return str(get_engine().url).replace('%', '%%')
-
-
-target_db = current_app.extensions['migrate'].db
-
-def get_metadata():
-    if hasattr(target_db, 'metadatas'):
-        return target_db.metadatas[None]
-    return target_db.metadata
-
-
-_app_url = current_app.config.get("SQLALCHEMY_DATABASE_URI")
-if not _app_url:
-    _app_url = get_engine_url()
-config.set_main_option('sqlalchemy.url', _app_url)
-
-
-def run_migrations_offline():
-    """Run migrations in 'offline' mode."""
+def run_migrations_offline() -> None:
     url = config.get_main_option("sqlalchemy.url")
     context.configure(
         url=url,
-        target_metadata=get_metadata(),
+        target_metadata=target_metadata,
         literal_binds=True,
+        compare_type=True,
+        compare_server_default=True,
     )
-
     with context.begin_transaction():
         context.run_migrations()
 
-
-def run_migrations_online():
-    """Run migrations in 'online' mode'."""
-
-    def process_revision_directives(context_, revision, directives):
-        if getattr(config.cmd_opts, 'autogenerate', False):
-            script = directives[0]
-            if script.upgrade_ops.is_empty():
-                directives[:] = []
-                logger.info('No changes in schema detected.')
-
-    conf_args = current_app.extensions['migrate'].configure_args
-    if conf_args.get("process_revision_directives") is None:
-        conf_args["process_revision_directives"] = process_revision_directives
-
-    connectable = get_engine()
-
+def run_migrations_online() -> None:
+    connectable = engine_from_config(
+        config.get_section(config.config_ini_section) or {},
+        prefix="sqlalchemy.",
+        poolclass=pool.NullPool,
+    )
     with connectable.connect() as connection:
         context.configure(
             connection=connection,
-            target_metadata=get_metadata(),
-            **conf_args
+            target_metadata=target_metadata,
+            compare_type=True,
+            compare_server_default=True,
         )
         with context.begin_transaction():
             context.run_migrations()
-
 
 if context.is_offline_mode():
     run_migrations_offline()

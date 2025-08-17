@@ -1,9 +1,15 @@
+venv/
+.venv/
+old_backend_flask/venv/
+old_backend_flask/.venv/
+/old_backend_flask/ssl
 
 /frontend/node_modules
 /frontend/build
 /frontend/ssl
-/backend/ssl
+
 /backend-fastapi/.venv
 __pycache__
 .env
+.env.docker
 .env.production
