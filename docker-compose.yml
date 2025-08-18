@@ -12,18 +12,20 @@ services:
 
   backend:
     build: ./backend
+    command: uvicorn app.main:app --host 0.0.0.0 --port 10000 --reload --reload-dir /app/app
+    environment:
+      DATABASE_URL: postgresql+psycopg2://postgres:brewchemy@db:5432/brewchemy
+      CORS_ORIGINS: http://localhost:3000,http://localhost:5173
+      OAUTHLIB_INSECURE_TRANSPORT: "1"
+      OAUTHLIB_RELAX_TOKEN_SCOPE: "1"
     depends_on:
       - db
-    environment:
-      FLASK_APP: app.py
-      FLASK_ENV: development
-      OAUTHLIB_INSECURE_TRANSPORT: "1"
-      # only for container
-      DATABASE_URL: postgresql+psycopg2://postgres:brewchemy@db:5432/brewchemy
-      BACKEND_URL: http://localhost:5000
-      FRONTEND_URL: http://localhost:3000
     ports:
-      - "5000:5000"
+      - "10000:10000"
+    volumes:
+      - ./backend/app:/app/app:rw
+    env_file:
+      - ./backend/.env.docker
 
   frontend:
     build: ./frontend

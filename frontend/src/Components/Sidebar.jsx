@@ -89,7 +89,7 @@ function Sidebar() {
       <nav className="menu">
         {menuItems}
       </nav>
-      <div className="version-info">v1.1.0-beta</div>
+      <div className="version-info">v1.2.0-beta</div>
     </div>
   );
 }

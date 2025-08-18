@@ -17,6 +17,14 @@ export default function NewEquipment() {
         <h1>Changelog</h1>
       </section>
       <div className="content">
+        <b>Aug 16, 2025 (v1.2.0)</b>
+        <br />
+        <br />
+        🚀 We’ve upgraded to a modern data communication layer, making the app faster and more responsive.
+        <br />
+        🔒 Authentication now follows the latest best-practice standards, ensuring stronger protection for your account.
+        <br />
+        <br />
         <b>Aug 08, 2025 (v1.1.0)</b>
         <br />
         <br />
