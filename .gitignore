@@ -3,12 +3,13 @@ venv/
 old_backend_flask/venv/
 old_backend_flask/.venv/
 /old_backend_flask/ssl
+/old_frontend_CRA/node_modules
+/old_frontend_CRA/ssl
 
 /frontend/node_modules
 /frontend/build
 /frontend/ssl
 
-/backend-fastapi/.venv
 __pycache__
 .env
 .env.docker
