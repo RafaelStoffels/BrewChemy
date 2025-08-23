@@ -1,0 +1,90 @@
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 150px;
+  background-color: #3c291fff;
+  color: #c4932bff;
+  overflow-x: hidden;
+  z-index: 1000;
+  box-shadow: 0 0px 100px rgba(0, 0, 0, 0.8);
+  padding-top: 20px;
+  transition: width 0.3s ease-in-out;
+  overflow-y: auto;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  border-top-right-radius: 8px;
+  border-bottom-right-radius: 8px;
+}
+
+.sidebar .menu ul {
+  list-style: none;
+  padding: 0;
+}
+
+.sidebar .menu ul li {
+  padding: 12px 15px;
+  cursor: pointer;
+  transition: background 0.3s ease-in-out;
+  padding: 12px 20px;
+}
+
+.sidebar .menu ul li a {
+  text-decoration: none;
+  color: #c4932bff;
+  font-size: 14px;
+  display: block;
+  transition: all 0.3s ease-in-out;
+}
+
+.sidebar .menu ul li:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.sidebar .menu ul li.active {
+  background-color: rgba(75, 67, 67, 0.4);
+  border-left: 2px solid #564d4d;
+}
+
+.submenu {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease-in-out;
+  padding-left: 15px;
+  background-color: rgba(8, 6, 0, 0.4);
+}
+
+.submenu.open {
+  max-height: 200px;
+}
+
+.submenu li a {
+  font-size: 14px;
+  padding: 0px 20px;
+  display: block;
+  color: #d4a91c;
+}
+
+.logout-button {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.version-info {
+  position: absolute;
+  bottom: 10px;
+  left: 0;
+  width: 100%;
+  font-size: 14px;
+  text-align: center;
+  color: #e69b29ff;
+  padding: 10px 0;
+  opacity: 0.8;
+}

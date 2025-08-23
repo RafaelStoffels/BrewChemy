@@ -26,7 +26,7 @@ export default function Logon() {
 
   const handleGoogleLoginRedirect = () => {
     // Vite: use import.meta.env.VITE_*
-    window.location.href = import.meta.env.VITE_GOOGLE_LOGIN_URL;
+    window.location.href = import.meta.env.VITE_GOOGLE_LOGIN_URL ;
   };
 
   useEffect(() => {
