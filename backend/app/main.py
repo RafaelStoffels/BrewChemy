@@ -10,6 +10,7 @@ from .routers import hops
 from .routers import misc
 from .routers import yeasts
 from .routers import recipes
+from .routers import openai
 
 app = FastAPI(title="Brewchemy API")
 
@@ -43,3 +44,4 @@ app.include_router(hops.router)
 app.include_router(misc.router)
 app.include_router(yeasts.router)
 app.include_router(recipes.router)
+app.include_router(openai.router)
