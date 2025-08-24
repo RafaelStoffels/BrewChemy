@@ -20,12 +20,11 @@ export default function Logon() {
     try {
       await loginUser(email, password, { login, navigate });
     } catch (err) {
-      // trate erros aqui (toast, msg, etc.)
+
     }
   };
 
   const handleGoogleLoginRedirect = () => {
-    // Vite: use import.meta.env.VITE_*
     window.location.href = import.meta.env.VITE_GOOGLE_LOGIN_URL ;
   };
 
@@ -42,8 +41,7 @@ export default function Logon() {
     };
 
     handleRedirectLogin();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // mantém comportamento do seu CRA
+  }, []);
 
   return (
     <div className="logon-container">
@@ -51,7 +49,7 @@ export default function Logon() {
         <object
           className="Brewchemy-object"
           type="image/svg+xml"
-          data="/logo.svg"            // em public/logo.svg
+          data="/logo.svg"
           aria-label="Logo da Brewchemy"
         >
           a
@@ -90,7 +88,7 @@ export default function Logon() {
               className="buttonGoogleLogIn"
               aria-label="Entrar com Google"
             >
-              <img src="/googleSignin.png" alt="Entrar com Google" /> {/* em public/googleSignin.png */}
+              <img src="/googleSignin.png" alt="Entrar com Google" />
             </button>
 
             <Link to="/ForgotPassword" style={{ marginTop: '30px' }}>

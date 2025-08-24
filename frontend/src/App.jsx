@@ -35,14 +35,12 @@ export default function App() {
     <AuthProvider>
       <SidebarProvider>
         <Routes>
-          {/* Sem layout */}
           <Route path="/" element={<Login />} />
           <Route path="/CreateAccount" element={<CreateAccount />} />
           <Route path="/EmailSent" element={<EmailSent />} />
           <Route path="/ForgotPassword" element={<ForgotPassword />} />
           <Route path="/ChangePassword" element={<ChangePassword />} />
-
-          {/* Com layout (precisa ter <Outlet/> dentro de Layout) */}
+          
           <Route element={<Layout />}>
             <Route path="/Changelog" element={<Changelog />} />
             <Route path="/Main" element={<Main />} />
