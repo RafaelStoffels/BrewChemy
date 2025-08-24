@@ -9,7 +9,7 @@ Livedemo: https://brewchemy-react.onrender.com/
 
 ## 🚀 Features
 
-- 🧾Ingredient management with full CRUD operations (malts, hops, yeasts, etc.)
+- 🧾 Ingredient management with full CRUD operations (malts, hops, yeasts, etc.)
 - 🔄 Real-time calculation of key beer parameters (e.g., IBU, ABV, OG)
 - 🎯 Style matching and visual feedback based on BJCP guidelines
 - 🧪 Dynamic interface for recipe editing
@@ -21,7 +21,6 @@ Livedemo: https://brewchemy-react.onrender.com/
 
 - Calculators: Carbonation, ABV/Attenuation
 - Add option for users to choose volume unit (liters, gallons, etc.)
-- Add option for users to choose weight unit (kilograms, pounds, etc.)
 - Structured mash process planning
 - Add fermentation monitoring tools
 
@@ -32,10 +31,12 @@ Livedemo: https://brewchemy-react.onrender.com/
 - [FastAPI](https://fastapi.tiangolo.com/)
 - [PostgreSQL](https://www.postgresql.org/)
 - [SQLAlchemy](https://www.sqlalchemy.org/)
-- [Flake8](https://flake8.pycqa.org/) – for enforcing Python code style and linting
+- [Ruff](https://docs.astral.sh/ruff/) – for linting
+- [Black](https://black.readthedocs.io/en/stable/) – for automatic code formatting
 
 **Frontend:**
 - [React](https://reactjs.org/)
+- [Vite](https://vitejs.dev/) – fast frontend build and development tool
 - [Axios](https://axios-http.com/) – for communication between frontend and backend
 - [React Hook Form](https://react-hook-form.com/) – for form handling and validation
 - [Yup](https://github.com/jquense/yup) – for schema-based form validation
@@ -60,30 +61,38 @@ docker-compose up --build
 ```bash
 | Variable                     | Description                              | Required | Default                                  |
 |------------------------------|------------------------------------------|----------|------------------------------------------|
+| `BACKEND_URL`                | Base URL for backend                     | Yes      | `https://localhost:10000`                |
+| `FRONTEND_URL`               | Base URL for frontend                    | Yes      | `https://localhost:5173`                 |
+| `DB_USER`                    | Database´s user                          | Yes      | `postgres`                               |
+| `DB_PASSWORD`                | Database´s password                      | Yes      | `brewchemy`                              |
+| `DB_HOST`                    | Database´s host                          | Yes      | `localhost`                              |
+| `DB_PORT`                    | Database´s port number                   | Yes      | `5433`                                   |
+| `DB_NAME`                    | Database´s name                          | Yes      | `brewchemy`                              |
+| `DATABASE_URL`               | Database URL                             | Yes      | `postgresql+psycopg2://postgres:brewchemy@localhost:5433/brewchemy`
+| `JWT_SECRET`                 |                                          | No       |                                          |
+| `JWT_ALG`                    |                                          | No       |                                          |
+| `CORS_ORIGINS`               |                                          | No       |                                          |
+| `GOOGLE_CLIENT_ID`           | Required if Google login is enabled      | No       | `your_client_id`                         |
+| `GOOGLE_CLIENT_SECRET`       | Required if Google login is enabled      | No       | `your_client_secret`                     |
+| `GOOGLE_REDIRECT_URI`        | Required if Google login is enabled      | No       | `GOOGLE_REDIRECT_URI`                    |
+| `GOOGLE_AUTH_URL`            | Required if Google login is enabled      | No       | `GOOGLE_AUTH_URL`                        |
+| `GOOGLE_TOKEN_URL`           | Required if Google login is enabled      | No       | `GOOGLE_TOKEN_URL`                       |
 | `MAIL_USERNAME`              | You can log in using your Google account | No       | `your_username`                          |
 | `MAIL_PASSWORD`              | You can log in using your Google account | No       | `your_password`                          |
 | `MAIL_SERVER`                | You can log in using your Google account | No       | `your_mail_server`                       |
 | `MAIL_PORT`                  | You can log in using your Google account | No       | `your_mail_port`                         |
-| `GOOGLE_CLIENT_ID`           | Required if Google login is enabled      | No       | `your_client_id`                         |
-| `GOOGLE_CLIENT_SECRET`       | Required if Google login is enabled      | No       | `your_client_secret`                     |
-| `ENVIRONMENT`                | Local or Production                      | Yes      | `local`                                  |
-| `BACKEND_URL`                | Base URL for backend                     | Yes      | `https://localhost:5000`                 |
-| `FRONTEND_URL`               | Base URL for frontend                    | Yes      | `https://localhost:3000`                 |
-| `DB_USER`                    | Database´s user                          | Yes      | `postgres_user`                          |
-| `DB_PASSWORD`                | Database´s password                      | Yes      | `postgres_password`                      |
-| `DB_HOST`                    | Database´s host                          | Yes      | `localhost`                              |
-| `DB_PORT`                    | Database´s port number                   | Yes      | `db_port_number`                         |
-| `DB_NAME`                    | Database´s name                          | Yes      | `brewchemy`                              |
+| `MAIL_DEFAULT_SENDER`        | You can log in using your Google account | No       | `your_username`                          |
+| `MAIL_USE_TLS       `        | You can log in using your Google account | No       | `true`                                   |
 | `OPENAI_API_KEY`             | openAI key to activate AI                | No       | `openAI_key`                             |
 ```
 
 ### Frontend
 
 ```bash
-| Variable                     | Description                     | Required | Default                                  |
-|------------------------------|---------------------------------|----------|------------------------------------------|
-| `REACT_APP_API_URL`          | Base URL for frontend API       | Yes      | `http://localhost:5000`                  |
-| `REACT_APP_GOOGLE_LOGIN_URL` | Variable for google login       | Yes      | `https://localhost:5000/api/google-login`|
+| Variable                     | Description                     | Required | Default                                   |
+|------------------------------|---------------------------------|----------|-------------------------------------------|
+| `VITE_API_URL`               | Base URL for frontend API       | Yes      | `http://localhost:10000`                  |
+| `VITE_GOOGLE_LOGIN_URL`      | Variable for google login       | Yes      | `https://localhost:10000/api/google-login`|
 ```
 
 ## 📁 Project Structure
@@ -91,11 +100,13 @@ docker-compose up --build
 ```bash
 BrewChemy/
 ├── backend/
-│   ├── main.py
-│   └── routers/
-│   └── schemas/
-│   └── scripts/
-│   └── utils/
+│   ├── migrations/
+│   └── app/
+│       ├── main.py
+│       ├── routers/
+│       ├── schemas/
+│       ├── scripts/
+│       └── utils/
 ├── frontend/
 │   ├── src/
 │   │   ├── Components/
@@ -150,15 +161,7 @@ This project follows [PEP 8](https://peps.python.org/pep-0008/) with the followi
 
 Recommended tools:
 
-- `flake8` with `max-line-length = 100`
 - `black` (optional, using default settings)
-
-Example configuration for `.flake8`:
-
-```ini
-[flake8]
-max-line-length = 90
-```
 
 ### Frontend
 

@@ -6,7 +6,7 @@ import { useParams } from 'react-router-dom';
 import { FiTrash2, FiEdit, FiRepeat } from 'react-icons/fi';
 import Swal from 'sweetalert2';
 import { usePopper } from 'react-popper';
-import { ReactComponent as BeerSVG } from '../../assets/beer.svg';
+import BeerSVG from '@/assets/beer.svg?react';
 
 // Context and hooks
 import AuthContext from '../../context/AuthContext';

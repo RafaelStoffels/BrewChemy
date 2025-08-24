@@ -17,6 +17,12 @@ export default function NewEquipment() {
         <h1>Changelog</h1>
       </section>
       <div className="content">
+        <b>Aug 23, 2025 (v1.3.0)</b>
+        <br />
+        <br />
+        ⚡ We’ve upgraded our front-end engine to a modern build system, making pages load faster and feel more responsive.
+        <br />
+        <br />
         <b>Aug 16, 2025 (v1.2.0)</b>
         <br />
         <br />
