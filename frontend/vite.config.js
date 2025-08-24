@@ -5,10 +5,21 @@ import svgr from 'vite-plugin-svgr';
 import path from 'path';
 
 export default defineConfig({
-  plugins: [react(), svgr()],
-  resolve: {
-    alias: {
-      '@': path.resolve(__dirname, 'src'),
-    },
-  },
+  plugins: [
+    react(),
+    svgr({
+      include: '**/*.svg?react',
+      svgrOptions: {
+        ref: true,
+        svgo: true,
+        svgoConfig: {
+          plugins: [
+            { name: 'prefixIds', params: { prefix: 'beer' } },
+            { name: 'removeUnknownsAndDefaults', active: false },
+          ],
+        },
+      },
+    }),
+  ],
+  resolve: { alias: { '@': path.resolve(__dirname, 'src') } },
 });
