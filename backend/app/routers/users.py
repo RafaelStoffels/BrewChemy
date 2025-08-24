@@ -144,13 +144,11 @@ def google_callback(request: Request, db: Session = Depends(get_db)):
 
     try:
         if not user:
-            temp_password = _generate_temp_password()
-
             user = User(
                 name=name or email.split("@")[0],
                 email=email,
                 google_id=google_id,
-                password_hash=hash_password(temp_password),  # Argon2
+                password_hash=None,  # Argon2
                 brewery=None,
                 status="active",
                 last_login=datetime.now(timezone.utc),
@@ -179,14 +177,6 @@ def google_callback(request: Request, db: Session = Depends(get_db)):
     return RedirectResponse(
         url=f"{settings.FRONTEND_URL}/?token={token}", status_code=302
     )
-
-
-def _generate_temp_password(length: int = 16) -> str:
-    import secrets
-    import string
-
-    alphabet = string.ascii_letters + string.digits
-    return "".join(secrets.choice(alphabet) for _ in range(length))
 
 
 @router.post("/login")

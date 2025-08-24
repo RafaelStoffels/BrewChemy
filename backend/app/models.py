@@ -40,7 +40,7 @@ class User(Base):
     email: Mapped[str] = mapped_column(
         String(100), unique=True, nullable=False, index=True
     )
-    password_hash: Mapped[str] = mapped_column(String(255), nullable=False)
+    password_hash: Mapped[str] = mapped_column(String(255), nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime, server_default=func.current_timestamp()
     )

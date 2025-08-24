@@ -23,7 +23,7 @@ services:
     ports:
       - "10000:10000"
     volumes:
-      - ./backend/app:/app/app:rw
+      - ./backend:/app:rw
     env_file:
       - ./backend/.env.docker
 
