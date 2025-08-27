@@ -7,53 +7,60 @@ import sys
 from sqlalchemy import engine_from_config, pool
 from alembic import context
 
-# --- garantir import do pacote app ---
 BASE_DIR = Path(__file__).resolve().parents[1]  # .../backend
 if str(BASE_DIR) not in sys.path:
     sys.path.append(str(BASE_DIR))
 
-# Logging do Alembic
 config = context.config
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-# --- importar Base e settings ---
-from app.models import Base                 # declarative_base com metadata
+from app.models import Base
 from app.config import settings as app_settings
 
-def build_sync_db_url() -> str:
-    """Monta a URL a partir do settings caso não tenha env explícito"""
-    url = getattr(app_settings, "DATABASE_URL", None)
+def normalize_scheme(url: str) -> str:
+    """Normaliza 'postgres://' -> 'postgresql://' para o SQLAlchemy."""
+    if url.startswith("postgres://"):
+        return url.replace("postgres://", "postgresql://", 1)
+    return url
+
+def to_sync_psycopg2(url: str) -> str:
+    """
+    Converte qualquer URL Postgres para driver síncrono psycopg2:
+    - postgresql+asyncpg://... -> postgresql+psycopg2://...
+    - postgresql://... (já é psycopg2 por padrão)
+    """
+    url = normalize_scheme(url)
+    if url.startswith("postgresql+asyncpg://"):
+        url = url.replace("postgresql+asyncpg://", "postgresql+psycopg2://", 1)
+    return url
+
+def build_sync_db_url_from_settings() -> str:
+    """Monta a URL a partir do settings caso não tenha env explícito."""
+    url = getattr(app_settings, "DATABASE_URL", None) or ""
     if url:
-        return url
+        return to_sync_psycopg2(url)
     user = app_settings.DB_USER
-    pwd = app_settings.DB_PASSWORD
+    pwd  = app_settings.DB_PASSWORD
     host = app_settings.DB_HOST
     port = app_settings.DB_PORT
     name = app_settings.DB_NAME
     return f"postgresql+psycopg2://{user}:{pwd}@{host}:{port}/{name}"
 
-def normalize_to_sync(url: str) -> str:
-    """Converte URL async para sync se necessário"""
-    if url.startswith("postgresql+asyncpg://"):
-        return url.replace("postgresql+asyncpg://", "postgresql+psycopg2://", 1)
-    return url
+def get_alembic_sync_url() -> str:
+    raw = os.getenv("DATABASE_URL")
+    if raw:
+        return to_sync_psycopg2(raw)
 
-# --- escolher URL síncrona para o Alembic ---
-env_sync = os.getenv("DATABASE_URL_SYNC")
-if env_sync:
-    DATABASE_URL = env_sync
-else:
-    env_any = os.getenv("DATABASE_URL")
-    if env_any:
-        DATABASE_URL = normalize_to_sync(env_any)
-    else:
-        DATABASE_URL = normalize_to_sync(build_sync_db_url())
+    raw_async = os.getenv("DATABASE_URL_SYNC")
+    if raw_async:
+        return to_sync_psycopg2(raw_async)
 
-# injeta a URL no Alembic
+    return build_sync_db_url_from_settings()
+
+DATABASE_URL = get_alembic_sync_url()
 config.set_main_option("sqlalchemy.url", DATABASE_URL)
 
-# Metadata para autogenerate
 target_metadata = Base.metadata
 
 def run_migrations_offline() -> None:
