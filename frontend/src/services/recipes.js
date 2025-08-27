@@ -34,7 +34,6 @@ export function searchRecipes(userToken, term, opts = {}) {
 }
 
 export function addRecipe(userToken, dataInput, opts = {}) {
-  console.log(dataInput);
   return request(
     api.post('/api/recipes', dataInput, withAuth(userToken)),
     { fallback: 'Error saving recipe', successMsg: 'Recipe saved successfully.', ...opts },

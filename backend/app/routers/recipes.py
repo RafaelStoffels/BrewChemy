@@ -2,7 +2,7 @@
 from typing import List, Set
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import select
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..database import get_db
 from ..models import (
@@ -24,51 +24,49 @@ def _to_out(r: Recipe) -> RecipeOut:
 
 
 @router.get("/search", response_model=List[RecipeOut])
-def search_recipes(
+async def search_recipes(
     searchTerm: str = Query(..., min_length=1),
     current_user_id: int = Depends(token_required),
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
 ):
     stmt = select(Recipe).where(
         Recipe.user_id == current_user_id,
         Recipe.name.ilike(f"%{searchTerm}%"),
     )
-    items = db.execute(stmt).scalars().all()
+    items = (await db.execute(stmt)).scalars().all()
     return [_to_out(i) for i in items]
 
 
 @router.get("", response_model=List[RecipeOut])
-def get_recipes(
+async def get_recipes(
     current_user_id: int = Depends(token_required),
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
 ):
-    items = (
-        db.execute(select(Recipe).where(Recipe.user_id == current_user_id))
-        .scalars()
-        .all()
-    )
+    items = (await db.execute(
+        select(Recipe).where(Recipe.user_id == current_user_id)
+    )).scalars().all()
     return [_to_out(i) for i in items]
 
 
 @router.get("/{id:int}", response_model=RecipeOut)
-def get_recipe(
+async def get_recipe(
     id: int,
     current_user_id: int = Depends(token_required),
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
 ):
-    item = db.execute(
+    item = (await db.execute(
         select(Recipe).where(Recipe.id == id, Recipe.user_id == current_user_id)
-    ).scalar_one_or_none()
+    )).scalar_one_or_none()
     if not item:
         raise HTTPException(status_code=404, detail="Recipe not found")
     return _to_out(item)
 
 
 @router.post("", status_code=status.HTTP_201_CREATED, response_model=RecipeOut)
-def add_recipe(
+async def add_recipe(
     payload: RecipeCreate,
     current_user_id: int = Depends(token_required),
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
 ):
     recipe = Recipe(
         user_id=current_user_id,
@@ -80,7 +78,7 @@ def add_recipe(
         type=payload.type,
     )
     db.add(recipe)
-    db.flush()
+    await db.flush()
 
     eq = payload.recipeEquipment
     if eq:
@@ -170,24 +168,25 @@ def add_recipe(
             )
         )
 
-    db.commit()
-    db.refresh(recipe)
+    await db.commit()
+    await db.refresh(recipe)
     return _to_out(recipe)
 
 
 @router.put("/{id:int}", response_model=RecipeOut)
-def update_recipe(
+async def update_recipe(
     id: int,
     payload: RecipeUpdate,
     current_user_id: int = Depends(token_required),
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
 ):
-    recipe = db.execute(
+    recipe = (await db.execute(
         select(Recipe).where(Recipe.id == id, Recipe.user_id == current_user_id)
-    ).scalar_one_or_none()
+    )).scalar_one_or_none()
     if not recipe:
         raise HTTPException(status_code=404, detail="Recipe not found")
 
+    # campos simples
     if payload.name is not None:
         recipe.name = payload.name
     if payload.style is not None:
@@ -201,11 +200,12 @@ def update_recipe(
     if payload.type is not None:
         recipe.type = payload.type
 
+    # equipment (0..1)
     eq = payload.recipeEquipment
     if eq:
-        existing_eq = db.execute(
+        existing_eq = (await db.execute(
             select(RecipeEquipment).where(RecipeEquipment.recipe_id == recipe.id)
-        ).scalar_one_or_none()
+        )).scalar_one_or_none()
         if existing_eq:
             existing_eq.name = eq.name
             existing_eq.description = eq.description
@@ -235,23 +235,21 @@ def update_recipe(
                 )
             )
 
-    sent_f_ids: Set[int] = set(
-        f.id for f in (payload.recipeFermentables or []) if f.id is not None
-    )
-    existing_f_by_id = {f.id: f for f in (recipe.recipe_fermentables or [])}
+    # ---------- Fermentables ----------
+    sent_f_ids: Set[int] = {f.id for f in (payload.recipeFermentables or []) if f.id is not None}
+    existing_fs = (await db.execute(
+        select(RecipeFermentable).where(RecipeFermentable.recipe_id == recipe.id)
+    )).scalars().all()
+    existing_f_by_id = {f.id: f for f in existing_fs if f.id is not None}
 
-    for f in payload.recipeFermentables or []:
+    for f in (payload.recipeFermentables or []):
         if f.id and f.id in existing_f_by_id:
             obj = existing_f_by_id[f.id]
             obj.name = f.name or obj.name
-            obj.description = (
-                f.description if f.description is not None else obj.description
-            )
+            obj.description = f.description if f.description is not None else obj.description
             obj.ebc = f.ebc if f.ebc is not None else obj.ebc
             obj.potential_extract = (
-                f.potentialExtract
-                if f.potentialExtract is not None
-                else obj.potential_extract
+                f.potentialExtract if f.potentialExtract is not None else obj.potential_extract
             )
             obj.type = f.type if f.type is not None else obj.type
             obj.supplier = f.supplier if f.supplier is not None else obj.supplier
@@ -275,41 +273,27 @@ def update_recipe(
 
     for fid, obj in list(existing_f_by_id.items()):
         if fid not in sent_f_ids:
-            db.delete(obj)
+            await db.delete(obj)
 
-    sent_h_ids: Set[int] = set(
-        h.id for h in (payload.recipeHops or []) if h.id is not None
-    )
-    existing_h_by_id = {h.id: h for h in (recipe.recipe_hops or [])}
+    # ---------- Hops ----------
+    sent_h_ids: Set[int] = {h.id for h in (payload.recipeHops or []) if h.id is not None}
+    existing_hs = (await db.execute(
+        select(RecipeHop).where(RecipeHop.recipe_id == recipe.id)
+    )).scalars().all()
+    existing_h_by_id = {h.id: h for h in existing_hs if h.id is not None}
 
-    for h in payload.recipeHops or []:
+    for h in (payload.recipeHops or []):
         if h.id and h.id in existing_h_by_id:
             obj = existing_h_by_id[h.id]
             obj.name = h.name or obj.name
-            obj.alpha_acid_content = (
-                h.alphaAcidContent
-                if h.alphaAcidContent is not None
-                else obj.alpha_acid_content
-            )
-            obj.beta_acid_content = (
-                h.betaAcidContent
-                if h.betaAcidContent is not None
-                else obj.beta_acid_content
-            )
+            obj.alpha_acid_content = h.alphaAcidContent if h.alphaAcidContent is not None else obj.alpha_acid_content
+            obj.beta_acid_content = h.betaAcidContent if h.betaAcidContent is not None else obj.beta_acid_content
             obj.use_type = h.useType if h.useType is not None else obj.use_type
-            obj.country_of_origin = (
-                h.countryOfOrigin
-                if h.countryOfOrigin is not None
-                else obj.country_of_origin
-            )
-            obj.description = (
-                h.description if h.description is not None else obj.description
-            )
+            obj.country_of_origin = h.countryOfOrigin if h.countryOfOrigin is not None else obj.country_of_origin
+            obj.description = h.description if h.description is not None else obj.description
             obj.quantity = h.quantity if h.quantity is not None else obj.quantity
             obj.boil_time = h.boilTime if h.boilTime is not None else obj.boil_time
-            obj.usage_stage = (
-                h.usageStage if h.usageStage is not None else obj.usage_stage
-            )
+            obj.usage_stage = h.usageStage if h.usageStage is not None else obj.usage_stage
         else:
             db.add(
                 RecipeHop(
@@ -329,20 +313,20 @@ def update_recipe(
 
     for hid, obj in list(existing_h_by_id.items()):
         if hid not in sent_h_ids:
-            db.delete(obj)
+            await db.delete(obj)
 
-    sent_m_ids: Set[int] = set(
-        m.id for m in (payload.recipeMisc or []) if m.id is not None
-    )
-    existing_m_by_id = {m.id: m for m in (recipe.recipe_misc or [])}
+    # ---------- Miscs ----------
+    sent_m_ids: Set[int] = {m.id for m in (payload.recipeMisc or []) if m.id is not None}
+    existing_ms = (await db.execute(
+        select(RecipeMisc).where(RecipeMisc.recipe_id == recipe.id)
+    )).scalars().all()
+    existing_m_by_id = {m.id: m for m in existing_ms if m.id is not None}
 
-    for m in payload.recipeMisc or []:
+    for m in (payload.recipeMisc or []):
         if m.id and m.id in existing_m_by_id:
             obj = existing_m_by_id[m.id]
             obj.name = m.name or obj.name
-            obj.description = (
-                m.description if m.description is not None else obj.description
-            )
+            obj.description = m.description if m.description is not None else obj.description
             obj.type = m.type if m.type is not None else obj.type
             obj.quantity = m.quantity if m.quantity is not None else obj.quantity
             obj.use = m.use if m.use is not None else obj.use
@@ -363,39 +347,27 @@ def update_recipe(
 
     for mid, obj in list(existing_m_by_id.items()):
         if mid not in sent_m_ids:
-            db.delete(obj)
+            await db.delete(obj)
 
-    sent_y_ids: Set[int] = set(
-        y.id for y in (payload.recipeYeasts or []) if y.id is not None
-    )
-    existing_y_by_id = {y.id: y for y in (recipe.recipe_yeasts or [])}
+    # ---------- Yeasts ----------
+    sent_y_ids: Set[int] = {y.id for y in (payload.recipeYeasts or []) if y.id is not None}
+    existing_ys = (await db.execute(
+        select(RecipeYeast).where(RecipeYeast.recipe_id == recipe.id)
+    )).scalars().all()
+    existing_y_by_id = {y.id: y for y in existing_ys if y.id is not None}
 
-    for y in payload.recipeYeasts or []:
+    for y in (payload.recipeYeasts or []):
         if y.id and y.id in existing_y_by_id:
             obj = existing_y_by_id[y.id]
             obj.name = y.name or obj.name
-            obj.manufacturer = (
-                y.manufacturer if y.manufacturer is not None else obj.manufacturer
-            )
+            obj.manufacturer = y.manufacturer if y.manufacturer is not None else obj.manufacturer
             obj.type = y.type if y.type is not None else obj.type
             obj.form = y.form if y.form is not None else obj.form
-            obj.attenuation = (
-                y.attenuation if y.attenuation is not None else obj.attenuation
-            )
-            obj.temperature_range = (
-                y.temperatureRange
-                if y.temperatureRange is not None
-                else obj.temperature_range
-            )
-            obj.flavor_profile = (
-                y.flavorProfile if y.flavorProfile is not None else obj.flavor_profile
-            )
-            obj.flocculation = (
-                y.flocculation if y.flocculation is not None else obj.flocculation
-            )
-            obj.description = (
-                y.description if y.description is not None else obj.description
-            )
+            obj.attenuation = y.attenuation if y.attenuation is not None else obj.attenuation
+            obj.temperature_range = y.temperatureRange if y.temperatureRange is not None else obj.temperature_range
+            obj.flavor_profile = y.flavorProfile if y.flavorProfile is not None else obj.flavor_profile
+            obj.flocculation = y.flocculation if y.flocculation is not None else obj.flocculation
+            obj.description = y.description if y.description is not None else obj.description
             obj.quantity = y.quantity if y.quantity is not None else obj.quantity
         else:
             db.add(
@@ -417,25 +389,25 @@ def update_recipe(
 
     for yid, obj in list(existing_y_by_id.items()):
         if yid not in sent_y_ids:
-            db.delete(obj)
+            await db.delete(obj)
 
-    db.commit()
-    db.refresh(recipe)
+    await db.commit()
+    await db.refresh(recipe)
     return _to_out(recipe)
 
 
 @router.delete("/{id:int}")
-def delete_recipe(
+async def delete_recipe(
     id: int,
     current_user_id: int = Depends(token_required),
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
 ):
-    recipe = db.execute(
+    recipe = (await db.execute(
         select(Recipe).where(Recipe.id == id, Recipe.user_id == current_user_id)
-    ).scalar_one_or_none()
+    )).scalar_one_or_none()
     if not recipe:
         raise HTTPException(status_code=404, detail="Recipe not found")
 
-    db.delete(recipe)
-    db.commit()
+    await db.delete(recipe)
+    await db.commit()
     return {"message": "Recipe deleted"}

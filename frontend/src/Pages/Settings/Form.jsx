@@ -13,8 +13,6 @@ export default function SettingsForm() {
   useAuthRedirect(user);
   const title = 'Settings';
 
-  console.log('AuthContext.user:', user);
-
   const {
     register,
     handleSubmit,

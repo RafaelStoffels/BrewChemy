@@ -1,26 +1,28 @@
 # app/routers/openai.py
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
+from sqlalchemy.ext.asyncio import AsyncSession
 from .users import token_required
-from openai import OpenAI
+
 import os
 from dotenv import load_dotenv
+from openai import AsyncOpenAI, APIConnectionError, APIStatusError
 
 router = APIRouter(prefix="/api/openAI", tags=["openAI"])
 
+load_dotenv()
 
 class RecipeMessage(BaseModel):
     message: str
 
-
-class ChatGPT:
+class ChatGPTAsync:
     def __init__(self, api_key: str | None):
-        self.client = OpenAI(api_key=api_key)
+        self.client = AsyncOpenAI(api_key=api_key)
 
-    def get_response(self, message: str) -> str:
+    async def get_response(self, message: str, model: str) -> str:
         try:
-            resp = self.client.chat.completions.create(
-                model="gpt-3.5-turbo",
+            resp = await self.client.chat.completions.create(
+                model=model,
                 messages=[
                     {
                         "role": "system",
@@ -30,23 +32,26 @@ class ChatGPT:
                 ],
             )
             return resp.choices[0].message.content or ""
+        except (APIConnectionError, APIStatusError) as e:
+            raise HTTPException(status_code=502, detail=f"OpenAI API error: {e}") from e
         except Exception as e:
-            return f"Error communicating with ChatGPT: {e}"
+            raise HTTPException(status_code=502, detail=f"Unexpected error calling OpenAI: {e}") from e
 
 
-@router.post("")  # POST /api/openAI
-def openai_endpoint(
+@router.post("")
+async def openai_endpoint(
     payload: RecipeMessage,
     current_user_id: int = Depends(token_required),
 ):
     if not payload.message:
         raise HTTPException(status_code=400, detail="No recipe provided")
 
-    load_dotenv()
     api_key = os.getenv("OPENAI_API_KEY")
     if not api_key:
         raise HTTPException(status_code=500, detail="OPENAI_API_KEY not configured")
 
-    chatgpt = ChatGPT(api_key=api_key)
-    chat_response = chatgpt.get_response(payload.message)
+    model = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
+
+    chatgpt = ChatGPTAsync(api_key=api_key)
+    chat_response = await chatgpt.get_response(payload.message, model=model)
     return {"response": chat_response}

@@ -3,14 +3,26 @@ import { showErrorToast, showSuccessToast } from './notifications';
 
 export function extractApiError(err, fallback = 'Unexpected error') {
   const status = err?.response?.status;
-  let message = fallback;
+  const data = err?.response?.data;
+  let message;
 
   if (status === 401) {
     message = 'Your session has expired. Please log in again.';
-  } else if (err?.response?.data?.message || err?.response?.data?.error) {
-    message = err.response.data.message || err.response.data.error;
-  } else if (err?.message) {
-    message = err.message;
+  } else if (data) {
+    if (typeof data.detail === 'string') {
+      message = data.detail;
+    } else if (Array.isArray(data.detail)) {
+      message = data.detail
+        .map((e) => e?.msg || (typeof e === 'string' ? e : ''))
+        .filter(Boolean)
+        .join('\n');
+    } else if (data.message || data.error) {
+      message = data.message || data.error;
+    }
+  }
+
+  if (!message) {
+    message = err?.message || fallback;
   }
 
   return { message, status };
@@ -24,7 +36,6 @@ export async function request(promise, { showToast = true, successMsg, fallback 
   } catch (err) {
     const { message, status } = extractApiError(err, fallback);
     if (showToast) showErrorToast(message);
-
     throw Object.assign(new Error(message), { status, cause: err });
   }
 }

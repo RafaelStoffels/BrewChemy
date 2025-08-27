@@ -1,4 +1,3 @@
-# alembic/env.py
 from __future__ import annotations
 from logging.config import fileConfig
 from pathlib import Path
@@ -19,38 +18,46 @@ if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
 # --- importar Base e settings ---
-from app.models import Base                 # <<< seu declarative_base
+from app.models import Base                 # declarative_base com metadata
 from app.config import settings as app_settings
 
 def build_sync_db_url() -> str:
-    # 1) se veio pronta no .env, usa
-    url = app_settings.DATABASE_URL
+    """Monta a URL a partir do settings caso não tenha env explícito"""
+    url = getattr(app_settings, "DATABASE_URL", None)
     if url:
-        # Se for async, converte para sync para o Alembic
-        if url.startswith("postgresql+asyncpg://"):
-            url = url.replace("postgresql+asyncpg://", "postgresql+psycopg2://", 1)
         return url
-
-    # 2) montar a partir de DB_* (do seu config.py)
     user = app_settings.DB_USER
-    pwd  = app_settings.DB_PASSWORD
+    pwd = app_settings.DB_PASSWORD
     host = app_settings.DB_HOST
     port = app_settings.DB_PORT
     name = app_settings.DB_NAME
     return f"postgresql+psycopg2://{user}:{pwd}@{host}:{port}/{name}"
 
-DATABASE_URL = build_sync_db_url()
+def normalize_to_sync(url: str) -> str:
+    """Converte URL async para sync se necessário"""
+    if url.startswith("postgresql+asyncpg://"):
+        return url.replace("postgresql+asyncpg://", "postgresql+psycopg2://", 1)
+    return url
 
-# fallback por env (opcional)
-DATABASE_URL = os.getenv("DATABASE_URL", DATABASE_URL)
+# --- escolher URL síncrona para o Alembic ---
+env_sync = os.getenv("DATABASE_URL_SYNC")
+if env_sync:
+    DATABASE_URL = env_sync
+else:
+    env_any = os.getenv("DATABASE_URL")
+    if env_any:
+        DATABASE_URL = normalize_to_sync(env_any)
+    else:
+        DATABASE_URL = normalize_to_sync(build_sync_db_url())
 
 # injeta a URL no Alembic
 config.set_main_option("sqlalchemy.url", DATABASE_URL)
 
-# MUITO IMPORTANTE: metadata para autogenerate
+# Metadata para autogenerate
 target_metadata = Base.metadata
 
 def run_migrations_offline() -> None:
+    """Run migrations in 'offline' mode."""
     url = config.get_main_option("sqlalchemy.url")
     context.configure(
         url=url,
@@ -64,6 +71,7 @@ def run_migrations_offline() -> None:
         context.run_migrations()
 
 def run_migrations_online() -> None:
+    """Run migrations in 'online' mode."""
     connectable = engine_from_config(
         config.get_section(config.config_ini_section, {}),
         prefix="sqlalchemy.",

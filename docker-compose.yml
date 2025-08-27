@@ -6,7 +6,7 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: brewchemy
     ports:
-      - "5433:5432"   # host 5433 -> container 5432
+      - "5433:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
 
@@ -14,7 +14,9 @@ services:
     build: ./backend
     command: uvicorn app.main:app --host 0.0.0.0 --port 10000 --reload --reload-dir /app/app
     environment:
-      DATABASE_URL: postgresql+psycopg2://postgres:brewchemy@db:5432/brewchemy
+      # >>> AQUI: async driver <<<
+      DATABASE_URL: postgresql+asyncpg://postgres:brewchemy@db:5432/brewchemy
+      DATABASE_URL_SYNC: postgresql+psycopg2://postgres:brewchemy@db:5432/brewchemy
       CORS_ORIGINS: http://localhost:3000,http://localhost:5173
       OAUTHLIB_INSECURE_TRANSPORT: "1"
       OAUTHLIB_RELAX_TOKEN_SCOPE: "1"
