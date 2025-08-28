@@ -1,5 +1,5 @@
 # app/routers/users.py
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timedelta
 import random
 import smtplib
 from email.message import EmailMessage
@@ -198,7 +198,7 @@ async def login(payload: LoginIn, db: AsyncSession = Depends(get_db)):
     ):
         raise HTTPException(status_code=401, detail="Invalid credentials")
 
-    user.last_login = datetime.now(timezone.utc)
+    user.last_login = datetime.utcnow()
     await db.commit()
 
     token = make_access_token(user.user_id)
@@ -441,7 +441,7 @@ async def send_password_reset_email(
         raise HTTPException(status_code=404, detail="User not found")
 
     try:
-        now = datetime.now(timezone.utc)
+        now = datetime.utcnow()
         token = jwt.encode(
             {
                 "sub": email,
