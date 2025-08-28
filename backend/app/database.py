@@ -25,7 +25,10 @@ ASYNC_DATABASE_URL = to_async_url(settings.DATABASE_URL)
 engine = create_async_engine(
     ASYNC_DATABASE_URL,
     pool_pre_ping=True,
-    connect_args={"statement_cache_size": 0},
+    connect_args={
+        "statement_cache_size": 0,
+        "prepared_statement_name_func": lambda: f"__asyncpg_{uuid4()}__",
+    },
 )
 
 _session_factory = async_sessionmaker(
