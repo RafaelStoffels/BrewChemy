@@ -6,6 +6,8 @@ from sqlalchemy.ext.asyncio import (
     create_async_engine,
     async_scoped_session,
 )
+from sqlalchemy.pool import NullPool
+from uuid import uuid4
 
 from .config import settings
 
@@ -24,6 +26,7 @@ ASYNC_DATABASE_URL = to_async_url(settings.DATABASE_URL)
 
 engine = create_async_engine(
     ASYNC_DATABASE_URL,
+    poolclass=NullPool,
     pool_pre_ping=True,
     connect_args={
         "statement_cache_size": 0,
