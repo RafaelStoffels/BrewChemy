@@ -1,5 +1,5 @@
 # app/routers/users.py
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timedelta
 import random
 import smtplib
 from email.message import EmailMessage
@@ -18,8 +18,9 @@ from fastapi.responses import JSONResponse, RedirectResponse
 from jose import jwt, JWTError, ExpiredSignatureError
 from pydantic import BaseModel, EmailStr, Field, AliasChoices
 from sqlalchemy import select
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 from requests_oauthlib import OAuth2Session
+from starlette.concurrency import run_in_threadpool
 
 from ..config import settings
 from ..database import get_db
@@ -27,6 +28,9 @@ from ..models import User
 from ..schemas.users import CreateUserIn, LoginIn, UserOut
 from ..security import verify_password, hash_password
 from ..utils.jwt import make_access_token
+
+import logging
+logger = logging.getLogger("brewchemy")
 
 router = APIRouter(prefix="/api/users", tags=["users"])
 
@@ -70,11 +74,11 @@ class MeOut(BaseModel):
         from_attributes = True
 
 
-def get_current_user(
+async def get_current_user(
     user_id: int = Depends(token_required),
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
 ) -> User:
-    user = db.get(User, user_id)
+    user = await db.get(User, user_id)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     if getattr(user, "status", "active") != "active":
@@ -101,7 +105,7 @@ def google_login(request: Request):
 
 
 @router.get("/google/callback")
-def google_callback(request: Request, db: Session = Depends(get_db)):
+async def google_callback(request: Request, db: AsyncSession = Depends(get_db)):
     state = request.query_params.get("state")
     saved_state = request.session.get("oauth_state")
     if not state or not saved_state or state != saved_state:
@@ -114,7 +118,9 @@ def google_callback(request: Request, db: Session = Depends(get_db)):
     )
 
     try:
-        token = google.fetch_token(
+        # fetch_token é bloqueante -> threadpool
+        token = await run_in_threadpool(
+            google.fetch_token,
             settings.GOOGLE_TOKEN_URL,
             client_secret=settings.GOOGLE_CLIENT_SECRET,
             authorization_response=str(request.url),
@@ -125,7 +131,10 @@ def google_callback(request: Request, db: Session = Depends(get_db)):
     request.session["oauth_token"] = token
 
     try:
-        user_info = google.get("https://www.googleapis.com/oauth2/v3/userinfo").json()
+        # chamada HTTP bloqueante -> threadpool
+        user_info = await run_in_threadpool(
+            lambda: google.get("https://www.googleapis.com/oauth2/v3/userinfo").json()
+        )
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Failed to fetch userinfo: {e}")
 
@@ -136,11 +145,8 @@ def google_callback(request: Request, db: Session = Depends(get_db)):
     if not google_id or not email:
         raise HTTPException(status_code=400, detail="Missing Google user data")
 
-    user = (
-        db.query(User)
-        .filter((User.email == email) | (User.google_id == google_id))
-        .first()
-    )
+    stmt = select(User).where((User.email == email) | (User.google_id == google_id))
+    user = (await db.execute(stmt)).scalar_one_or_none()
 
     try:
         if not user:
@@ -151,12 +157,12 @@ def google_callback(request: Request, db: Session = Depends(get_db)):
                 password_hash=None,  # Argon2
                 brewery=None,
                 status="active",
-                last_login=datetime.now(timezone.utc),
+                last_login=datetime.utcnow(),
             )
 
             db.add(user)
-            db.commit()
-            db.refresh(user)
+            await db.commit()
+            await db.refresh(user)
 
         else:
             if getattr(user, "status", "active") == "pending":
@@ -165,11 +171,11 @@ def google_callback(request: Request, db: Session = Depends(get_db)):
             if not getattr(user, "google_id", None):
                 user.google_id = google_id
 
-            user.last_login = datetime.now(timezone.utc)
-            db.commit()
+            user.last_login = datetime.utcnow()
+            await db.commit()
 
     except Exception:
-        db.rollback()
+        await db.rollback()
         raise
 
     token = make_access_token(user.user_id)
@@ -180,13 +186,13 @@ def google_callback(request: Request, db: Session = Depends(get_db)):
 
 
 @router.post("/login")
-def login(payload: LoginIn, db: Session = Depends(get_db)):
+async def login(payload: LoginIn, db: AsyncSession = Depends(get_db)):
     if not payload.email or not payload.password:
         raise HTTPException(status_code=400, detail="Email and password are required")
 
-    user = db.execute(
+    user = (await db.execute(
         select(User).where(User.email == payload.email)
-    ).scalar_one_or_none()
+    )).scalar_one_or_none()
 
     if (
         not user
@@ -195,8 +201,8 @@ def login(payload: LoginIn, db: Session = Depends(get_db)):
     ):
         raise HTTPException(status_code=401, detail="Invalid credentials")
 
-    user.last_login = datetime.now(timezone.utc)
-    db.commit()
+    user.last_login = datetime.utcnow()
+    await db.commit()
 
     token = make_access_token(user.user_id)
     return {"token": token}
@@ -213,10 +219,12 @@ def get_user_me(current_user: User = Depends(get_current_user)):
 
 
 @router.post("", status_code=status.HTTP_201_CREATED, response_model=UserOut)
-def create_user(
-    payload: CreateUserIn, background: BackgroundTasks, db: Session = Depends(get_db)
+async def create_user(
+    payload: CreateUserIn, background: BackgroundTasks, db: AsyncSession = Depends(get_db)
 ):
-    existing_user = db.query(User).filter(User.email == payload.email).first()
+    existing_user = (await db.execute(
+        select(User).where(User.email == payload.email)
+    )).scalar_one_or_none()
     if existing_user:
         raise HTTPException(status_code=400, detail="Email already registered.")
 
@@ -232,12 +240,12 @@ def create_user(
     )
 
     db.add(new_user)
-    db.commit()
-    db.refresh(new_user)
+    await db.commit()
+    await db.refresh(new_user)
 
     background.add_task(send_confirmation_email, new_user)
 
-    return UserOut.from_orm(new_user)
+    return UserOut.model_validate(new_user)
 
 
 class UpdateUserIn(BaseModel):
@@ -252,8 +260,8 @@ class UpdateUserIn(BaseModel):
 
 
 @router.put("/{user_id}", response_model=UserOut)
-def update_user(user_id: int, payload: UpdateUserIn, db: Session = Depends(get_db)):
-    user: User | None = db.query(User).get(user_id)
+async def update_user(user_id: int, payload: UpdateUserIn, db: AsyncSession = Depends(get_db)):
+    user: User | None = await db.get(User, user_id)
     if user is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
@@ -272,21 +280,21 @@ def update_user(user_id: int, payload: UpdateUserIn, db: Session = Depends(get_d
     if payload.weight_unit is not None:
         user.weight_unit = payload.weight_unit
 
-    db.commit()
-    db.refresh(user)
-    return user
+    await db.commit()
+    await db.refresh(user)
+    return UserOut.model_validate(user)
 
 
 @router.delete("/{user_id}", status_code=status.HTTP_200_OK)
-def delete_user(user_id: int, db: Session = Depends(get_db)):
-    user: User | None = db.query(User).get(user_id)
+async def delete_user(user_id: int, db: AsyncSession = Depends(get_db)):
+    user: User | None = await db.get(User, user_id)
     if user is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
         )
 
-    db.delete(user)
-    db.commit()
+    await db.delete(user)
+    await db.commit()
     return {"message": f"User {user_id} deleted successfully"}
 
 
@@ -351,11 +359,13 @@ def send_confirmation_email(user) -> bool:
 
 
 @router.get("/confirm")
-def confirm_user(
+async def confirm_user(
     email: EmailStr = Query(..., description="E-mail de confirmação"),
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
 ):
-    user = db.query(User).filter(User.email == email).first()
+    user = (await db.execute(
+        select(User).where(User.email == email)
+    )).scalar_one_or_none()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
 
@@ -366,7 +376,7 @@ def confirm_user(
         )
 
     user.status = "active"
-    db.commit()
+    await db.commit()
 
     return RedirectResponse(
         url=settings.FRONTEND_URL, status_code=status.HTTP_302_FOUND
@@ -379,7 +389,7 @@ class ChangePasswordIn(BaseModel):
 
 
 @router.post("/changePassword")
-def change_password(payload: ChangePasswordIn, db: Session = Depends(get_db)):
+async def change_password(payload: ChangePasswordIn, db: AsyncSession = Depends(get_db)):
     if not payload.token:
         print("Token is required")
         raise HTTPException(status_code=400, detail="Token is required")
@@ -397,12 +407,14 @@ def change_password(payload: ChangePasswordIn, db: Session = Depends(get_db)):
             print("Invalid token")
             raise HTTPException(status_code=400, detail="Invalid token")
 
-        user = db.query(User).filter(User.email == email).first()
+        user = (await db.execute(
+            select(User).where(User.email == email)
+        )).scalar_one_or_none()
         if not user:
             raise HTTPException(status_code=404, detail="User not found")
 
         user.password_hash = hash_password(payload.password)
-        db.commit()
+        await db.commit()
         return {"message": "Password changed successfully"}
 
     except ExpiredSignatureError:
@@ -418,19 +430,21 @@ class PasswordResetRequest(BaseModel):
 
 
 @router.post("/sendPasswordResetEmail")
-def send_password_reset_email(
+async def send_password_reset_email(
     payload: PasswordResetRequest,
     background: BackgroundTasks,
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
 ):
     email = payload.email
 
-    user = db.query(User).filter(User.email == email).first()
+    user = (await db.execute(
+        select(User).where(User.email == email)
+    )).scalar_one_or_none()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
 
     try:
-        now = datetime.now(timezone.utc)
+        now = datetime.utcnow()
         token = jwt.encode(
             {
                 "sub": email,

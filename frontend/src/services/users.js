@@ -17,33 +17,24 @@ export function updateUser(userToken, userId, dataInput, opts = {}) {
 }
 
 export async function loginUser(email, password, { login, navigate, ...opts }) {
-  console.log('inicio');
   try {
-    // request() retorna response.data
     const data = await request(
       api.post('/api/users/login', { email, password }),
-      { showToast: false, ...opts },
+      { ...opts },
     );
-    console.log('[loginUser] data de /login:', data);
 
     const token = data?.token ?? data?.access_token;
-    if (!token) throw new Error('Token ausente na resposta de /login');
+    if (!token) throw new Error('No token - response /login');
 
-    console.log('[loginUser] chamando me()…');
     const userInfo = await me(token, { showToast: false });
-    console.log('[loginUser] me() OK:', userInfo);
 
     const fullUser = { ...userInfo, token };
-    console.log('[loginUser] chamando login(fullUser)…');
     login(fullUser);
 
-    console.log('[loginUser] chamando navigate…');
     navigate('/RecipeList', { replace: true });
 
-    console.log('[loginUser] fim');
   } catch (err) {
     console.error('[loginUser] erro:', err);
-    // se quiser, toast aqui
   }
 }
 

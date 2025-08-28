@@ -1,23 +1,52 @@
 # app/database.py
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, scoped_session
+import asyncio
+from sqlalchemy.ext.asyncio import (
+    AsyncSession,
+    async_sessionmaker,
+    create_async_engine,
+    async_scoped_session,
+)
+from sqlalchemy.pool import NullPool
+from uuid import uuid4
 
 from .config import settings
 
-engine = create_engine(
-    settings.DATABASE_URL,
+
+def to_async_url(url: str) -> str:
+    if url.startswith("postgres://"):
+        url = url.replace("postgres://", "postgresql://", 1)
+    if "+asyncpg" not in url:
+        url = url.replace("postgresql+psycopg2", "postgresql+asyncpg").replace(
+            "postgresql://", "postgresql+asyncpg://"
+        )
+    return url
+
+
+ASYNC_DATABASE_URL = to_async_url(settings.DATABASE_URL)
+
+engine = create_async_engine(
+    ASYNC_DATABASE_URL,
+    poolclass=NullPool,
     pool_pre_ping=True,
-    future=True,
+    connect_args={
+        "statement_cache_size": 0,
+        "prepared_statement_name_func": lambda: f"__asyncpg_{uuid4()}__",
+    },
 )
 
-SessionLocal = scoped_session(
-    sessionmaker(bind=engine, autocommit=False, autoflush=False, expire_on_commit=False)
+_session_factory = async_sessionmaker(
+    bind=engine,
+    class_=AsyncSession,
+    autoflush=False,
+    expire_on_commit=False,
 )
 
+SessionLocal = async_scoped_session(_session_factory, scopefunc=asyncio.current_task)
 
-def get_db():
-    db = SessionLocal()
+
+async def get_db() -> AsyncSession:
+    db: AsyncSession = SessionLocal()
     try:
         yield db
     finally:
-        db.close()
+        await db.close()

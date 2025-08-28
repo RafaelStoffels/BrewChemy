@@ -3,7 +3,7 @@ from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import select, or_, and_, not_
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..database import get_db
 from ..models import Fermentable
@@ -18,10 +18,10 @@ def _to_out(x: Fermentable) -> FermentableOut:
 
 
 @router.get("/search", response_model=List[FermentableOut])
-def search_fermentables(
+async def search_fermentables(
     searchTerm: str = Query(..., min_length=1),
     current_user_id: int = Depends(token_required),
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
 ):
     subq = (
         select(Fermentable.official_id)
@@ -31,7 +31,7 @@ def search_fermentables(
         )
         .distinct()
     )
-    sub_ids = [row[0] for row in db.execute(subq).all()]
+    sub_ids = (await db.execute(subq)).scalars().all()
 
     stmt = (
         select(Fermentable)
@@ -49,14 +49,14 @@ def search_fermentables(
         )
         .limit(12)
     )
-    items = db.execute(stmt).scalars().all()
+    items = (await db.execute(stmt)).scalars().all()
     return [_to_out(i) for i in items]
 
 
 @router.get("", response_model=List[FermentableOut])
-def get_fermentables(
+async def get_fermentables(
     current_user_id: int = Depends(token_required),
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
 ):
     subq = (
         select(Fermentable.official_id)
@@ -66,7 +66,7 @@ def get_fermentables(
         )
         .distinct()
     )
-    sub_ids = [row[0] for row in db.execute(subq).all()]
+    sub_ids = (await db.execute(subq)).scalars().all()
 
     stmt = (
         select(Fermentable)
@@ -81,31 +81,31 @@ def get_fermentables(
         )
         .limit(12)
     )
-    items = db.execute(stmt).scalars().all()
+    items = (await db.execute(stmt)).scalars().all()
     return [_to_out(i) for i in items]
 
 
 @router.get("/{itemUserId:int}/{id:int}", response_model=FermentableOut)
-def get_fermentable(
+async def get_fermentable(
     itemUserId: int,
     id: int,
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
 ):
     stmt = select(Fermentable).where(
         Fermentable.id == id,
         Fermentable.user_id == itemUserId,
     )
-    item = db.execute(stmt).scalar_one_or_none()
+    item = (await db.execute(stmt)).scalar_one_or_none()
     if not item:
         raise HTTPException(status_code=404, detail="Fermentable not found")
     return _to_out(item)
 
 
 @router.post("", status_code=status.HTTP_201_CREATED, response_model=FermentableOut)
-def add_fermentable(
+async def add_fermentable(
     payload: FermentableCreate,
     current_user_id: int = Depends(token_required),
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
 ):
     data = payload.model_dump(by_alias=False)
 
@@ -117,26 +117,26 @@ def add_fermentable(
         **data,
     )
     db.add(new_item)
-    db.commit()
-    db.refresh(new_item)
+    await db.commit()
+    await db.refresh(new_item)
     return _to_out(new_item)
 
 
 @router.put("/{id:int}", response_model=FermentableOut)
-def update_fermentable(
+async def update_fermentable(
     id: int,
     payload: FermentableUpdate,
     current_user_id: int = Depends(token_required),
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
 ):
     itemUserId = payload.itemUserId
     data = payload.model_dump(exclude_unset=True, by_alias=False)
     data.pop("itemUserId", None)
 
     if itemUserId != current_user_id:
-        official = db.execute(
+        official = (await db.execute(
             select(Fermentable).where(Fermentable.id == id, Fermentable.user_id == 1)
-        ).scalar_one_or_none()
+        )).scalar_one_or_none()
         if not official:
             raise HTTPException(
                 status_code=404, detail="Official fermentable not found"
@@ -156,44 +156,44 @@ def update_fermentable(
             setattr(new_item, field, value)
 
         db.add(new_item)
-        db.commit()
-        db.refresh(new_item)
+        await db.commit()
+        await db.refresh(new_item)
         return _to_out(new_item)
 
-    item = db.execute(
+    item = (await db.execute(
         select(Fermentable).where(
             Fermentable.id == id, Fermentable.user_id == current_user_id
         )
-    ).scalar_one_or_none()
+    )).scalar_one_or_none()
     if not item:
         raise HTTPException(status_code=404, detail="Fermentable not found")
 
     for field, value in data.items():
         setattr(item, field, value)
 
-    db.commit()
-    db.refresh(item)
+    await db.commit()
+    await db.refresh(item)
     return _to_out(item)
 
 
 @router.delete("/{itemUserId:int}/{id:int}")
-def delete_fermentable(
+async def delete_fermentable(
     itemUserId: int,
     id: int,
     current_user_id: int = Depends(token_required),
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
 ):
     if itemUserId != current_user_id:
         raise HTTPException(status_code=404, detail="Cannot delete official record")
 
-    item = db.execute(
+    item = (await db.execute(
         select(Fermentable).where(
             Fermentable.id == id, Fermentable.user_id == current_user_id
         )
-    ).scalar_one_or_none()
+    )).scalar_one_or_none()
     if not item:
         raise HTTPException(status_code=404, detail="Fermentable not found")
 
-    db.delete(item)
-    db.commit()
+    await db.delete(item)
+    await db.commit()
     return {"message": f"Fermentable with ID {id} was successfully deleted"}

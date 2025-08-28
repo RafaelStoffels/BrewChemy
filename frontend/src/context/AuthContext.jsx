@@ -14,7 +14,6 @@ const AuthContext = createContext({
 });
 
 export function AuthProvider({ children }) {
-  // Lazy init: carrega do localStorage na montagem
   const [user, setUser] = useState(() => {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
@@ -24,7 +23,6 @@ export function AuthProvider({ children }) {
     }
   });
 
-  // Sincroniza storage sempre que user mudar (cobre uso de setUser externo)
   useEffect(() => {
     if (user) localStorage.setItem(STORAGE_KEY, JSON.stringify(user));
     else localStorage.removeItem(STORAGE_KEY);
@@ -50,7 +48,7 @@ export function AuthProvider({ children }) {
       login,
       logout,
       updateUserLocal,
-      setUser, // mantenha se o app já usa diretamente
+      setUser,
     }),
     [user, login, logout, updateUserLocal]
   );
@@ -60,5 +58,4 @@ export function AuthProvider({ children }) {
 
 export default AuthContext;
 
-// Helper opcional
 export const useAuth = () => useContext(AuthContext);
