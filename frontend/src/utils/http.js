@@ -6,9 +6,7 @@ export function extractApiError(err, fallback = 'Unexpected error') {
   const data = err?.response?.data;
   let message;
 
-  if (status === 401) {
-    message = 'Your session has expired. Please log in again.';
-  } else if (data) {
+  if (data) {
     if (typeof data.detail === 'string') {
       message = data.detail;
     } else if (Array.isArray(data.detail)) {

@@ -16,9 +16,6 @@ services:
       dockerfile: Dockerfile
     command: uvicorn app.main:app --host 0.0.0.0 --port 10000 --reload --reload-dir /app/app
     environment:
-      DATABASE_URL: postgresql+asyncpg://postgres:brewchemy@db:5432/brewchemy
-      DATABASE_URL_SYNC: postgresql+psycopg2://postgres:brewchemy@db:5432/brewchemy
-      CORS_ORIGINS: http://localhost:3000,http://localhost:5173
       OAUTHLIB_INSECURE_TRANSPORT: "1"
       OAUTHLIB_RELAX_TOKEN_SCOPE: "1"
     depends_on:

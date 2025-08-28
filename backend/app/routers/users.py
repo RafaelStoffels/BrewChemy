@@ -29,6 +29,9 @@ from ..schemas.users import CreateUserIn, LoginIn, UserOut
 from ..security import verify_password, hash_password
 from ..utils.jwt import make_access_token
 
+import logging
+logger = logging.getLogger("brewchemy")
+
 router = APIRouter(prefix="/api/users", tags=["users"])
 
 

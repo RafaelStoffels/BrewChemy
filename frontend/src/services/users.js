@@ -20,11 +20,11 @@ export async function loginUser(email, password, { login, navigate, ...opts }) {
   try {
     const data = await request(
       api.post('/api/users/login', { email, password }),
-      { showToast: false, ...opts },
+      { ...opts },
     );
 
     const token = data?.token ?? data?.access_token;
-    if (!token) throw new Error('Token ausente na resposta de /login');
+    if (!token) throw new Error('No token - response /login');
 
     const userInfo = await me(token, { showToast: false });
 
