@@ -30,7 +30,7 @@ async def run_async():
             email=ADMIN_EMAIL,
             password_hash=password_hash,
             brewery="",
-            created_at=datetime.now(timezone.utc),
+            created_at=datetime.utcnow(),
             last_login=None,
             is_active=True,
             google_id=None,

@@ -11,10 +11,11 @@ services:
       - pgdata:/var/lib/postgresql/data
 
   backend:
-    build: ./backend
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
     command: uvicorn app.main:app --host 0.0.0.0 --port 10000 --reload --reload-dir /app/app
     environment:
-      # >>> AQUI: async driver <<<
       DATABASE_URL: postgresql+asyncpg://postgres:brewchemy@db:5432/brewchemy
       DATABASE_URL_SYNC: postgresql+psycopg2://postgres:brewchemy@db:5432/brewchemy
       CORS_ORIGINS: http://localhost:3000,http://localhost:5173
@@ -30,7 +31,9 @@ services:
       - ./backend/.env.docker
 
   frontend:
-    build: ./frontend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
     command: npm start
     ports:
       - "3000:3000"
