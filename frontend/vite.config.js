@@ -2,11 +2,13 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import svgr from 'vite-plugin-svgr';
+import tailwind from '@tailwindcss/vite'
 import path from 'path';
 
 export default defineConfig({
   plugins: [
     react(),
+    tailwind(),
     svgr({
       include: '**/*.svg?react',
       svgrOptions: {

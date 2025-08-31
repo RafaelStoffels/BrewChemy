@@ -5,6 +5,7 @@ import { FiLogIn } from 'react-icons/fi';
 
 import { me, loginUser } from '../../services/users';
 import AuthContext from '../../context/AuthContext';
+import { Spinner } from '../../Components/Spinner';
 
 import './Login.css';
 
@@ -14,13 +15,17 @@ export default function Logon() {
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (loading) return;
+    setLoading(true);
     try {
       await loginUser(email, password, { login, navigate });
     } catch (err) {
-
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -78,8 +83,20 @@ export default function Logon() {
               />
             </label>
 
-            <button className="buttonLogin" type="submit">
-              Login <FiLogIn size={16} color="#fff" />
+            <button
+              className="buttonLogin flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+              type="submit"
+              disabled={loading}
+            >
+              {loading ? (
+                <>
+                  <Spinner size={16} light /> Logging in…
+                </>
+              ) : (
+                <>
+                  Login <FiLogIn size={16} color="#fff" />
+                </>
+              )}
             </button>
 
             <button

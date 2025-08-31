@@ -1,6 +1,8 @@
 /* ======================================
    Fonts and Global Reset
 ====================================== */
+@import "tailwindcss";
+
 * {
     margin: 0;
     padding: 0;
