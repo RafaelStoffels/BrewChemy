@@ -6,6 +6,7 @@ import schema from './schema';
 
 import useAuthRedirect from '../../../hooks/useAuthRedirect';
 import useFormMode from '../../../hooks/useFormMode';
+import { LoadingButton } from '@/Components/LoadingButton';
 
 import { fetchMiscById, updateMisc, addMisc } from '../../../services/misc';
 import { showErrorToast } from '../../../utils/notifications';
@@ -25,6 +26,7 @@ export default function NewMisc() {
   const {
     register,
     handleSubmit,
+    formState: { isSubmitting },
     reset,
   } = useForm({
     resolver: yupResolver(schema),
@@ -136,9 +138,15 @@ export default function NewMisc() {
           </form>
         </div>
         {!isView && (
-          <button form="formSubmit" className="crud-save-button" type="submit">
-            Save
-          </button>
+          <LoadingButton
+            form="formSubmit"
+            type="submit"
+            loading={isSubmitting}
+            disabled={isSubmitting}
+            className="crud-save-button"
+          >
+            {isSubmitting ? 'Saving…' : 'Save'}
+          </LoadingButton>
         )}
       </div>
     </div>

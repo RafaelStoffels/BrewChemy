@@ -2,18 +2,22 @@ import React, { useState, useEffect, useContext } from 'react';
 import Modal from 'react-modal';
 import PropTypes from 'prop-types';
 
+// Schemas
 import { addFermentableSchema, updateFermentableSchema } from './schemas/fermentablesSchema';
 import { addHopSchema, updateHopSchema } from './schemas/hopsSchema';
 import { addMiscSchema, updateMiscSchema } from './schemas/miscsSchema';
 import { addYeastSchema, updateYeastSchema } from './schemas/yeastsSchema';
 
+// Components
 import SearchInput from '../../Components/SearchInput';
 
+// Utils
 import { showErrorToast, showInfoToast } from '../../utils/notifications';
 import normalizeWeightForSave from '../../utils/formHelpers';
 import { ouncesToGrams } from '../../utils/unitConversion';
 import { toDisplayWeight } from '../../utils/displayUnits';
 
+// Services
 import { searchEquipments, fetchEquipments } from '../../services/equipments';
 import { searchFermentables, fetchFermentables } from '../../services/fermentables';
 import { searchHops, fetchHops } from '../../services/hops';

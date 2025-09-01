@@ -39,7 +39,6 @@ export default function useRecipeCalculations({
 
     // calculate FG
     const FGResult = calculateFG(recipeData, OGResult);
-    console.log(FGResult);
     setFG(FGResult);
 
     // calculate IBU

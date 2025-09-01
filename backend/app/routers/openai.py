@@ -3,8 +3,8 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 from .users import token_required
+from ..config import settings
 
-import os
 from dotenv import load_dotenv
 from openai import AsyncOpenAI, APIConnectionError, APIStatusError
 
@@ -33,7 +33,7 @@ class ChatGPTAsync:
             )
             return resp.choices[0].message.content or ""
         except (APIConnectionError, APIStatusError) as e:
-            raise HTTPException(status_code=502, detail=f"OpenAI API error: {e}") from e
+            raise HTTPException(status_code=502, detail=f"{e}") from e
         except Exception as e:
             raise HTTPException(status_code=502, detail=f"Unexpected error calling OpenAI: {e}") from e
 
@@ -46,11 +46,11 @@ async def openai_endpoint(
     if not payload.message:
         raise HTTPException(status_code=400, detail="No recipe provided")
 
-    api_key = os.getenv("OPENAI_API_KEY")
+    api_key = settings.OPENAI_API_KEY
     if not api_key:
         raise HTTPException(status_code=500, detail="OPENAI_API_KEY not configured")
 
-    model = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
+    model = "gpt-3.5-turbo"
 
     chatgpt = ChatGPTAsync(api_key=api_key)
     chat_response = await chatgpt.get_response(payload.message, model=model)
