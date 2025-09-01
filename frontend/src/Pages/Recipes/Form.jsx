@@ -593,7 +593,7 @@ export default function NewRecipe() {
                           data="/malt.svg"
                           aria-label="Malt icon"
                         />
-                        {toDisplayWeight(fermentable.quantity, user?.weightUnit === 'oz' ? 'oz' : 'g')}
+                        {toDisplayWeight(fermentable.quantity, user?.weightUnit === 'oz' ? 'oz' : 'kg')}
                         {' '}
                         {user?.weightUnit === 'oz' ? 'oz' : 'kg'}
                       </td>

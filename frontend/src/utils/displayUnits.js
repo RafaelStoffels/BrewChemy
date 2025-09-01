@@ -6,10 +6,13 @@ const round = (n, d) => {
   return Math.round((n + Number.EPSILON) * f) / f;
 };
 
-export function toDisplayWeight(grams, unit, decimalsMap = { oz: 2, g: 0, kg: 2 }) {
+export function toDisplayWeight(grams, unit, decimalsMap = { oz: 2, g: 0, kg: 3 }) {
   if (grams == null) return '';
   if (unit === 'oz') return round(grams / GRAMS_PER_OUNCE, decimalsMap.oz);
-  if (unit === 'kg') return round(grams / 1000, decimalsMap.kg);
+  if (unit === 'kg') {
+    const n = round(grams / 1000, decimalsMap.kg);
+    return n.toFixed(3);
+  }
   // default g
   return round(grams, decimalsMap.g);
 }
