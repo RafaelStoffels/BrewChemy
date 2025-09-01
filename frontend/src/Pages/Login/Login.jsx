@@ -5,7 +5,7 @@ import { FiLogIn } from 'react-icons/fi';
 
 import { me, loginUser } from '../../services/users';
 import AuthContext from '../../context/AuthContext';
-import { Spinner } from '../../Components/Spinner';
+import { LoadingButton } from '../../Components/LoadingButton';
 
 import './Login.css';
 
@@ -83,21 +83,15 @@ export default function Logon() {
               />
             </label>
 
-            <button
-              className="buttonLogin flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+            <LoadingButton
               type="submit"
-              disabled={loading}
+              loading={loading}
+              className="buttonLogin"
+              icon={<FiLogIn size={16} color="#fff" />}
+              spinnerSize={16}
             >
-              {loading ? (
-                <>
-                  <Spinner size={16} light /> Logging in…
-                </>
-              ) : (
-                <>
-                  Login <FiLogIn size={16} color="#fff" />
-                </>
-              )}
-            </button>
+              {loading ? "Logging in…" : "Log in"}
+            </LoadingButton>
 
             <button
               type="button"

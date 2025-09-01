@@ -14,6 +14,7 @@ export default function useRecipeForm({ isEditing, recipeId, userToken }) {
     reset,
     getValues,
     setValue,
+    formState,
     watch,
   } = useForm({
     resolver: yupResolver(schema),
@@ -83,6 +84,7 @@ export default function useRecipeForm({ isEditing, recipeId, userToken }) {
     getValues,
     setValue,
     watch,
+    formState,
     onValid,
     onError,
 

@@ -29,6 +29,7 @@ import {
   UpdateFermentableModal, UpdateHopModal, UpdateMiscModal, UpdateYeastModal,
 } from './FormModals';
 import OGBar from './Components/Indicators';
+import { LoadingButton } from '@/Components/LoadingButton';
 
 // Styles
 import beerStyles from './utils/getBeerStyles';
@@ -90,6 +91,7 @@ export default function NewRecipe() {
     setValue,
     onValid,
     onError,
+    formState: { isSubmitting },
     watchedFields,
   } = useRecipeForm({
     isEditing,
@@ -924,9 +926,15 @@ export default function NewRecipe() {
           </div>
 
           {!isView && (
-            <button form="formSubmit" className="crud-save-button" type="submit">
-              Save
-            </button>
+            <LoadingButton
+              form="formSubmit"
+              type="submit"
+              loading={isSubmitting}
+              disabled={isSubmitting}
+              className="crud-save-button"
+            >
+              {isSubmitting ? 'Saving…' : 'Save'}
+            </LoadingButton>
           )}
         </div>
         {activeModal === MODALS.FERMENTABLE && (

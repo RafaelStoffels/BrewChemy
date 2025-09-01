@@ -1,7 +1,13 @@
 /* ======================================
    Fonts and Global Reset
 ====================================== */
-@import "tailwindcss";
+@tailwind components;
+@tailwind utilities;
+
+@layer utilities {
+  @keyframes spin { to { transform: rotate(360deg) } }
+  .animate-spin { animation: spin 1s linear infinite; }
+}
 
 * {
     margin: 0;
@@ -16,7 +22,7 @@ body {
   font-family: "Helvetica Neue", Arial, sans-serif;
   background: #e6d296ff;
   -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale; /* para Firefox */
+  -moz-osx-font-smoothing: grayscale; /* Firefox */
   line-height: 1.3;
 }
 
@@ -116,7 +122,9 @@ textarea{
     color: #FFF;
     font-weight: 700;
     margin-top: 12px;
-    display: inline-block;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     text-align: center;
     text-decoration: none;
     font-size: 18px;
