@@ -231,22 +231,25 @@ export default function NewRecipe() {
   // =======================
   // Fetch OpenAI
   // =======================
-  const fetchOpenAIResponse = async () => {
-    const recipe = getValues();
+const fetchOpenAIResponse = async () => {
+  const recipe = getValues();
 
-    if (!recipe?.style || typeof recipe !== 'object') {
-      showErrorToast('Recipe data is missing wmor invalid.');
-      setPopoverContent('Recipe data is missing or invalid.');
-      return;
-    }
+  if (!recipe || !recipe.style) {
+    showErrorToast('Recipe data is missing or invalid.');
+    setPopoverContent('Recipe data is missing or invalid.');
+    return;
+  }
 
-    try {
-      const openAIResponse = await getOpenAIResponse(recipe, user.token);
-      setPopoverContent(openAIResponse);
-    } catch (err) {
-      //
-    }
-  };
+  try {
+    setPopoverContent('Consulting mystical wisdom…');
+
+    const aiText = await getOpenAIResponse(user.token, recipe, { showToast: true });
+
+    setPopoverContent(aiText || 'No suggestions this time.');
+  } catch (err) {
+    setPopoverContent('The AI service is busy. Please try again.');
+  }
+};
 
   // =======================
   // useEffects

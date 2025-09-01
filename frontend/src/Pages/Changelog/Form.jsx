@@ -17,6 +17,12 @@ export default function NewEquipment() {
         <h1>Changelog</h1>
       </section>
       <div className="content">
+        <b>Sep 01, 2025 (v1.4.0)</b>
+        <br />
+        <br />
+        ⏳ Buttons now show a loading indicator while the action is processing. You can see it’s saving and avoid repeated clicks.
+        <br />
+        <br />
         <b>Aug 23, 2025 (v1.3.0)</b>
         <br />
         <br />

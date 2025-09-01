@@ -1,42 +1,44 @@
+// services/openAI.js
 import api from './api';
-import { showErrorToast } from '../utils/notifications';
+import { request, withAuth } from '../utils/http';
 
-async function getOpenAIResponse(recipe, userToken) {
-  try {
-    let message = `Style: ${recipe.style};`
-                + `Liters: ${recipe.recipeEquipment.batchVolume};`
-                + `Boil Time: ${recipe.recipeEquipment.boilTime};`;
+export function buildOpenAIMessage(recipe) {
+  if (!recipe) return '';
 
-    message += ' Fermentables: ';
-    recipe.recipeFermentables.forEach((fermentable) => {
-      message += `${fermentable.name} (${fermentable.quantity}g), `;
-    });
+  const parts = [
+    `Style: ${recipe.style};`,
+    `Liters: ${recipe?.recipeEquipment?.batchVolume};`,
+    `Boil Time: ${recipe?.recipeEquipment?.boilTime};`,
+  ];
 
-    message += ' Hops: ';
-    recipe.recipeHops.forEach((hop) => {
-      message += `${hop.name} (${hop.quantity}g) (Boil time: ${hop.boilTime}m), `;
-    });
+  const fmt = (arr, label) => {
+    if (!Array.isArray(arr) || arr.length === 0) return;
+    const s = arr
+      .map((item) => {
+        if (label === 'Hops') {
+          return `${item.name} (${item.quantity}g) (Boil time: ${item.boilTime}m)`;
+        }
+        return `${item.name} (${item.quantity}g)`;
+      })
+      .join(', ');
+    parts.push(` ${label}: ${s}.`);
+  };
 
-    message += ' Miscelaneous: ';
-    recipe.recipeMisc.forEach((misc) => {
-      message += `${misc.name} (${misc.quantity}g), `;
-    });
+  fmt(recipe.recipeFermentables, 'Fermentables');
+  fmt(recipe.recipeHops, 'Hops');
+  fmt(recipe.recipeMisc, 'Miscelaneous');
+  fmt(recipe.recipeYeasts, 'Yeasts');
 
-    message += ' Yeasts: ';
-    recipe.recipeYeasts.forEach((yeast) => {
-      message += `${yeast.name} (${yeast.quantity}g), `;
-    });
+  return parts.join('');
+}
 
-    const response = await api.post('api/openAI', { message }, {
-      headers: { Authorization: `Bearer ${userToken}` },
-    });
+export function getOpenAIResponse(userToken, recipe, opts = {}) {
+  const message = buildOpenAIMessage(recipe);
 
-    return response.data.response;
-  } catch (err) {
-    const msg = err.response?.data?.error || err.message || 'Unexpected error contacting OpenAI.';
-    showErrorToast(`OpenAI error: ${msg}`);
-    throw new Error(msg);
-  }
+  return request(
+    api.post('/api/openAI', { message }, withAuth(userToken)),
+    { fallback: 'Could not get AI suggestion right now.', ...opts },
+  ).then((data) => data?.message ?? data?.response ?? data);
 }
 
 export default getOpenAIResponse;
