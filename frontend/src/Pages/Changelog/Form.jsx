@@ -17,6 +17,12 @@ export default function NewEquipment() {
         <h1>Changelog</h1>
       </section>
       <div className="content">
+        <b>Sep 03, 2025 (v1.5.0)</b>
+        <br />
+        <br />
+        💧 Added configuration option to set the volume unit to liters or gallons.
+        <br />
+        <br />
         <b>Sep 01, 2025 (v1.4.0)</b>
         <br />
         <br />
