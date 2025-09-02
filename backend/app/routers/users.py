@@ -69,6 +69,7 @@ class MeOut(BaseModel):
     name: str
     email: str
     weightUnit: str | None = None
+    volumeUnit: str | None = None
 
     class Config:
         from_attributes = True
@@ -215,6 +216,7 @@ def get_user_me(current_user: User = Depends(get_current_user)):
         name=current_user.name,
         email=current_user.email,
         weightUnit=getattr(current_user, "weight_unit", None),
+        volumeUnit=getattr(current_user, "volume_unit", None),
     )
 
 
@@ -257,6 +259,9 @@ class UpdateUserIn(BaseModel):
     weight_unit: str | None = Field(
         default=None, validation_alias=AliasChoices("weightUnit", "weight_unit")
     )
+    volume_unit: str | None = Field(
+        default=None, validation_alias=AliasChoices("volumeUnit", "volume_unit")
+    )
 
 
 @router.put("/{user_id}", response_model=UserOut)
@@ -279,6 +284,8 @@ async def update_user(user_id: int, payload: UpdateUserIn, db: AsyncSession = De
         user.is_active = payload.is_active
     if payload.weight_unit is not None:
         user.weight_unit = payload.weight_unit
+    if payload.volume_unit is not None:
+        user.volume_unit = payload.volume_unit
 
     await db.commit()
     await db.refresh(user)

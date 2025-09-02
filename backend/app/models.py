@@ -50,6 +50,7 @@ class User(Base):
     google_id: Mapped[Optional[str]] = mapped_column(String(100), unique=True)
     status: Mapped[Optional[str]] = mapped_column(String(15))
     weight_unit: Mapped[str] = mapped_column(String(5), default="g")
+    volume_unit: Mapped[str] = mapped_column(String(5), default="l")
 
     def set_password(self, password: str) -> None:
         self.password_hash = pwd_ctx.hash(password)
@@ -69,6 +70,7 @@ class User(Base):
             "brewery": self.brewery,
             "status": self.status,
             "weightUnit": self.weight_unit,
+            "volumeUnit": self.volume_unit,
         }
 
 

@@ -1,12 +1,17 @@
 import React, { useContext, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
-import schema from './schema';
-import { updateUser } from '../../services/users';
-import AuthContext from '../../context/AuthContext';
-import '../../Styles/crud.css';
 
+import schema from './schema';
+// Services
+import { updateUser } from '../../services/users';
+// Context
+import AuthContext from '../../context/AuthContext';
+// Styles
+import '../../Styles/crud.css';
+// Hooks
 import useAuthRedirect from '../../hooks/useAuthRedirect';
+// Components
 import { LoadingButton } from '@/Components/LoadingButton';
 
 export default function SettingsForm() {
@@ -23,20 +28,24 @@ export default function SettingsForm() {
     resolver: yupResolver(schema),
     defaultValues: {
       weight: user?.weightUnit || 'g',
+      volume: user?.volumeUnit || 'l',
     },
   });
 
   useEffect(() => {
     if (user) {
       reset({ weight: user.weightUnit || 'g' });
+      reset({ volume: user.volumeUnit || 'l' });
     }
   }, [user, reset]);
 
   const onValid = async (data) => {
     const weight = (data.weight || 'g').toLowerCase();
-    await updateUser(user.token, user.user_id, { weightUnit: weight });
-    updateUserLocal({ weightUnit: weight });
-    reset({ weight });
+    const volume = (data.volume || 'l').toLowerCase();
+
+    await updateUser(user.token, user.user_id, { weightUnit: weight, volumeUnit: volume });
+    updateUserLocal({ weightUnit: weight, volumeUnit: volume });
+    reset({ weight, volume });
   };
 
   return (
@@ -51,7 +60,14 @@ export default function SettingsForm() {
               <label htmlFor="weight">Weight Unit</label>
               <select id="weight" {...register('weight')}>
                 <option value="oz">oz</option>
-                <option value="g">g</option>
+                <option value="g">grams</option>
+              </select>
+            </div>
+            <div className="input-field">
+              <label htmlFor="volume">Volume Unit</label>
+              <select id="volume" {...register('volume')}>
+                <option value="l">liters</option>
+                <option value="g">gallons</option>
               </select>
             </div>
           </div>
