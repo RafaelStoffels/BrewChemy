@@ -1,4 +1,4 @@
-import React, { useEffect, useContext } from 'react';
+import React, { useEffect, useContext, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -18,6 +18,8 @@ import { showErrorToast } from '../../utils/notifications';
 import getFormTitle from '../../utils/formTitle';
 import AuthContext from '../../context/AuthContext';
 
+import { toDisplayVolume, toLiters } from '../../utils/displayUnits';
+
 import '../../Styles/crud.css';
 
 export default function NewEquipment() {
@@ -26,6 +28,13 @@ export default function NewEquipment() {
   const navigate = useNavigate();
 
   const { isEditing, isView } = useFormMode();
+
+  const volumeUnit = useMemo(
+    () => (user?.volumeUnit === 'gal' ? 'gal' : 'L'),
+    [user?.volumeUnit]
+  );
+  const volumeLabel = volumeUnit === 'gal' ? 'gal' : 'L';
+  const volDecimals = { gal: 3, l: 2, ml: 0 };
 
   const {
     register,
@@ -53,20 +62,22 @@ export default function NewEquipment() {
   useEffect(() => {
     const loadEquipment = async () => {
       if (!id) return;
+        const equipment = await fetchEquipmentById(user.token, recordUserId, id);
+
+        const mapV = (v) => toDisplayVolume(Number(v ?? 0), volumeUnit, volDecimals);
 
       try {
-        const equipment = await fetchEquipmentById(user.token, recordUserId, id);
         reset({
           name: equipment.name || '',
           description: equipment.description || '',
-          efficiency: equipment.efficiency || '',
-          batchVolume: equipment.batchVolume || '',
-          batchTime: equipment.batchTime || '',
-          boilTime: equipment.boilTime || '',
-          boilTemperature: equipment.boilTemperature || '',
-          boilOff: equipment.boilOff || '',
-          trubLoss: equipment.trubLoss || '',
-          deadSpace: equipment.deadSpace || '',
+          efficiency: equipment.efficiency ?? '',
+          batchVolume: equipment.batchVolume != null ? mapV(equipment.batchVolume) : '',
+          batchTime: equipment.batchTime ?? '',
+          boilTime: equipment.boilTime ?? '',
+          boilTemperature: equipment.boilTemperature ?? '',
+          boilOff: equipment.boilOff != null ? mapV(equipment.boilOff) : '',
+          trubLoss: equipment.trubLoss != null ? mapV(equipment.trubLoss) : '',
+          deadSpace: equipment.deadSpace != null ? mapV(equipment.deadSpace) : '',
         });
       } catch {
         navigate('/EquipmentList');
@@ -79,8 +90,14 @@ export default function NewEquipment() {
   const title = getFormTitle('Equipment', isEditing, isView);
 
   const onValid = async (data) => {
+    const toL = (v) => (v === '' || v == null ? null : toLiters(v, volumeUnit));
+
     const payload = {
       ...data,
+      batchVolume: toL(data.batchVolume),
+      boilOff: toL(data.boilOff),
+      trubLoss: toL(data.trubLoss),
+      deadSpace: toL(data.deadSpace),
       itemUserId: recordUserId,
     };
 
@@ -142,10 +159,11 @@ export default function NewEquipment() {
           </div>
           <div className="inputs-row">
             <div className="input-field">
-              <label htmlFor="batchVolume">Batch Volume (L)</label>
+              <label htmlFor="batchVolume">Batch Volume ({volumeLabel})</label>
               <input
                 id="batchVolume"
                 type="number"
+                step="any"
                 {...register('batchVolume')}
                 disabled={isView}
               />
@@ -180,28 +198,31 @@ export default function NewEquipment() {
               />
             </div>
             <div className="input-field">
-              <label htmlFor="boilOff">Boil Off (L)</label>
+              <label htmlFor="boilOff">Boil Off ({volumeLabel})</label>
               <input
                 id="boilOff"
                 type="number"
+                step="any"
                 {...register('boilOff')}
                 disabled={isView}
               />
             </div>
             <div className="input-field">
-              <label htmlFor="trubLoss">Trub Loss (L)</label>
+              <label htmlFor="trubLoss">Trub Loss ({volumeLabel})</label>
               <input
                 id="trubLoss"
                 type="number"
+                step="any"
                 {...register('trubLoss')}
                 disabled={isView}
               />
             </div>
             <div className="input-field">
-              <label htmlFor="deadSpace">Dead Space (L)</label>
+              <label htmlFor="deadSpace">Dead Space ({volumeLabel})</label>
               <input
                 id="deadSpace"
                 type="number"
+                step="any"
                 {...register('deadSpace')}
                 disabled={isView}
               />

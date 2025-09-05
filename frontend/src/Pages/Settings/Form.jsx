@@ -67,7 +67,7 @@ export default function SettingsForm() {
               <label htmlFor="volume">Volume Unit</label>
               <select id="volume" {...register('volume')}>
                 <option value="l">liters</option>
-                <option value="g">gallons</option>
+                <option value="gal">gallons</option>
               </select>
             </div>
           </div>

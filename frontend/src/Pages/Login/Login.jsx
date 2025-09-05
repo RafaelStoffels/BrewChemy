@@ -108,6 +108,9 @@ export default function Logon() {
             <Link to="/CreateAccount" style={{ marginTop: '15px' }}>
               Create account
             </Link>
+            <br></br>
+          <b> ℹ️ Beta version – free hosting: sometimes the server “falls asleep” when not in use and may need
+           a moment to wake up, so things can feel slower. </b>
           </form>
         </div>
       </section>

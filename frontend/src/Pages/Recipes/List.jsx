@@ -29,10 +29,10 @@ export default function RecipeList() {
     }
   };
 
-  const onDetails = (userId, id) => navigate(`/Recipes/${id}/details`);
-  const onUpdate = (userId, id) => navigate(`/Recipes/${id}/edit`);
+  const onDetails = (id) => navigate(`/Recipes/${id}/details`);
+  const onUpdate = (id) => navigate(`/Recipes/${id}/edit`);
 
-  const onDelete = async (userId, id) => {
+  const onDelete = async (id) => {
     try {
       await deleteRecipe(user.token, id);
       setItemList((prev) => prev.filter((item) => item.id !== id));
@@ -46,7 +46,7 @@ export default function RecipeList() {
       <p>
         <strong>Author:</strong>
         {' '}
-        {item.author}
+        {item?.author || 'N/A'}
       </p>
       <p>
         <strong>Style:</strong>
@@ -56,9 +56,11 @@ export default function RecipeList() {
       <p>
         <strong>Description:</strong>
         {' '}
-        {item.description.length > 140
-          ? `${item.description.substring(0, 140)}...`
-          : item.description}
+        {item?.description
+          ? item.description.length > 140
+            ? `${item.description.substring(0, 140)}...`
+            : item.description
+          : 'No description available'}
       </p>
     </>
   );

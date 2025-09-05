@@ -641,6 +641,12 @@ export function ChangeEquipmentModal({ isOpen, closeModal, handleChangeEquipment
     }
   };
 
+  const handleSelectAndSave = (item) => {
+    setSelectedItem(item);
+    handleChangeEquipmentRecipe(item);
+    closeModal();
+  };
+
   useEffect(() => {
     if (isOpen) {
       const loadItems = async () => {
@@ -680,6 +686,7 @@ export function ChangeEquipmentModal({ isOpen, closeModal, handleChangeEquipment
                   type="button"
                   className={`modal-search-button ${selectedItem?.id === item.id ? 'selected' : ''}`}
                   onClick={() => handleSelectItem(item)}
+                  onDoubleClick={() => handleSelectAndSave(item)}
                 >
                   {item.name}
                 </button>

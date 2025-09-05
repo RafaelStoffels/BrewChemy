@@ -20,6 +20,8 @@ import useRecipeCalculations from './hooks/useRecipeCalculations';
 import { fetchRecipeById } from '../../services/recipes';
 import getOpenAIResponse from '../../services/openAI';
 import { showErrorToast } from '../../utils/notifications';
+import beerStyles from './utils/getBeerStyles';
+import { toDisplayWeight, toDisplayVolume, toLiters } from '../../utils/displayUnits';
 
 // Components
 import Sidebar from '../../Components/Sidebar';
@@ -32,14 +34,12 @@ import OGBar from './Components/Indicators';
 import { LoadingButton } from '@/Components/LoadingButton';
 
 // Styles
-import beerStyles from './utils/getBeerStyles';
-import { toDisplayWeight } from '../../utils/displayUnits';
 import './Form.css';
 
 export default function NewRecipe() {
   const { user } = useContext(AuthContext);
   const { id } = useParams();
-  const generateId = () => `fermentable-${Date.now()}`;
+  const generateId = () => Date.now();
 
   const { isEditing, isView } = useFormMode();
 
@@ -47,6 +47,9 @@ export default function NewRecipe() {
   const [show, setShow] = useState(false);
   const svgRef = useRef(null);
   const [popoverContent, setPopoverContent] = useState('Loading...');
+  const initializedBatchDisplay = useRef(false);
+
+  const volUnit = user?.volumeUnit ?? 'l';
 
   const { styles, attributes } = usePopper(svgRef.current, popoverRef.current, {
     placement: 'bottom',
@@ -59,7 +62,7 @@ export default function NewRecipe() {
       },
     ],
   });
-
+  
   // Ingredients Modals
   const {
     activeModal,
@@ -255,6 +258,21 @@ const fetchOpenAIResponse = async () => {
   // useEffects
   // =======================
   useAuthRedirect(user);
+
+  // Convert Liters to Gallons BatchField
+  useEffect(() => {
+    if (initializedBatchDisplay.current) return;
+
+    const liters = watchedBatchVolume;
+    if (liters == null) return;
+
+    setValue('ui.batchVolumeDisplay', String(toDisplayVolume(liters, volUnit)), {
+      shouldDirty: false,
+      shouldValidate: false,
+    });
+
+    initializedBatchDisplay.current = true;
+  }, [watchedBatchVolume, setValue]);
 
   useEffect(() => {
     if (!user?.token || !id) return;
@@ -467,14 +485,20 @@ const fetchOpenAIResponse = async () => {
               <div className="inputs-row">
                 <div className="input-field">
                   <label htmlFor="batchVolume">
-                    Batch Volume (L)
+                    Batch Volume {user?.volumeUnit === 'l' ? '(L)' : '(gal)'}
                     <input
                       id="batchVolume"
                       name="batchVolume"
                       type="number"
-                      {...register('recipeEquipment.batchVolume')}
                       disabled={isView}
+                      step="any"
                       style={{ width: '150px' }}
+                      {...register('ui.batchVolumeDisplay', {
+                        onChange: (e) => {
+                          const lit = toLiters(e.target.value, volUnit);
+                          setValue('recipeEquipment.batchVolume', lit, { shouldDirty: true, shouldValidate: true });
+                        },
+                      })}
                     />
                   </label>
                 </div>
@@ -519,15 +543,16 @@ const fetchOpenAIResponse = async () => {
                 </div>
                 <div className="input-field">
                   <label htmlFor="preBoilVolume">
-                    Pre Boil Volume (ml)
+                    Pre Boil Volume {user?.volumeUnit === 'l' ? '(L)' : '(gal)'}
                     <input
                       id="preBoilVolume"
                       name="preBoilVolume"
                       type="number"
-                      value={preBoilVolume}
                       onChange={handleEquipmentChange}
                       disabled
+                      step="any"
                       style={{ width: '150px' }}
+                      value={toDisplayVolume(preBoilVolume, volUnit) ?? ''}
                     />
                   </label>
                 </div>
