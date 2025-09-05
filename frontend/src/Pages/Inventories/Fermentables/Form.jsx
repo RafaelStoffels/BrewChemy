@@ -6,7 +6,10 @@ import schema from './schema';
 
 import useAuthRedirect from '../../../hooks/useAuthRedirect';
 import useFormMode from '../../../hooks/useFormMode';
+
+// Components
 import { LoadingButton } from '@/Components/LoadingButton';
+import HelpHint from "@/Components/HelpHint";
 
 import {
   fetchFermentableById,
@@ -18,6 +21,7 @@ import { showErrorToast } from '../../../utils/notifications';
 import getFormTitle from '../../../utils/formTitle';
 import AuthContext from '../../../context/AuthContext';
 
+// Styles
 import '../../../Styles/crud.css';
 
 export default function NewFermentable() {
@@ -60,8 +64,10 @@ export default function NewFermentable() {
           supplier: fermentable.supplier || '',
           description: fermentable.description || '',
           type: fermentable.type || 'Base',
-          ebc: fermentable.ebc || '',
-          potentialExtract: fermentable.potentialExtract || '',
+          ebc: fermentable.ebc ?? '',
+          potentialExtract: fermentable.potentialExtract != null
+            ? Number(fermentable.potentialExtract).toFixed(3)
+            : '',
         });
       } catch {
         navigate('/FermentableList');
@@ -148,7 +154,11 @@ export default function NewFermentable() {
               </select>
             </div>
             <div className="input-field">
-              <label htmlFor="ebc">Color Degree</label>
+              <label htmlFor="ebc">
+                Color Degree
+                <HelpHint text="Color degree indicates the beer’s color contributed by the malt, 
+                               measured in EBC or SRM units, from pale to dark." />
+              </label>
               <input
                 id="ebc"
                 type="number"
@@ -158,7 +168,12 @@ export default function NewFermentable() {
               />
             </div>
             <div className="input-field">
-              <label htmlFor="potentialExtract">Potential Extract</label>
+              <label htmlFor="potentialExtract">
+                Potential Extract
+                <HelpHint text="Potential extract is the amount of fermentable sugars the malt can provide,
+                                usually expressed as specific gravity (e.g., 1.037).
+                                It indicates the malt’s capacity to contribute to alcohol production." />
+              </label>
               <input
                 id="potentialExtract"
                 type="number"

@@ -232,7 +232,7 @@ class RecipeUpdate(BaseModel):
     @model_validator(mode="before")
     @classmethod
     def _clean(cls, data):
-        return _blank_to_none(data)
+        return data
 
 
 # ---------- children OUT ----------

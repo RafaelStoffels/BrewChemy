@@ -32,6 +32,7 @@ import {
 } from './FormModals';
 import OGBar from './Components/Indicators';
 import { LoadingButton } from '@/Components/LoadingButton';
+import HelpHint from "@/Components/HelpHint";
 
 // Styles
 import './Form.css';
@@ -434,7 +435,7 @@ const fetchOpenAIResponse = async () => {
                       id="equipment"
                       name="equipment"
                       {...register('recipeEquipment.name')}
-                      disabled={isView}
+                      disabled={true}
                       style={{ width: '500px' }}
                     />
                   </label>
@@ -492,7 +493,7 @@ const fetchOpenAIResponse = async () => {
                       type="number"
                       disabled={isView}
                       step="any"
-                      style={{ width: '150px' }}
+                      style={{ width: '200px' }}
                       {...register('ui.batchVolumeDisplay', {
                         onChange: (e) => {
                           const lit = toLiters(e.target.value, volUnit);
@@ -511,39 +512,32 @@ const fetchOpenAIResponse = async () => {
                       type="number"
                       {...register('recipeEquipment.batchTime')}
                       disabled={isView}
-                      style={{ width: '150px' }}
-                    />
-                  </label>
-                </div>
-                <div className="input-field">
-                  <label htmlFor="brewEfficiency">
-                    Brew. Efficiency %
-                    <input
-                      id="brewEfficiency"
-                      name="brewEfficiency"
-                      type="number"
-                      {...register('recipeEquipment.efficiency')}
-                      disabled={isView}
-                      style={{ width: '150px' }}
+                      style={{ width: '200px' }}
                     />
                   </label>
                 </div>
                 <div className="input-field">
                   <label htmlFor="mashEfficiency">
                     Mash Efficiency %
+                    <HelpHint text="Mash efficiency is the percentage of sugars extracted from the malt during the mash compared 
+                                    to the theoretical maximum. It is part of the recipe calculation and depends on each brewer’s
+                                    equipment and process." />
                     <input
                       id="mashEfficiency"
                       name="mashEfficiency"
                       type="number"
                       {...register('recipeEquipment.efficiency')}
                       disabled={isView}
-                      style={{ width: '150px' }}
+                      style={{ width: '200px' }}
                     />
                   </label>
                 </div>
                 <div className="input-field">
                   <label htmlFor="preBoilVolume">
-                    Pre Boil Volume {user?.volumeUnit === 'l' ? '(L)' : '(gal)'}
+                    Pre-boil Volume {user?.volumeUnit === 'l' ? '(L)' : '(gal)'}
+                    <HelpHint text="Pre-boil volume is the total amount of wort collected before the boil begins. 
+                                    It is part of the recipe calculation and depends on mash efficiency,
+                                    sparging, and equipment setup." />
                     <input
                       id="preBoilVolume"
                       name="preBoilVolume"
@@ -551,7 +545,7 @@ const fetchOpenAIResponse = async () => {
                       onChange={handleEquipmentChange}
                       disabled
                       step="any"
-                      style={{ width: '150px' }}
+                      style={{ width: '200px' }}
                       value={toDisplayVolume(preBoilVolume, volUnit) ?? ''}
                     />
                   </label>
@@ -565,7 +559,7 @@ const fetchOpenAIResponse = async () => {
                       type="number"
                       {...register('recipeEquipment.boilTime')}
                       disabled={isView}
-                      style={{ width: '160px' }}
+                      style={{ width: '200px' }}
                     />
                   </label>
                 </div>

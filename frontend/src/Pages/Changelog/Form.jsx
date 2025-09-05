@@ -17,6 +17,12 @@ export default function NewEquipment() {
         <h1>Changelog</h1>
       </section>
       <div className="content">
+        <b>Sep 06, 2025 (v1.6.0)</b>
+        <br />
+        <br />
+        ❓ New: added help icons (❓) next to technical fields.
+        <br />
+        <br />
         <b>Sep 04, 2025 (v1.5.0)</b>
         <br />
         <br />
