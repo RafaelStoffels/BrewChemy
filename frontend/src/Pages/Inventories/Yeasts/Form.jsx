@@ -6,7 +6,10 @@ import schema from './schema';
 
 import useAuthRedirect from '../../../hooks/useAuthRedirect';
 import useFormMode from '../../../hooks/useFormMode';
+
+// Components
 import { LoadingButton } from '@/Components/LoadingButton';
+import HelpHint from "@/Components/HelpHint";
 
 import { fetchYeastById, updateYeast, addYeast } from '../../../services/yeasts';
 import { showErrorToast } from '../../../utils/notifications';
@@ -61,7 +64,7 @@ export default function NewYeast() {
           flavorProfile: yeast.flavorProfile || '',
           type: yeast.type || 'Ale',
           form: yeast.form || 'Dry',
-          attenuation: yeast.attenuation || '',
+          attenuation: yeast.attenuation ?? '',
           temperatureRange: yeast.temperatureRange || '',
           flocculation: yeast.flocculation || 'Low',
         });
@@ -146,8 +149,10 @@ export default function NewYeast() {
               <div className="input-field">
                 <label>
                   Attenuation %
+                  <HelpHint text="Attenuation indicates how much sugar the yeast can ferment, expressed as a percentage.
+                                  Higher attenuation means a drier beer; lower attenuation leaves more sweetness." />
                   <input
-                    style={{ width: '100px' }}
+                    style={{ width: '120px' }}
                     type="number"
                     {...register('attenuation')}
                     disabled={isView}
@@ -184,7 +189,9 @@ export default function NewYeast() {
               <div className="input-field">
                 <label>
                   Flocculation
-                  <select style={{ width: '200px' }} {...register('flocculation')} disabled={isView}>
+                  <HelpHint text="Flocculation describes how easily yeast cells clump together and settle out after fermentation. 
+                                  High flocculation means the beer clears faster; low flocculation keeps yeast longer in suspension." />
+                  <select style={{ width: '180px' }} {...register('flocculation')} disabled={isView}>
                     <option value="Low">Low</option>
                     <option value="Medium">Medium</option>
                     <option value="Medium - High">Medium - High</option>

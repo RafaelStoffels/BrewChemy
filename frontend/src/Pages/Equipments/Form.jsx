@@ -6,7 +6,10 @@ import schema from './schema';
 
 import useAuthRedirect from '../../hooks/useAuthRedirect';
 import useFormMode from '../../hooks/useFormMode';
+
+// Components
 import { LoadingButton } from '@/Components/LoadingButton';
+import HelpHint from "@/Components/HelpHint";
 
 import {
   fetchEquipmentById,
@@ -198,7 +201,10 @@ export default function NewEquipment() {
               />
             </div>
             <div className="input-field">
-              <label htmlFor="boilOff">Boil Off ({volumeLabel})</label>
+              <label htmlFor="boilOff">
+                Boil Off ({volumeLabel})
+                <HelpHint text="Boil off is the portion of wort that evaporates during the boil." />
+              </label> 
               <input
                 id="boilOff"
                 type="number"
@@ -208,7 +214,11 @@ export default function NewEquipment() {
               />
             </div>
             <div className="input-field">
-              <label htmlFor="trubLoss">Trub Loss ({volumeLabel})</label>
+              <label htmlFor="trubLoss">
+                Trub Loss ({volumeLabel})
+                <HelpHint text="Trub loss is the wort volume lost to the sediment (hops, proteins, 
+                                and other particles) that settles at the bottom of the kettle" />
+              </label>
               <input
                 id="trubLoss"
                 type="number"
@@ -218,7 +228,11 @@ export default function NewEquipment() {
               />
             </div>
             <div className="input-field">
-              <label htmlFor="deadSpace">Dead Space ({volumeLabel})</label>
+              <label htmlFor="deadSpace">
+                Dead Space ({volumeLabel})
+                <HelpHint text="Dead space is the wort volume that remains trapped in the equipment 
+                               (valves, pipes, or bottom of the kettle) and cannot be drained." />
+              </label>
               <input
                 id="deadSpace"
                 type="number"

@@ -6,7 +6,10 @@ import schema from './schema';
 
 import useAuthRedirect from '../../../hooks/useAuthRedirect';
 import useFormMode from '../../../hooks/useFormMode';
+
+// Components
 import { LoadingButton } from '@/Components/LoadingButton';
+import HelpHint from "@/Components/HelpHint";
 
 import { fetchHopById, updateHop, addHop } from '../../../services/hops';
 import { showErrorToast } from '../../../utils/notifications';
@@ -60,8 +63,8 @@ export default function NewHop() {
           countryOfOrigin: hop.countryOfOrigin || '',
           type: hop.type || 'Pellet',
           useType: hop.useType || 'Boil',
-          alphaAcidContent: hop.alphaAcidContent || '',
-          betaAcidContent: hop.betaAcidContent || '',
+          alphaAcidContent: hop.alphaAcidContent ?? '',
+          betaAcidContent: hop.betaAcidContent ?? '',
         });
       } catch {
         navigate('/HopList');
@@ -183,6 +186,8 @@ export default function NewHop() {
               <div className="input-field">
                 <label>
                   Alpha Acid
+                  <HelpHint text="Alpha acids are the main bittering compounds in hops. 
+                                  Their percentage indicates the hop’s potential to add bitterness to the beer during the boil." />
                   <input
                     type="number"
                     step="any"
@@ -195,6 +200,8 @@ export default function NewHop() {
               <div className="input-field">
                 <label>
                   Beta Acid
+                  <HelpHint text="Beta acids are secondary hop compounds that contribute to bitterness and flavor stability, 
+                                  but less predictably than alpha acids." />
                   <input
                     type="number"
                     step="any"
