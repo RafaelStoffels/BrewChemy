@@ -9,6 +9,8 @@ import { LoadingButton } from '../../Components/LoadingButton';
 
 import './Login.css';
 
+const OAUTH_FLAG = 'oauth:provider';
+
 export default function Logon() {
   const { login } = useContext(AuthContext);
   const [email, setEmail] = useState('');
@@ -16,6 +18,7 @@ export default function Logon() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [loading, setLoading] = useState(false);
+  const [oauthLoading, setOauthLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -30,19 +33,31 @@ export default function Logon() {
   };
 
   const handleGoogleLoginRedirect = () => {
+    sessionStorage.setItem(OAUTH_FLAG, 'google');
+    setOauthLoading(true);
     window.location.href = import.meta.env.VITE_GOOGLE_LOGIN_URL ;
   };
 
   useEffect(() => {
+    if (sessionStorage.getItem(OAUTH_FLAG)) {
+      setOauthLoading(true);
+    }
+
     const handleRedirectLogin = async () => {
       const token = searchParams.get('token');
       if (!token) return;
 
-      const userInfo = await me(token);
-      const fullUser = { ...userInfo, token };
-
-      login(fullUser);
-      navigate('/RecipeList');
+      try {
+        setOauthLoading(true);
+        const userInfo = await me(token);
+        const fullUser = { ...userInfo, token };
+        login(fullUser);
+        sessionStorage.removeItem(OAUTH_FLAG);
+        navigate('/RecipeList', { replace: true });
+      } catch {
+        sessionStorage.removeItem(OAUTH_FLAG);
+        setOauthLoading(false);
+      }
     };
 
     handleRedirectLogin();
@@ -50,6 +65,36 @@ export default function Logon() {
 
   return (
     <div className="logon-container">
+      {oauthLoading && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            display: 'grid',
+            placeItems: 'center',
+            background: 'rgba(0,0,0,0.55)',
+            color: '#fff',
+            zIndex: 9999,
+          }}
+        >
+          <div style={{ textAlign: 'center' }}>
+            <div
+              style={{
+                width: 44,
+                height: 44,
+                border: '4px solid #fff',
+                borderTopColor: 'transparent',
+                borderRadius: '50%',
+                margin: '0 auto 12px',
+                animation: 'spin 1s linear infinite',
+              }}
+            />
+            <div>Connecting...</div>
+          </div>
+          <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+        </div>
+      )}
+
       <section className="form">
         <object
           className="Brewchemy-object"
