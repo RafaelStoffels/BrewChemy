@@ -52,6 +52,20 @@ class User(Base):
     weight_unit: Mapped[str] = mapped_column(String(5), default="g")
     volume_unit: Mapped[str] = mapped_column(String(5), default="l")
 
+    # FK
+    default_equipment_id: Mapped[Optional[int]] = mapped_column(
+        Integer,
+        ForeignKey("equipments.id", ondelete="SET NULL"),
+        nullable=True,
+    )
+
+    # Relationship 
+    default_equipment: Mapped[Optional["Equipment"]] = relationship(
+        "Equipment",
+        foreign_keys=[default_equipment_id],
+        lazy="joined",
+    )
+
     def set_password(self, password: str) -> None:
         self.password_hash = pwd_ctx.hash(password)
 
@@ -71,6 +85,7 @@ class User(Base):
             "status": self.status,
             "weightUnit": self.weight_unit,
             "volumeUnit": self.volume_unit,
+            "defaultEquipmentId": self.default_equipment_id,
         }
 
 

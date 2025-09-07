@@ -83,15 +83,21 @@ async def get_equipments(
     return [_to_out(i) for i in items]
 
 
-@router.get("/{itemUserId:int}/{id:int}", response_model=EquipmentOut)
+@router.get("/{id:int}", response_model=EquipmentOut)
 async def get_equipment(
-    itemUserId: int,
     id: int,
+    current_user_id: int = Depends(token_required),
     db: AsyncSession = Depends(get_db),
 ):
-    stmt = select(Equipment).where(
-        Equipment.id == id,
-        Equipment.user_id == itemUserId,
+    stmt = (
+        select(Equipment)
+        .where(
+            Equipment.id == id,
+            or_(
+                Equipment.user_id == current_user_id,
+                Equipment.user_id == 1,
+            ),
+        )
     )
     item = (await db.execute(stmt)).scalar_one_or_none()
     if not item:

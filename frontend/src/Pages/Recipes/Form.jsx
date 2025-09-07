@@ -16,9 +16,13 @@ import useIngredientModals from './hooks/useIngredientModals';
 import useRecipeForm from './hooks/useRecipeForm';
 import useRecipeCalculations from './hooks/useRecipeCalculations';
 
-// Utils and services
+// Services
 import { fetchRecipeById } from '../../services/recipes';
 import getOpenAIResponse from '../../services/openAI';
+import { updatePreferences } from '../../services/users';
+import { fetchEquipmentById } from '../../services/equipments';
+
+// Utils
 import { showErrorToast } from '../../utils/notifications';
 import beerStyles from './utils/getBeerStyles';
 import { toDisplayWeight, toDisplayVolume, toLiters } from '../../utils/displayUnits';
@@ -162,31 +166,45 @@ export default function NewRecipe() {
   // Equipment Change Function
   // =======================
   const handleChangeEquipmentRecipe = async (selectedItem) => {
-    if (selectedItem) {
-      const currentEquipmentName = getValues('recipeEquipment.name');
 
-      if (currentEquipmentName !== undefined && currentEquipmentName.trim() !== '') {
-        const result = await Swal.fire({
-          title: 'Are you sure?',
-          text: 'Do you really want to change the equipment? Changing it will update the recipe.',
-          icon: 'warning',
-          showCancelButton: true,
-          confirmButtonColor: '#3085d6',
-          cancelButtonColor: '#d33',
-          confirmButtonText: 'Sim',
-          cancelButtonText: 'Cancelar',
-        });
+    if (!selectedItem) {
+      showErrorToast('Please select an equipment.', selectedItem);
+      return;
+    }
 
-        if (result.isConfirmed) {
-          setValue('recipeEquipment', { ...selectedItem });
-          closeModal(MODALS.CHANGE_EQUIPMENT);
-        }
-      } else {
-        setValue('recipeEquipment', { ...selectedItem });
-        closeModal(MODALS.CHANGE_EQUIPMENT);
-      }
-    } else {
-      showErrorToast('Please select an equipment.');
+    const currentEquipmentName = getValues('recipeEquipment.name');
+
+    if (currentEquipmentName !== undefined && currentEquipmentName.trim() !== '') {
+      const result = await Swal.fire({
+        title: 'Are you sure?',
+        text: 'Do you really want to change the equipment? Changing it will update the recipe.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3d7118ff',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes',
+        cancelButtonText: 'No',
+      });
+
+      if (!result.isConfirmed) return;
+    }
+
+    setValue('recipeEquipment', { ...selectedItem });
+    closeModal(MODALS.CHANGE_EQUIPMENT);
+
+    const changeDefaultEquipment = await Swal.fire({
+      title: 'Would you like to set this equipment as the default?',
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonColor: '#3d7118ff',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes',
+      cancelButtonText: 'No',
+    });
+
+    if (changeDefaultEquipment.isConfirmed) {
+      await updatePreferences(user.token, { defaultEquipmentId: selectedItem.id });
+      toast.success('Default equipment updated');
     }
   };
 
@@ -259,6 +277,26 @@ const fetchOpenAIResponse = async () => {
   // useEffects
   // =======================
   useAuthRedirect(user);
+
+  // Set default equipment on new recipe
+  useEffect(() => {
+    if (!user?.token || !user?.defaultEquipmentId) return;
+    if (isEditing) return;
+  
+    const eq = getValues('recipeEquipment');
+    if (eq?.id || eq?.name) return;
+  
+    let cancelled = false;
+  
+    fetchEquipmentById(user.token, user.defaultEquipmentId, { showToast: false })
+      .then((equip) => {
+        if (!cancelled && equip) {
+          setValue('recipeEquipment', equip, { shouldDirty: true });
+        }
+      })
+    
+    return () => { cancelled = true; };
+  }, [user?.token, user?.defaultEquipmentId, isEditing, getValues, setValue]);
 
   // Convert Liters to Gallons BatchField
   useEffect(() => {
