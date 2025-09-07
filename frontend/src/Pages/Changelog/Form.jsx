@@ -17,6 +17,12 @@ export default function NewEquipment() {
         <h1>Changelog</h1>
       </section>
       <div className="content">
+        <b>Sep 08, 2025 (v1.7.0)</b>
+        <br />
+        <br />
+        🔄️ When you select equipment on the recipes page, you can set it as your default. From then on, every new recipe will automatically use that equipment and prefill its settings (e.g., batch volume, efficiency, boil time), so you don’t have to pick it again. (Existing recipes aren’t changed.)
+        <br />
+        <br />
         <b>Sep 06, 2025 (v1.6.0)</b>
         <br />
         <br />

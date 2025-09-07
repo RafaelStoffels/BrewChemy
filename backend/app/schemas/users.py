@@ -21,6 +21,8 @@ class UserOut(BaseModel):
     brewery: Optional[str] = None
     status: str
     weight_unit: str | None = None
+    volume_unit: str | None = None
+    default_equipment_id: int | None = None
 
     class Config:
         from_attributes = True

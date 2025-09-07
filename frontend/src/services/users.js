@@ -1,18 +1,13 @@
 // services/users.js
 import api from './api';
+
+//Utils
 import { request, withAuth } from '../utils/http';
 
 export function me(userToken, opts = {}) {
   return request(
     api.get('/api/users/me', withAuth(userToken)),
     { fallback: 'Failed to fetch user info.', ...opts },
-  );
-}
-
-export function updateUser(userToken, userId, dataInput, opts = {}) {
-  return request(
-    api.put(`/api/users/${userId}`, dataInput, withAuth(userToken)),
-    { fallback: 'Failed to update user.', successMsg: 'User updated successfully.', ...opts },
   );
 }
 
@@ -45,6 +40,18 @@ export function addUser(data, opts = {}) {
       fallback: 'User creation failed, please try again later.',
       successMsg:
         'An email with an activation code has been sent. Please check your inbox and activate your account.',
+      ...opts,
+    },
+  );
+}
+
+/** ---------- PREFERENCES ---------- **/
+export function updatePreferences(token, partialPrefs, opts = {}) {
+  return request(
+    api.patch('/api/users/me/preferences', partialPrefs, withAuth(token)),
+    {
+      fallback: 'Failed to update preferences.',
+      successMsg: 'Preferences updated.',
       ...opts,
     },
   );

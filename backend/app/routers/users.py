@@ -70,6 +70,7 @@ class MeOut(BaseModel):
     email: str
     weightUnit: str | None = None
     volumeUnit: str | None = None
+    defaultEquipmentId: int | None = None
 
     class Config:
         from_attributes = True
@@ -217,6 +218,7 @@ def get_user_me(current_user: User = Depends(get_current_user)):
         email=current_user.email,
         weightUnit=getattr(current_user, "weight_unit", None),
         volumeUnit=getattr(current_user, "volume_unit", None),
+        defaultEquipmentId=getattr(current_user, "default_equipment_id", None),
     )
 
 
@@ -250,42 +252,34 @@ async def create_user(
     return UserOut.model_validate(new_user)
 
 
-class UpdateUserIn(BaseModel):
-    name: str | None = None
-    email: EmailStr | None = None
-    password: str | None = Field(default=None, min_length=6)
-    brewery: str | None = None
-    is_active: bool | None = None
+class PreferencesPatch(BaseModel):
     weight_unit: str | None = Field(
         default=None, validation_alias=AliasChoices("weightUnit", "weight_unit")
     )
     volume_unit: str | None = Field(
         default=None, validation_alias=AliasChoices("volumeUnit", "volume_unit")
     )
+    default_equipment_id: int | None = Field(
+        default=None, validation_alias=AliasChoices("defaultEquipmentId", "default_equipment_id")
+    )
 
 
-@router.put("/{user_id}", response_model=UserOut)
-async def update_user(user_id: int, payload: UpdateUserIn, db: AsyncSession = Depends(get_db)):
-    user: User | None = await db.get(User, user_id)
+@router.patch("/me/preferences", response_model=UserOut)
+async def patch_preferences(
+    prefs: PreferencesPatch,
+    current_user_id: int = Depends(token_required),
+    db: AsyncSession = Depends(get_db),
+):
+    user: User | None = await db.get(User, current_user_id)
     if user is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
 
-    if payload.name is not None:
-        user.name = payload.name
-    if payload.email is not None:
-        user.email = payload.email
-    if payload.password:
-        user.password_hash = hash_password(payload.password)
-    if payload.brewery is not None:
-        user.brewery = payload.brewery
-    if payload.is_active is not None:
-        user.is_active = payload.is_active
-    if payload.weight_unit is not None:
-        user.weight_unit = payload.weight_unit
-    if payload.volume_unit is not None:
-        user.volume_unit = payload.volume_unit
+    if prefs.weight_unit is not None:
+        user.weight_unit = prefs.weight_unit
+    if prefs.volume_unit is not None:
+        user.volume_unit = prefs.volume_unit
+    if prefs.default_equipment_id is not None:
+        user.default_equipment_id = prefs.default_equipment_id
 
     await db.commit()
     await db.refresh(user)

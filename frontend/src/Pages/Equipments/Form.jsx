@@ -65,7 +65,7 @@ export default function NewEquipment() {
   useEffect(() => {
     const loadEquipment = async () => {
       if (!id) return;
-        const equipment = await fetchEquipmentById(user.token, recordUserId, id);
+        const equipment = await fetchEquipmentById(user.token, id);
 
         const mapV = (v) => toDisplayVolume(Number(v ?? 0), volumeUnit, volDecimals);
 

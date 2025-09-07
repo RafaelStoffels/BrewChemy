@@ -19,9 +19,9 @@ export function fetchEquipments(userToken, opts = {}) {
   );
 }
 
-export function fetchEquipmentById(userToken, recordUserId, id, opts = {}) {
+export function fetchEquipmentById(userToken, id, opts = {}) {
   return request(
-    api.get(`/api/equipments/${recordUserId}/${id}`, withAuth(userToken)),
+    api.get(`/api/equipments/${id}`, withAuth(userToken)),
     { fallback: 'Error loading equipment', ...opts },
   );
 }

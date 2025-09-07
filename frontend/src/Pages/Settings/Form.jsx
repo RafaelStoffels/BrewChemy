@@ -4,7 +4,7 @@ import { yupResolver } from '@hookform/resolvers/yup';
 
 import schema from './schema';
 // Services
-import { updateUser } from '../../services/users';
+import { updatePreferences } from '../../services/users';
 // Context
 import AuthContext from '../../context/AuthContext';
 // Styles
@@ -43,7 +43,8 @@ export default function SettingsForm() {
     const weight = (data.weight || 'g').toLowerCase();
     const volume = (data.volume || 'l').toLowerCase();
 
-    await updateUser(user.token, user.user_id, { weightUnit: weight, volumeUnit: volume });
+    await updatePreferences(user.token, { weightUnit: weight, volumeUnit: volume });
+
     updateUserLocal({ weightUnit: weight, volumeUnit: volume });
     reset({ weight, volume });
   };
