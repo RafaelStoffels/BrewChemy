@@ -1,4 +1,4 @@
-import React, { useEffect, useContext } from 'react';
+import React, { useEffect, useContext, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -15,6 +15,7 @@ import getFormTitle from '../../../utils/formTitle';
 import AuthContext from '../../../context/AuthContext';
 
 import '../../../Styles/crud.css';
+import '../../../Styles/skeleton.css';
 
 export default function NewMisc() {
   const { user } = useContext(AuthContext);
@@ -22,6 +23,7 @@ export default function NewMisc() {
   const navigate = useNavigate();
 
   const { isEditing, isView } = useFormMode();
+  const [isLoading, setIsLoading] = useState(!!id);
 
   const {
     register,
@@ -44,9 +46,10 @@ export default function NewMisc() {
 
   useEffect(() => {
     const loadMisc = async () => {
-      if (!id) return;
+      if (!id) { setIsLoading(false); return; }
 
       try {
+        setIsLoading(true);
         const misc = await fetchMiscById(user.token, recordUserId, id);
         reset({
           name: misc.name || '',
@@ -55,6 +58,8 @@ export default function NewMisc() {
         });
       } catch {
         navigate('/MiscList');
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -94,50 +99,71 @@ export default function NewMisc() {
         <section>
           <h1>{title}</h1>
         </section>
-        <div className="content">
-          <form id="formSubmit" onSubmit={handleSubmit(onValid, onError)}>
-            <div className="inputs-row">
-              <div className="input-field">
-                <label htmlFor="name">
-                  Name
-                  <input
-                    {...register('name')}
-                    disabled={isView}
-                    style={{ width: '430px' }}
-                  />
-                </label>
+        <div className="content" aria-busy={isLoading}>
+          {isLoading ? (
+            <div className="sk sk-card" style={{ padding: 16 }}>
+              <div className="inputs-row">
+                <div className="input-field" style={{ width: 430 }}>
+                  <div className="sk-line w60" style={{ height: 12, marginBottom: 8 }} />
+                  <div className="sk-line w80" style={{ height: 36 }} />
+                </div>
+                <div className="input-field" style={{ width: 220 }}>
+                  <div className="sk-line w40" style={{ height: 12, marginBottom: 8 }} />
+                  <div className="sk-line w80" style={{ height: 36 }} />
+                </div>
               </div>
-              <div className="input-field">
-                <label htmlFor="type">
-                  Type
-                  <select
-                    {...register('type')}
-                    disabled={isView}
-                  >
-                    <option value="Flavor">Flavor</option>
-                    <option value="Fining">Fining</option>
-                    <option value="Herb">Herb</option>
-                    <option value="Spice">Spice</option>
-                    <option value="Water Agent">Water Agent</option>
-                    <option value="Other">Other</option>
-                  </select>
-                </label>
+              <div className="inputs-row" style={{ marginTop: 16 }}>
+                <div className="input-field" style={{ width: '100%' }}>
+                  <div className="sk-line w40" style={{ height: 12, marginBottom: 8 }} />
+                  <div className="sk-line w80" style={{ height: 90 }} />
+                </div>
               </div>
             </div>
-            <div className="inputs-row">
-              <div className="input-field">
-                <label htmlFor="description">
-                  Description
-                  <textarea
-                    {...register('description')}
-                    disabled={isView}
-                  />
-                </label>
+          ) : (
+            <form id="formSubmit" onSubmit={handleSubmit(onValid, onError)}>
+              <div className="inputs-row">
+                <div className="input-field">
+                  <label htmlFor="name">
+                    Name
+                    <input
+                      {...register('name')}
+                      disabled={isView}
+                      style={{ width: '430px' }}
+                    />
+                  </label>
+                </div>
+                <div className="input-field">
+                  <label htmlFor="type">
+                    Type
+                    <select
+                      {...register('type')}
+                      disabled={isView}
+                    >
+                      <option value="Flavor">Flavor</option>
+                      <option value="Fining">Fining</option>
+                      <option value="Herb">Herb</option>
+                      <option value="Spice">Spice</option>
+                      <option value="Water Agent">Water Agent</option>
+                      <option value="Other">Other</option>
+                    </select>
+                  </label>
+                </div>
               </div>
-            </div>
-          </form>
+              <div className="inputs-row">
+                <div className="input-field">
+                  <label htmlFor="description">
+                    Description
+                    <textarea
+                      {...register('description')}
+                      disabled={isView}
+                    />
+                  </label>
+                </div>
+              </div>
+            </form>
+          )}
         </div>
-        {!isView && (
+        {!isView && !isLoading && (
           <LoadingButton
             form="formSubmit"
             type="submit"

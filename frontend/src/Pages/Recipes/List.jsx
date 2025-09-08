@@ -13,19 +13,25 @@ export default function RecipeList() {
   const { user } = useContext(AuthContext);
   const [itemList, setItemList] = useState([]);
 
+  const [loading, setLoading] = useState(true);
+  const [isFetching, setIsFetching] = useState(false);
   const navigate = useNavigate();
 
   const onSearch = async (term) => {
+    if (!user?.token) return;
+    setIsFetching(true);
     try {
       const response = await searchRecipes(user.token, term);
-
       if (Array.isArray(response) && response.length === 0) {
+        setItemList([]);
         showInfoToast('Data not found');
       } else {
         setItemList(response);
       }
     } catch (err) {
       showErrorToast(`Error: ${err}`);
+    } finally {
+      setIsFetching(false);
     }
   };
 
@@ -71,19 +77,22 @@ export default function RecipeList() {
   useAuthRedirect(user);
 
   useEffect(() => {
+    let active = true;
     const loadItems = async () => {
       try {
-        if (!user?.token) return;
-
+        if (!user?.token) { setLoading(false); return; }
+        setLoading(true);
         const data = await fetchRecipes(user.token);
-        setItemList(data);
+        if (active) setItemList(data);
       } catch (err) {
         showErrorToast('Error loading recipes');
+      } finally {
+        if (active) setLoading(false);
       }
     };
-
     loadItems();
-  }, [user]);
+    return () => { active = false; };
+  }, [user?.token]);
 
   return (
     <ItemListPage
@@ -94,6 +103,8 @@ export default function RecipeList() {
       onUpdate={onUpdate}
       onDelete={onDelete}
       renderItem={renderItem}
+      isLoading={loading}
+      isFetching={isFetching}
       addNewRoute="/Recipes/new"
     />
   );

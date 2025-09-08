@@ -1,4 +1,4 @@
-import React, { useEffect, useContext, useMemo } from 'react';
+import React, { useEffect, useContext, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -24,6 +24,7 @@ import AuthContext from '../../context/AuthContext';
 import { toDisplayVolume, toLiters } from '../../utils/displayUnits';
 
 import '../../Styles/crud.css';
+import '../../Styles/skeleton.css';
 
 export default function NewEquipment() {
   const { user } = useContext(AuthContext);
@@ -31,6 +32,7 @@ export default function NewEquipment() {
   const navigate = useNavigate();
 
   const { isEditing, isView } = useFormMode();
+  const [isLoading, setIsLoading] = useState(!!id);
 
   const volumeUnit = useMemo(
     () => (user?.volumeUnit === 'gal' ? 'gal' : 'L'),
@@ -64,12 +66,13 @@ export default function NewEquipment() {
 
   useEffect(() => {
     const loadEquipment = async () => {
-      if (!id) return;
-        const equipment = await fetchEquipmentById(user.token, id);
-
-        const mapV = (v) => toDisplayVolume(Number(v ?? 0), volumeUnit, volDecimals);
+      if (!id) { setIsLoading(false); return; }
 
       try {
+        setIsLoading(true);
+        const equipment = await fetchEquipmentById(user.token, id);
+        const mapV = (v) => toDisplayVolume(Number(v ?? 0), volumeUnit, volDecimals);
+
         reset({
           name: equipment.name || '',
           description: equipment.description || '',
@@ -84,11 +87,13 @@ export default function NewEquipment() {
         });
       } catch {
         navigate('/EquipmentList');
+      } finally {
+        setIsLoading(false);
       }
     };
 
     loadEquipment();
-  }, [id, user, navigate, recordUserId, reset]);
+  }, [id, user?.token, navigate, reset, volumeUnit]);
 
   const title = getFormTitle('Equipment', isEditing, isView);
 
@@ -128,123 +133,179 @@ export default function NewEquipment() {
       <section>
         <h1>{title}</h1>
       </section>
-      <div className="content">
-        <form id="formSubmit" onSubmit={handleSubmit(onValid, onError)}>
-          <div className="inputs-row">
-            <div className="input-field">
-              <label htmlFor="name">Name</label>
-              <input
-                id="name"
-                type="text"
-                {...register('name')}
-                disabled={isView}
-              />
+      <div className="content" aria-busy={isLoading}>
+        {isLoading ? (
+          <div className="sk sk-card" style={{ padding: 16 }}>
+            <div className="inputs-row">
+              <div className="input-field" style={{ width: 300 }}>
+                <div className="sk-line w60" style={{ height: 12, marginBottom: 8 }} />
+                <div className="sk-line w80" style={{ height: 36 }} />
+              </div>
+              <div className="input-field" style={{ width: 220 }}>
+                <div className="sk-line w40" style={{ height: 12, marginBottom: 8 }} />
+                <div className="sk-line w80" style={{ height: 36 }} />
+              </div>
             </div>
-            <div className="input-field">
-              <label htmlFor="efficiency">Efficiency</label>
-              <input
-                id="efficiency"
-                type="number"
-                {...register('efficiency')}
-                disabled={isView}
-              />
+
+            <div className="inputs-row" style={{ marginTop: 16 }}>
+              <div className="input-field" style={{ width: '100%' }}>
+                <div className="sk-line w40" style={{ height: 12, marginBottom: 8 }} />
+                <div className="sk-line w80" style={{ height: 90 }} />
+              </div>
             </div>
-          </div>
-          <div className="inputs-row">
-            <div className="input-field">
-              <label htmlFor="description">Description</label>
-              <textarea
-                id="description"
-                {...register('description')}
-                disabled={isView}
-              />
+
+            <div className="inputs-row" style={{ marginTop: 16 }}>
+              <div className="input-field" style={{ width: 220 }}>
+                <div className="sk-line w40" style={{ height: 12, marginBottom: 8 }} />
+                <div className="sk-line w80" style={{ height: 36 }} />
+              </div>
+              <div className="input-field" style={{ width: 220 }}>
+                <div className="sk-line w60" style={{ height: 12, marginBottom: 8 }} />
+                <div className="sk-line w80" style={{ height: 36 }} />
+              </div>
+              <div className="input-field" style={{ width: 220 }}>
+                <div className="sk-line w60" style={{ height: 12, marginBottom: 8 }} />
+                <div className="sk-line w80" style={{ height: 36 }} />
+              </div>
             </div>
-          </div>
-          <div className="inputs-row">
-            <div className="input-field">
-              <label htmlFor="batchVolume">Batch Volume ({volumeLabel})</label>
-              <input
-                id="batchVolume"
-                type="number"
-                step="any"
-                {...register('batchVolume')}
-                disabled={isView}
-              />
-            </div>
-            <div className="input-field">
-              <label htmlFor="batchTime">Batch Time (minutes)</label>
-              <input
-                id="batchTime"
-                type="number"
-                {...register('batchTime')}
-                disabled={isView}
-              />
-            </div>
-            <div className="input-field">
-              <label htmlFor="boilTime">Boil Time (minutes)</label>
-              <input
-                id="boilTime"
-                type="number"
-                {...register('boilTime')}
-                disabled={isView}
-              />
+
+            <div className="inputs-row" style={{ marginTop: 16 }}>
+              <div className="input-field" style={{ width: 220 }}>
+                <div className="sk-line w60" style={{ height: 12, marginBottom: 8 }} />
+                <div className="sk-line w80" style={{ height: 36 }} />
+              </div>
+              <div className="input-field" style={{ width: 220 }}>
+                <div className="sk-line w60" style={{ height: 12, marginBottom: 8 }} />
+                <div className="sk-line w80" style={{ height: 36 }} />
+              </div>
+              <div className="input-field" style={{ width: 220 }}>
+                <div className="sk-line w60" style={{ height: 12, marginBottom: 8 }} />
+                <div className="sk-line w80" style={{ height: 36 }} />
+              </div>
+              <div className="input-field" style={{ width: 220 }}>
+                <div className="sk-line w60" style={{ height: 12, marginBottom: 8 }} />
+                <div className="sk-line w80" style={{ height: 36 }} />
+              </div>
             </div>
           </div>
-          <div className="inputs-row">
-            <div className="input-field">
-              <label htmlFor="boilTemperature">Boil Temper. (celsius)</label>
-              <input
-                id="boilTemperature"
-                type="number"
-                {...register('boilTemperature')}
-                disabled={isView}
-              />
+        ) : (
+          <form id="formSubmit" onSubmit={handleSubmit(onValid, onError)}>
+            <div className="inputs-row">
+              <div className="input-field">
+                <label htmlFor="name">Name</label>
+                <input
+                  id="name"
+                  type="text"
+                  {...register('name')}
+                  disabled={isView}
+                />
+              </div>
+              <div className="input-field">
+                <label htmlFor="efficiency">Efficiency</label>
+                <input
+                  id="efficiency"
+                  type="number"
+                  {...register('efficiency')}
+                  disabled={isView}
+                />
+              </div>
             </div>
-            <div className="input-field">
-              <label htmlFor="boilOff">
-                Boil Off ({volumeLabel})
-                <HelpHint text="Boil off is the portion of wort that evaporates during the boil." />
-              </label> 
-              <input
-                id="boilOff"
-                type="number"
-                step="any"
-                {...register('boilOff')}
-                disabled={isView}
-              />
+            <div className="inputs-row">
+              <div className="input-field">
+                <label htmlFor="description">Description</label>
+                <textarea
+                  id="description"
+                  {...register('description')}
+                  disabled={isView}
+                />
+              </div>
             </div>
-            <div className="input-field">
-              <label htmlFor="trubLoss">
-                Trub Loss ({volumeLabel})
-                <HelpHint text="Trub loss is the wort volume lost to the sediment (hops, proteins, 
-                                and other particles) that settles at the bottom of the kettle" />
-              </label>
-              <input
-                id="trubLoss"
-                type="number"
-                step="any"
-                {...register('trubLoss')}
-                disabled={isView}
-              />
+            <div className="inputs-row">
+              <div className="input-field">
+                <label htmlFor="batchVolume">Batch Volume ({volumeLabel})</label>
+                <input
+                  id="batchVolume"
+                  type="number"
+                  step="any"
+                  {...register('batchVolume')}
+                  disabled={isView}
+                />
+              </div>
+              <div className="input-field">
+                <label htmlFor="batchTime">Batch Time (minutes)</label>
+                <input
+                  id="batchTime"
+                  type="number"
+                  {...register('batchTime')}
+                  disabled={isView}
+                />
+              </div>
+              <div className="input-field">
+                <label htmlFor="boilTime">Boil Time (minutes)</label>
+                <input
+                  id="boilTime"
+                  type="number"
+                  {...register('boilTime')}
+                  disabled={isView}
+                />
+              </div>
             </div>
-            <div className="input-field">
-              <label htmlFor="deadSpace">
-                Dead Space ({volumeLabel})
-                <HelpHint text="Dead space is the wort volume that remains trapped in the equipment 
-                               (valves, pipes, or bottom of the kettle) and cannot be drained." />
-              </label>
-              <input
-                id="deadSpace"
-                type="number"
-                step="any"
-                {...register('deadSpace')}
-                disabled={isView}
-              />
+            <div className="inputs-row">
+              <div className="input-field">
+                <label htmlFor="boilTemperature">Boil Temper. (celsius)</label>
+                <input
+                  id="boilTemperature"
+                  type="number"
+                  {...register('boilTemperature')}
+                  disabled={isView}
+                />
+              </div>
+              <div className="input-field">
+                <label htmlFor="boilOff">
+                  Boil Off ({volumeLabel})
+                  <HelpHint text="Boil off is the portion of wort that evaporates during the boil." />
+                </label>
+                <input
+                  id="boilOff"
+                  type="number"
+                  step="any"
+                  {...register('boilOff')}
+                  disabled={isView}
+                />
+              </div>
+              <div className="input-field">
+                <label htmlFor="trubLoss">
+                  Trub Loss ({volumeLabel})
+                  <HelpHint text="Trub loss is the wort volume lost to the sediment (hops, proteins, 
+                                  and other particles) that settles at the bottom of the kettle" />
+                </label>
+                <input
+                  id="trubLoss"
+                  type="number"
+                  step="any"
+                  {...register('trubLoss')}
+                  disabled={isView}
+                />
+              </div>
+              <div className="input-field">
+                <label htmlFor="deadSpace">
+                  Dead Space ({volumeLabel})
+                  <HelpHint text="Dead space is the wort volume that remains trapped in the equipment 
+                                 (valves, pipes, or bottom of the kettle) and cannot be drained." />
+                </label>
+                <input
+                  id="deadSpace"
+                  type="number"
+                  step="any"
+                  {...register('deadSpace')}
+                  disabled={isView}
+                />
+              </div>
             </div>
-          </div>
-        </form>
+          </form>
+        )}
       </div>
-      {!isView && (
+      {!isView && !isLoading && (
         <LoadingButton
           form="formSubmit"
           type="submit"
