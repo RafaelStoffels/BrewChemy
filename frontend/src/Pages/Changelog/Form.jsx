@@ -17,6 +17,12 @@ export default function NewEquipment() {
         <h1>Changelog</h1>
       </section>
       <div className="content">
+        <b>Sep 09, 2025 (v1.8.0)</b>
+        <br />
+        <br />
+        ⏳ Added loading indicators across the app. You’ll now see a spinner or skeleton whenever data is fetching.
+        <br />
+        <br />
         <b>Sep 08, 2025 (v1.7.0)</b>
         <br />
         <br />

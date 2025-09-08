@@ -1,4 +1,4 @@
-import React, { useEffect, useContext } from 'react';
+import React, { useEffect, useContext, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -23,6 +23,7 @@ import AuthContext from '../../../context/AuthContext';
 
 // Styles
 import '../../../Styles/crud.css';
+import '../../../Styles/skeleton.css';
 
 export default function NewFermentable() {
   const { user } = useContext(AuthContext);
@@ -30,6 +31,7 @@ export default function NewFermentable() {
   const navigate = useNavigate();
 
   const { isEditing, isView } = useFormMode();
+  const [isLoading, setIsLoading] = useState(!!id);
 
   const {
     register,
@@ -55,9 +57,10 @@ export default function NewFermentable() {
 
   useEffect(() => {
     const loadFermentable = async () => {
-      if (!id) return;
+      if (!id) { setIsLoading(false); return; }
 
       try {
+        setIsLoading(true);
         const fermentable = await fetchFermentableById(user.token, recordUserId, id);
         reset({
           name: fermentable.name || '',
@@ -71,6 +74,8 @@ export default function NewFermentable() {
         });
       } catch {
         navigate('/FermentableList');
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -109,83 +114,118 @@ export default function NewFermentable() {
       <section>
         <h1>{title}</h1>
       </section>
-      <div className="content">
-        <form id="formSubmit" onSubmit={handleSubmit(onValid, onError)}>
-          <div className="inputs-row">
-            <div className="input-field">
-              <label htmlFor="name">Name</label>
-              <input
-                id="name"
-                {...register('name')}
-                disabled={isView}
-                style={{ width: '430px' }}
-              />
+      <div className="content" aria-busy={isLoading}>
+        {isLoading ? (
+          <div className="sk sk-card" style={{ padding: 16 }}>
+            <div className="inputs-row">
+              <div className="input-field" style={{ width: 430 }}>
+                <div className="sk-line w60" style={{ height: 12, marginBottom: 8 }} />
+                <div className="sk-line w80" style={{ height: 36 }} />
+              </div>
+              <div className="input-field" style={{ flex: 1 }}>
+                <div className="sk-line w40" style={{ height: 12, marginBottom: 8 }} />
+                <div className="sk-line w80" style={{ height: 36 }} />
+              </div>
             </div>
-            <div className="input-field">
-              <label htmlFor="supplier">Supplier</label>
-              <input
-                id="supplier"
-                {...register('supplier')}
-                disabled={isView}
-              />
+            <div className="inputs-row" style={{ marginTop: 16 }}>
+              <div className="input-field" style={{ width: '100%' }}>
+                <div className="sk-line w40" style={{ height: 12, marginBottom: 8 }} />
+                <div className="sk-line w80" style={{ height: 90 }} />
+              </div>
+            </div>
+            <div className="inputs-row" style={{ marginTop: 16 }}>
+              <div className="input-field" style={{ width: 220 }}>
+                <div className="sk-line w40" style={{ height: 12, marginBottom: 8 }} />
+                <div className="sk-line w80" style={{ height: 36 }} />
+              </div>
+              <div className="input-field" style={{ width: 220 }}>
+                <div className="sk-line w40" style={{ height: 12, marginBottom: 8 }} />
+                <div className="sk-line w80" style={{ height: 36 }} />
+              </div>
+              <div className="input-field" style={{ width: 220 }}>
+                <div className="sk-line w40" style={{ height: 12, marginBottom: 8 }} />
+                <div className="sk-line w80" style={{ height: 36 }} />
+              </div>
             </div>
           </div>
-          <div className="inputs-row">
-            <div className="input-field">
-              <label htmlFor="description">Description</label>
-              <textarea
-                id="description"
-                {...register('description')}
-                disabled={isView}
-              />
+        ) : (
+          <form id="formSubmit" onSubmit={handleSubmit(onValid, onError)}>
+            <div className="inputs-row">
+              <div className="input-field">
+                <label htmlFor="name">Name</label>
+                <input
+                  id="name"
+                  {...register('name')}
+                  disabled={isView}
+                  style={{ width: '430px' }}
+                />
+              </div>
+              <div className="input-field">
+                <label htmlFor="supplier">Supplier</label>
+                <input
+                  id="supplier"
+                  {...register('supplier')}
+                  disabled={isView}
+                />
+              </div>
             </div>
-          </div>
-          <div className="inputs-row">
-            <div className="input-field">
-              <label htmlFor="type">Type</label>
-              <select
-                id="type"
-                {...register('type')}
-                disabled={isView}
-              >
-                <option value="Base">Base</option>
-                <option value="Specialty">Specialty</option>
-                <option value="Adjunct">Adjunct</option>
-              </select>
+            <div className="inputs-row">
+              <div className="input-field">
+                <label htmlFor="description">Description</label>
+                <textarea
+                  id="description"
+                  {...register('description')}
+                  disabled={isView}
+                />
+              </div>
             </div>
-            <div className="input-field">
-              <label htmlFor="ebc">
-                Color Degree
-                <HelpHint text="Color degree indicates the beer’s color contributed by the malt, 
+            <div className="inputs-row">
+              <div className="input-field">
+                <label htmlFor="type">Type</label>
+                <select
+                  id="type"
+                  {...register('type')}
+                  disabled={isView}
+                >
+                  <option value="Base">Base</option>
+                  <option value="Specialty">Specialty</option>
+                  <option value="Adjunct">Adjunct</option>
+                </select>
+              </div>
+              <div className="input-field">
+                <label htmlFor="ebc">
+                  Color Degree
+                  <HelpHint text="Color degree indicates the beer’s color contributed by the malt, 
                                measured in EBC or SRM units, from pale to dark." />
-              </label>
-              <input
-                id="ebc"
-                type="number"
-                step="any"
-                {...register('ebc')}
-                disabled={isView}
-              />
-            </div>
-            <div className="input-field">
-              <label htmlFor="potentialExtract">
-                Potential Extract
-                <HelpHint text="Potential extract is the amount of fermentable sugars the malt can provide,
+                </label>
+                <input
+                  id="ebc"
+                  type="number"
+                  step="any"
+                  {...register('ebc')}
+                  disabled={isView}
+                />
+              </div>
+              <div className="input-field">
+                <label htmlFor="potentialExtract">
+                  Potential Extract
+                  <HelpHint text="Potential extract is the amount of fermentable sugars the malt can provide,
                                 usually expressed as specific gravity (e.g., 1.037).
                                 It indicates the malt’s capacity to contribute to alcohol production." />
-              </label>
-              <input
-                id="potentialExtract"
-                type="number"
-                step="any"
-                {...register('potentialExtract')}
-                disabled={isView}
-              />
+                </label>
+                <input
+                  id="potentialExtract"
+                  type="number"
+                  step="any"
+                  {...register('potentialExtract')}
+                  disabled={isView}
+                />
+              </div>
             </div>
-          </div>
-        </form>
+          </form>
+        )}
       </div>
-      {!isView && (
+      {!isView && !isLoading && (
         <LoadingButton
           form="formSubmit"
           type="submit"
