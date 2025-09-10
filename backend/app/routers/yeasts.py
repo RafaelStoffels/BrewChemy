@@ -176,7 +176,7 @@ async def delete_yeast(
         raise HTTPException(status_code=404, detail="Yeast not found")
 
     # Do not allow deleting admin/official records
-    if item.user_id == ADMIN_ID:
+    if item.user_id == 1 and current_user_id != ADMIN_ID:
         raise HTTPException(status_code=404, detail="Cannot delete official record")
 
     if item.user_id != current_user_id:
