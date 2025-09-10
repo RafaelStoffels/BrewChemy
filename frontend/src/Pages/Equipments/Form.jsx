@@ -28,7 +28,7 @@ import '../../Styles/skeleton.css';
 
 export default function NewEquipment() {
   const { user } = useContext(AuthContext);
-  const { recordUserId, id } = useParams();
+  const { id } = useParams();
   const navigate = useNavigate();
 
   const { isEditing, isView } = useFormMode();
@@ -106,7 +106,6 @@ export default function NewEquipment() {
       boilOff: toL(data.boilOff),
       trubLoss: toL(data.trubLoss),
       deadSpace: toL(data.deadSpace),
-      itemUserId: recordUserId,
     };
 
     try {

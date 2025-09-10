@@ -19,16 +19,16 @@ export function fetchMisc(userToken, opts = {}) {
   );
 }
 
-export function fetchMiscById(userToken, recordUserId, id, opts = {}) {
+export function fetchMiscById(userToken, id, opts = {}) {
   return request(
-    api.get(`/api/miscs/${recordUserId}/${id}`, withAuth(userToken)),
+    api.get(`/api/miscs/${id}`, withAuth(userToken)),
     { fallback: 'Error loading misc', ...opts },
   );
 }
 
-export function deleteMisc(userToken, recordUserId, id, opts = {}) {
+export function deleteMisc(userToken, id, opts = {}) {
   return request(
-    api.delete(`/api/miscs/${recordUserId}/${id}`, withAuth(userToken)),
+    api.delete(`/api/miscs/${id}`, withAuth(userToken)),
     { fallback: 'Error deleting misc', successMsg: 'Misc deleted successfully.', ...opts },
   );
 }

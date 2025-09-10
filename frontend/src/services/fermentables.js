@@ -19,16 +19,16 @@ export function fetchFermentables(userToken, opts = {}) {
   );
 }
 
-export function fetchFermentableById(userToken, recordUserId, id, opts = {}) {
+export function fetchFermentableById(userToken, id, opts = {}) {
   return request(
-    api.get(`/api/fermentables/${recordUserId}/${id}`, withAuth(userToken)),
+    api.get(`/api/fermentables/${id}`, withAuth(userToken)),
     { fallback: 'Error loading fermentable', ...opts },
   );
 }
 
-export function deleteFermentable(userToken, recordUserId, id, opts = {}) {
+export function deleteFermentable(userToken, id, opts = {}) {
   return request(
-    api.delete(`/api/fermentables/${recordUserId}/${id}`, withAuth(userToken)),
+    api.delete(`/api/fermentables/${id}`, withAuth(userToken)),
     { fallback: 'Error deleting fermentable', successMsg: 'Fermentable deleted successfully.', ...opts },
   );
 }

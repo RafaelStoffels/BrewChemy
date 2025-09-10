@@ -18,7 +18,6 @@ class HopCreate(BaseModel):
 
 
 class HopUpdate(BaseModel):
-    itemUserId: int
     name: Optional[str] = None
     supplier: Optional[str] = None
     alpha_acid_content: Optional[float] = Field(default=None, alias="alphaAcidContent")

@@ -107,12 +107,17 @@ export default function Logon() {
 
         <div className="bottom-div">
           <form onSubmit={handleSubmit}>
-            <h1>Login</h1>
-
             <label htmlFor="email">
               E-mail
               <input
                 id="email"
+                name="email"
+                type="email"
+                autoComplete="email"
+                autoCapitalize="none"
+                autoCorrect="off"
+                spellCheck={false}
+                required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
@@ -122,7 +127,11 @@ export default function Logon() {
               Password
               <input
                 id="password"
+                name="password"
                 type="password"
+                autoComplete="current-password"
+                required
+                minLength={8}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />

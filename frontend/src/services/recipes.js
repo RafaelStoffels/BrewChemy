@@ -10,16 +10,10 @@ export function fetchRecipes(userToken, opts = {}) {
 }
 
 export function fetchRecipeById(userToken, recipeId, opts = {}) {
+  console.log(userToken, recipeId);
   return request(
     api.get(`/api/recipes/${recipeId}`, withAuth(userToken)),
     { fallback: 'Error loading recipe', ...opts },
-  );
-}
-
-export function deleteRecipe(userToken, itemId, opts = {}) {
-  return request(
-    api.delete(`/api/recipes/${itemId}`, withAuth(userToken)),
-    { fallback: 'Error deleting recipe', successMsg: 'Recipe deleted successfully.', ...opts },
   );
 }
 
@@ -44,5 +38,12 @@ export function updateRecipe(userToken, id, dataInput, opts = {}) {
   return request(
     api.put(`/api/recipes/${id}`, dataInput, withAuth(userToken)),
     { fallback: 'Error updating recipe', successMsg: 'Recipe saved successfully.', ...opts },
+  );
+}
+
+export function deleteRecipe(userToken, itemId, opts = {}) {
+  return request(
+    api.delete(`/api/recipes/${itemId}`, withAuth(userToken)),
+    { fallback: 'Error deleting recipe', successMsg: 'Recipe deleted successfully.', ...opts },
   );
 }

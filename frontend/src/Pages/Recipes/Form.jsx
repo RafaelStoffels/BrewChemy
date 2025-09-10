@@ -43,7 +43,7 @@ import './Form.css';
 import '../../Styles/skeleton.css';
 
 export default function NewRecipe() {
-  const { user } = useContext(AuthContext);
+  const { user, updateUserLocal } = useContext(AuthContext);
   const { id } = useParams();
   const generateId = () => Date.now();
 
@@ -208,8 +208,13 @@ export default function NewRecipe() {
     });
 
     if (changeDefaultEquipment.isConfirmed) {
-      await updatePreferences(user.token, { defaultEquipmentId: selectedItem.id });
-      showInfoToast('Default equipment updated');
+      try{
+        await updatePreferences(user.token, { defaultEquipmentId: selectedItem.id });
+        updateUserLocal({ defaultEquipmentId: selectedItem.id });
+        showInfoToast('Default equipment updated');
+      } catch (error) {
+        //
+      }
     }
   };
 

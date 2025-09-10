@@ -34,8 +34,8 @@ export default function HopList() {
     }
   };
 
-  const onDetails = (userId, id) => navigate(`/Hops/${userId}/${id}/details`);
-  const onUpdate = (userId, id) => navigate(`/Hops/${userId}/${id}/edit`);
+  const onDetails = (id) => navigate(`/Hops/${id}/details`);
+  const onUpdate = (id) => navigate(`/Hops/${id}/edit`);
 
   const onDelete = async (id) => {
     if (!user?.token) return;

@@ -36,8 +36,8 @@ export default function EquipmentList() {
     }
   };
 
-  const onDetails = (userId, id) => navigate(`/Equipments/${userId}/${id}/details`);
-  const onUpdate = (userId, id) => navigate(`/Equipments/${userId}/${id}/edit`);
+  const onDetails = (id) => navigate(`/Equipments/${id}/details`);
+  const onUpdate = (id) => navigate(`/Equipments/${id}/edit`);
 
   const onDelete = async (id) => {
     if (!user?.token) return;

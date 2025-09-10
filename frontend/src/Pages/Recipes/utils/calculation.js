@@ -30,13 +30,15 @@ export const calculateOG = (recipe) => {
 };
 
 export const calculateFG = (recipe, OGResult) => {
-  let attenuation = 100;
+  let attenuation = 75;
 
-  (recipe.recipeYeasts || []).forEach((yeast) => {
-    if (yeast.attenuation < attenuation) {
-      attenuation = yeast.attenuation;
-    }
-  });
+  if (recipe.recipeYeasts && recipe.recipeYeasts.length > 0) {
+    attenuation = Math.max(
+      ...recipe.recipeYeasts
+        .filter((yeast) => yeast.attenuation)
+        .map((yeast) => yeast.attenuation)
+    );
+  }
 
   const FG = OGResult - ((OGResult - 1) * (attenuation / 100));
   return FG.toFixed(3);

@@ -19,7 +19,7 @@ import '../../../Styles/skeleton.css';
 
 export default function NewMisc() {
   const { user } = useContext(AuthContext);
-  const { recordUserId, id } = useParams();
+  const { id } = useParams();
   const navigate = useNavigate();
 
   const { isEditing, isView } = useFormMode();
@@ -50,7 +50,7 @@ export default function NewMisc() {
 
       try {
         setIsLoading(true);
-        const misc = await fetchMiscById(user.token, recordUserId, id);
+        const misc = await fetchMiscById(user.token, id);
         reset({
           name: misc.name || '',
           description: misc.description || '',
@@ -64,14 +64,13 @@ export default function NewMisc() {
     };
 
     loadMisc();
-  }, [id, user, navigate, recordUserId, reset]);
+  }, [id, user, navigate, reset]);
 
   const title = getFormTitle('Misc', isEditing, isView);
 
   const onValid = async (data) => {
     const payload = {
       ...data,
-      itemUserId: recordUserId,
     };
 
     try {

@@ -10,7 +10,6 @@ class MiscCreate(BaseModel):
 
 
 class MiscUpdate(BaseModel):
-    itemUserId: int
     name: Optional[str] = None
     description: Optional[str] = None
     type: Optional[str] = None

@@ -34,8 +34,8 @@ export default function YeastList() {
     }
   };
 
-  const onDetails = (userId, id) => navigate(`/Yeasts/${userId}/${id}/details`);
-  const onUpdate = (userId, id) => navigate(`/Yeasts/${userId}/${id}/edit`);
+  const onDetails = (id) => navigate(`/Yeasts/${id}/details`);
+  const onUpdate = (id) => navigate(`/Yeasts/${id}/edit`);
 
   const onDelete = async (id) => {
     if (!user?.token) return;

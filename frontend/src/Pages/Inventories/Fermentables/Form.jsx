@@ -27,7 +27,7 @@ import '../../../Styles/skeleton.css';
 
 export default function NewFermentable() {
   const { user } = useContext(AuthContext);
-  const { recordUserId, id } = useParams();
+  const { id } = useParams();
   const navigate = useNavigate();
 
   const { isEditing, isView } = useFormMode();
@@ -61,7 +61,7 @@ export default function NewFermentable() {
 
       try {
         setIsLoading(true);
-        const fermentable = await fetchFermentableById(user.token, recordUserId, id);
+        const fermentable = await fetchFermentableById(user.token, id);
         reset({
           name: fermentable.name || '',
           supplier: fermentable.supplier || '',
@@ -80,14 +80,13 @@ export default function NewFermentable() {
     };
 
     loadFermentable();
-  }, [id, user, navigate, recordUserId, reset]);
+  }, [id, user, navigate, reset]);
 
   const title = getFormTitle('Fermentable', isEditing, isView);
 
   const onValid = async (data) => {
     const payload = {
       ...data,
-      itemUserId: recordUserId,
     };
 
     try {
