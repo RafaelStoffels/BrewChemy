@@ -34,13 +34,14 @@ export default function FermentableList() {
     }
   };
 
-  const onDetails = (userId, id) => navigate(`/Fermentables/${userId}/${id}/details`);
-  const onUpdate = (userId, id) => navigate(`/Fermentables/${userId}/${id}/edit`);
+  const onDetails = (id) => navigate(`/Fermentables/${id}/details`);
+  const onUpdate = (id) => navigate(`/Fermentables/${id}/edit`);
 
   const onDelete = async (id) => {
+    console.log(id);
     if (!user?.token) return;
     try {
-      await deleteFermentable(user.token, id);
+  +   await deleteFermentable(user.token, id);
       setItemList((prev) => prev.filter((item) => item.id !== id));
     } catch (err) {
       showErrorToast(`${err}`);

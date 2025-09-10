@@ -2,7 +2,9 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { addUser } from '../../../services/users';
-import { showErrorToast } from '../../../utils/notifications';
+import { showErrorToast, showSuccessToast } from '../../../utils/notifications';
+// Opcional (recomendado): npm i zxcvbn
+// import zxcvbn from 'zxcvbn';
 
 import '../../../Styles/crud.css';
 
@@ -14,54 +16,59 @@ export default function NewAccount() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [brewery, setBrewery] = useState('');
-  const [passwordError, setPasswordError] = useState('');
-  const [confirmPasswordError, setConfirmPasswordError] = useState('');
+  const [submitting, setSubmitting] = useState(false);
 
-  const validatePassword = (passwordPar) => {
-    const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d@$!%*?&]{8,}$/;
-    return regex.test(passwordPar);
+  // Política sugerida: >= 12 chars e força mínima (opcional com zxcvbn)
+  const isPasswordStrongEnough = (pwd) => {
+    if (!pwd || pwd.trim().length < 10) return false;
+    // Se usar zxcvbn:
+    // const { score } = zxcvbn(pwd);
+    // return score >= 3; // 0..4
+    // Sem zxcvbn: ao menos 12 não-espaços:
+    return /^\S{10,}$/.test(pwd);
   };
 
-  const validateEmail = (emailPar) => {
-    const regex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-    return regex.test(emailPar);
-  };
+  const normalizeEmail = (e) => e.trim().toLowerCase();
 
   async function handleSubmit(e) {
     e.preventDefault();
+    if (submitting) return;
+
+    const normalizedEmail = normalizeEmail(email);
 
     if (password !== confirmPassword) {
       showErrorToast('Passwords do not match!');
       return;
     }
-    setConfirmPasswordError('');
 
-    if (!validatePassword(password)) {
-      showErrorToast(
-        'Password must be at least 8 characters long, '
-        + 'with a number and a mix of uppercase and lowercase letters.',
-      );
+    if (!isPasswordStrongEnough(password)) {
+      showErrorToast('Use at least 10 characters and avoid common/weak passwords.');
       return;
     }
-    setPasswordError('');
 
-    if (!validateEmail(email)) {
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)) {
       showErrorToast('Please enter a valid email address.');
       return;
     }
 
     const data = {
-      name,
-      email,
-      brewery,
-      password,
+      name: name.trim(),
+      email: normalizedEmail,
+      brewery: brewery.trim() || undefined,
+      password, // nunca logue isso!
     };
 
     try {
+      setSubmitting(true);
       await addUser(data);
+      // feedback rápido
+      // showSuccessToast('Check your inbox to confirm your account.');
       navigate('/EmailSent');
     } catch (err) {
+      showErrorToast('Could not create the account. Please try again.');
       navigate('/');
+    } finally {
+      setSubmitting(false);
     }
   }
 
@@ -69,15 +76,19 @@ export default function NewAccount() {
     <div className="crud-container">
       <h1>Create Account</h1>
       <div className="content">
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} autoComplete="on" noValidate>
           <div className="inputs-row">
             <div className="input-field">
               <label htmlFor="name">
                 Full Name / Nickname *
                 <input
+                  id="name"
+                  name="name"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   required
+                  autoComplete="name"
+                  spellCheck={false}
                 />
               </label>
             </div>
@@ -87,10 +98,16 @@ export default function NewAccount() {
               <label htmlFor="email">
                 Email Address *
                 <input
+                  id="email"
+                  name="email"
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
+                  autoCapitalize="none"
+                  autoCorrect="off"
+                  spellCheck={false}
+                  autoComplete="email"
                 />
               </label>
             </div>
@@ -100,8 +117,11 @@ export default function NewAccount() {
               <label htmlFor="brewery">
                 Brewery
                 <input
+                  id="brewery"
+                  name="organization"
                   value={brewery}
                   onChange={(e) => setBrewery(e.target.value)}
+                  autoComplete="organization"
                 />
               </label>
             </div>
@@ -111,13 +131,16 @@ export default function NewAccount() {
               <label htmlFor="password">
                 Password *
                 <input
+                  id="password"
+                  name="new-password"
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
+                  autoComplete="new-password"
+                  minLength={12}
                 />
               </label>
-              {passwordError && <p className="error-message">{passwordError}</p>}
             </div>
           </div>
           <div className="inputs-row">
@@ -125,17 +148,25 @@ export default function NewAccount() {
               <label htmlFor="confirmPassword">
                 Confirm Password *
                 <input
+                  id="confirmPassword"
+                  name="confirm-password"
                   type="password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   required
+                  autoComplete="new-password"
+                  minLength={12}
                 />
               </label>
-              {confirmPasswordError && <p className="error-message">{confirmPasswordError}</p>}
             </div>
           </div>
-          <button type="submit" className="crud-save-button">
-            Create
+          <button
+            type="submit"
+            className="crud-save-button"
+            disabled={submitting}
+            aria-busy={submitting}
+          >
+            {submitting ? 'Creating…' : 'Create'}
           </button>
         </form>
       </div>

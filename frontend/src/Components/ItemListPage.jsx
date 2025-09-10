@@ -86,13 +86,13 @@ export default function ItemListPage({
                   <div className="item-details">{renderItem(item)}</div>
 
                   <div className="button-group">
-                    <button onClick={() => onDetails(item.userId, item.id)} type="button" className="icon-button" aria-label="Details">
+                    <button onClick={() => onDetails(item.id)} type="button" className="icon-button" aria-label="Details">
                       <FiBookOpen size={20} />
                     </button>
-                    <button onClick={() => onUpdate(item.userId, item.id)} type="button" className="icon-button" aria-label="Edit">
+                    <button onClick={() => onUpdate(item.id)} type="button" className="icon-button" aria-label="Edit">
                       <FiEdit size={20} />
                     </button>
-                    <button onClick={() => onDelete(item.userId, item.id)} type="button" className="icon-button" aria-label="Delete">
+                    <button onClick={() => onDelete(item.id)} type="button" className="icon-button" aria-label="Delete">
                       <FiTrash2 size={20} />
                     </button>
                   </div>

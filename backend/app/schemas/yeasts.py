@@ -40,7 +40,6 @@ class YeastCreate(BaseModel):
 
 
 class YeastUpdate(BaseModel):
-    itemUserId: int
     name: Optional[str] = None
     manufacturer: Optional[str] = None
     type: Optional[str] = None

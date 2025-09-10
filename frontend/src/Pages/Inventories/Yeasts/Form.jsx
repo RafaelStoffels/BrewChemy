@@ -22,7 +22,7 @@ import '../../../Styles/skeleton.css';
 
 export default function NewYeast() {
   const { user } = useContext(AuthContext);
-  const { recordUserId, id } = useParams();
+  const { id } = useParams();
   const navigate = useNavigate();
 
   const { isEditing, isView } = useFormMode();
@@ -59,7 +59,7 @@ export default function NewYeast() {
 
       try {
         setIsLoading(true);
-        const yeast = await fetchYeastById(user.token, recordUserId, id);
+        const yeast = await fetchYeastById(user.token, id);
         reset({
           name: yeast.name || '',
           manufacturer: yeast.manufacturer || '',
@@ -79,14 +79,13 @@ export default function NewYeast() {
     };
 
     loadYeast();
-  }, [id, user, navigate, recordUserId, reset]);
+  }, [id, user, navigate, reset]);
 
   const title = getFormTitle('Yeast', isEditing, isView);
 
   const onValid = async (data) => {
     const payload = {
       ...data,
-      itemUserId: recordUserId,
     };
 
     try {

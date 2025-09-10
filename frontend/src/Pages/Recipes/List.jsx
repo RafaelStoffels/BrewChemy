@@ -1,10 +1,16 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+// Components
 import ItemListPage from '../../Components/ItemListPage';
+
+// Hooks
 import useAuthRedirect from '../../hooks/useAuthRedirect';
 
+// Services
 import { fetchRecipes, deleteRecipe, searchRecipes } from '../../services/recipes';
+
+// Utils
 import { showErrorToast, showInfoToast } from '../../utils/notifications';
 
 import AuthContext from '../../context/AuthContext';

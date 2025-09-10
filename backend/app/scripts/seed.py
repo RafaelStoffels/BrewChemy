@@ -1,6 +1,6 @@
 # app/scripts/seed.py
 import asyncio
-from datetime import datetime, timezone
+from datetime import datetime
 from passlib.hash import argon2
 from sqlalchemy import select
 

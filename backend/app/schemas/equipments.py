@@ -19,7 +19,6 @@ class EquipmentCreate(BaseModel):
 
 
 class EquipmentUpdate(BaseModel):
-    itemUserId: int
     name: Optional[str] = None
     description: Optional[str] = None
     efficiency: Optional[float] = None

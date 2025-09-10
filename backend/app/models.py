@@ -313,7 +313,7 @@ class RecipeYeast(Base):
     manufacturer: Mapped[str | None] = mapped_column(String(100))
     type: Mapped[str | None] = mapped_column(String(15))
     form: Mapped[str | None] = mapped_column(String(15))
-    attenuation: Mapped[str | None] = mapped_column(String(20))
+    attenuation: Mapped[float | None] = mapped_column(Numeric(5, 2), nullable=True)
     temperature_range: Mapped[str | None] = mapped_column(String(15))
     flavor_profile: Mapped[str | None] = mapped_column(Text)
     flocculation: Mapped[str | None] = mapped_column(String(15))

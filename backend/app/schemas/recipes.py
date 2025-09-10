@@ -127,7 +127,7 @@ class RecipeYeastIn(BaseModel):
     manufacturer: Optional[str] = None
     type: Optional[str] = None
     form: Optional[str] = None
-    attenuation: Optional[str] = None
+    attenuation: Optional[float] = None
     temperatureRange: Optional[str] = Field(
         default=None,
         validation_alias=AliasChoices("temperatureRange", "temperature_range"),
@@ -315,7 +315,7 @@ class RecipeYeastOut(BaseModel):
     manufacturer: Optional[str] = None
     type: Optional[str] = None
     form: Optional[str] = None
-    attenuation: Optional[str] = None
+    attenuation: Optional[float] = None
     temperature_range: Optional[str] = Field(
         default=None, serialization_alias="temperatureRange"
     )

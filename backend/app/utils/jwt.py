@@ -4,7 +4,7 @@ from jose import jwt
 from ..config import settings
 
 
-def make_access_token(user_id: int, *, hours=1):
+def make_access_token(user_id: int, *, hours=4):
     now = datetime.now(timezone.utc)
     payload = {
         "sub": str(user_id),

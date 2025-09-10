@@ -35,8 +35,8 @@ export default function MiscList() {
     }
   };
 
-  const onDetails = (userId, id) => navigate(`/Miscs/${userId}/${id}/details`);
-  const onUpdate = (userId, id) => navigate(`/Miscs/${userId}/${id}/edit`);
+  const onDetails = (id) => navigate(`/Miscs/${id}/details`);
+  const onUpdate = (id) => navigate(`/Miscs/${id}/edit`);
 
   const onDelete = async (id) => {
     if (!user?.token) return;

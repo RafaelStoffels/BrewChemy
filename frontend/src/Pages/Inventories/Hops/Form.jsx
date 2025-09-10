@@ -22,7 +22,7 @@ import '../../../Styles/skeleton.css';
 
 export default function NewHop() {
   const { user } = useContext(AuthContext);
-  const { recordUserId, id } = useParams();
+  const { id } = useParams();
   const navigate = useNavigate();
 
   const { isEditing, isView } = useFormMode();
@@ -58,7 +58,7 @@ export default function NewHop() {
 
       try {
         setIsLoading(true);
-        const hop = await fetchHopById(user.token, recordUserId, id);
+        const hop = await fetchHopById(user.token, id);
         reset({
           name: hop.name || '',
           supplier: hop.supplier || '',
@@ -77,14 +77,13 @@ export default function NewHop() {
     };
 
     loadHop();
-  }, [id, user, navigate, recordUserId, reset]);
+  }, [id, user, navigate, reset]);
 
   const title = getFormTitle('Hop', isEditing, isView);
 
   const onValid = async (data) => {
     const payload = {
       ...data,
-      itemUserId: recordUserId,
     };
 
     try {

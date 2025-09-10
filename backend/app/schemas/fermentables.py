@@ -16,7 +16,6 @@ class FermentableCreate(BaseModel):
 
 
 class FermentableUpdate(BaseModel):
-    itemUserId: int
     name: Optional[str] = None
     description: Optional[str] = None
     ebc: Optional[float] = None

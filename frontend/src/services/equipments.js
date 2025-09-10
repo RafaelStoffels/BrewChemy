@@ -26,13 +26,6 @@ export function fetchEquipmentById(userToken, id, opts = {}) {
   );
 }
 
-export function deleteEquipment(userToken, recordUserId, id, opts = {}) {
-  return request(
-    api.delete(`/api/equipments/${recordUserId}/${id}`, withAuth(userToken)),
-    { fallback: 'Error deleting equipment', successMsg: 'Equipment deleted successfully.', ...opts },
-  );
-}
-
 export function addEquipment(userToken, dataInput, opts = {}) {
   return request(
     api.post('/api/equipments', dataInput, withAuth(userToken)),
@@ -44,5 +37,12 @@ export function updateEquipment(userToken, id, dataInput, opts = {}) {
   return request(
     api.put(`/api/equipments/${id}`, dataInput, withAuth(userToken)),
     { fallback: 'Error updating equipment', successMsg: 'Equipment updated successfully.', ...opts },
+  );
+}
+
+export function deleteEquipment(userToken, id, opts = {}) {
+  return request(
+    api.delete(`/api/equipments/${id}`, withAuth(userToken)),
+    { fallback: 'Error deleting equipment', successMsg: 'Equipment deleted successfully.', ...opts },
   );
 }

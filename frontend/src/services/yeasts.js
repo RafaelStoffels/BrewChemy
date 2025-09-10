@@ -19,16 +19,16 @@ export function fetchYeasts(userToken, opts = {}) {
   );
 }
 
-export function fetchYeastById(userToken, recordUserId, id, opts = {}) {
+export function fetchYeastById(userToken, id, opts = {}) {
   return request(
-    api.get(`/api/yeasts/${recordUserId}/${id}`, withAuth(userToken)),
+    api.get(`/api/yeasts/${id}`, withAuth(userToken)),
     { fallback: 'Error loading yeast', ...opts },
   );
 }
 
-export function deleteYeast(userToken, recordUserId, id, opts = {}) {
+export function deleteYeast(userToken, id, opts = {}) {
   return request(
-    api.delete(`/api/yeasts/${recordUserId}/${id}`, withAuth(userToken)),
+    api.delete(`/api/yeasts/${id}`, withAuth(userToken)),
     { fallback: 'Error deleting yeast', successMsg: 'Yeast deleted successfully.', ...opts },
   );
 }

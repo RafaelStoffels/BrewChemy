@@ -19,16 +19,16 @@ export function fetchHops(userToken, opts = {}) {
   );
 }
 
-export function fetchHopById(userToken, recordUserId, id, opts = {}) {
+export function fetchHopById(userToken, id, opts = {}) {
   return request(
-    api.get(`/api/hops/${recordUserId}/${id}`, withAuth(userToken)),
+    api.get(`/api/hops/${id}`, withAuth(userToken)),
     { fallback: 'Error loading hop', ...opts },
   );
 }
 
-export function deleteHop(userToken, recordUserId, id, opts = {}) {
+export function deleteHop(userToken, id, opts = {}) {
   return request(
-    api.delete(`/api/hops/${recordUserId}/${id}`, withAuth(userToken)),
+    api.delete(`/api/hops/${id}`, withAuth(userToken)),
     { fallback: 'Error deleting hop', successMsg: 'Hop deleted successfully.', ...opts },
   );
 }
