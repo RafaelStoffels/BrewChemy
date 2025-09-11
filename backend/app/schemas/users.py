@@ -22,6 +22,7 @@ class UserOut(BaseModel):
     status: str
     weight_unit: str | None = None
     volume_unit: str | None = None
+    color_unit: str | None = None 
     default_equipment_id: int | None = None
 
     class Config:
