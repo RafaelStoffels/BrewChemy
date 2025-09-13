@@ -25,7 +25,7 @@ import { fetchEquipmentById } from '../../services/equipments';
 // Utils
 import { showErrorToast, showInfoToast } from '../../utils/notifications';
 import beerStyles from './utils/getBeerStyles';
-import { toDisplayWeight, toDisplayVolume, toLiters } from '../../utils/displayUnits';
+import { toDisplayWeight, toDisplayVolume, toLiters, toDisplaySRM } from '../../utils/displayUnits';
 
 // Components
 import Sidebar from '../../Components/Sidebar';
@@ -876,7 +876,9 @@ export default function NewRecipe() {
                 </div>
                 <div className="bottom-right">
                   <div className="parameters-container">
-                    <strong>OG:</strong>
+                    <strong>
+                      OG:
+                    </strong>
                     {' '}
                     {OG}
                     <span style={{ color: '#555' }}>
@@ -933,9 +935,10 @@ export default function NewRecipe() {
                     />
                   </div>
                   <div className="parameters-container">
-                    <strong>EBC:</strong>
+                    
+                    <strong>{user?.colorUnit === 'SRM' ? 'SRM:' : 'EBC:'}</strong>
                     {' '}
-                    {EBC}
+                    {user?.colorUnit === 'SRM' ? toDisplaySRM(EBC) : EBC}
                     <span style={{ color: '#555' }}>
                       {selectedStyle.initialEBC > 0 && selectedStyle.finalEBC > 0 && (
                         ` (${selectedStyle.initialEBC} - ${selectedStyle.finalEBC})`

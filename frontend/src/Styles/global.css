@@ -382,7 +382,7 @@ td {
   gap: 0.5rem;
 }
 
-.color-toggle-option {
+.radio-toggle-option {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
@@ -395,20 +395,20 @@ td {
   transition: background .15s ease, color .15s ease, border-color .15s ease, box-shadow .15s ease, transform .02s;
 }
 
-.color-toggle-option:hover {
+.radio-toggle-option:hover {
   background: rgba(255,255,255,0.12);
   border-color: rgba(0,0,0,0.25);
 }
 
-.color-toggle-option:active {
+.radio-toggle-option:active {
   transform: translateY(1px);
 }
 
-.color-toggle-option:focus-within {
+.radio-toggle-option:focus-within {
   box-shadow: 0 0 0 3px rgba(139, 94, 52, 0.35);
 }
 
-.color-toggle-option .pill-dot {
+.radio-toggle-option .pill-dot {
   width: 10px;
   height: 10px;
   border-radius: 9999px;
@@ -417,19 +417,19 @@ td {
   transition: background .15s ease, border-color .15s ease, opacity .15s ease;
 }
 
-.color-toggle-option .pill-label {
+.radio-toggle-option .pill-label {
   font-weight: 600;
   letter-spacing: 0.2px;
 }
 
-.color-toggle-option:has(input:checked) {
+.radio-toggle-option:has(input:checked) {
   background: #8b5e34;
   border-color: #8b5e34;
   color: #fff;
   box-shadow: 0 0 0 2px rgba(139, 94, 52, 0.25) inset;
 }
 
-.color-toggle-option:has(input:checked) .pill-dot {
+.radio-toggle-option:has(input:checked) .pill-dot {
   background: #fff;
   border-color: #fff;
   opacity: 1;

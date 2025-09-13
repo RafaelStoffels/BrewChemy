@@ -67,28 +67,54 @@ export default function SettingsForm() {
       </section>
       <div className="content">
         <form id="formSubmit" onSubmit={handleSubmit(onValid)}>
+
+          {/* Weight */}
           <div className="inputs-row">
             <div className="input-field">
-              <label htmlFor="weight">Weight Unit</label>
-              <select id="weight" {...register('weight')}>
-                <option value="oz">oz</option>
-                <option value="g">grams</option>
-              </select>
-            </div>
-            <div className="input-field">
-              <label htmlFor="volume">Volume Unit</label>
-              <select id="volume" {...register('volume')}>
-                <option value="l">liters</option>
-                <option value="gal">gallons</option>
-              </select>
+              <label className="block mb-2 font-medium">Weight Unit</label>
+              <div className="radio-toggle">
+                {[{ value: "g", label: "Grams" }, { value: "oz", label: "Oz" }].map(opt => (
+                  <label key={opt.value} className="radio-toggle-option">
+                    <input
+                      type="radio"
+                      value={opt.value}
+                      {...register("weight")}
+                      className="hidden"
+                    />
+                    {opt.label}
+                  </label>
+                ))}
+              </div>
             </div>
           </div>
+
+          {/* Volume */}
+          <div className="inputs-row">
+            <div className="input-field">
+              <label className="block mb-2 font-medium">Volume Unit</label>
+              <div className="radio-toggle">
+                {[{ value: "l", label: "Liters" }, { value: "gal", label: "Gallons" }].map(opt => (
+                  <label key={opt.value} className="radio-toggle-option">
+                    <input
+                      type="radio"
+                      value={opt.value}
+                      {...register("volume")}
+                      className="hidden"
+                    />
+                    {opt.label}
+                  </label>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Color */}
           <div className="inputs-row">
             <div className="input-field">
               <label className="block mb-2 font-medium">Color Unit</label>
               <div className="color-toggle">
                 {["EBC", "SRM"].map(opt => (
-                  <label key={opt} className="color-toggle-option">
+                  <label key={opt} className="radio-toggle-option">
                     <input
                       type="radio"
                       value={opt}

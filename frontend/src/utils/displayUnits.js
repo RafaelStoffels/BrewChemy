@@ -46,4 +46,9 @@ export function toLiters(value, unit) {
   return n; // 'l'
 }
 
+export function toDisplaySRM(ebc) {
+  if (!ebc || isNaN(ebc)) return null;
+  return (ebc / 1.97).toFixed(1);
+}
+
 export const fromDisplayVolume = toLiters;

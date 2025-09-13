@@ -17,6 +17,12 @@ export default function NewEquipment() {
         <h1>Changelog</h1>
       </section>
       <div className="content">
+        <b>Sep 13, 2025 (v1.9.0)</b>
+        <br />
+        <br />
+        🔁 Added configuration option to set the color unit to EBC or SRM.
+        <br />
+        <br />
         <b>Sep 09, 2025 (v1.8.0)</b>
         <br />
         <br />
