@@ -51,6 +51,7 @@ class User(Base):
     status: Mapped[Optional[str]] = mapped_column(String(15))
     weight_unit: Mapped[str] = mapped_column(String(5), default="g")
     volume_unit: Mapped[str] = mapped_column(String(5), default="l")
+    color_unit: Mapped[str] = mapped_column(String(5), default="EBC")
 
     # FK
     default_equipment_id: Mapped[Optional[int]] = mapped_column(
@@ -85,6 +86,7 @@ class User(Base):
             "status": self.status,
             "weightUnit": self.weight_unit,
             "volumeUnit": self.volume_unit,
+            "colorUnit": self.color_unit,
             "defaultEquipmentId": self.default_equipment_id,
         }
 

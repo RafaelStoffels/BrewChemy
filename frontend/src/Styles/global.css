@@ -372,3 +372,65 @@ td {
   z-index: 1000;
   max-width: 260px;
 }
+
+
+/* ======================================
+   Radio Button
+====================================== */
+.color-toggle {
+  display: inline-flex;
+  gap: 0.5rem;
+}
+
+.radio-toggle-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.45rem 0.9rem;
+  border-radius: 0.6rem;
+  border: 1px solid rgba(0,0,0,0.18);
+  background: rgba(255,255,255,0.06);
+  cursor: pointer;
+  user-select: none;
+  transition: background .15s ease, color .15s ease, border-color .15s ease, box-shadow .15s ease, transform .02s;
+}
+
+.radio-toggle-option:hover {
+  background: rgba(255,255,255,0.12);
+  border-color: rgba(0,0,0,0.25);
+}
+
+.radio-toggle-option:active {
+  transform: translateY(1px);
+}
+
+.radio-toggle-option:focus-within {
+  box-shadow: 0 0 0 3px rgba(139, 94, 52, 0.35);
+}
+
+.radio-toggle-option .pill-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 9999px;
+  border: 2px solid currentColor;
+  opacity: 0.7;
+  transition: background .15s ease, border-color .15s ease, opacity .15s ease;
+}
+
+.radio-toggle-option .pill-label {
+  font-weight: 600;
+  letter-spacing: 0.2px;
+}
+
+.radio-toggle-option:has(input:checked) {
+  background: #8b5e34;
+  border-color: #8b5e34;
+  color: #fff;
+  box-shadow: 0 0 0 2px rgba(139, 94, 52, 0.25) inset;
+}
+
+.radio-toggle-option:has(input:checked) .pill-dot {
+  background: #fff;
+  border-color: #fff;
+  opacity: 1;
+}

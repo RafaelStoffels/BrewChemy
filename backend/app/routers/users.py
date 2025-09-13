@@ -70,6 +70,7 @@ class MeOut(BaseModel):
     email: str
     weightUnit: str | None = None
     volumeUnit: str | None = None
+    colorUnit: str | None = None
     defaultEquipmentId: int | None = None
 
     class Config:
@@ -218,6 +219,7 @@ def get_user_me(current_user: User = Depends(get_current_user)):
         email=current_user.email,
         weightUnit=getattr(current_user, "weight_unit", None),
         volumeUnit=getattr(current_user, "volume_unit", None),
+        colorUnit=getattr(current_user, "color_unit", None),
         defaultEquipmentId=getattr(current_user, "default_equipment_id", None),
     )
 
@@ -259,6 +261,9 @@ class PreferencesPatch(BaseModel):
     volume_unit: str | None = Field(
         default=None, validation_alias=AliasChoices("volumeUnit", "volume_unit")
     )
+    color_unit: str | None = Field(
+        default=None, validation_alias=AliasChoices("colorUnit", "color_unit")
+    )
     default_equipment_id: int | None = Field(
         default=None, validation_alias=AliasChoices("defaultEquipmentId", "default_equipment_id")
     )
@@ -278,6 +283,8 @@ async def patch_preferences(
         user.weight_unit = prefs.weight_unit
     if prefs.volume_unit is not None:
         user.volume_unit = prefs.volume_unit
+    if prefs.color_unit is not None:
+        user.color_unit = prefs.color_unit
     if prefs.default_equipment_id is not None:
         user.default_equipment_id = prefs.default_equipment_id
 
